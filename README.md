@@ -1,6 +1,6 @@
 # DYSYMMETRICAL
 ![DysymmetricalLogo](dysdocs/icon.png)
-An asymmetrical DBD-game engine for Roblox.
+An asymmetrical game engine for Roblox.
 
 ## Getting Started
 First of all, install [Rojo](https://rojo.space/docs/v7/getting-started/installation/).
