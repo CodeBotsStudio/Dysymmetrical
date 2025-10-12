@@ -1,5 +1,5 @@
 # DYSYMMETRICAL
-A private asymmetrical DBD-game engine for Roblox.
+An asymmetrical DBD-game engine for Roblox.
 
 ## Getting Started
 First of all, install [Rojo](https://rojo.space/docs/v7/getting-started/installation/).
@@ -27,6 +27,9 @@ You may create pull requests of anything you want changed from the engine as lon
 They will be read and checked to see if they deserve to be merged.
 
 To-Do's are listed through comments as well, so you might want to isntall something like [Todo+](https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-todo-plus) in VSCode to see every `NOTE`, `FIXME`, `TODO`...
+
+If you *do* indeed make a pull request, it'll most probably be revised and merged without many questions or complaints.
+Though, if it's needed, the stuff in the pull requests will be changed if it doesn't comply with W.I.P. features or with the code style itself.
 
 ## Licensing
 You may use this project for whatever you want, as long as you keep credit.
