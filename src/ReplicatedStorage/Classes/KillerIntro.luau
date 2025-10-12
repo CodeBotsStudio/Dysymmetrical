@@ -103,7 +103,7 @@ function KillerIntroClass:New2DIntro(Config: IntroSettings, IntroModule: ModuleS
                 if Intro.Frames then
                     own.VideoPlayer:Play(own.Module.Config.IntroFPS) --will default to 30 if nil
                 elseif Intro.Sound then
-                    Sounds:PlaySound(Intro.Sound or own.Module.Config.Sounds.IntroSound, {Volume = 0.5}, {Name = "IntroSound"})
+                    Sounds:PlaySound(Intro.Sound or own.Module.Config.Sounds.IntroSound, {Name = "IntroSound"})
                 end
             end))
 
@@ -226,7 +226,7 @@ function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
             end
 
             if own.Module.Config.Sounds.IntroSound then
-                Sounds:PlaySound(own.Module.Config.Sounds.IntroSound, {Volume = 0.5})
+                Sounds:PlaySound(own.Module.Config.Sounds.IntroSound)
             end
 
             if own.Module.Config.OnIntroPlay then

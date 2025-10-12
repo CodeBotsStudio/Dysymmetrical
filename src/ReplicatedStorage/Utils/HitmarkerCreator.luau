@@ -30,7 +30,7 @@ function HitmarkerCreator:ShowHitmarker(position: Vector3, dmgAmount: number, pl
 		local SoundID = CommonUtils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.HitsoundID")
 		if SoundID and #SoundID > 0 then
 			task.spawn(function()
-				Sounds:PlaySound(SoundID, {Volume = 0.5}, {SoundGroup = SoundGroup})
+				Sounds:PlaySound(SoundID, {Volume = 0.5, SoundGroup = SoundGroup})
 			end)
 		end
 	end

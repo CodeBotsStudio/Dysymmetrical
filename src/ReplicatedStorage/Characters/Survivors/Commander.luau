@@ -171,8 +171,9 @@ Justice.Behaviour = function(self)
             FirePart.Front:Emit(12)
             FirePart.Smoke:Emit(8)
             FirePart.Flash:Emit(3)
-            Sounds:PlaySound(self.ShotSound, {Volume = 2}, {
+            Sounds:PlaySound(self.ShotSound, {
                 Position = FirePart.Position,
+                Volume = 2,
             })
         end))
 

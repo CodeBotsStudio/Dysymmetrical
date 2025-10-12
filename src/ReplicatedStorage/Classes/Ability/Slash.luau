@@ -27,7 +27,7 @@ function SlashModule.New()
 
 	function Slash:Behaviour()
 		if RunService:IsServer() then
-			Sounds:PlaySound(self.UseSound, {Volume = 0.5}, {Parent = self.OwnerProperties.HRP})
+			Sounds:PlaySound(self.UseSound, {Parent = self.OwnerProperties.HRP})
 			task.delay(self.Delay, function()
 				Hitbox:New(self.Owner, {
 					CFrameOffset = self.HitboxOffset,

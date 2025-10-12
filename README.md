@@ -1,4 +1,5 @@
 # DYSYMMETRICAL
+![DysymmetricalLogo](dysdocs/icon.png)
 An asymmetrical DBD-game engine for Roblox.
 
 ## Getting Started

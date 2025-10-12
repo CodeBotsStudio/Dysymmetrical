@@ -78,29 +78,15 @@ end
 
 --- Plays a sound with the ID `ID`.
 --- Check `SoundInfo` and `Sound`'s properties for further usage.
-function Sounds:PlaySound(ID: string | {string}, Info: SoundInfo?, SoundProperties: {[string]: any?}?): Sound?
+function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any?}?): Sound?
     if typeof(ID) ~= "string" and typeof(ID) ~= "table" then
         return
     end
 
     if typeof(ID) == "table" then
-        return self:PlaySound(ID[math.random(1, #ID)], Info, SoundProperties)
+        return self:PlaySound(ID[Rand:NextInteger(1, #ID)], SoundProperties)
     elseif #ID <= 0 then
         return
-    end
-
-    --OPTIONAL INFO
-    if not Info then
-        Info = {}
-    end
-    if not Info.Volume then
-        Info.Volume = 0.5
-    end
-    if not Info.MinPitch then
-        Info.MinPitch = 1
-    end
-    if not Info.MaxPitch then
-        Info.MaxPitch = 1
     end
 
     local Sound = self:GetSound(ID, true)
@@ -108,7 +94,7 @@ function Sounds:PlaySound(ID: string | {string}, Info: SoundInfo?, SoundProperti
         return
     end
     Sound.Parent = nil --for setting the parent later
-    Sound.Volume = Info.Volume or SoundProperties.Volume or 0.5
+    Sound.Volume = SoundProperties.Volume or 0.5
 
     for _, i in self.CommonlyUsedSounds do --weird hack but fuck it
         if ID == i then
@@ -125,7 +111,7 @@ function Sounds:PlaySound(ID: string | {string}, Info: SoundInfo?, SoundProperti
                 Part.Name = Sound.Name
                 Part.Parent = workspace.Sounds
                 Sound.Parent = Part
-            else
+            elseif Sound[name] then
                 Sound[name] = value
             end
         end
@@ -180,14 +166,10 @@ function Sounds:PlayTheme(ID: string | Instance, properties: {[string]: any}): S
         ThemeTweenDurationHolder = properties.TweenTime or 0.8
         properties.TweenTime = nil
 
-        local Volume = properties.Volume or 1
+        local Volume = properties.Volume or 0.5
         properties.Volume = nil
 
-        local SoundInstance = self:PlaySound(name, {
-            Volume = Volume,
-            MinPitch = 1,
-            MaxPitch = 1
-        }, properties)
+        local SoundInstance = self:PlaySound(name, properties)
 
         if SoundInstance then
             if properties.TimePosition then
