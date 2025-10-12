@@ -1,0 +1,35 @@
+{
+  "name": "Dysymmetrical",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage"
+    },
+
+    "ReplicatedFirst": {
+      "$path": "src/ReplicatedFirst"
+    },
+
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayerScripts"
+      },
+      "StarterCharacterScripts": {
+        "$path": "src/StarterCharacterScripts"
+      }
+    },
+    
+    "ServerStorage": {
+      "$path": "src/ServerStorage"
+    },
+
+    "StarterGui": {
+      "$path": "src/StarterGui"
+    }
+  }
+}

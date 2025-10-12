@@ -1,0 +1,136 @@
+--!nocheck
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+
+local LocalPlayer = Players.LocalPlayer
+local RoundState: StringValue = ReplicatedStorage.RoundInfo.CurrentState
+
+local RoundPlayerList = {}
+
+local TemplateFolder = CommonUtils:FindFirstChild(script, "Templates")
+local Prefabs = {
+    UI = CommonUtils:FindFirstChild(script, "RoundPlayerListUI"),
+    Card = CommonUtils:FindFirstChild(TemplateFolder, "Card"),
+}
+local UIParent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "RoundPlayerList")
+
+function RoundPlayerList:Init()
+    LocalPlayer.CharacterAdded:Connect(function(Char: Model)
+        self:_InitUI(Char)
+    end)
+end
+
+function RoundPlayerList:_InitUI(Char: Model)
+    if CommonUtils:FindFirstChild(Char, "Role").Value == "Spectator" then
+        return
+    end
+
+    local UI = Prefabs.UI:Clone()
+
+    if RoundState.Value ~= "InRound" then
+        repeat task.wait()
+        until RoundState.Value == "InRound"
+    end
+
+    local Conns: {[string]: RBXScriptConnection} = {}
+
+    for _, Character in workspace.Players:GetChildren() do
+        if not CommonUtils:FindFirstChild(Character, "Role") or Character.Role.Value ~= "Survivor" then
+            continue
+        end
+
+        local Card = Prefabs.Card:Clone()
+        Card.Name = Character.Name
+
+        --should show the skin portrait if equipped
+        Card.Portrait.Image = require(CommonUtils:GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"), Character:GetAttribute("CharacterSkinName"))).Config.Render
+        --should show the root character's name without caring about the skin
+        Card.CharacterName.Text = require(CommonUtils:GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"))).Config.Name
+
+        local Humanoid = CommonUtils:FindFirstChild(Character, "Humanoid")
+
+        if Character == LocalPlayer.Character then
+            Card.PlayerHealth.TextTransparency = 1
+            Card.CharacterName.TextColor3 = Color3.fromRGB(255, 255, 127)
+            Card.PortraitOutline.ImageColor3 = Color3.fromRGB(255, 255, 127)
+            Card.PlayerName.Text = Character.Name.." (You)"
+
+            --stopping everything on own death
+            Conns[Character.Name] = LocalPlayer.CharacterAdded:Connect(function()
+                UI:Destroy()
+                for _, c in Conns do
+                    if typeof(c) == "table" then
+                        for _, i in c do
+                            i:Disconnect()
+                        end
+                        continue
+                    end
+                    c:Disconnect()
+                end
+            end)
+        else
+            Card.PlayerName.Text = Character.Name
+
+            local PlayerConns = {}
+            table.insert(PlayerConns, RunService.PreRender:Connect(function(_delta: number)
+                --stop checking when they die
+                if Humanoid.Health <= 0 then
+                    Card.Portrait.ImageColor3 = Color3.fromRGB(161, 0, 0)
+                    Card.PortraitOutline.ImageColor3 = Color3.fromRGB(255, 0, 0)
+
+                    Card.PlayerState.TextColor3 = Color3.fromRGB(255, 0, 0)
+                    Card.PlayerState.Text = "DEAD"
+                    Card.PlayerState.TextTransparency = 1
+
+                    Card.PlayerHealth.TextTransparency = 1
+
+                    for _, i in PlayerConns do
+                        i:Disconnect()
+                    end
+                    return
+                end
+
+                local HealthPercentageMagnitude = Humanoid.Health / Humanoid.MaxHealth
+                Card.PlayerHealth.TextColor3 = Color3.fromRGB(
+                    CommonUtils:MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
+                    HealthPercentageMagnitude * 180 + 75,
+                    75
+                )
+                Card.PlayerHealth.Text = tostring(HealthPercentageMagnitude * 100).."%"
+            end))
+            table.insert(PlayerConns, Players.PlayerRemoving:Connect(function(Player: Player)
+                if not Character then
+                    return
+                end
+
+                --stop checking when they leave and are still alive
+                if Player.Name == Character.Name then
+                    for _, c in PlayerConns do
+                        c:Disconnect()
+                    end
+
+                    Card.Portrait.ImageColor3 = Color3.fromRGB(200, 200, 200)
+                    Card.PortraitOutline.ImageColor3 = Color3.fromRGB(150, 150, 150)
+
+                    Card.PlayerState.TextColor3 = Color3.fromRGB(170, 170, 170)
+                    Card.PlayerState.Text = "LOST"
+                    Card.PlayerState.TextTransparency = 0
+
+                    Card.PlayerHealth.TextTransparency = 1
+                end
+            end))
+
+            Conns[Character.Name] = PlayerConns
+        end
+
+        Card.Parent = UI
+    end
+
+    UI.Parent = UIParent
+end
+
+return RoundPlayerList

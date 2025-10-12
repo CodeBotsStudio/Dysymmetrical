@@ -1,0 +1,275 @@
+--!nocheck
+local CharTypes = {}
+
+--- Type used for survivor characters.
+export type Survivor = {
+    --- Config that shouldn't affect gameplay mechanics.
+    Config: {
+        --- The display name of the character.
+        Name: string,
+        --- The character's `More Info` page content.
+        Description: string,
+        --- A possible quote from the character that'll show up when you buy it.
+        Quote: string,
+
+        --- The price of this character in the shop.
+        Price: number,
+        --- The render image / portrait ID of this character.
+        Render: string?,
+
+        --- All AnimationIDs related to this character.
+        AnimationIDs: {
+            --- The animation that'll play on an idle state.
+            IdleAnimation: string,
+            --- The animation that'll play on a walking state.
+            WalkAnimation: string,
+            --- The animation that'll play on a running state.
+            RunAnimation: string,
+        },
+
+        --- Any voicelines this character might have. It's built with strings as keys, and either strings or string dictionaries as values for random voicelines.
+        Voicelines: {[string]: string | {[string]: string}},
+    },
+
+    --- Gameplay mechanics config that will affect how the character works.
+    GameplayConfig: {
+        --- Amount of health.
+        Health: number,
+        --- Useful stamina properties that you can change.
+        StaminaProperties: {
+            --- The maximum amount of stamina.
+            MaxStamina: number,
+            --- How fast the stamina drains.
+            StaminaDrain: number,
+            --- How fast the stamina gets regained.
+            StaminaGain: number,
+        },
+
+        --- All of the initialized abilities the character has.
+        Abilities: {any},
+        --- Any temp objects or instances that might be created mid-match.
+        Cache: {any},
+    },
+}
+
+--- Survivor preset for customization.
+function CharTypes:GetDefaultSurvivorSettings(): Survivor
+    return {
+        Config = {
+            Name = "Survivor",
+            Description = "PLACEHOLDER",
+            Quote = "hello",
+
+            Price = 0,
+            Render = "rbxassetid://18831151594",
+
+            AnimationIDs = {
+                IdleAnimation = "rbxassetid://128254839975087",
+                WalkAnimation = "rbxassetid://95139037304316",
+                RunAnimation = "rbxassetid://84289923509689",
+            },
+
+            Voicelines = {},
+        },
+
+        GameplayConfig = {
+            Health = 100,
+            StaminaProperties = {
+                MaxStamina = 100,
+                StaminaDrain = 10,
+                StaminaGain = 30,
+            },
+
+            Abilities = {},
+            Cache = {
+                Animations = {},
+            },
+        },
+    }
+end
+
+--- Type used for killer characters.
+export type Killer = {
+    --- Config that shouldn't affect gameplay mechanics.
+    Config: {
+        --- The display name of the character.
+        Name: string,
+        --- The character's `More Info` page content.
+        Description: string,
+        --- A possible quote from the character that'll show up when you buy it.
+        Quote: string,
+
+        --- The price of this character in the shop.
+        Price: number,
+        --- The render image / portrait ID of this character.
+        Render: string?,
+
+        --- A possible custom LMS theme the character might have.
+        LastManStandingTheme: string?,
+        SpecialLastManStandings: {[string]: {
+            Default: string,
+            [string]: string,
+        }}?,
+
+        --- All AnimationIDs related to this character.
+        AnimationIDs: {
+            --- The animation that'll play on an idle state.
+            IdleAnimation: string,
+            --- The animation that'll play on a walking state.
+            WalkAnimation: string,
+            --- The animation that'll play on a running state.
+            RunAnimation: string,
+            --- The animation that'll play when slashing.
+            SlashAnimation: string?,
+            --- The animation that the killer will have in the intro animation.
+            KillerRig: string?,
+            --- The animation that the camera will have in the intro animation.
+            CameraRig: string?,
+            --- The animations that'll play when executing a player.
+            --- Inside, make a `Default` for any survivor.
+            --- You may make others with the `"[SkinName][CharacterName]"` format to add customs for skins and characters.
+            --- Remove `[SkinName]` to make it for a survivor in general.
+            Execution: {
+                Default: {
+                    Killer: string,
+                    Survivor: string,
+                },
+                [string]: {
+                    Killer: string,
+                    Survivor: string,
+                },
+            }?,
+        },
+
+        --- Any voicelines this character might have. It's built with strings as keys, and either strings or string dictionaries as values for random voicelines.
+        --- For killers, use `Kill` to set the kill voicelines.
+        --- In it set a `Default` value for any survivor.
+        --- You may set customs for skins and characters using `"[SkinName][CharacterName]"` format.
+        --- Remove `[SkinName]` to make it for a survivor in general.
+        Voicelines: {
+            Kill: {
+                Default: (string | {string}),
+                [string]: (string | {string}),
+            }?,
+            [string]: (string | {string}),
+        },
+
+        --- The chase theme of the character, separated in layers that depend on distance between the survivors and the killer.
+        ChaseThemes: {
+            --- Layer 1: 60 studs.
+            L1: string,
+            --- Layer 2: 45 studs.
+            L2: string,
+            --- Layer 3: 30 studs.
+            L3: string,
+            --- Chase music: 15 studs (will stop when back at 60).
+            L4: string,
+        },
+
+        --- CLIENT FUNCTION: Empty function to execute code when the killer intro initializes (loads its content).
+        OnIntroInit: (KillerRig: Model, CameraRig: Model) -> ()?,
+        --- CLIENT FUNCTION: Empty function to execute code when the killer intro plays.
+        OnIntroPlay: (KillerRig: Model, CameraRig: Model, AnimDuration: number) -> ()?,
+
+        --- Any SFX that you may want to play with the character.
+        --- Voicelines go in `Voicelines`.
+        Sounds: {
+            --- The sound that'll play when the killer's intro plays.
+            --- Can also be a table to play a random sound.
+            IntroSound: (string | {string})?,
+            --- The SFX of the Execution animations.
+            --- Since animations may vary, it's possible to set custom sounds for each.*
+            Execution: {
+                Default: (string | {string}),
+                [string]: (string | {string}),
+            },
+            [string]: (string | {string}),
+        },
+
+        --- The CFrame value that'll be added to a survivor's CFrame when snapping to a killer's CFrame by being executed by them. Defaults to `CFrame.new(0, 0, 5)` in `Hitbox`.
+        ExecutionSurvivorCFrameOffset: CFrame?,
+    },
+
+    --- Gameplay mechanics config that will affect how the character works.
+    GameplayConfig: {
+        --- Amount of health.
+        Health: number,
+        --- Useful stamina properties that you can change.
+        StaminaProperties: {
+            --- The maximum amount of stamina.
+            MaxStamina: number,
+            --- How fast the stamina drains.
+            StaminaDrain: number,
+            --- How fast the stamina gets regained.
+            StaminaGain: number,
+        },
+
+        --- The damage the slash'll do.
+        SlashDamage: number,
+        --- The cooldown the slash'll have.
+        SlashCooldown: number,
+        --- How long every slash's hitbox will last.
+        SlashDuration: number,
+
+        --- All of the initialized abilities the character has, counting the slash.
+        Abilities: {any},
+        --- Any temp objects or instances that might be created mid-match.
+        Cache: {any},
+    },
+}
+
+--- Killer preset for customization.
+function CharTypes:GetDefaultKillerSettings(): Killer
+    return {
+        Config = {
+            Name = "Killer",
+            Description = "PLACEHOLDER",
+            Quote = "hello",
+
+            Price = 0,
+            Render = "rbxassetid://18831151594",
+
+            LastManStandingTheme = "rbxassetid://125799740823318",
+            SpecialLastManStandings = {},
+
+            AnimationIDs = {
+                IdleAnimation = "rbxassetid://138818467051890",
+                WalkAnimation = "rbxassetid://96779101755387",
+                RunAnimation = "rbxassetid://139221510401164",
+                SlashAnimation = "rbxassetid://133504250023139",
+                Execution = {
+
+                },
+            },
+
+            Voicelines = {},
+
+            ChaseThemes = {
+                L1 = "rbxassetid://101608255438688",
+                L2 = "rbxassetid://122380833390973",
+                L3 = "rbxassetid://78435073515542",
+                L4 = "rbxassetid://100400124559989",
+            },
+        },
+
+        GameplayConfig = {
+            Health = 800,
+            StaminaProperties = {
+                MaxStamina = 110,
+                StaminaDrain = 8,
+                StaminaGain = 27,
+            },
+
+            SlashDamage = 20,
+            SlashCooldown = 2,
+            SlashDuration = 0.4,
+
+            Abilities = {},
+            Cache = {
+                Animations = {},
+            },
+        },
+    }
+end
+
+return CharTypes
