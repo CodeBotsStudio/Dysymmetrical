@@ -2,6 +2,24 @@
 ![DysymmetricalLogo](dysdocs/icon.png)
 An asymmetrical game engine for Roblox.
 
+## Features
+
+#### Full documentation in most scripts
+![DocScreenshot](dysdocs/docs-ss.png)
+#### Easy UI Ordering in a single table
+![UIOrderScreenshot](dysdocs/uiorder-ss.png)
+#### Simple character definitions & Templates for each role
+![CharScreenshot](dysdocs/chardef-ss.png)
+[...]
+
+![AbilitiesScreenshot](dysdocs/abilitydef-ss.png)
+#### Pre-made customizable UI
+![ShopScreenshot](dysdocs/shop-ss.png)
+![InventoryScreenshot](dysdocs/inventory-ss.png)
+![StatsMenu](dysdocs/stats-ss.png)
+![SettingsMenu](dysdocs/settings-ss.png)
+
+
 ## Getting Started
 First of all, install [Rojo](https://rojo.space/docs/v7/getting-started/installation/).
 

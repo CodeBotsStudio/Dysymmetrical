@@ -18,12 +18,12 @@ NullexVoyd.Config.Name = "Nullex Voyd"
 NullexVoyd.Config.Render = "rbxassetid://139883756028491"
 NullexVoyd.Config.Price = 1308
 
-NullexVoyd.GameplayConfig.SlashDuration = 0.35
-
 --Abilities Definition
 
 --Slash
 local Slash = require(ReplicatedStorage.Classes.Ability.Slash).New()
+Slash.Duration = 0.35
+--You can also use `NullexVoyd.GameplayConfig.SlashDuration = 0.35`.
 
 --Callback Ping
 local Info = TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
