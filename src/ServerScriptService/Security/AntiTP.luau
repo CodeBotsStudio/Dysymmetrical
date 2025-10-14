@@ -1,8 +1,13 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local CommonFunctions = require(ServerScriptService.System.CommonFunctions)
 local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+
 local AntiTP = {
+    KickAllowed = false,
     PlayerThreads = {},
     PositionMagnitudeThreshold = 500,
 }
@@ -39,13 +44,22 @@ end
 function AntiTP:_SetupCharacter(Player: Player, Character: Model)
     local HRP = CommonUtils:FindFirstChild(Character, "HumanoidRootPart")
     local Humanoid = CommonUtils:FindFirstChild(Character, "Humanoid")
+
     local LastPos = HRP.Position
+
     self.PlayerThreads[Player.UserId] = RunService.PostSimulation:Connect(function()
         local PosDiff = HRP.Position - LastPos
+
         if PosDiff.Magnitude > self.PositionMagnitudeThreshold then
+            if self.KickAllowed then
+                CommonFunctions:KickPlayer(Player, CommonFunctions.KickIDs.TPing)
+                return
+            end
+
             CommonUtils:Print("Killing "..Player.Name..": TP detected")
             Humanoid.Health = 0
         end
+
         LastPos = HRP.Position
     end)
 end

@@ -43,7 +43,7 @@ CommonUtils.Credits = [[
 
 
 This game is using Dysymmetrical, an open-source asymmetrical game engine available on GitHub.
-Credits to Dyscarn for making it (hello!)!
+Credits to Dyscarn for making it! (hello!)
 ]]
 
 function CommonUtils:Init()
@@ -88,9 +88,7 @@ end
 
 --- Splits a path into multiple strings.
 function CommonUtils:SplitStringPath(path: string): {string}
-    local result: {string} = {}
-    result = path:split(".")
-    return result
+    return path:split(".")
 end
 
 --- Returns a completely invisible, uncollidable, undetectable, 1 cubic stud sized part in CFrame `cf` and parented to `parent`.
@@ -103,6 +101,7 @@ function CommonUtils:GetInvisPart(cf: CFrame?, parent: Instance?): Part
     Part.CastShadow = false
     Part.Anchored = true
     Part.Size = Vector3.one
+
     if cf then
         Part.CFrame = cf
     end
@@ -116,7 +115,7 @@ end
 --- Makes a copy of an entire table.
 function CommonUtils:CopyTable<T>(CloneThis: T & {}) : T
 	local MetaTable = getmetatable(CloneThis)
-	local NewTable = (if MetaTable then setmetatable({}, MetaTable :: {}?) else {}) :: typeof(CloneThis)
+	local NewTable = (MetaTable and setmetatable({}, MetaTable :: {}?) or {}) :: typeof(CloneThis)
 
 	for i, v in CloneThis do
 		if type(v) == `table` then
@@ -253,12 +252,9 @@ function CommonUtils:_GetMousePosition(LockToClosestPlayer: boolean): Vector3
         params.FilterType = Enum.RaycastFilterType.Exclude
         params.FilterDescendantsInstances = trans
         params.IgnoreWater = true
+
         local cast = workspace:Raycast(Pos, LookVector, params)
-        if cast then
-            return cast.Position
-        else
-            return Pos + LookVector
-        end
+        return cast and cast.Position or Pos + LookVector
     end
 end
 
@@ -315,7 +311,7 @@ end
 
 --- Checks if a certain `Instance` is on screen.
 function CommonUtils:IsOnScreen(Thing: Instance): boolean
-    if RunService:IsServer() or typeof(Thing) ~= "Instance" then
+    if RunService:IsServer() or not Thing:IsA("Instance") then
         return
     end
     local found = false
@@ -443,31 +439,12 @@ end
 --- Retrieves a player's stat through a string path.
 --- If `value` is false, it'll return the `ValueBase` object instead of the value itself to modify it or to get a property from it (e.g. attributes).
 function CommonUtils:GetPlayerStat(Player: Player, path: string, value: boolean?): ValueBase | any
-    if not Player:FindFirstChild("PlayerData") then
-        repeat task.wait(0.1)
-        until Player:FindFirstChild("PlayerData")
-    end
-
     if value == nil then
         value = true
     end
 
-    local splitPath = self:SplitStringPath(path)
-    local PlayerStats = Player.PlayerData.Stats
-    if #splitPath == 1 then
-        local Stat = PlayerStats:FindFirstChild(splitPath[1])
-        return value and Stat.Value or value
-    else
-        local Stat = PlayerStats
-        for _, step in splitPath do
-            if not Stat then
-                warn("[CommonUtils:GetPlayerStat()] Child \""..step.."\" not found! Returning nil!")
-                return
-            end
-            Stat = Stat:FindFirstChild(step)
-        end
-        return value and Stat.Value or Stat
-    end
+    local Stat = CommonUtils:FindFirstChild(Player, "PlayerData.Stats."..path)
+    return value and Stat.Value or Stat
 end
 
 --- Retrieves a player's setting value through a string path.
@@ -478,7 +455,7 @@ function CommonUtils:GetPlayerSetting(Player: Player, path: string): any
     end
 
     local splitPath = self:SplitStringPath(path)
-    local PlayerSettings = Player.PlayerData.Settings
+    local PlayerSettings = self:FindFirstChild(Player, "PlayerData.Settings")
     if #splitPath == 1 then
         return PlayerSettings:FindFirstChild(splitPath[1]).Value
     else
@@ -498,17 +475,12 @@ end
 --- Also works for emotes.
 --- If `value` is false, it'll return the `StringValue` object instead of the value itself.
 function CommonUtils:GetPlayerEquipped(Player: Player, path: string, value: boolean?): StringValue | string
-    if not Player:FindFirstChild("PlayerData") then
-        repeat task.wait(0.1)
-        until Player:FindFirstChild("PlayerData")
-    end
-
     if value == nil then
         value = true
     end
 
     local splitPath = self:SplitStringPath(path)
-    local Equipped = Player.PlayerData.Equipped
+    local Equipped = CommonUtils:FindFirstChild(Player, "PlayerData.Equipped")
     if #splitPath == 1 then
         local Child = Equipped:FindFirstChild(splitPath[1])
         return value and Child.Value or Child
@@ -544,36 +516,18 @@ end
 --- Also works for emotes.
 --- If `value` is false, it'll return the `StringValue` object instead of the value itself.
 function CommonUtils:GetPlayerOwned(Player: Player, path: string, value: boolean?): StringValue | string
-    if not Player:FindFirstChild("PlayerData") then
-        repeat task.wait()
-        until Player:FindFirstChild("PlayerData")
-    end
-
     if value == nil then
         value = true
     end
 
-    local splitPath = self:SplitStringPath(path)
-    local Purchased = Player.PlayerData.Purchased
-    if #splitPath == 1 then
-        local Child = Purchased:FindFirstChild(splitPath[1])
-        return value and Child.Value or Child
-    else
-        local Child = Purchased
-        for _, step in splitPath do
-            if not Child then
-                return false
-            end
-            Child = Child:FindFirstChild(step)
-        end
-        return value and (Child and Child.Value or false) or Child
-    end
+    local Child = CommonUtils:FindFirstChild(Player, "PlayerData.Purchased."..path)
+    return value and (Child and Child.Value or false) or Child
 end
 
 --- Checks if a player has an effect.
 --- @return Returns a `boolean` indicating if the specified player has the effect and the level if it's true.
 function CommonUtils:CheckPlayerEffect(Player: Player, effectName: string): (boolean & number)?
-    if Player.Character and Player.Character:FindFirstChild("Effects") and Player.Character.Effects:FindFirstChild(effectName) then
+    if Player.Character and CommonUtils:FindFirstChild(Player.Character, "Effects."..effectName) then
         return true, Player.Character.Effects[effectName].Value
     end
 
@@ -716,9 +670,9 @@ function CommonUtils:GetEffectModule(name: string, subfolder: string?, module: b
 	local Effect: ModuleScript
 
 	if subfolder and #subfolder > 0 then
-		Effect = ReplicatedStorage.Effects:FindFirstChild(subfolder):FindFirstChild(name)
+        Effect = CommonUtils:FindFirstChild(ReplicatedStorage.Effects, subfolder.."."..name)
 	else
-		Effect = ReplicatedStorage.Effects:FindFirstChild(name)
+        Effect = CommonUtils:FindFirstChild(ReplicatedStorage.Effects, name)
 	end
 
     if not Effect:IsA("ModuleScript") then
@@ -770,10 +724,11 @@ function CommonUtils:LoadAnimationFromID(Rig: Model, ID: string | {string} | {[s
 
     local Animator = Rig:FindFirstChild("Animator", true)
     if not Animator then
+        local timeout = 0
         repeat
-            task.wait(0.1)
+            timeout += task.wait(0.1)
             Animator = Rig:FindFirstChild("Animator", true)
-        until Animator
+        until Animator or timeout > 30
     end
 
     local AnimInstances = Rig:FindFirstChild("AnimationInstances")
@@ -856,7 +811,7 @@ function CommonUtils:_Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
         self.FadeFrame.BackgroundTransparency = StartTransparency or 1
         self.FadeFrame.BackgroundColor3 = FadeColor and Color3.fromRGB(FadeColor.R, FadeColor.G, FadeColor.B) or Color3.fromRGB(0, 0, 0)
         self.FadeFrame.Size = self.UDim.Full
-        self.FadeFrame.Parent = Players.LocalPlayer.PlayerGui:FindFirstChild("KillerIntros")
+        self.FadeFrame.Parent = CommonUtils:FindFirstChild(Players.LocalPlayer.PlayerGui, "KillerIntros")
 
         if Duration <= 0 then
             self.FadeFrame.BackgroundTransparency = 0
@@ -954,7 +909,7 @@ function CommonUtils:CreateMissingSkinValue(SourcePlayer: Player, name: string)
         return
     end
 
-    local SkinValue = SourcePlayer.PlayerData.Equipped.Skins:FindFirstChild(name)
+    local SkinValue = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins."..name)
     if SkinValue then
         return SkinValue
     end
@@ -973,7 +928,7 @@ function CommonUtils:CreateMissingPurchasedSkinValue(SourcePlayer: Player, name:
         return
     end
 
-    local SkinFolder = SourcePlayer.PlayerData.Purchased.Skins:FindFirstChild(name)
+    local SkinFolder = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins."..name)
     if SkinFolder then
         return SkinFolder
     end

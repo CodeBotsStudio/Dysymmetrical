@@ -21,8 +21,9 @@ For these templates, the animations will have to be replaced as the ones they ha
 ![StatsMenu](dysdocs/stats-ss.png)
 ![SettingsMenu](dysdocs/settings-ss.png)
 
-#### 1K+ lines of documented utils in ReplicatedStorage
+#### 1K+ lines of documented utils in ReplicatedStorage and ServerScriptService
 ![UtilsScreenshot](dysdocs/utils-ss.png)
+![SUtilsScreenshot](dysdocs/utils-ss2.png)
 
 
 ## Getting Started

@@ -11,19 +11,9 @@ local CommonFunctions = {
 			ID = "0002",
 			Message = "Player assumed to be flying.",
 		},
-		--- Kick message displayed when taking too long to send a specific RemoteEvent related to security.
-		SecurityRemoteTimeout = {
+		TPing = {
 			ID = "0003",
-			Message = "Client Security Remote Send Timeout",
-		},
-		StaminaSurpass = {
-			ID = "0004",
-			Message = "Player assumed to be bypassing max stamina.",
-		},
-		--- Kick message displayed when firing a Remote instance too many times in a short time.
-		RemoteExhaustion = {
-			ID = "0005",
-			Message = "Player assumed to be exhausting a (handled) Remote instance purposefully.",
+			Message = "Player assumed to be teleporting across great distances.",
 		},
 	},
 }
@@ -49,16 +39,17 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	--correction: the hitboxes in Forsaken are FULLY server-handled, but it doesn't lag because THEIR GAME SOMEHOW DOESN'T LAG AT ALL. WHAT????
 	--quick thing: hitboxes are now fully server-sided. yup. i had to. :(
 
-	if Char:FindFirstChild("Role") and Char.Role.Value == "Survivor" then
+	if CommonUtils:FindFirstChild(Char, "Role") and Char.Role.Value == "Survivor" then
 		Char.Killer.Value = sourcePlayer
 	end
 	
 	reason = reason or "HAHAHA https://www.youtube.com/watch?v=L8XbI9aJOXk" --OnlyIvo
 
-	if Char:FindFirstChild("PlayerAttributes") and Char.PlayerAttributes:FindFirstChild("Effects") and Char.PlayerAttributes.Effects:FindFirstChild("Resistance") then
+	if CommonUtils:FindFirstChild(Char, "PlayerAttributes.Effects.Resistance") then
 		inflictedDamage /= Char.PlayerAttributes.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
-	if Char.Effects:FindFirstChild("Blocking") == nil then
+
+	if not CommonUtils:FindFirstChild(Char, "Effects.Blocking") then
 		targetHumanoid:TakeDamage(inflictedDamage)
 	else
 		self:ApplyEffect(sourcePlayer.Character:FindFirstChildOfClass("Humanoid"), "Slowness", 6, 2, "KillerSpecific")
@@ -103,7 +94,7 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	if Player then
 		Network:FireClientConnection(Player, "DamagePlayer", "REMOTE_EVENT", sourcePlayer, reason)
 		if CommonUtils:GetPlayerSetting(Player, "Miscellaneous.ImageFlashOnHit") then
-			Network:FireClientConnection(Player, "ShowJokeSettingImage", "REMOTE_EVENT", true, Char:FindFirstChild("Role") and Char.Role.Value or "Survivor")
+			Network:FireClientConnection(Player, "ShowJokeSettingImage", "REMOTE_EVENT", true, CommonUtils:FindFirstChild(Char, "Role") and Char.Role.Value or "Survivor")
 		end
 	end
 	Network:FireClientConnection(sourcePlayer, "DamagedPlayer", "REMOTE_EVENT", Player, targetHumanoid, reason)
@@ -123,7 +114,7 @@ function CommonFunctions:ApplyEffect(hum: Humanoid, name: string, level: number?
 	end
 	EffectValue:SetAttribute("Duration", duration or EffectModule.Duration)
 
-	EffectValue.Parent = char:FindFirstChild("Effects")
+	EffectValue.Parent = CommonUtils:FindFirstChild(char, "Effects")
 	
 	task.delay(duration, function()
 		if EffectValue then
@@ -171,22 +162,12 @@ end
 --- Updates a player's stat specified by a `string` path.
 --- Stats are all either `int`s or `number`s.
 function CommonFunctions:UpdatePlayerStat(Player: Player, path: string, amount: number)
-    if not Player:FindFirstChild("PlayerData") then
-        repeat task.wait(0.1)
-        until Player:FindFirstChild("PlayerData")
-    end
-
-    local splitPath = CommonUtils:SplitStringPath(path)
-    local PlayerStats = Player.PlayerData.Stats
-    if #splitPath == 1 then
-        PlayerStats:FindFirstChild(splitPath[1]).Value += amount
-    else
-        local Stat = PlayerStats
-        for _, step in splitPath do
-            Stat = Stat:FindFirstChild(step)
-        end
-        Stat.Value += amount
-    end
+    local Stat = CommonUtils:FindFirstChild(Player, "PlayerData.Stats."..path)
+	if Stat then
+		Stat.Value += amount
+	else
+		warn("[CommonFunctions:UpdatePlayerStat()] Couldn't find stat "..path.."!")
+	end
 end
 
 --- Function used instead of the typical `Player:Kick()` to auto-generate an anti-cheat kick message and keep consistency.
