@@ -42,6 +42,13 @@ It is needed, though, to keep the place inside of the repository and never remov
 
 Make sure to replace the animations in the template characters.
 
+## Bug reporting
+If you find a certain bug in the engine, it'd be really appreciated if you reported it in the GitHub Issues page for this repo.
+
+If you're able to fix it by yourself, it'd also be a great help if you opened a pull request fixing the issue.
+
+Read `Contributing` below for more information.
+
 ## Documentation
 Docs for anything added in the engine can be found through code comments at the start of important variables or functions. Any of those that isn't considered important outside of being used internally doesn't have any.
 
