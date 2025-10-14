@@ -9,6 +9,7 @@ An asymmetrical game engine for Roblox.
 #### Easy UI Ordering in a single table
 ![UIOrderScreenshot](dysdocs/uiorder-ss.png)
 #### Simple character definitions & Templates for each role
+For these templates, the animations will have to be replaced as the ones they have are owned by CodeBots.
 ![CharScreenshot](dysdocs/chardef-ss.png)
 
 [...]
@@ -20,7 +21,7 @@ An asymmetrical game engine for Roblox.
 ![StatsMenu](dysdocs/stats-ss.png)
 ![SettingsMenu](dysdocs/settings-ss.png)
 
-#### 1K+ lines of utils in ReplicatedStorage
+#### 1K+ lines of documented utils in ReplicatedStorage
 ![UtilsScreenshot](dysdocs/utils-ss.png)
 
 
@@ -34,6 +35,8 @@ It's also necessary that you know how to code. Yup, had to use that card.
 
 There's an example place included in the repository, which you can duplicate and rename to use for your own project.
 It is needed, though, to keep the place inside of the repository and never remove it so that merging with updates to the engine is a lot easier and faster.
+
+Make sure to replace the animations in the template characters.
 
 ## Documentation
 Docs for anything added in the engine can be found through code comments at the start of important variables or functions. Any of those that isn't considered important outside of being used internally doesn't have any.
