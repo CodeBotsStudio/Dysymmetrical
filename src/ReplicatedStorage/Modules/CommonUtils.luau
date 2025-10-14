@@ -449,11 +449,6 @@ end
 
 --- Retrieves a player's setting value through a string path.
 function CommonUtils:GetPlayerSetting(Player: Player, path: string): any
-    if not Player:FindFirstChild("PlayerData") then
-        repeat task.wait(0.1)
-        until Player:FindFirstChild("PlayerData")
-    end
-
     local splitPath = self:SplitStringPath(path)
     local PlayerSettings = self:FindFirstChild(Player, "PlayerData.Settings")
     if #splitPath == 1 then

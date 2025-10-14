@@ -25,6 +25,9 @@ For these templates, the animations will have to be replaced as the ones they ha
 ![UtilsScreenshot](dysdocs/utils-ss.png)
 ![SUtilsScreenshot](dysdocs/utils-ss2.png)
 
+## DISCLAIMER
+NO CODE or ESSENTIAL UI is being stolen from Forsaken.
+There are certain assets from Forsaken used in this project's UI but they're nothing major and WILL be replaced soon.
 
 ## Getting Started
 First of all, install [Rojo](https://rojo.space/docs/v7/getting-started/installation/).
@@ -52,6 +55,10 @@ Contributing's such a simple topic that it isn't in its own separate file.
 You may create pull requests of anything you want changed from the engine as long as it benefits anyone (e.g. a QoL feature or a bug fix).
 
 They will be read and checked to see if they deserve to be merged.
+
+If you add utils to `ReplicatedStorage/Modules/CommonUtils` or `ServerScriptService/System/CommonFunctions`,
+it'd be greatly appreciated if you could add them to the engine's repo through a pull request.
+Credits would be given in the util's documentation.
 
 To-Do's are listed through comments as well, so you might want to isntall something like [Todo+](https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-todo-plus) in VSCode to see every `NOTE`, `FIXME`, `TODO`...
 
