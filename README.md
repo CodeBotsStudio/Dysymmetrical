@@ -59,7 +59,6 @@ Though, if it's needed, the stuff in the pull requests will be changed if it doe
 
 ## Licensing
 You may use this project for whatever you want, as long as you keep credit.
-
-In GitHub, the repository MUST be a fork of this one, even if it's private.
+Do NOT remove the `print()` calls that identify this engine.
 
 Also see [GNU GPL-3.0 License](https://www.gnu.org/licenses/gpl-3.0.html).
