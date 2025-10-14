@@ -67,7 +67,7 @@ If you add utils to `ReplicatedStorage/Modules/CommonUtils` or `ServerScriptServ
 it'd be greatly appreciated if you could add them to the engine's repo through a pull request.
 Credits would be given in the util's documentation.
 
-To-Do's are listed through comments as well, so you might want to isntall something like [Todo+](https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-todo-plus) in VSCode to see every `NOTE`, `FIXME`, `TODO`...
+To-Do's are listed through comments as well, so you might want to install something like [Todo+](https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-todo-plus) in VSCode to see every `NOTE`, `FIXME`, `TODO`...
 
 If you *do* indeed make a pull request, it'll most probably be revised and merged without many questions or complaints.
 Though, if it's needed, the stuff in the pull requests will be changed if it doesn't comply with W.I.P. features or with the code style itself.
