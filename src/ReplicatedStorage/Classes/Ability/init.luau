@@ -107,11 +107,8 @@ export type Ability = {
 
 --- Ability preset for customization.
 function AbilityType:GetDefaultAbilitySettings(): Ability
-    --instantiates a new `Animation` instance for loading the use animation
-    local Animation
-    if not RunService:IsServer() then
-        Animation = Instance.new("Animation")
-    end
+    --instantiates a new `Animation` instance for loading the use animation (CLIENT ONLY)
+    local Animation = not RunService:IsServer() and Instance.new("Animation") or nil
 
     return {
         Name = "Ability",
@@ -194,9 +191,12 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             if #own.UseAnimation > 0 then
                 Animation.AnimationId = own.UseAnimation
 
-                local AnimName = own.Name:gsub(" ", "").."UseAnim"
-                charModule.GameplayConfig.Cache.Animations[AnimName] = CommonUtils:LoadAnimationFromID(own.Owner.Character, own.UseAnimation)
-                own.UseAnimationTrack = charModule.GameplayConfig.Cache.Animations[AnimName]
+                --nesting in pcall so that if there's nothing it doesn't matter
+                pcall(function()
+                    local AnimName = own.Name:gsub(" ", "").."UseAnim"
+                    charModule.GameplayConfig.Cache.Animations[AnimName] = CommonUtils:LoadAnimationFromID(own.Owner.Character, own.UseAnimation)
+                    own.UseAnimationTrack = charModule.GameplayConfig.Cache.Animations[AnimName]
+                end)
             end
 
             own.PlayUseAnimation = function()
@@ -274,7 +274,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
         ReloadAnimation = function(own: Ability, id: string)
             Animation.AnimationId = id
-            own.UseAnimationTrack = CommonUtils:LoadAnimationFromID(own.Owner.Character, id)
+            pcall(function()
+                own.UseAnimationTrack = CommonUtils:LoadAnimationFromID(own.Owner.Character, id)
+            end)
         end,
 
         PlayUseAnimation = nil,
