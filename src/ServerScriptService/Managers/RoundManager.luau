@@ -80,15 +80,6 @@ function RoundManager:StartRound()
     end
     CommonUtils:Print(RoundManager.CurrentRound.PlayersRemaining)
 
-    task.delay(1, function()
-        local KillerName = CommonUtils:GetPlayerEquipped(HighestMalice.Player, "Killer")
-        Network:FireClientConnection(RoundManager.CurrentRound.PlayersAccepted, "ChaseTheme", "REMOTE_EVENT",
-            KillerName,
-            CommonUtils:GetPlayerEquipped(HighestMalice.Player, "Skins."..KillerName),
-            HighestMalice.Player.Character
-        )
-    end)
-
     RoundState.Value = "InRound"
     TimeManager:SetTime(TimeManager.Config.RoundTime)
     TimeManager.OnTimerEnd = function()
@@ -139,9 +130,6 @@ function RoundManager.Callables:InitLMS(LastMan: Player)
 
     RoundManager.CurrentRound.StartedLMS = true
     workspace:SetAttribute("LMS", true)
-
-    --removes the chase theme
-    Network:FireClientConnection({RoundManager.CurrentRound.Killer.Player, LastMan}, "ChaseTheme", "REMOTE_EVENT")
 
     --reveals auras
     CommonUtils:RevealPlayerAuraTo(RoundManager.CurrentRound.Killer.Player, LastMan, 10)
@@ -211,7 +199,6 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
         if i.Character and i.Character.Role.Value ~= "Spectator" then
             ServerCharacterManager:SetupCharacter(i)
         end
-        Network:FireClientConnection(i, "ChaseTheme", "REMOTE_EVENT") --r
     end
     
     --restarting variables
@@ -328,10 +315,6 @@ function RoundManager.Utils:SetupPlayer(Player: Player, IsKiller: boolean)
         
             --checks for death to count kills n shit
             Char.Humanoid.Died:Connect(function()
-                if #RoundManager.CurrentRound.PlayersRemaining > 2 then
-                    Network:FireClientConnection(Player, "ChaseTheme", "REMOTE_EVENT")
-                end
-            
                 RoundManager.Callables:_OnPlayerDeath(Player)
             end)
         }
@@ -363,10 +346,6 @@ function RoundManager.Utils:SetupPlayer(Player: Player, IsKiller: boolean)
 
             --checks for death to count kills n shit
             Char.Humanoid.Died:Connect(function()
-                if #RoundManager.CurrentRound.PlayersRemaining > 2 then
-                    Network:FireClientConnection(Player, "ChaseTheme", "REMOTE_EVENT")
-                end
-
                 --if the survivor dies they lose duh
                 CommonFunctions:UpdatePlayerStat(Player, "SurvivorStats.SurvivorLosses", 1) --increasing loss stat
                 RoundManager.Callables:_OnPlayerDeath(Player)

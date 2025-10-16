@@ -11,12 +11,6 @@ local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
 
 local SoundFolder = game:GetService("ReplicatedStorage").Assets.Sounds
 
-export type SoundInfo = {
-    Volume: number?,
-    MinPitch: number?,
-    MaxPitch: number?,
-}
-
 local Sounds = {
     CommonlyUsedSounds = {
         ButtonHover = "rbxassetid://7249904928",
@@ -76,8 +70,9 @@ function Sounds:GetSound(ID: string, clone: boolean?): Sound?
     return
 end
 
+--TODO: import pitch (because I forgot)
 --- Plays a sound with the ID `ID`.
---- Check `SoundInfo` and `Sound`'s properties for further usage.
+--- Check `Sound`'s properties for further usage.
 function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any?}?): Sound?
     if typeof(ID) ~= "string" and typeof(ID) ~= "table" then
         return
@@ -111,6 +106,8 @@ function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any
                 Part.Name = Sound.Name
                 Part.Parent = workspace.Sounds
                 Sound.Parent = Part
+            elseif name:lower():find("pitch") then
+                continue
             elseif Sound[name] then
                 Sound[name] = value
             end

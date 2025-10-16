@@ -40,7 +40,7 @@ function AntiFly:_SetupCharacter(player: Player, char: Model)
     local lastTouched = time()
 
     task.spawn(function()
-        while char.Parent do
+        while root and root.Parent and char and char.Parent do
             task.wait(self.TimeBetweenChecks)
             
             if self:_IsCharacterNotFlying(root, Params) then

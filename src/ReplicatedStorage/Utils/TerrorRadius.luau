@@ -46,6 +46,9 @@ function Terror.New(LayerFolder, Killer: Model)
 		sound.SoundId = id
 		sound.Volume = 0
 		sound.Looped = true
+		if layerName ~= "L4" then
+			sound:Play()
+		end
 		sound.SoundGroup = SoundService.SoundGroups.Master.Music
 		sound.Parent = themeFolder
 
@@ -109,6 +112,8 @@ function Terror:RadiusCheck()
 	for _, data in ipairs(self.LayerMagnitudes) do
 		local sound, radius = data[1], data[2]
 		local upcoming = Radiuses[sound.Name .. "Upcoming"] or -1e10
+
+		print(dist, radius, upcoming, self.InChase)
 
 		if self.InChase then
 			if dist < 60 and not killerHRP.Parent.Effects:FindFirstChild("Undetectable") then

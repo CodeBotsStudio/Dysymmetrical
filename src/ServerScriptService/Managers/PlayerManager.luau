@@ -170,7 +170,7 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: "K
 
 	--gets the skin if queued to
 	if skinName ~= nil and #skinName > 0 then
-		char = CharFolder["Skins"][RigType]:FindFirstChild(RigName):FindFirstChild(skinName)
+		char = CommonUtils:FindFirstChild(CharFolder.Skins.RigType, RigName.."."..skinName, false)
 	end
 
 	--if there's a skin then it gets cloned and used

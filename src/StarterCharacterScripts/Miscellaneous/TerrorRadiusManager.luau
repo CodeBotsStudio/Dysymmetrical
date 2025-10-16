@@ -19,6 +19,7 @@ local Radiuses = {
 }
 
 local TerrorRadiusManager = {
+    AbleToInit = true,
     Layers = {},
     Killer = nil,
     LayerMagnitudes = {},
@@ -40,6 +41,9 @@ local function CalculateSound(Distance)
 end
 
 function TerrorRadiusManager:Init()
+    if not self.AbleToInit then
+        return
+    end
     local Char = LocalPlayer.Character
     local Role = CommonUtils:FindFirstChild(Char, "Role").Value
     if Role == "Spectator" then
@@ -75,7 +79,7 @@ function TerrorRadiusManager:Init()
 
     --TODO: multi-killer support
     for _, character in workspace.Players:GetChildren() do
-        local OtherRole = CommonUtils:FindFirstChild(character, "Role")
+        local OtherRole = CommonUtils:FindFirstChild(character, "Role").Value
         if OtherRole == "Killer" then
             self.Killer = character
             break
@@ -85,14 +89,6 @@ function TerrorRadiusManager:Init()
     if not self.Killer then
         return
     end
-
-    table.insert(self.Connections, RunService.PreRender:Connect(function()
-        self:CheckInRadius()
-    end))
-
-    table.insert(self.Connections, CommonUtils:FindFirstChild(self.Killer, "Humanoid").Died:Connect(function()
-        self:Destroy()
-    end))
 
     local ChaseThemes = require(CommonUtils:GetCharacterModule("Killer", self.Killer:GetAttribute("CharacterName"), self.Killer:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
     for l, i in ChaseThemes do
@@ -110,6 +106,20 @@ function TerrorRadiusManager:Init()
 
         self:SetLayerMagnitude(Sound, Radiuses[l])
     end
+
+    for _, i in self.ThemeFolder:GetChildren() do
+        if i:IsA("Sound") and i.Name ~= "L4" then
+            i:Play()
+        end
+    end
+
+    table.insert(self.Connections, RunService.PreRender:Connect(function()
+        self:CheckInRadius()
+    end))
+
+    table.insert(self.Connections, CommonUtils:FindFirstChild(self.Killer, "Humanoid").Died:Connect(function()
+        self:Destroy()
+    end))
 end
 
 function TerrorRadiusManager:Destroy()
@@ -174,23 +184,28 @@ function TerrorRadiusManager:_CheckAsSurvivor()
         local Upcoming = Radiuses[s.Name.."Upcoming"] or -1e10
 
         if self.InChase then
-            if Distance < Radiuses["L1"] and not CommonUtils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable") then
+            if Distance < Radiuses["L1"] and not CommonUtils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
                 if s.Name == "L4" then
                     self:TweenVolume(s, Distance < 55 and 0.5 or CalculateSound(Distance))
                 else
                     self:TweenVolume(s, 0)
                 end
             else
-                if Distance <= r and Distance > Upcoming and not CommonUtils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable") then
-                    if s.Name == "L4" then
-                        self.InChase = true
-                        self:PlayLayer4()
-                    else
-                        self:TweenVolume(s, CalculateSound(Distance))
-                    end
-                else
+                self.InChase = false
+                if s.Name == "L4" then
                     self:TweenVolume(s, 0)
                 end
+            end
+        else
+            if Distance <= r and Distance > Upcoming and not CommonUtils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
+                if s.Name == "L4" then
+                    self.InChase = true
+                    self:PlayLayer4()
+                else
+                    self:TweenVolume(s, CalculateSound(Distance))
+                end
+            else
+                self:TweenVolume(s, 0)
             end
         end
     end
@@ -199,12 +214,13 @@ end
 function TerrorRadiusManager:_CheckAsKiller()
     for _, char in workspace.Players:GetChildren() do
         if char ~= self.LocalPlayerProps.Char
-        and CommonUtils:FindFirstChild(char, "Role").Value ~= self.LocalPlayerProps.Role
-        and CommonUtils:FindFirstChild(char, "Humanoid").Health >= 0 then
+        and char:FindFirstChild("Role") and char.Role.Value == "Survivor"
+        and char:FindFirstChildOfClass("Humanoid").Health > 0
+        and not CommonUtils:FindFirstChild(char, "Effects.Undetectable", false) then
             
             local Distance = (CommonUtils:FindFirstChild(char, "HumanoidRootPart").Position - self.LocalPlayerProps.HRP.Position).Magnitude
-            self.PlayerClose = Distance <= Radiuses["L1"]
-            self.InChase = self.InChase and Distance <= Radiuses["L1"] or Distance <= Radiuses["L4"]
+            self.PlayerClose = Distance <= 60
+            self.InChase = Distance <= 25 or self.InChase and Distance <= 35
 
             for r: number, s: Sound in self.LayerMagnitudes do
                 if s.Name == "L4" then

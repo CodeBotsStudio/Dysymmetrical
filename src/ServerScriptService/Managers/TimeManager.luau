@@ -3,7 +3,7 @@ local TimeManager = {
     CurrentTime = 0,
     Config = {
         LobbyTime = 5, --0:45 / 45
-        RoundTime = 120, --3:30 / 210
+        RoundTime = 210, --3:30 / 210
         LastManStandingTime = 90, --1:30 / 90
 
         --- If true, `TimeManager` will wait until `TimeManager.Config.MinimumPlayerAmount` players have loaded their game to tick down.

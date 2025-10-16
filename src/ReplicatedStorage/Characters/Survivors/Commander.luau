@@ -109,6 +109,10 @@ Reload.Behaviour = function(self)
         return
     end
 
+    if self.CharModule.GameplayConfig.Abilities.Justice.UsesLeft > 0 then
+        return
+    end
+
     table.insert(self.Connections, task.delay(self.Duration, function()
         self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
         Network:FireConnection("ReloadCommanderJustice")
@@ -171,9 +175,8 @@ Justice.Behaviour = function(self)
             FirePart.Front:Emit(12)
             FirePart.Smoke:Emit(8)
             FirePart.Flash:Emit(3)
-            Sounds:PlaySound(self.ShotSound, {
+            Sounds:PlaySound(self.ShotSound, {Volume = 2}, {
                 Position = FirePart.Position,
-                Volume = 2,
             })
         end))
 

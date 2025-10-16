@@ -539,7 +539,7 @@ end
 --- If called from Server, it'll also print to all clients to trace server values.
 function CommonUtils:Print(...)
     if RunService:IsServer() then
-        print(..., debug.traceback())
+        print(...)
         if workspace:GetAttribute("DebugAllowed") == true and not RunService:IsStudio() then
             Network:FireAllClientConnection("Print", "UREMOTE_EVENT", Enum.MessageType.MessageInfo, ...)
         end
@@ -904,7 +904,7 @@ function CommonUtils:CreateMissingSkinValue(SourcePlayer: Player, name: string)
         return
     end
 
-    local SkinValue = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins."..name)
+    local SkinValue = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins."..name, true, 0.05)
     if SkinValue then
         return SkinValue
     end
@@ -954,7 +954,7 @@ function CommonUtils:FindFirstChild(Parent: Instance, ChildPath: string, YieldPe
     for _, step in SplitPath do
         local P = Result
 
-        Result = P:FindFirstChild(step) or (YieldPerStep and P:WaitForChild(step, 3) or nil)
+        Result = P:FindFirstChild(step) or (YieldPerStep and P:WaitForChild(step, Timeout or 3) or nil)
 
         if not Result then
             break
@@ -962,7 +962,7 @@ function CommonUtils:FindFirstChild(Parent: Instance, ChildPath: string, YieldPe
     end
 
     if not Result or Result == Parent then
-        warn("[CommonUtils:FindFirstChild()] Couldn't find \""..Parent.Name.."."..ChildPath.."\"!")
+        -- warn("[CommonUtils:FindFirstChild()] Couldn't find \""..Parent.Name.."."..ChildPath.."\"!", debug.traceback())
         return
     end
 

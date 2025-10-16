@@ -45,11 +45,11 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	
 	reason = reason or "HAHAHA https://www.youtube.com/watch?v=L8XbI9aJOXk" --OnlyIvo
 
-	if CommonUtils:FindFirstChild(Char, "PlayerAttributes.Effects.Resistance") then
+	if CommonUtils:FindFirstChild(Char, "PlayerAttributes.Effects.Resistance", false) then
 		inflictedDamage /= Char.PlayerAttributes.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
 
-	if not CommonUtils:FindFirstChild(Char, "Effects.Blocking") then
+	if not CommonUtils:FindFirstChild(Char, "Effects.Blocking", false) then
 		targetHumanoid:TakeDamage(inflictedDamage)
 	else
 		self:ApplyEffect(sourcePlayer.Character:FindFirstChildOfClass("Humanoid"), "Slowness", 6, 2, "KillerSpecific")
@@ -57,7 +57,7 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	end
 	
 	--NOTE: this is from Driftwood and you can use it as an example.
-	if Char.Effects:FindFirstChild("Domino Effect") and table.find(DominoEffectModule.Attacks, reason) then
+	if CommonUtils:FindFirstChild(Char, "Effects.Domino Effect", false) and table.find(DominoEffectModule.Attacks, reason) then
 		Network:FireClientConnection(sourcePlayer, "ExecuteReplicatedModule", "REMOTE_EVENT", ReplicatedStorage.Effects.SurvivorSpecific.DominoEffect.ApplyInk:GetFullName())
 		Char.Effects["Domino Effect"]:Destroy()
 		CommonUtils:GetEffectModule("Domino Effect", "SurvivorSpecific"):Remove(Char)
