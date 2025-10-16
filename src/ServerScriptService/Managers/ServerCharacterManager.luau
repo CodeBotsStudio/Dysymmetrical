@@ -34,7 +34,6 @@ function ServerCharacterManager:SetupCharacter(player: Player, charName: string,
     end
 
     print("sending to "..player.Name)
-    Network:FireClientConnection(player, "SetupCharacter", "REMOTE_EVENT", charName, charType, skinName) --client setup
     self:_InitCharacter(player, CommonUtils:GetCharacterModule(charType, charName, skinName))
 
     return Char

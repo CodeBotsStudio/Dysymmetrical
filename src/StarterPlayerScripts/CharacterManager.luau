@@ -9,14 +9,13 @@ local CharManager = {}
 local LocalPlayer = Players.LocalPlayer
 
 local AbilityGUI = require(ReplicatedStorage.Classes.Ability.AbilityGUI)
-local Network = require(ReplicatedStorage.Modules.Network)
 local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
 
 function CharManager:Init()
-    print("initting char setup event")
-    Network:SetConnection("SetupCharacter", "REMOTE_EVENT", function(charName: string, charType: string, skinName: string?)
-        print("Loading client character!")
-        self:LoadCharacter(charName, charType, skinName)
+    LocalPlayer.CharacterAdded:Connect(function(Char: Model)
+        if CommonUtils:FindFirstChild(Char, "Role").Value ~= "Spectator" then
+            self:LoadCharacter(Char:GetAttribute("CharacterName"), Char.Role.Value, Char:GetAttribute("CharacterSkinName"))
+        end
     end)
 end
 
@@ -40,31 +39,20 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
         StarterGui:SetCore("ResetButtonCallback", true)
     end)
 
-    print("past delay")
-
     local Char: Model = LocalPlayer.Character
     local Animate = CommonUtils:FindFirstChild(Char, "Animate")
 
-    print("found Animate")
-
     local CharModule = CommonUtils:CopyTable(require(CommonUtils:GetCharacterModule(charType, charName, skinName)))
 
-    print("past char module get")
-
     CommonUtils:PreloadAssets(CharModule.Config)
-
-    print("past preloading")
 
     Animate.idle.IdleAnim.AnimationId = CharModule.Config.AnimationIDs.IdleAnimation
     Animate.walk.WalkAnim.AnimationId = CharModule.Config.AnimationIDs.WalkAnimation
     Animate.run.RunAnim.AnimationId = CharModule.Config.AnimationIDs.RunAnimation
     require(Char.PlayerAbilities.Default.Sprinting):ReloadAnimation(CharModule.Config.AnimationIDs.RunAnimation)
-    
-    print("past anims")
 
     self:_InitCharacterAbilities(CharModule)
 
-    print("past ability init")
     if charType == "Killer" then
         local Slash = require(Char.PlayerAbilities.CharacterAbilities).Abilities.Slash
         Slash:ReloadAnimation(CharModule.Config.AnimationIDs.SlashAnimation)

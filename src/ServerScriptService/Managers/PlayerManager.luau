@@ -184,12 +184,6 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: "K
 	char:SetAttribute("CharacterName", RigName)
 
 	char.Name = plr.Name
-
-	--creates the role before `PlayerManager` can create it with the Spectator value
-	local Role = Instance.new("StringValue")
-	Role.Name = "Role"
-	Role.Value = RigType
-	Role.Parent = char
 	
 	plr.Character = char
 	
@@ -197,6 +191,12 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: "K
 	for _, i in StarterCharacterScripts:GetChildren() do
 		i:Clone().Parent = char
 	end
+
+	--creates the role before `PlayerManager` can create it with the Spectator value
+	local Role = Instance.new("StringValue")
+	Role.Name = "Role"
+	Role.Value = RigType
+	Role.Parent = char
 
 	--adds the char to `Players` in `workspace`
 	char.Parent = PlayerFolder
