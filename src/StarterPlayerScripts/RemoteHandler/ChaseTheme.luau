@@ -17,6 +17,6 @@ return function()
 			return
 		end
 
-		CurrentRadius = TerrorRadius.New(require(CommonUtils:GetCharacterModule("Killer", killerName, killerSkin)).Config.ChaseThemes, KillerCharacter)
+		-- CurrentRadius = TerrorRadius.New(require(CommonUtils:GetCharacterModule("Killer", killerName, killerSkin)).Config.ChaseThemes, KillerCharacter)
 	end)
 end

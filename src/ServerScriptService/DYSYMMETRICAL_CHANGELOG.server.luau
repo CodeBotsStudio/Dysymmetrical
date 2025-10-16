@@ -14,6 +14,9 @@
     ------09/10/2025------
     * Added Round Player List (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/RoundPlayerList` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
     
+    ------16/10/2025------
+    * Refactored TerrorRadius to not be a util and be embedded to each character instead
+    * Added TopbarPlus for the mod panel
 ]]
 
 script:Destroy()

@@ -40,6 +40,8 @@ function ModPanelManager:_CheckPlayer(Player: Player)
         return
     end
 
+    task.wait(2)
+
     Network:FireClientConnection(Player, "InitModPanel", "REMOTE_EVENT")
 end
 

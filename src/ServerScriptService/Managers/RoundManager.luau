@@ -94,6 +94,7 @@ function RoundManager:StartRound()
     TimeManager.OnTimerEnd = function()
         RoundManager.Callables:EndRound("Survivors")
     end
+    workspace:SetAttribute("LMS", false)
     
     task.spawn(function()
         while task.wait(1) do
@@ -137,6 +138,7 @@ function RoundManager.Callables:InitLMS(LastMan: Player)
     end
 
     RoundManager.CurrentRound.StartedLMS = true
+    workspace:SetAttribute("LMS", true)
 
     --removes the chase theme
     Network:FireClientConnection({RoundManager.CurrentRound.Killer.Player, LastMan}, "ChaseTheme", "REMOTE_EVENT")
@@ -170,6 +172,8 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
     table.clear(RoundManager.Threads)
     --no more music!!1!
     Sounds:StopTheme("LMS", 0)
+
+    workspace:SetAttribute("LMS", false)
 
     for _, Connections: {RBXScriptConnection} in RoundManager.PlayerConnections do
         for _, Connection in Connections do
