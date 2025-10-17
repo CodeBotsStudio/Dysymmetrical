@@ -17,7 +17,7 @@ local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Commander: Character.Survivor = Character:GetDefaultSurvivorSettings()
 Commander.Config.Name = "Commander"
 Commander.Config.Quote = "*pyro noises*"
-Commander.Config.Render = "rbxassetid://91655983223359"
+Commander.Config.Render = "rbxassetid://108440668883002"
 
 --Abilities Definition
 
