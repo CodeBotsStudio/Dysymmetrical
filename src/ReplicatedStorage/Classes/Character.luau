@@ -1,8 +1,11 @@
 --!nocheck
+local KillerIntro = require(script.Parent.KillerIntro)
 local CharTypes = {}
 
 --- Type used for survivor characters.
 export type Survivor = {
+    --- The player that currently owns the character instance.
+    Owner: Player,
     --- Config that shouldn't affect gameplay mechanics.
     Config: {
         --- The display name of the character.
@@ -50,11 +53,15 @@ export type Survivor = {
         --- Any temp objects or instances that might be created mid-match.
         Cache: {any},
     },
+
+    --- An empty function that you can replace to execute custom behaviour when this character initializes.
+    OnInit: (self: Survivor, charModel: Model) -> ()?,
 }
 
 --- Survivor preset for customization.
 function CharTypes:GetDefaultSurvivorSettings(): Survivor
     return {
+        Owner = nil,
         Config = {
             Name = "Survivor",
             Description = "PLACEHOLDER",
@@ -85,11 +92,15 @@ function CharTypes:GetDefaultSurvivorSettings(): Survivor
                 Animations = {},
             },
         },
+
+        OnInit = nil,
     }
 end
 
 --- Type used for killer characters.
 export type Killer = {
+    --- The player that currently owns the character instance.
+    Owner: Player,
     --- Config that shouldn't affect gameplay mechanics.
     Config: {
         --- The display name of the character.
@@ -167,9 +178,11 @@ export type Killer = {
         },
 
         --- CLIENT FUNCTION: Empty function to execute code when the killer intro initializes (loads its content).
-        OnIntroInit: (KillerRig: Model, CameraRig: Model) -> ()?,
+        --- `KillerRig` and `CameraRig` will be `nil` when it's a 2D intro (`UiIntro`).
+        OnIntroInit: (self: Killer, intro: KillerIntro.AnimatedIntro | KillerIntro.UiIntro, KillerRig: Model, CameraRig: Model) -> ()?,
         --- CLIENT FUNCTION: Empty function to execute code when the killer intro plays.
-        OnIntroPlay: (KillerRig: Model, CameraRig: Model, AnimDuration: number) -> ()?,
+        --- `KillerRig` and `CameraRig` will be `nil` when it's a 2D intro (`UiIntro`).
+        OnIntroPlay: (self: Killer, intro: KillerIntro.AnimatedIntro | KillerIntro.UiIntro, KillerRig: Model, CameraRig: Model, AnimDuration: number) -> ()?,
 
         --- Any SFX that you may want to play with the character.
         --- Voicelines go in `Voicelines`.
@@ -189,6 +202,9 @@ export type Killer = {
         --- The CFrame value that'll be added to a survivor's CFrame when snapping to a killer's CFrame by being executed by them. Defaults to `CFrame.new(0, 0, 5)` in `Hitbox`.
         ExecutionSurvivorCFrameOffset: CFrame?,
     },
+
+    --- An empty function that you can replace to execute custom behaviour when this character initializes.
+    OnInit: (self: Killer, charModel: Model) -> ()?,
 
     --- Gameplay mechanics config that will affect how the character works.
     GameplayConfig: {
@@ -221,6 +237,7 @@ export type Killer = {
 --- Killer preset for customization.
 function CharTypes:GetDefaultKillerSettings(): Killer
     return {
+        Owner = nil,
         Config = {
             Name = "Killer",
             Description = "PLACEHOLDER",
@@ -269,6 +286,8 @@ function CharTypes:GetDefaultKillerSettings(): Killer
                 Animations = {},
             },
         },
+
+        OnInit = nil,
     }
 end
 

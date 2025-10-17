@@ -43,6 +43,7 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     local Animate = CommonUtils:FindFirstChild(Char, "Animate")
 
     local CharModule = CommonUtils:CopyTable(require(CommonUtils:GetCharacterModule(charType, charName, skinName)))
+    CharModule.Owner = LocalPlayer
 
     CommonUtils:PreloadAssets(CharModule.Config)
 
@@ -64,6 +65,10 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     end
 
     AbilityGUI:InitGUI()
+
+    if CharModule.OnInit then
+        CharModule:OnInit(Char)
+    end
 
     return Char
 end

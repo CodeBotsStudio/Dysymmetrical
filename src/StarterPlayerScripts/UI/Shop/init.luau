@@ -72,6 +72,8 @@ local ButtonsContainer
 
 local Sections = {}
 
+--TODO: order by alphabetical order when multiple items have the same price
+
 function Shop:ReorderSkins()
     local Ordered = {
         Owned = {},

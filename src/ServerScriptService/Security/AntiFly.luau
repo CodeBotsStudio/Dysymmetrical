@@ -57,6 +57,9 @@ function AntiFly:_SetupCharacter(player: Player, char: Model)
 end
 
 function AntiFly:_IsCharacterNotFlying(root: BasePart, Params: RaycastParams): boolean
+    if not (root and root.Parent) then
+        return true
+    end
     if math.abs(root.AssemblyLinearVelocity.Y) > 45 then --if the player is flung it's obv gonna be false positive (DAMN YOU SHITTY ROBLOX PHYSICS!!!)
         return true
     end

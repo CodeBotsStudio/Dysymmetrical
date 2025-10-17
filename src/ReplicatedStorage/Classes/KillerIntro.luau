@@ -183,7 +183,7 @@ function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
             end
 
             if Module.Config.OnIntroInit then
-                Module.Config:OnIntroInit(KillerRig, CameraRig)
+                Module.Config:OnIntroInit(own, KillerRig, CameraRig)
             end
 
             for _, i in {

@@ -74,6 +74,8 @@ local Templates = {
 
 local Sections = {}
 
+--TODO: order by alphabetical order when multiple items have the same price
+
 function Inventory:ReorderSkins()
     local Ordered = {}
     local LO = 0

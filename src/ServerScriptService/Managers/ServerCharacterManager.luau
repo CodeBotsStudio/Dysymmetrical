@@ -42,6 +42,7 @@ end
 --- Inits a character's abilities and sets its properties accordingly as specified in its `GameplayConfig`.
 function ServerCharacterManager:_InitCharacter(player: Player, charModule: ModuleScript)
     local module = CommonUtils:CopyTable(require(charModule))
+    module.Owner = player
 
     --Abilities
     local Char = player.Character
@@ -60,6 +61,10 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
         if Ability.Init then
             Ability:Init(module, player)
         end
+    end
+
+    if module.OnInit then
+        module:OnInit(Char)
     end
 
     if module.Config.Voicelines and module.Config.Voicelines.Stunned then

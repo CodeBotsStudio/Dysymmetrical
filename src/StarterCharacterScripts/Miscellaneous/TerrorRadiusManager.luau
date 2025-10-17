@@ -67,7 +67,7 @@ function TerrorRadiusManager:Init()
 
     --slow down on death fx
     table.insert(self.Connections, self.LocalPlayerProps.Humanoid.Died:Connect(function()
-        for _, s in self.ThemeFolder do
+        for _, s in self.ThemeFolder:GetChildren() do
             TweenService:Create(s, TweenInfo.new(0.4), {PlaybackSpeed = 0}):Play()
         end
     end))
