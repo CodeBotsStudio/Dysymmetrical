@@ -77,3 +77,7 @@ You may use this project for whatever you want, as long as you keep credit.
 Do NOT remove the `print()` calls that identify this engine.
 
 Also see [GNU GPL-3.0 License](https://www.gnu.org/licenses/gpl-3.0.html).
+
+## Credits
+Credits to [@PirosMacska](https://github.com/PirosMacska) for making the `VideoPlayer` module for 2D killer intros
+Credits to [@grayzcale](https://github.com/grayzcale/simplepath) for the `SimplePath` module
