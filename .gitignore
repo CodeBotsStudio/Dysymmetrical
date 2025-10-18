@@ -8,8 +8,5 @@
 # Packages/
 ServerPackages/
 sourcemap.json
-
 wally.lock
 .VSCodeCounter/
-.stylua.toml
-selene.toml
