@@ -51,6 +51,8 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
     local Humanoid = CommonUtils:FindFirstChild(Char, "Humanoid")
     Humanoid.MaxHealth = module.GameplayConfig.Health
     Humanoid.Health = module.GameplayConfig.Health
+    Humanoid.JumpPower = 0
+    Humanoid.JumpHeight = 0
 
     for name, value in module.GameplayConfig.StaminaProperties do
         Char.PlayerAttributes:FindFirstChild(name).Value = value

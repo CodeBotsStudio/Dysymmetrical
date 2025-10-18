@@ -108,7 +108,7 @@ function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any
                 Sound.Parent = Part
             elseif name:lower():find("pitch") then
                 continue
-            elseif Sound[name] then
+            else
                 Sound[name] = value
             end
         end

@@ -24,6 +24,7 @@ local GUIs = {
 	"Menus",
 	"SideBar",
 	"RewardNotifications",
+	"AFKLabel",
 }
 
 for index, name in GUIs do

@@ -1,5 +1,6 @@
 --!nocheck
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local rand = Random.new()
 
 local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
@@ -71,7 +72,7 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
             own.Owner = player
             own.Animator = animator
 
-            if game:GetService("RunService"):IsServer() then
+            if RunService:IsServer() then
                 --NOTE: i just noticed that forsaken uses a whole data array to store everything from a player and get the index of it instead of checking it for everyone.
                 --it makes more sense.
                 table.insert(own.Connections, Network:SetConnection("PlayEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string, soundId: string)
@@ -180,7 +181,7 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
             own.Initted = true
         end,
         BaseBehaviour = function(own: Emote)
-            if game:GetService("RunService"):IsServer() then return end
+            if RunService:IsServer() then return end
 
             if own.BaseBehaviourAllowed then
                 if own.TrackPlaying and own.TrackPlaying.Animation.IsPlaying then

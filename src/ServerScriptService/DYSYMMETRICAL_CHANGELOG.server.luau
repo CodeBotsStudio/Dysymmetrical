@@ -17,6 +17,9 @@
     ------16/10/2025------
     * Refactored TerrorRadius to not be a util and be embedded to each character instead
     * Added TopbarPlus for the mod panel
+
+    ------18/10/2025------
+    * Added Emote WHEEL using trigonometry that I despise (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/EmotePanel` & `ServerScriptService/Managers/SaveManager/PlayerData/Equipped/Emotes` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 ]]
 
 script:Destroy()

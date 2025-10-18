@@ -617,7 +617,7 @@ function CommonUtils:GetEmoteModule(EmoteName: string): ModuleScript
 
     --obv errors if there's none
     if not Module then
-        error("Can't find emote module! ("..EmoteName..")")
+        -- error("Can't find emote module! ("..EmoteName..")")
         return
     end
 
@@ -923,7 +923,7 @@ function CommonUtils:CreateMissingPurchasedSkinValue(SourcePlayer: Player, name:
         return
     end
 
-    local SkinFolder = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins."..name)
+    local SkinFolder = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins."..name, true, 0.05)
     if SkinFolder then
         return SkinFolder
     end

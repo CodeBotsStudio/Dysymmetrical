@@ -81,14 +81,20 @@ end
 
 function EmoteManager:ReloadAvailableContent(EquippedEmotes: Folder)
 	table.clear(self.EmotesAvailable)
-	for _, emote: IntValue in EquippedEmotes:GetChildren() do
-		if not emote:IsA("IntValue") then continue end
+	for _, emote: StringValue in EquippedEmotes:GetChildren() do
+		if not emote:IsA("StringValue") and #emote.Value > 0 then
+			continue
+		end
 
-		local Module = CommonUtils:GetEmoteModule(emote.Name)
-		self.EmotesAvailable[emote.Name] = CommonUtils:CopyTable(require(Module))
-		if not self.EmotesAvailable[emote.Name].Initted then
+		local Module = CommonUtils:GetEmoteModule(emote.Value)
+		if not Module then
+			return
+		end
+
+		self.EmotesAvailable[emote.Value] = CommonUtils:CopyTable(require(Module))
+		if not self.EmotesAvailable[emote.Value].Initted then
 			Network:FireServerConnection("InitEmote", "REMOTE_EVENT", Module.Name)
-			self.EmotesAvailable[emote.Name]:Init(Players.LocalPlayer, self.Animator)
+			self.EmotesAvailable[emote.Value]:Init(Players.LocalPlayer, self.Animator)
 		end
 	end
 end

@@ -1,56 +1,117 @@
 --!nocheck
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local Mouse = LocalPlayer:GetMouse()
+local InputManager = require(LocalPlayer.PlayerScripts.InputManager)
 local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
-local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local EmotePanel = {
-    EmoteContainers = {},
-
     Open = false,
-    Debounce = false,
+
+    EmoteSpaces = {},
 }
 
-local LocalPlayer = game:GetService("Players").LocalPlayer
-local EquippedEmotes: Folder
-
-local UI: Frame
-local EmotePrefab: Frame
-
-local UISize = UDim2.fromScale(0.75, 0.347)
-local UDim2Zero = UDim2.new(0, 0, 0, 0)
+local UI
+local UISize = UDim2.fromScale(0.407, 0.723)
 
 function EmotePanel:Init()
-    EquippedEmotes = CommonUtils:FindFirstChild(LocalPlayer, "PlayerData.Equipped.Emotes")
+    local ScreenGui = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "EmotePanel")
 
     UI = CommonUtils:FindFirstChild(script, "EmotePanel")
-    UI.Parent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "EmotePanel")
+    UI.Parent = ScreenGui
 
-    EmotePrefab = CommonUtils:FindFirstChild(script, "EmoteContainer")
+    local Selector = CommonUtils:FindFirstChild(UI, "Selector")
+    local EmoteButtonContainer = CommonUtils:FindFirstChild(UI, "EmoteContainer")
 
-    self:Reload()
+    local SelectedEmote = ""
 
-    require(LocalPlayer.PlayerScripts.InputManager).Miscellaneous.EmotePanel.Pressed:Connect(function()
-        if not workspace:GetAttribute("ClientLoaded") then return end
-        self:_Toggle()
+    local function CheckEmotePlay()
+        if not self.Open then
+            return
+        end
+        self:_Close()
+
+        local EmoteToPlay = EmoteButtonContainer[SelectedEmote]:GetAttribute("Name")
+        if LocalPlayer.Character and EmoteToPlay and #EmoteToPlay > 0 then
+            local EmoteManager = require(CommonUtils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager"))
+            if EmoteManager.CurrentlyPlayingEmote and EmoteManager.CurrentlyPlayingEmote.Name == EmoteToPlay then return end
+            EmoteManager:PlayEmote(EmoteToPlay)
+        end
+    end
+
+    local function ReloadContent()
+        for _, i in EmoteButtonContainer:GetChildren() do
+            local EquippedEmote = CommonUtils:GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
+            local EmoteModule = EquippedEmote and #EquippedEmote > 0 and CommonUtils:GetEmoteModule(EquippedEmote)
+            if EmoteModule then
+                i:SetAttribute("Name", EquippedEmote)
+                EmoteModule = require(EmoteModule)
+                i:SetAttribute("DisplayName", EmoteModule.Config.Name)
+
+                i.Render.Image = EmoteModule.Config.Render
+                i.NameLabel.Text = EmoteModule.Config.Name
+
+                i.Render.ImageTransparency = 0
+                i.NameLabel.TextTransparency = 0
+            else
+                i:SetAttribute("Name", "")
+                i:SetAttribute("DisplayName", "")
+                i.Render.ImageTransparency = 1
+                i.NameLabel.TextTransparency = 1
+            end
+        end
+    end
+
+    ReloadContent()
+    for _, i in CommonUtils:GetPlayerEquipped(LocalPlayer, "Emotes", false):GetChildren() do
+        i.Changed:Connect(ReloadContent)
+    end
+
+    RunService.PreRender:Connect(function()
+        local CenterOfScreen = ScreenGui.AbsoluteSize / 2
+        local MousePosition = Vector2.new(Mouse.X, Mouse.Y) - CenterOfScreen
+
+        local CurrentRotation = math.deg(math.atan2(MousePosition.Y, MousePosition.X))
+
+        Selector.Rotation = CurrentRotation + 90
+
+        CurrentRotation += 180 --for selecting an emote properly
+
+        SelectedEmote = "Emote"..tostring(math.floor((CurrentRotation) / 45) + 1)
+        UI.Selected.Text = EmoteButtonContainer[SelectedEmote]:GetAttribute("DisplayName")
     end)
 
-    EquippedEmotes.DescendantAdded:Connect(function(_descendant: Instance)
-        self:Reload()
+    UserInputService.InputBegan:Connect(function(Input: InputObject, GPE: boolean)
+        if GPE then
+            return
+        end
+
+        if InputManager.CurrentControlScheme == "Gamepad" then
+            if Input.KeyCode == Enum.KeyCode.ButtonR2 then
+                CheckEmotePlay()
+            end
+        elseif Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            CheckEmotePlay()
+        end
     end)
-    EquippedEmotes.DescendantRemoving:Connect(function(_descendant: Instance)
-        self:Reload()
+
+    InputManager.Miscellaneous.EmotePanel.Pressed:Connect(function()
+        self:Toggle()
     end)
 end
 
-function EmotePanel:_Toggle()
-    if self.Debounce then return end
-    -- EmotePanel.Debounce = true
-    if self.Open then
-        self:_Close()
-    else
+function EmotePanel:Toggle()
+    if not self.Open then
         self:_Open()
+    else
+        self:_Close()
     end
 end
 
@@ -58,63 +119,12 @@ local Info = TweenInfo.new(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out
 
 function EmotePanel:_Open()
     TweenService:Create(UI, Info, {Size = UISize}):Play()
-    -- task.wait(Info.Time + 0.2)
-    -- EmotePanel.Debounce = false
     self.Open = true
 end
 
 function EmotePanel:_Close()
     self.Open = false
-    TweenService:Create(UI, Info, {Size = UDim2Zero}):Play()
-    -- task.wait(Info.Time + 0.2)
-    -- EmotePanel.Debounce = false
-end
-
-function EmotePanel:Reload()
-    for _, emote in self.EmoteContainers do
-        if emote:IsA("Frame") then
-            emote:Destroy()
-        end
-    end
-
-    table.clear(self.EmoteContainers)
-
-    for _, emote in EquippedEmotes:GetChildren() do
-        if emote:IsA("IntValue") then
-            local index = emote.Value
-            if not index or self.EmoteContainers[index] then continue end
-
-            local EmoteInfo = require(CommonUtils:GetEmoteModule(emote.Name))
-            
-            local NewEmote = EmotePrefab:Clone()
-            NewEmote.Name = emote.Name
-            NewEmote.Render.Image = EmoteInfo.Config.Render
-            NewEmote.EmoteName.Text = EmoteInfo.Config.Name
-            self.EmoteContainers[index] = NewEmote
-            --NewEmote.Parent = UI
-
-            NewEmote.Interaction.MouseButton1Click:Connect(function()
-                if not self.Open then return end
-                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-                task.defer(function()
-                    self:_Close()
-                end)
-
-                if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("Miscellaneous") or not LocalPlayer.Character.Miscellaneous:FindFirstChild("EmoteManager") then
-                    return
-                end
-                
-                local EmoteManager = require(LocalPlayer.Character.Miscellaneous.EmoteManager)
-                
-                if EmoteManager.CurrentlyPlayingEmote and EmoteManager.CurrentlyPlayingEmote.Name == EmoteInfo.Config.Name then return end
-                EmoteManager:PlayEmote(emote.Name)
-            end)
-        end
-    end
-
-    for _, emote in self.EmoteContainers do
-        emote.Parent = UI
-    end
+    TweenService:Create(UI, Info, {Size = CommonUtils.UDim.Zero}):Play()
 end
 
 return EmotePanel

@@ -16,14 +16,15 @@ return function()
             ItemType = ItemType.Parent.Parent
         end
         ItemType = ItemType.Name
-        
-        local Money = SourcePlayer.PlayerData.Stats.Currency.Money
+        local Money = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Stats.Currency.Money")
+        local NetWorth = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Stats.Currency.NetWorth")
         local Price = require(Module).Config.Price
 
         if Price > Money.Value then
             return false
         else
             Money.Value -= Price
+            NetWorth.Value += Price
 
             local Product = Instance.new("IntValue")
             Product.Name = Module.Name
