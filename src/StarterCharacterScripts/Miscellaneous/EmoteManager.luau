@@ -82,6 +82,7 @@ function EmoteManager:StopEmote(name: string | {})
 	end
 
 	Network:FireServerConnection("StopEmote", "REMOTE_EVENT", name.Config.Name)
+	self.Char:SetAttribute("Emoting", false)
 	self.CurrentlyPlayingEmote = nil
 end
 
