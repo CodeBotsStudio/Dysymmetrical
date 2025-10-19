@@ -17,7 +17,9 @@ For these templates, the animations will have to be replaced as the ones they ha
 ![AbilitiesScreenshot](dysdocs/abilitydef-ss.png)
 #### Pre-made customizable UI
 ![ShopScreenshot](dysdocs/shop-ss.png)
+![EmoteShopScreenshot](dysdocs/emoteshop-ss.png)
 ![InventoryScreenshot](dysdocs/inventory-ss.png)
+![EmoteInventoryScreenshot](dysdocs/emoteinventory-ss.png)
 ![StatsMenu](dysdocs/stats-ss.png)
 ![SettingsMenu](dysdocs/settings-ss.png)
 
