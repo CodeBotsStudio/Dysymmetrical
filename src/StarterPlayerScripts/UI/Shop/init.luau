@@ -1,9 +1,12 @@
+--!nocheck
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
 local Types = require(ReplicatedStorage.Classes.Character)
+local Emote = require(ReplicatedStorage.Classes.Emote)
 local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
@@ -20,7 +23,7 @@ local Shop = {
     LoadedItems = {
         Killers = {},
         Survivors = {},
-        --Emotes = {},
+        Emotes = {},
         Skins = {},
     },
     ItemModules = {},
@@ -51,6 +54,7 @@ local Sizes = {
 local PreviewInstances = {
     Render = nil,
     Title = nil,
+    EmotePreview = nil,
 }
 
 local Templates = {
@@ -64,13 +68,18 @@ local UI
 local ShopContainer
 local KillerContainer
 local SurvivorContainer
+local EmoteContainer
 
 local SideContainer
 local SkinContainer
 local PreviewContainer
 local ButtonsContainer
 
+local EmoteRig
+
 local Sections = {}
+
+local LoadedEmoteTracks = {}
 
 --TODO: order by alphabetical order when multiple items have the same price
 
@@ -193,6 +202,10 @@ local function SwitchSection(sectionName: string)
 
     TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0, 1)}):Play()
 
+    if workspace.Sounds:FindFirstChild("EmotePreview") then
+        workspace.Sounds.EmotePreview:Destroy()
+    end
+
     for _, i in Sections do
         i.Visible = i.Name == sectionName
     end
@@ -210,11 +223,13 @@ function Shop:Init()
     ShopContainer = Container.ShopContainer.Content
     KillerContainer = ShopContainer.Killers
     SurvivorContainer = ShopContainer.Survivors
+    EmoteContainer = ShopContainer.Emotes
     SkinContainer = Container.SkinsContainer.Content
 
     Sections = {
         KillerContainer,
         SurvivorContainer,
+        EmoteContainer,
     }
 
     for _, button in Container.ShopContainer.Topbar:GetChildren() do
@@ -244,6 +259,8 @@ function Shop:Init()
     PreviewInstances.Render = PreviewContainer.Render
     PreviewInstances.Render.Image = ""
     PreviewInstances.Title = PreviewContainer.Title
+    PreviewInstances.EmotePreview = PreviewContainer.Emote
+    EmoteRig = PreviewContainer.Emote.EmotePreview.Rig
 
     ButtonsContainer = SideContainer.ButtonsContainer
 
@@ -261,6 +278,11 @@ function Shop:Init()
     table.insert(Conns, Buttons.Purchase.MouseButton1Click:Connect(function()
         Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
         if not CommonUtils:GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
+            if self.SelectedItem.Type == "Emote" then
+                self:CreateBuyWindow(CommonUtils:GetEmoteModule(self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
+                return
+            end
+
             self:CreateBuyWindow(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
         end
     end))
@@ -298,6 +320,21 @@ function Shop:Open(Time: number)
 
     self:ToggleSkinsMenu(false)
     PreviewInstances.Render.Image = ""
+    PreviewInstances.Render.ImageTransparency = 0
+    PreviewInstances.EmotePreview.Visible = false
+    ButtonsContainer.Skins.Visible = true
+    for _, v in LoadedEmoteTracks do
+        if v.Animation ~= nil then
+            v.Animation:Stop(0)
+        else
+            for _, i in v do
+                i.Animation:Stop(0)
+            end
+        end
+    end
+    if workspace.Sounds:FindFirstChild("EmotePreview") then
+        workspace.Sounds.EmotePreview:Destroy()
+    end
     SkinContainer.Parent.Size = CommonUtils.UDim.FullY
     SideContainer.Size = CommonUtils.UDim.FullY
     ShopContainer.Parent.Size = UDim2.fromScale(0.7, 1)
@@ -310,6 +347,9 @@ end
 function Shop:Close(Time: number)
     if self.BuyWindow then
         self.BuyWindow:Hide(Time <= 0)
+    end
+    if workspace.Sounds:FindFirstChild("EmotePreview") then
+        workspace.Sounds.EmotePreview:Destroy()
     end
     if Time > 0 then
         TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Zero}):Play()
@@ -348,34 +388,96 @@ function Shop:Toggle(toggle: boolean)
     self.Enabled = toggle
 end
 
-function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Survivor, Module: ModuleScript, Type: string, Card: Frame, skin: boolean?)
+function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Survivor | Emote.Emote, Module: ModuleScript, Type: string, Card: Frame)
     if not self.Opened then
         return
     end
 
-    if skin == nil then
-        skin = false
+    PreviewInstances.Render.Image = info.Config.Render
+    PreviewInstances.Title.Text = info.Config.Name
+
+    if CommonUtils:GetPlayerOwned(LocalPlayer, Type.."s."..codeName) then
+        Buttons.Purchase.Title.Text = "Purchased"
+    else
+        Buttons.Purchase.Title.Text = "Purchase"
     end
 
-    if not skin then
-        PreviewInstances.Render.Image = info.Config.Render
-        PreviewInstances.Title.Text = info.Config.Name
+    ButtonsContainer.CurrentItemPrice.Text = info.Config.Price > 0 and tostring(info.Config.Price).."$" or "FREE"
 
-        if CommonUtils:GetPlayerOwned(LocalPlayer, Type.."s."..codeName) then
-            Buttons.Purchase.Title.Text = "Purchased"
-        else
-            Buttons.Purchase.Title.Text = "Purchase"
+    self.SelectedItem.Name = codeName
+    self.SelectedItem.Type = Type
+    self.SelectedItem.Card = Card
+
+    TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play()
+
+    if Type == "Emote" then
+        PreviewInstances.EmotePreview.Visible = true
+        PreviewInstances.Render.ImageTransparency = 1
+        ButtonsContainer.Skins.Visible = false
+        
+        if workspace.Sounds:FindFirstChild("EmotePreview") then
+            workspace.Sounds.EmotePreview:Destroy()
+        end
+        for _, v in LoadedEmoteTracks do
+            if v.Animation ~= nil then
+                v.Animation:Stop(0)
+            else
+                for _, i in v do
+                    i.Animation:Stop(0)
+                end
+            end
         end
 
-        ButtonsContainer.CurrentItemPrice.Text = info.Config.Price > 0 and tostring(info.Config.Price).."$" or "FREE"
+        local AnimTrack = LoadedEmoteTracks[Module.Name]
+        if not AnimTrack then
+            local AnimIDs = info.AnimationIds
+            if typeof(AnimIDs) == "string" then
+                LoadedEmoteTracks[Module.Name] = {
+                    Animation = CommonUtils:LoadAnimationFromID(EmoteRig, AnimIDs),
+                    Sound = nil,
+                }
+            else
+                LoadedEmoteTracks[Module.Name] = {}
 
-        self.SelectedItem.Name = codeName
-        self.SelectedItem.Type = Type
-        self.SelectedItem.Card = Card
+                for _, ID: string in AnimIDs do
+                    LoadedEmoteTracks[Module.Name][ID] = {
+                        Animation = CommonUtils:LoadAnimationFromID(EmoteRig, ID),
+                        Sound = nil,
+                    }
+                end
+            end
 
-        TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play()
-    elseif not CommonUtils:GetPlayerOwned(LocalPlayer, Type.."s."..codeName) then
-        self:CreateBuyWindow(Module, true, UI, Card)
+            if info.SoundIds then
+                if typeof(info.SoundIds) == "string" then
+                    if typeof(AnimIDs) == "string" then
+                        LoadedEmoteTracks[Module.Name].Sound = info.SoundIds
+                    else
+                        for _, id in AnimIDs do
+                            LoadedEmoteTracks[Module.Name][id].Sound = info.SoundIds
+                        end
+                    end
+                else
+                    for animId, id in info.SoundIds do
+                        LoadedEmoteTracks[Module.Name][animId].Sound = id
+                    end
+                end
+            end
+
+            AnimTrack = LoadedEmoteTracks[Module.Name]
+        end
+
+        if not AnimTrack.Animation then
+            local Selected = AnimTrack[math.random(1, #AnimTrack)]
+            Selected.Animation:Play(0)
+            Sounds:PlaySound(Selected.Sound, {Name = "EmotePreview"})
+        else
+            AnimTrack.Animation:Play(0)
+            Sounds:PlaySound(AnimTrack.Sound, {Name = "EmotePreview"})
+        end
+    else
+        PreviewInstances.EmotePreview.Visible = false
+        PreviewInstances.Render.ImageTransparency = 0
+        ButtonsContainer.Skins.Visible = true
     end
 end
 
@@ -541,6 +643,82 @@ function Shop:ReloadContent(CreateCards: boolean?)
     end
     for _, module in Ordered.Owned do
         SetupSurvivorCard(module)
+    end
+
+    Ordered = {
+        Owned = {},
+        Unowned = {},
+    }
+    LO = 0
+
+    for _, module in ReplicatedStorage.Assets.Emotes:GetChildren() do
+        if CommonUtils:GetPlayerOwned(LocalPlayer, "Emotes."..module.Name) then
+            table.insert(Ordered.Owned, module)
+        else
+            table.insert(Ordered.Unowned, module)
+        end
+    end
+
+    table.sort(Ordered.Owned, function(a, b)
+        return require(a).Config.Price < require(b).Config.Price
+    end)
+    table.sort(Ordered.Unowned, function(a, b)
+        return require(a).Config.Price < require(b).Config.Price
+    end)
+
+    local function SetupEmoteCard(module)
+        if module:HasTag("Dev") then
+            return
+        end
+        
+        local name = module.Name
+        LO += 1
+
+        if not CreateCards then
+            EmoteContainer:FindFirstChild(name).LayoutOrder = LO
+            return
+        end
+
+        if self.LoadedItems.Emotes[name] then
+            return
+        end
+
+        local Module = CommonUtils:GetEmoteModule(name)
+        local EmoteInfo: Emote.Emote = require(Module)
+
+        local Card = Templates.CardTemplate:Clone()
+        local Container = Card.Container
+        Card.Name = name
+        Card.LayoutOrder = LO
+        Card.Parent = EmoteContainer
+        Container.Title.Text = EmoteInfo.Config.Name
+        Container.CharacterRender.Image = EmoteInfo.Config.Render
+        Container.Price.Text = EmoteInfo.Config.Price > 0 and tostring(EmoteInfo.Config.Price).."$" or "FREE"
+
+        if CommonUtils:GetPlayerOwned(LocalPlayer, "Emotes."..name) then
+            Container.Owned.BackgroundTransparency = 0.55
+            Container.Owned.TextLabel.TextTransparency = 0
+        end
+
+        self.LoadedItems.Emotes[name] = Card
+        self.ItemModules[name] = EmoteInfo
+        Container.Interact.MouseEnter:Connect(function()
+            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        end)
+        Container.Interact.MouseLeave:Connect(function()
+            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        end)
+        Container.Interact.MouseButton1Click:Connect(function()
+            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+            self:OnCharButtonPress(name, EmoteInfo, Module, "Emote", Card)
+        end)
+    end
+    
+    for _, module in Ordered.Unowned do
+        SetupEmoteCard(module)
+    end
+    for _, module in Ordered.Owned do
+        SetupEmoteCard(module)
     end
 end
 

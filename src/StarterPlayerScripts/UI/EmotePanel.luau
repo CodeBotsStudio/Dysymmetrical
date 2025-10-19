@@ -11,11 +11,11 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local InputManager = require(LocalPlayer.PlayerScripts.InputManager)
 local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local TopbarPlus = require(ReplicatedStorage.Packages.TopbarPlus)
 
 local EmotePanel = {
     Open = false,
-
-    EmoteSpaces = {},
+    TopbarButton = nil,
 }
 
 local UI
@@ -105,6 +105,35 @@ function EmotePanel:Init()
     InputManager.Miscellaneous.EmotePanel.Pressed:Connect(function()
         self:Toggle()
     end)
+
+    local function CheckMobileButton(ControlScheme: "Keyboard" | "Gamepad" | "Touch")
+        if ControlScheme == "Touch" and not self.TopbarButton then
+            self.TopbarButton = TopbarPlus.new()
+            self.TopbarButton:setOrder(10)
+            self.TopbarButton:oneClick(true)
+            self.TopbarButton:setLabel("Emote")
+            self.TopbarButton:setTextFont(Enum.Font.Bodoni)
+            self.TopbarButton:bindEvent("deselected", function()
+                if not LocalPlayer.Character then
+                    self:Toggle()
+                    return
+                end
+
+                local EmoteManager = require(CommonUtils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager"))
+                
+                if EmoteManager.CurrentlyPlayingEmote then
+                    EmoteManager:StopEmote(EmoteManager.CurrentlyPlayingEmote)
+                else
+                    self:Toggle()
+                end
+            end)
+        elseif self.TopbarButton then
+            self.TopbarButton:Destroy()
+        end
+    end
+
+    InputManager.SchemeChanged:Connect(CheckMobileButton)
+    CheckMobileButton(InputManager.CurrentControlScheme)
 end
 
 function EmotePanel:Toggle()

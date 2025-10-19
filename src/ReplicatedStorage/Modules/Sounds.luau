@@ -99,6 +99,7 @@ function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any
     end
 
     local Part = nil
+    local PitchShifter
     if SoundProperties then
         for name, value in SoundProperties do
             if name == "Position" then
@@ -107,7 +108,12 @@ function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any
                 Part.Parent = workspace.Sounds
                 Sound.Parent = Part
             elseif name:lower():find("pitch") then
-                continue
+                if not PitchShifter then
+                    PitchShifter = Instance.new("PitchShiftSoundEffect")
+                    PitchShifter.Parent = Sound
+                end
+
+                PitchShifter[name] = value
             else
                 Sound[name] = value
             end

@@ -35,6 +35,7 @@ export type Key = {
 
 local InputManager = {
     CurrentControlScheme = "Keyboard",
+    SchemeChanged = Signal.new(),
 }
 
 function InputManager:_SetupKeybind(key: Key)
@@ -164,18 +165,8 @@ function InputManager:Init()
     })
 
     --SETTING UP--
-    UserInputService.InputBegan:Connect(function(input: InputObject, gpe: boolean)
-        if gpe then return end
-        if input.UserInputType.Name:find("Gamepad") then
-            InputManager.CurrentControlScheme = "Gamepad"
-        elseif input.UserInputType == Enum.UserInputType.Touch then
-            InputManager.CurrentControlScheme = "Touch"
-        else
-            InputManager.CurrentControlScheme = "Keyboard"
-        end
-    end)
-
     local function ChangePreferred(value: Enum.UserInputType)
+        local LastControlScheme = InputManager.CurrentControlScheme
         if value.Name:find("Gamepad") then
             InputManager.CurrentControlScheme = "Gamepad"
         elseif value == Enum.UserInputType.Touch then
@@ -183,7 +174,14 @@ function InputManager:Init()
         else
             InputManager.CurrentControlScheme = "Keyboard"
         end
+        if InputManager.CurrentControlScheme ~= LastControlScheme then
+            InputManager.SchemeChanged:Fire(InputManager.CurrentControlScheme)
+        end
     end
+    UserInputService.InputBegan:Connect(function(input: InputObject, gpe: boolean)
+        if gpe then return end
+        ChangePreferred(input.UserInputType)
+    end)
 
     RunService.PreRender:Connect(function(_delta: number)
         ChangePreferred(UserInputService:GetLastInputType())
@@ -193,7 +191,7 @@ function InputManager:Init()
 
     LocalPlayer.CharacterAdded:Connect(function(_char: Model)
         for _, input in InputManager do
-            if typeof(input) ~= "table" then
+            if typeof(input) ~= "table" or input.Fire ~= nil then
                 continue
             end
             

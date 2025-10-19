@@ -515,7 +515,10 @@ function CommonUtils:GetPlayerOwned(Player: Player, path: string, value: boolean
         value = true
     end
 
-    local Child = CommonUtils:FindFirstChild(Player, "PlayerData.Purchased."..path)
+    local Child = CommonUtils:FindFirstChild(Player, "PlayerData.Purchased."..path, false)
+    if not Child then
+        return
+    end
     return value and (Child and Child.Value or false) or Child
 end
 

@@ -15,6 +15,7 @@ export type Emote = {
         Quote: string,
         Author: string,
         Render: string,
+        Price: number,
     },
 
     AnimationIds: {string} | string,
@@ -57,6 +58,7 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
             Quote = "\"hey guys what's up dys here\"",
             Author = "idk lol",
             Render = "rbxasset://textures/ui/GuiImagePlaceholder.png",
+            Price = 300,
         },
 
         AnimationIds = {},
