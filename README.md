@@ -58,6 +58,8 @@ A proper docs page may be made if the project gets too big.
 
 No one's stopping anyone from reading the code by themselves and changing it, though.
 
+For animations, there are templates for Blender in `dysassets\Blend Files`.
+
 ## Contributing
 Contributing's such a simple topic that it isn't in its own separate file.
 
