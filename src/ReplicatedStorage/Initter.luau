@@ -1,8 +1,10 @@
 local Initter = {
-    Loaded = false
+    CurrentlyInitting = nil,
+    Loaded = false,
 }
 
 function Initter:Init()
+    self.CurrentlyInitting = "DysNetworking"
     require(script.Parent.Modules.Network):Init()
     for _, i in ipairs(script.Parent.Modules:GetDescendants()) do
         if i.Name == "Network" then
@@ -12,6 +14,9 @@ function Initter:Init()
             pcall(function()
                 local Scr = require(i)
     		    if type(Scr) == "table" and Scr["Init"] and type(Scr["Init"]) == "function" then
+                    if i.Name ~= "ModPanel" then
+                        self.CurrentlyInitting = i.Name
+                    end
     		    	Scr:Init()
     		    end
             end)

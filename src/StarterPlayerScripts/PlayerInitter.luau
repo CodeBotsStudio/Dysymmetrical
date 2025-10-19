@@ -5,6 +5,7 @@ local Player = game:GetService("Players").LocalPlayer
 
 local PlayerInitter = {
     Loaded = false,
+    CurrentlyInitting = nil,
     Initting = false,
 }
 
@@ -21,6 +22,9 @@ function PlayerInitter:Init()
         if i:IsA("ModuleScript") and i ~= PlayerModule and not i:IsDescendantOf(PlayerModule) and not i:IsDescendantOf(ServerScripts) then
     		local Scr = require(i)
     		if type(Scr) == "table" and Scr.Init and type(Scr.Init) == "function" then
+                if i.Name ~= "ModPanel" then
+                    self.CurrentlyInitting = i.Name
+                end
     			Scr:Init()
     		end
     	end

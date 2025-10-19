@@ -1,6 +1,8 @@
 local LoadingGui = script:WaitForChild("LoadingGui")
 local Main = LoadingGui:WaitForChild("LoadingScreen"):WaitForChild("Main")
 local Percent = Main:WaitForChild("Percent")
+local AmountTxt = Main:WaitForChild("Amount")
+local CurrentlyInitting = Main:WaitForChild("CurrentlyInitting")
 local Skip = Main:WaitForChild("Skip")
 
 LoadingGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
@@ -27,7 +29,8 @@ local assetAmount = #assets
 local loaded = false
 function updateProgress()
     if not loaded then
-        Percent.Text = ("%*%%"):format((math.floor(#loadedAssets / assetAmount * 100 - 1)))
+        Percent.Text = tostring(math.floor(#loadedAssets / assetAmount * 100 - 1)).."%"
+        AmountTxt.Text = "("..tostring(#loadedAssets - 1).."/"..tostring(assetAmount)..")"
     end
 end
 
@@ -45,18 +48,28 @@ local TweenService = game:GetService("TweenService")
 
 local function Finish()
     if not game:GetService("RunService"):IsStudio() then
-        --don't remove this or you'll get in trouble! salutes!
+        --don't remove this or you'll get in trouble! salutations! (unless you mention the engine in the game's description)
         print(require(game:GetService("ReplicatedStorage").Modules.CommonUtils).Credits)
     end
 
     loaded = true
 
     Percent.Text = "100%"
+    AmountTxt.Text = "("..tostring(assetAmount).."/"..tostring(assetAmount)..")"
 
+    TweenService:Create(CurrentlyInitting, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        TextTransparency = 1
+    }):Play()
     TweenService:Create(Percent.UIStroke, TweenInfo.new(0.666), {
         Transparency = 1
     }):Play()
     TweenService:Create(Percent.UIStroke, TweenInfo.new(2), {
+        Thickness = 20
+    }):Play()
+    TweenService:Create(AmountTxt.UIStroke, TweenInfo.new(0.666), {
+        Transparency = 1
+    }):Play()
+    TweenService:Create(AmountTxt.UIStroke, TweenInfo.new(2), {
         Thickness = 20
     }):Play()
     TweenService:Create(Skip, TweenInfo.new(0.666), {
@@ -64,6 +77,9 @@ local function Finish()
     }):Play()
     task.wait(1)
     TweenService:Create(Percent, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        TextTransparency = 1
+    }):Play()
+    TweenService:Create(AmountTxt, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
         TextTransparency = 1
     }):Play()
     task.wait(0.5)
@@ -102,8 +118,16 @@ until #loadedAssets >= #assets - 100 or loaded
 
 local function InitScripts(module: ModuleScript)
     local ModuleCode = require(module)
-    ModuleCode:Init()
-    repeat task.wait()
+    task.spawn(function()
+        ModuleCode:Init()
+    end)
+    repeat
+        if ModuleCode.CurrentlyInitting then
+            CurrentlyInitting.Text = "Initializing "..ModuleCode.CurrentlyInitting.."..."
+        else
+            CurrentlyInitting.Text = ""
+        end
+        task.wait()
     until ModuleCode.Loaded
 end
 
