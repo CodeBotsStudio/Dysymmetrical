@@ -87,8 +87,10 @@ function EmoteManager:StopEmote(name: string | {})
 end
 
 function EmoteManager:ReloadAvailableContent(EquippedEmotes: Folder)
-	table.clear(self.EmotesAvailable)
 	for _, emote: StringValue in EquippedEmotes:GetChildren() do
+		if self.EmotesAvailable[emote.Value] then
+			return
+		end
 		if not emote:IsA("StringValue") or #emote.Value <= 0 then
 			continue
 		end
