@@ -21,7 +21,6 @@ Commander.Config.Render = "rbxassetid://108440668883002"
 
 --Abilities Definition
 
---TODO: finish this flashbang shit
 --Flashpoint // Blindside
 local Blindside: Ability.Ability = Ability:GetDefaultAbilitySettings()
 Blindside.Name = "Blindside"

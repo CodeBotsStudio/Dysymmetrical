@@ -81,8 +81,6 @@ local Sections = {}
 
 local LoadedEmoteTracks = {}
 
---TODO: order by alphabetical order when multiple items have the same price
-
 function Shop:ReorderSkins()
     local Ordered = {
         Owned = {},
@@ -99,14 +97,24 @@ function Shop:ReorderSkins()
     end
 
     table.sort(Ordered.Owned, function(a, b)
+        local Modules = {
+            A = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
+            B = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+        }
+
         return
-            require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)).Config.Price <
-            require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)).Config.Price
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
     table.sort(Ordered.Unowned, function(a, b)
+        local Modules = {
+            A = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
+            B = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+        }
+
         return
-            require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)).Config.Price <
-            require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)).Config.Price
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
     for _, i in Ordered.Unowned do
@@ -501,10 +509,24 @@ function Shop:ReloadContent(CreateCards: boolean?)
     end
 
     table.sort(Ordered.Owned, function(a, b)
-        return require(a).Config.Price < require(b).Config.Price
+        local Modules = {
+            A = require(a),
+            B = require(b),
+        }
+
+        return
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
     table.sort(Ordered.Unowned, function(a, b)
-        return require(a).Config.Price < require(b).Config.Price
+        local Modules = {
+            A = require(a),
+            B = require(b),
+        }
+
+        return
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
     local function SetupKillerCard(module)
@@ -581,10 +603,24 @@ function Shop:ReloadContent(CreateCards: boolean?)
     end
 
     table.sort(Ordered.Owned, function(a, b)
-        return require(a).Config.Price < require(b).Config.Price
+        local Modules = {
+            A = require(a),
+            B = require(b),
+        }
+
+        return
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
     table.sort(Ordered.Unowned, function(a, b)
-        return require(a).Config.Price < require(b).Config.Price
+        local Modules = {
+            A = require(a),
+            B = require(b),
+        }
+
+        return
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
     local function SetupSurvivorCard(module)
@@ -660,10 +696,24 @@ function Shop:ReloadContent(CreateCards: boolean?)
     end
 
     table.sort(Ordered.Owned, function(a, b)
-        return require(a).Config.Price < require(b).Config.Price
+        local Modules = {
+            A = require(a),
+            B = require(b),
+        }
+
+        return
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
     table.sort(Ordered.Unowned, function(a, b)
-        return require(a).Config.Price < require(b).Config.Price
+        local Modules = {
+            A = require(a),
+            B = require(b),
+        }
+
+        return
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
     local function SetupEmoteCard(module)

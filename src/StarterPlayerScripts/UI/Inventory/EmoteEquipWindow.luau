@@ -56,11 +56,19 @@ return {
             Debris:AddItem(self.Instance, 0.5)
         end
 
+        local EmotesToInstantiate = {}
         for _, i in CommonUtils:GetPlayerOwned(Players.LocalPlayer, "Emotes", false):GetChildren() do
-            local EmoteInfo = require(CommonUtils:GetEmoteModule(i.Name))
+            table.insert(EmotesToInstantiate, i.Name)
+        end
+        table.sort(EmotesToInstantiate, function(a, b)
+            return a < b
+        end)
+
+        for _, i in EmotesToInstantiate do
+            local EmoteInfo = require(CommonUtils:GetEmoteModule(i))
 
             local Button = ButtonPrefab:Clone()
-            Button.Name = i.Name
+            Button.Name = i
             Button.Render.Image = EmoteInfo.Config.Render
             Button.NameLabel.Text = EmoteInfo.Config.Name
 

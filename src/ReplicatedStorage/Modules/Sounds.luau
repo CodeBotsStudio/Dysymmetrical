@@ -70,7 +70,6 @@ function Sounds:GetSound(ID: string, clone: boolean?): Sound?
     return
 end
 
---TODO: import pitch (because I forgot)
 --- Plays a sound with the ID `ID`.
 --- Check `Sound`'s properties for further usage.
 function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any?}?): Sound?

@@ -79,8 +79,6 @@ local Templates = {
 
 local Sections = {}
 
---TODO: order by alphabetical order when multiple items have the same price
-
 function Inventory:ReorderSkins()
     local Ordered = {}
     local LO = 0
@@ -90,9 +88,14 @@ function Inventory:ReorderSkins()
     end
 
     table.sort(Ordered, function(a, b)
+        local Modules = {
+            A = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
+            B = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+        }
+
         return
-            require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)).Config.Price <
-            require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)).Config.Price
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
     for _, i in Ordered do
@@ -476,7 +479,14 @@ function Inventory:ReloadContent()
     local LO = 0
 
     table.sort(Ordered, function(a, b)
-        return require(CommonUtils:GetCharacterModule("Killer", a.Name)).Config.Price < require(CommonUtils:GetCharacterModule("Killer", b.Name)).Config.Price
+        local Modules = {
+            A = require(CommonUtils:GetCharacterModule("Killer", a.Name)),
+            B = require(CommonUtils:GetCharacterModule("Killer", b.Name)),
+        }
+
+        return
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
     local function SetupKillerCard(module)
@@ -524,7 +534,14 @@ function Inventory:ReloadContent()
     LO = 0
 
     table.sort(Ordered, function(a, b)
-        return require(CommonUtils:GetCharacterModule("Survivor", a.Name)).Config.Price < require(CommonUtils:GetCharacterModule("Survivor", b.Name)).Config.Price
+        local Modules = {
+            A = require(CommonUtils:GetCharacterModule("Survivor", a.Name)),
+            B = require(CommonUtils:GetCharacterModule("Survivor", b.Name)),
+        }
+
+        return
+            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+            or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
     local function SetupSurvivorCard(module)
