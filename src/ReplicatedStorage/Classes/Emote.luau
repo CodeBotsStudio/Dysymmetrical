@@ -33,7 +33,6 @@ export type Emote = {
     SpeedManager: {any},
     TurnToMoveDirection: {any},
 
-    Initted: boolean,
     TrackPlaying: AnimationTrack,
     Connections: {RBXScriptConnection},
 
@@ -106,10 +105,6 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
                 return
             end
 
-            if own.Initted then
-                return
-            end
-
             CommonUtils:PreloadAssets({own.Config.Render, own.AnimationIds, own.SoundIds})
 
             if typeof(own.AnimationIds) == "string" then
@@ -179,8 +174,6 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
                     i:Disconnect()
                 end
             end))
-
-            own.Initted = true
         end,
         BaseBehaviour = function(own: Emote)
             if RunService:IsServer() then return end
@@ -206,7 +199,6 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
         SpeedManager = nil,
         TurnToMoveDirection = nil,
 
-        Initted = false,
         TrackPlaying = nil,
     }
 end

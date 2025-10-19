@@ -450,7 +450,7 @@ end
 --- Retrieves a player's setting value through a string path.
 function CommonUtils:GetPlayerSetting(Player: Player, path: string): any
     local splitPath = self:SplitStringPath(path)
-    local PlayerSettings = self:FindFirstChild(Player, "PlayerData.Settings")
+    local PlayerSettings = self:FindFirstChild(Player, "PlayerData.Settings", false)
     if #splitPath == 1 then
         return PlayerSettings:FindFirstChild(splitPath[1]).Value
     else
@@ -475,7 +475,7 @@ function CommonUtils:GetPlayerEquipped(Player: Player, path: string, value: bool
     end
 
     local splitPath = self:SplitStringPath(path)
-    local Equipped = CommonUtils:FindFirstChild(Player, "PlayerData.Equipped")
+    local Equipped = CommonUtils:FindFirstChild(Player, "PlayerData.Equipped", false)
     if #splitPath == 1 then
         local Child = Equipped:FindFirstChild(splitPath[1])
         return value and Child.Value or Child
@@ -668,9 +668,9 @@ function CommonUtils:GetEffectModule(name: string, subfolder: string?, module: b
 	local Effect: ModuleScript
 
 	if subfolder and #subfolder > 0 then
-        Effect = CommonUtils:FindFirstChild(ReplicatedStorage.Effects, subfolder.."."..name)
+        Effect = CommonUtils:FindFirstChild(ReplicatedStorage.Effects, subfolder.."."..name, false)
 	else
-        Effect = CommonUtils:FindFirstChild(ReplicatedStorage.Effects, name)
+        Effect = CommonUtils:FindFirstChild(ReplicatedStorage.Effects, name, false)
 	end
 
     if not Effect:IsA("ModuleScript") then
@@ -907,7 +907,7 @@ function CommonUtils:CreateMissingSkinValue(SourcePlayer: Player, name: string)
         return
     end
 
-    local SkinValue = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins."..name, true, 0.05)
+    local SkinValue = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins."..name, false)
     if SkinValue then
         return SkinValue
     end
@@ -926,7 +926,7 @@ function CommonUtils:CreateMissingPurchasedSkinValue(SourcePlayer: Player, name:
         return
     end
 
-    local SkinFolder = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins."..name, true, 0.05)
+    local SkinFolder = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins."..name, false)
     if SkinFolder then
         return SkinFolder
     end

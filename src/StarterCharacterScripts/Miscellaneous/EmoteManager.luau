@@ -28,6 +28,12 @@ function EmoteManager:Init()
 		self:ReloadAvailableContent(EquippedEmotes)
 	end))
 
+	for _, i in EquippedEmotes:GetChildren() do
+		table.insert(self.Connections, i.Changed:Connect(function()
+			self:ReloadAvailableContent(EquippedEmotes)
+		end))
+	end
+
 	table.insert(self.Connections, require(LocalPlayer.PlayerScripts.InputManager).Miscellaneous.StopEmote.Pressed:Connect(function()
 		print(self.CurrentlyPlayingEmote)
 		if self.CurrentlyPlayingEmote then
@@ -82,7 +88,7 @@ end
 function EmoteManager:ReloadAvailableContent(EquippedEmotes: Folder)
 	table.clear(self.EmotesAvailable)
 	for _, emote: StringValue in EquippedEmotes:GetChildren() do
-		if not emote:IsA("StringValue") and #emote.Value > 0 then
+		if not emote:IsA("StringValue") or #emote.Value <= 0 then
 			continue
 		end
 
@@ -92,10 +98,8 @@ function EmoteManager:ReloadAvailableContent(EquippedEmotes: Folder)
 		end
 
 		self.EmotesAvailable[emote.Value] = CommonUtils:CopyTable(require(Module))
-		if not self.EmotesAvailable[emote.Value].Initted then
-			Network:FireServerConnection("InitEmote", "REMOTE_EVENT", Module.Name)
-			self.EmotesAvailable[emote.Value]:Init(Players.LocalPlayer, self.Animator)
-		end
+		Network:FireServerConnection("InitEmote", "REMOTE_EVENT", Module.Name)
+		self.EmotesAvailable[emote.Value]:Init(Players.LocalPlayer, self.Animator)
 	end
 end
 
