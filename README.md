@@ -88,3 +88,7 @@ Also see [GNU GPL-3.0 License](https://www.gnu.org/licenses/gpl-3.0.html).
 Credits to [@PirosMacska](https://github.com/PirosMacska) for making the `VideoPlayer` module for 2D killer intros
 
 Credits to [@grayzcale](https://github.com/grayzcale/simplepath) for the `SimplePath` module
+
+## Pull Request credits
+
+[@shroomii](https://github.com/shroomiii) in [#1](https://github.com/CodeBotsStudio/Dysymmetrical/pull/1) (clean .gitignore & GitHub Actions)
