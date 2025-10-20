@@ -22,6 +22,7 @@ For these templates, the animations will have to be replaced as the ones they ha
 ![EmoteInventoryScreenshot](dysdocs/emoteinventory-ss.png)
 ![StatsMenu](dysdocs/stats-ss.png)
 ![SettingsMenu](dysdocs/settings-ss.png)
+![PlayerListUI](dysdocs/playerlist-ss.png)
 
 #### 1K+ lines of documented utils in ReplicatedStorage and ServerScriptService
 ![UtilsScreenshot](dysdocs/utils-ss.png)
