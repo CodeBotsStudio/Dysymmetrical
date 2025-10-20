@@ -11,7 +11,7 @@ return function()
             return
         end
 
-        if not CommonUtils:GetPlayerOwned(plr, Type.."."..name, false) then
+        if not CommonUtils:GetPlayerOwned(plr, Type.."s."..name, false) then
             return
         end
 
