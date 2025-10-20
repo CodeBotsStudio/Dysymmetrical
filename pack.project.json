@@ -2,10 +2,10 @@
   "name": "Dysymmetrical",
   
   "tree": {
-    "$className": "DataModel",
+    "$className": "Folder",
 
     "ReplicatedStorage": {
-      "$className": "ReplicatedStorage",
+      "$className": "Folder",
       "$path": "src/ReplicatedStorage",
 
       "Packages": {
@@ -14,36 +14,36 @@
     },
 
     "ReplicatedFirst": {
-      "$className": "ReplicatedFirst",
+      "$className": "Folder",
       "$path": "src/ReplicatedFirst"
     },
 
     "ServerScriptService": {
-      "$className": "ServerScriptService",
+      "$className": "Folder",
       "$path": "src/ServerScriptService"
     },
 
     "StarterPlayer": {
-      "$className": "StarterPlayer",
+      "$className": "Folder",
 
       "StarterPlayerScripts": {
-        "$className": "StarterPlayerScripts",
+        "$className": "Folder",
         "$path": "src/StarterPlayerScripts"
       },
 
       "StarterCharacterScripts": {
-        "$className": "StarterCharacterScripts",
+        "$className": "Folder",
         "$path": "src/StarterCharacterScripts"
       }
     },
     
     "ServerStorage": {
-      "$className": "ServerStorage",
+      "$className": "Folder",
       "$path": "src/ServerStorage"
     },
 
     "StarterGui": {
-      "$className": "StarterGui",
+      "$className": "Folder",
       "$path": "src/StarterGui"
     }
   }
