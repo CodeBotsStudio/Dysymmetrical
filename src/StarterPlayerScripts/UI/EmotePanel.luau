@@ -84,7 +84,7 @@ function EmotePanel:Init()
 
         CurrentRotation += 180 --for selecting an emote properly
 
-        SelectedEmote = "Emote"..tostring(math.floor((CurrentRotation) / 45) + 1)
+        SelectedEmote = "Emote"..tostring(math.clamp(math.floor((CurrentRotation) / 45) + 1, 1, 8))
         UI.Selected.Text = EmoteButtonContainer[SelectedEmote]:GetAttribute("DisplayName")
     end)
 

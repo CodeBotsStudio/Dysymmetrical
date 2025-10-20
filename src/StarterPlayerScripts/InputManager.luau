@@ -164,6 +164,15 @@ function InputManager:Init()
         GamepadKey = Enum.KeyCode.ButtonA,
     })
 
+    InputManager:_SetupKeybind({
+        Name = "TogglePlayerList",
+        Subgroup = "Miscellaneous",
+
+        Enabled = true,
+
+        KeyboardKey = Enum.KeyCode.Tab,
+    })
+
     --SETTING UP--
     local function ChangePreferred(value: Enum.UserInputType)
         local LastControlScheme = InputManager.CurrentControlScheme

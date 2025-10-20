@@ -5,6 +5,7 @@ local StarterGui = game:GetService("StarterGui")
 
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
 
 local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
 
@@ -21,6 +22,7 @@ local GUIs = {
 	"CharacterGUI",
 	"VideoPlayer",
 	"KillerIntros",
+	"PlayerList",
 	"Menus",
 	"SideBar",
 	"RewardNotifications",

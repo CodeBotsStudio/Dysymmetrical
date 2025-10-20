@@ -24,6 +24,9 @@
     ------19/10/2025------
     * Added Emote purchasing and equipping (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Inventory` & `StarterPlayer/StarterPlayerScripts/UI/Shop` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
     * Added some loading screen stuff (MAKE SURE TO GO INTO `ReplicatedFirst/Loading` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
+    ------20/10/2025------
+    * Added Player list UI (MAKE SURE TO GO INTO `StarterGui/PlayerList`, `StarterPlayer/StarterPlayerScripts/UI/PlayerList` & `StarterPlayer/StarterPlayerScripts/UI/PlayerList/PlayerInfoWindow` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 ]]
 
 script:Destroy()
