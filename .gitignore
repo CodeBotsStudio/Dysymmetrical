@@ -1,14 +1,12 @@
-# Project place file
-/ForsakenBB.rbxlx
-
-# Roblox Studio lock files
 /*.rbxlx.lock
 /*.rbxl.lock
 
-# Packages/
+Packages/
 ServerPackages/
 sourcemap.json
-wally.lock
-.VSCodeCounter/
+*.lock
 .stylua.toml
 selene.toml
+
+.VSCodeCounter/
+.vscode
