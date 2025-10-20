@@ -27,6 +27,7 @@
 
     ------20/10/2025------
     * Added Player list UI (MAKE SURE TO GO INTO `StarterGui/PlayerList`, `StarterPlayer/StarterPlayerScripts/UI/PlayerList` & `StarterPlayer/StarterPlayerScripts/UI/PlayerList/PlayerInfoWindow` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    * Added Hide Money option (MAKE SURE TO GO INTO `ServerScriptService/Managers/SaveManager/PlayerData/Settings/Privacy/HideMoney` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 ]]
 
 script:Destroy()
