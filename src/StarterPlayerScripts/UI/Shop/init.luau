@@ -379,7 +379,7 @@ function Shop:Toggle(toggle: boolean)
         self.LoadedItems = {
             Killers = {},
             Survivors = {},
-            --Emotes = {},
+            Emotes = {},
             Skins = {},
         }
         self.SelectedItem = {
