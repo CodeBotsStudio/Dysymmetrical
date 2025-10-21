@@ -13,6 +13,10 @@ function MoneyXPRewards:Init()
     local Prefab = CommonUtils:FindFirstChild(script, "Reward")
 
     Network:SetConnection("GrantReward", "REMOTE_EVENT", function(Money: number?, EXP: number?, Reason: string?)
+        if not CommonUtils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.ShowRewardNotifications") then
+            return
+        end
+
         local Notification = Prefab:Clone()
         Notification.Position = UDim2.fromScale(0.5, -0.11)
 
