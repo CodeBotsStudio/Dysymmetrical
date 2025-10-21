@@ -35,13 +35,13 @@ function StatsMenu:Init()
 
     local CurrentLayoutOrder = 0
     
-    local Folders = Players.LocalPlayer.PlayerData.Stats:GetChildren()
+    local Folders = CommonUtils:FindFirstChild(LocalPlayer, "PlayerData.Stats"):GetChildren()
 
     table.sort(Folders, function(a, b)
         return a:GetAttribute("LayoutOrder") < b:GetAttribute("LayoutOrder")
     end)
 
-    for _, StatFolder in Folders do
+    for _, StatFolder in ipairs(Folders) do
         CurrentLayoutOrder += 1
 
         local Section = Prefabs.Section:Clone()

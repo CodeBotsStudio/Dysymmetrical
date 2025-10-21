@@ -54,7 +54,7 @@ function SideBar:Init()
 
     local PlayerUIModules = LocalPlayer.PlayerScripts.UI
 
-    local Buttons: {Button} = {
+    local Buttons: {[string]: Button} = {
         Shop = {
             Render = "rbxassetid://115748427612108",
             MenuModule = PlayerUIModules.Shop,
@@ -74,6 +74,11 @@ function SideBar:Init()
             Render = "rbxassetid://138518322199012",
             MenuModule = PlayerUIModules.Settings,
             LayoutOrder = 5,
+        },
+        Credits = {
+            Render = "rbxassetid://86407971397188",
+            MenuModule = PlayerUIModules.Credits,
+            LayoutOrder = 6,
         },
     }
 
