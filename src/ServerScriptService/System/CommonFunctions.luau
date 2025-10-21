@@ -127,7 +127,13 @@ end
 
 --TODO: make a UI for this
 --- Grants money and/or EXP to a player and displays a notification showing it.
-function CommonFunctions:GrantRewardToPlayer(Player: Player, Money: number?, EXP: number?)
+--- The `Reason` parameter is the source of the reward to display in the UI locally.
+function CommonFunctions:GrantRewardToPlayer(Player: Player, Money: number?, EXP: number?, Reason: string?)
+	--shouldn't give anything if in a private server
+	if #game.PrivateServerId > 0 then
+		return
+	end
+
 	local MoneyGranted = Money ~= nil and Money > 0 and Money or 0
 	local EXPGranted = EXP ~= EXP and EXP > 0 and EXP or 0
 	
@@ -138,25 +144,41 @@ function CommonFunctions:GrantRewardToPlayer(Player: Player, Money: number?, EXP
 
 	--if only EXP is granted
 	if MoneyGranted <= 0 then
-		self:GrantEXPToPlayer(Player, EXP, true)
+		self:GrantEXPToPlayer(Player, EXP, true, Reason)
 		return
 	end
 
 	--if only money is granted
 	if EXPGranted <= 0 then
 		self:UpdatePlayerStat(Player, "Currency.Money", MoneyGranted)
-		Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted)
+		Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, 0, Reason)
 		return
 	end
 
 	--if both are granted
 	self:UpdatePlayerStat(Player, "Currency.Money", MoneyGranted)
-	self:GrantEXPToPlayer(Player, EXPGranted, false)
-	Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, EXPGranted)
+	self:GrantEXPToPlayer(Player, EXPGranted, false, Reason)
+	Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, EXPGranted, Reason)
 end
 
-function CommonFunctions:GrantEXPToPlayer(Player: Player, amount: number, visual: boolean)
-	Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", 0, amount)
+function CommonFunctions:GrantEXPToPlayer(Player: Player, amount: number, visual: boolean, Reason: string?)
+	--shouldn't give anything if in a private server
+	if #game.PrivateServerId > 0 then
+		return
+	end
+	
+	if visual then
+		Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", 0, amount, Reason)
+	end
+
+	local Role = Player.Character:FindFirstChild("Role")
+	if not Role or Role.Value == "Spectator" then
+		return
+	end
+	local CharacterName = Player.Character:GetAttribute("CharacterName")
+
+	local CharValue = CommonUtils:GetPlayerOwned(Player, Role.Value.."s."..CharacterName, false)
+	CharValue.Value += amount
 end
 
 --- Updates a player's stat specified by a `string` path.

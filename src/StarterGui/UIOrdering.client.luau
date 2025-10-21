@@ -25,6 +25,7 @@ local GUIs = {
 	"PlayerList",
 	"Menus",
 	"SideBar",
+	"MoneyXPRewards",
 	"RewardNotifications",
 	"AFKLabel",
 }

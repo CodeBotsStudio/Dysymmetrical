@@ -69,12 +69,58 @@ function PlayerManager:Init()
 				end
 			end)
 
+			local KillerValue
+			if Role.Value == "Survivor" then
+				KillerValue = Instance.new("ObjectValue")
+				KillerValue.Name = "Killer"
+				KillerValue.Parent = char
+				local KillerValueThread
+				KillerValue.Changed:Connect(function(value: Instance?)
+					if KillerValueThread then
+						task.cancel(KillerValueThread)
+					end
+
+					if not value then
+						return
+					end
+
+					KillerValueThread = task.delay(15, function()
+						KillerValue.Value = nil
+					end)
+				end)
+			end
+
+			local LeaveConn
+			if KillerValue then
+				LeaveConn = Players.PlayerRemoving:Connect(function(p: Player)
+					if p ~= plr then
+						return
+					end
+
+					LeaveConn:Disconnect()
+					if KillerValue.Value then
+                		Network:FireClientConnection(KillerValue.Value, "KilledPlayer", "REMOTE_EVENT", plr)
+                		Network:FireConnection("KilledPlayer", KillerValue.Value, plr)
+
+						CommonFunctions:UpdatePlayerStat(KillerValue.Value, "KillerStats.Kills", 1)
+            	    	CommonFunctions:GrantRewardToPlayer(KillerValue.Value, 7, 20, "making a Survivor rage-quit")
+
+						TimeManager:SetTime(TimeManager.CurrentTime + 35)
+					end
+				end)
+			end
+
         	char.Humanoid.Died:Connect(function()
 				char:SetAttribute("Dead", true)
 
-				if char:FindFirstChild("Killer") and char.Killer.Value then
-					CommonFunctions:UpdatePlayerStat(char.Killer.Value, "KillerStats.Kills", 1)
-					char.Killer.Value = nil
+				if LeaveConn then
+					LeaveConn:Disconnect()
+				end
+
+				if KillerValue and KillerValue.Value then
+					CommonFunctions:UpdatePlayerStat(KillerValue.Value, "KillerStats.Kills", 1)
+                	CommonFunctions:GrantRewardToPlayer(KillerValue.Value, 20, 60, "killing a Survivor")
+					KillerValue.Value = nil
 
 					TimeManager:SetTime(TimeManager.CurrentTime + 35)
 				end

@@ -1,0 +1,45 @@
+local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
+local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Network = require(ReplicatedStorage.Modules.Network)
+
+local MoneyXPRewards = {}
+
+function MoneyXPRewards:Init()
+    local UI = CommonUtils:FindFirstChild(Players.LocalPlayer.PlayerGui, "MoneyXPRewards")
+    local Prefab = CommonUtils:FindFirstChild(script, "Reward")
+
+    Network:SetConnection("GrantReward", "REMOTE_EVENT", function(Money: number?, EXP: number?, Reason: string?)
+        local Notification = Prefab:Clone()
+        Notification.Position = UDim2.fromScale(0.5, -0.11)
+
+        local Text = "Granted "
+        if Money and EXP then
+            Text = Text..tostring(Money).."$ and "..tostring(EXP).." EXP"
+        elseif Money then
+            Text = Text..tostring(Money).."$"
+        elseif EXP then
+            Text = Text..tostring(EXP).." EXP"
+        else
+            Notification:Destroy()
+            return
+        end
+
+        if Reason then
+            Text = Text.." for "..Reason
+        end
+        Text = Text.."."
+
+        Notification.Parent = UI
+
+        TweenService:Create(Notification, TweenInfo.new(0.4), {Position = UDim2.fromScale(0.5, 0.034)}):Play()
+        task.wait(5.4)
+        TweenService:Create(Notification, TweenInfo.new(0.4), {Position = UDim2.fromScale(0.5, -0.11)}):Play()
+        Debris:AddItem(Notification, 1)
+    end)
+end
+
+return MoneyXPRewards

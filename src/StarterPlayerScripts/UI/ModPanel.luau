@@ -7,7 +7,7 @@ local ModPanel = {}
 
 function ModPanel:Init()
     Network:SetConnection("InitModPanel", "REMOTE_EVENT", function()
-
+        
     end)
 end
 

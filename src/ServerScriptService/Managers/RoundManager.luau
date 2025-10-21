@@ -174,6 +174,7 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
     if winner == "Killer" then
         if RoundManager.CurrentRound.Killer.Player then
             CommonFunctions:UpdatePlayerStat(RoundManager.CurrentRound.Killer.Player, "KillerStats.KillerWins", 1)
+            CommonFunctions:GrantRewardToPlayer(RoundManager.CurrentRound.Killer.Player, 120, 180, "winning a match as Killer")
         end
         --survivor losses aren't handled here since when a player dies it directly counts
         CommonUtils:Print("killer wins")
@@ -183,6 +184,7 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
         end
         for _, Player: Player in RoundManager.CurrentRound.PlayersRemaining do
             CommonFunctions:UpdatePlayerStat(Player, "SurvivorStats.SurvivorWins", 1)
+            CommonFunctions:GrantRewardToPlayer(RoundManager.CurrentRound.Killer.Player, 70, 110, "winning a match as Survivor")
         end
         
         CommonUtils:Print("survivors win")
