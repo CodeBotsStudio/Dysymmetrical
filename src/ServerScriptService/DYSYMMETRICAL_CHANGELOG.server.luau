@@ -32,6 +32,8 @@
     ------21/10/2025------
     * Added Money & EXP notifications (MAKE SURE TO GO INTO `StarterGui/MoneyXPRewards` and `StarterPlayer/StarterPlayerScripts/UI/MoneyXPRewards` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
     * Added skippable killer intros (MAKE SURE TO GO INTO `ServerScriptService/Managers/SaveManager/PlayerData/Settings/Miscellaneous/DisableKillerIntros` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    * Reminder to switch the scale type of the character renders in the player info window to `Crop` for them to show up correctly without caring about image aspect ratios.
+
 ]]
 
 script:Destroy()
