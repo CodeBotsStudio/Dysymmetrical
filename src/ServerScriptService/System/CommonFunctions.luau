@@ -22,6 +22,7 @@ local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
+local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
@@ -144,7 +145,7 @@ function CommonFunctions:GrantRewardToPlayer(Player: Player, Money: number?, EXP
 
 	--if only EXP is granted
 	if MoneyGranted <= 0 then
-		self:GrantEXPToPlayer(Player, EXP, true, Reason)
+		self:_GrantEXPToPlayer(Player, EXP, true, Reason)
 		return
 	end
 
@@ -157,11 +158,12 @@ function CommonFunctions:GrantRewardToPlayer(Player: Player, Money: number?, EXP
 
 	--if both are granted
 	self:UpdatePlayerStat(Player, "Currency.Money", MoneyGranted)
-	self:GrantEXPToPlayer(Player, EXPGranted, false, Reason)
+	self:_GrantEXPToPlayer(Player, EXPGranted, false, Reason)
 	Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, EXPGranted, Reason)
 end
 
-function CommonFunctions:GrantEXPToPlayer(Player: Player, amount: number, visual: boolean, Reason: string?)
+--- INTERNAL FUNCTION: Function used to grant EXP to a player in `CommonFunctions:GrantRewardToPlayer()`. Use that one instead.
+function CommonFunctions:_GrantEXPToPlayer(Player: Player, amount: number, visual: boolean, Reason: string?)
 	--shouldn't give anything if in a private server
 	if #game.PrivateServerId > 0 then
 		return
@@ -200,6 +202,65 @@ function CommonFunctions:KickPlayer(Player: Player, KickMessage: {
 })
 
     Player:Kick("\n\n[DysMemberer] "..KickMessage.ID..":\n"..KickMessage.Message.."\n")
+end
+
+--TODO: Achievement UI
+--- Increments a player's progress of a specific achievement.
+function CommonFunctions:IncrementAchievementProgress(Player: Player, AchievementPath: string, Amount: number)
+	local SplitPath = CommonUtils:SplitStringPath(AchievementPath)
+	local Achievement: Achievements.Achievement = Achievements
+	for _, step in SplitPath do
+		Achievement = Achievement[step]
+		if not Achievement then
+			warn("[CommonFunctions:IncrementAchievementProgress] Achievement from path "..AchievementPath.." not found!", debug.traceback())
+			return
+		end
+	end
+	if not Achievement.Requirement then
+		warn("[CommonFunctions:IncrementAchievementProgress] Achievement from path "..AchievementPath.." doesn't have a numeric requirement!", debug.traceback())
+		return
+	end
+
+	local AValue = CommonUtils:FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath)
+	if AValue.Value + Amount >= Achievement.Requirement then
+		self:CompleteAchievement(Player, AchievementPath)
+	else
+		AValue.Value += Amount
+	end
+end
+
+--- Grants a player an achievement instantly.
+--- Useful to grant boolean achievements or just complete achievements that have a numeric requirement.
+function CommonFunctions:CompleteAchievement(Player: Player, AchievementPath: string)
+	local SplitPath = CommonUtils:SplitStringPath(AchievementPath)
+	local Achievement: Achievements.Achievement = Achievements
+	for _, step in SplitPath do
+		Achievement = Achievement[step]
+		if not Achievement then
+			warn("[CommonFunctions:CompleteAchievement] Achievement from path "..AchievementPath.." not found!", debug.traceback())
+			return
+		end
+	end
+
+	--TODO: achievement rewards
+	if Achievement.Requirement then
+		CommonUtils:FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath).Value = Achievement.Requirement
+	else
+		local AValue = Instance.new("BoolValue")
+		AValue.Name = SplitPath[#SplitPath]
+		AValue.Value = true
+		local InstPath = SplitPath[1]
+		for i, step in SplitPath do
+			if i == 1 or i == #SplitPath then
+				continue
+			end
+
+			InstPath = InstPath.."."..step
+		end
+		AValue.Parent = CommonUtils:FindFirstChild(Player, "PlayerData.Achievements."..InstPath)
+	end
+
+	Network:FireClientConnection(Player, "CompletedAchievement", "REMOTE_EVENT", Achievement)
 end
 
 return CommonFunctions

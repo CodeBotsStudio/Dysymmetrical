@@ -1,6 +1,7 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
 
 local SaveManager = {
@@ -27,12 +28,29 @@ local function ConvertInstanceTreeToTable(obj)
 end
 
 function SaveManager:Init()
-    Players.PlayerAdded:Connect(function(Player: Player)
+    local function LoadPlayer(Player: Player)
         self.PlayerDatas[Player.UserId] = self:Load(Player)
-	end)
-	
+        for AchievementGroupCodeName, AchievementGroup in Achievements do
+            if not self.PlayerDatas[Player.UserId].Achievements:FindFirstChild(AchievementGroupCodeName) then
+                local Group = Instance.new("Folder")
+                Group.Name = AchievementGroupCodeName
+                Group.Parent = self.PlayerDatas[Player.UserId].Achievements
+            end
+
+            for AchievementCodeName, Achievement in AchievementGroup do
+                if Achievement.Requirement and not self.PlayerDatas[Player.UserId].Achievements[AchievementGroupCodeName]:FindFirstChild(AchievementCodeName) then
+                    local AchievementProgress = Instance.new("NumberValue")
+                    AchievementProgress.Name = AchievementCodeName
+                    AchievementProgress.Value = 0
+                    AchievementProgress.Parent = self.PlayerDatas[Player.UserId]
+                end
+            end
+        end
+    end
+
+    Players.PlayerAdded:Connect(LoadPlayer)
 	for _, i in Players:GetPlayers() do
-		self.PlayerDatas[i.UserId] = self:Load(i)
+		LoadPlayer(i)
 	end
 
     Players.PlayerRemoving:Connect(function(Player: Player)
