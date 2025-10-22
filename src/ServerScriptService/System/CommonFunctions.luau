@@ -16,6 +16,22 @@ local CommonFunctions = {
 			Message = "Player assumed to be teleporting across great distances.",
 		},
 	},
+	Ranks = {
+		Owner = 1,
+		LeadDeveloper = 5,
+		HeadModerator = 10,
+		Moderator = 15,
+		Developer = 18,
+		ServerOwner = 20,
+		DefaultPlayer = 30,
+	},
+	AdminPerms = {
+		{
+			Name = "Dyscarn",
+			UserId = 432073982,
+			Rank = "Developer",
+		},
+	},
 }
 
 local Debris = game:GetService("Debris")
@@ -27,6 +43,15 @@ local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
 local DominoEffectModule = require(ReplicatedStorage.Effects.SurvivorSpecific.DominoEffect)
+
+function CommonUtils:Init()
+	Network:SetConnection("GetPermRank", "REMOTE_FUNCTION", function(Player: Player): number
+		return self:GetPlayerPermissionRank(Player)
+	end)
+	Network:SetConnection("HasPermRank", "REMOTE_FUNCTION", function(Player: Player, Rank: string | number): boolean
+		return self:PlayerHasPermissionRank(Player, Rank)
+	end)
+end
 
 --- Function that should be used to damage a player from another player's attack.
 --- Handles blocking, resistance, weakness...
@@ -261,6 +286,26 @@ function CommonFunctions:CompleteAchievement(Player: Player, AchievementPath: st
 	end
 
 	Network:FireClientConnection(Player, "CompletedAchievement", "REMOTE_EVENT", Achievement)
+end
+
+--- Gets a player's permission rank.
+function CommonFunctions:GetPlayerPermissionRank(Player: Player): number
+	for _, i in self.AdminPerms do
+		if i.UserId == Player.UserId then
+			return self.Ranks[i.Rank] or tonumber(i.Rank) or self.Ranks.DefaultPlayer
+		end
+	end
+
+	return self.Ranks.DefaultPlayer
+end
+
+--- Checks if a player has a specific permission rank or higher.
+--- The minimum rank should be grabbed from `CommonFunctions.Ranks` through its name.
+--- Inputting a number is still possible but the existing ranks should be checked.
+--- @return Will return if the player has the specified rank and its actual rank.
+function CommonFunctions:PlayerHasPermissionRank(Player: Player, MandatoryRank: string | number): (boolean, number)
+	local Rank = self:GetPlayerRank(Player)
+	return Rank < (typeof(MandatoryRank) == "string" and self.Ranks[MandatoryRank] or MandatoryRank), Rank
 end
 
 return CommonFunctions
