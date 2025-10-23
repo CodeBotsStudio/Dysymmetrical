@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -32,22 +32,22 @@ local Credits: {{ Name: string, Credits: {Credit} }} = {
     },
 }
 
-local UIParent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function CreditsMenu:Init()
     if self.UIInstance then
         self.UIInstance.Parent = UIParent
-        self.UIInstance.Size = CommonUtils.UDim.Zero
+        self.UIInstance.Size = Utils.UDim.Zero
         return
     end
 
-    local UI = CommonUtils:FindFirstChild(script, "CreditsMenu")
-    UI.Size = CommonUtils.UDim.Zero
+    local UI = Utils:FindFirstChild(script, "CreditsMenu")
+    UI.Size = Utils.UDim.Zero
     self.UIInstance = UI
     UI.Parent = UIParent
 
     local Prefabs = {
-        Section = CommonUtils:FindFirstChild(script, "SectionLabel"),
-        Credit = CommonUtils:FindFirstChild(script, "Credit"),
+        Section = Utils:FindFirstChild(script, "SectionLabel"),
+        Credit = Utils:FindFirstChild(script, "Credit"),
     }
 
     local LO = 0
@@ -91,9 +91,9 @@ end
 
 function CreditsMenu:Close(Time: number)
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Zero}):Play()
+        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        self.UIInstance.Size = CommonUtils.UDim.Zero
+        self.UIInstance.Size = Utils.UDim.Zero
     end
     self.Opened = false
 end
@@ -104,7 +104,7 @@ function CreditsMenu:Toggle(toggle: boolean)
     end
     if not toggle and self.Enabled then
         self.UIInstance.Parent = script
-        self.UIInstance.Size = CommonUtils.UDim.Zero
+        self.UIInstance.Size = Utils.UDim.Zero
     end
     self.Enabled = toggle
 end

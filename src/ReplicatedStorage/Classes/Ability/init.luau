@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
@@ -121,7 +121,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             own.Owner = plr
             own.CharModule = charModule
             if RunService:IsServer() then
-                CommonUtils:Print("Initting "..own.Name.." ability for "..plr.Name)
+                Utils:Print("Initting "..own.Name.." ability for "..plr.Name)
 
                 --is this exploitable? yes.
                 --do i give a fuck? no.
@@ -129,7 +129,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
                 own.OwnerProperties = {
                     Character = own.Owner.Character,
-                    HRP = CommonUtils:FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
+                    HRP = Utils:FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
                     CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
@@ -178,7 +178,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
             own.OwnerProperties = {
                 Character = own.Owner.Character,
-                HRP = CommonUtils:FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
+                HRP = Utils:FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
                 InputManager = require(own.Owner.PlayerScripts.InputManager),
                 SpeedManager = require(own.Owner.Character.PlayerAttributeScripts.SpeedManager),
                 FOVManager = require(own.Owner.Character.PlayerAttributeScripts.FOVManager),
@@ -194,7 +194,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 --nesting in pcall so that if there's nothing it doesn't matter
                 pcall(function()
                     local AnimName = own.Name:gsub(" ", "").."UseAnim"
-                    charModule.GameplayConfig.Cache.Animations[AnimName] = CommonUtils:LoadAnimationFromID(own.Owner.Character, own.UseAnimation)
+                    charModule.GameplayConfig.Cache.Animations[AnimName] = Utils:LoadAnimationFromID(own.Owner.Character, own.UseAnimation)
                     own.UseAnimationTrack = charModule.GameplayConfig.Cache.Animations[AnimName]
                 end)
             end
@@ -275,7 +275,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         ReloadAnimation = function(own: Ability, id: string)
             Animation.AnimationId = id
             pcall(function()
-                own.UseAnimationTrack = CommonUtils:LoadAnimationFromID(own.Owner.Character, id)
+                own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
             end)
         end,
 

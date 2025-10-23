@@ -4,7 +4,7 @@ local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local CommonFunctions = require(ServerScriptService.System.CommonFunctions)
 local AntiFly = {
     TimeBetweenChecks = 0.5,
@@ -31,7 +31,7 @@ function AntiFly:Init()
 end
 
 function AntiFly:_SetupCharacter(player: Player, char: Model)
-    local root = CommonUtils:FindFirstChild(char, "HumanoidRootPart")
+    local root = Utils:FindFirstChild(char, "HumanoidRootPart")
 
     local Params = RaycastParams.new()
     Params.FilterType = Enum.RaycastFilterType.Exclude

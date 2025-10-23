@@ -10,7 +10,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Type = require(ReplicatedStorage.Classes.Effect)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 function EffectManager:Init()
     --visual
@@ -20,7 +20,7 @@ function EffectManager:Init()
         end
     end))
 
-    local Effects = CommonUtils:FindFirstChild(Players.LocalPlayer.Character, "Effects")
+    local Effects = Utils:FindFirstChild(Players.LocalPlayer.Character, "Effects")
 
     table.insert(self.Connections, Effects.ChildAdded:Connect(function(EffectValue: Instance)
         if EffectValue:IsA("NumberValue") then
@@ -29,7 +29,7 @@ function EffectManager:Init()
                 until EffectValue:GetAttribute("Duration") ~= nil
             end
 
-            self:AddEffect(CommonUtils:GetEffectModule(EffectValue.Name, EffectValue:GetAttribute("Subfolder"), true), EffectValue.Value, EffectValue:GetAttribute("Duration"))
+            self:AddEffect(Utils:GetEffectModule(EffectValue.Name, EffectValue:GetAttribute("Subfolder"), true), EffectValue.Value, EffectValue:GetAttribute("Duration"))
         end
     end))
 
@@ -55,7 +55,7 @@ function EffectManager:AddEffect(Effect: ModuleScript, level: number?, duration:
         return
     end
 
-    local effect = CommonUtils:CopyTable(require(Effect))
+    local effect = Utils:CopyTable(require(Effect))
     self.Effects[Effect.Name] = effect
 
     effect.TimeLeft = duration or effect.Duration

@@ -28,5 +28,5 @@ until SSSDone and RSDone
 workspace:SetAttribute("ServerLoaded", true)
 
 if not game:GetService("RunService"):IsStudio() then
-    print(require(game:GetService("ReplicatedStorage").Modules.CommonUtils).Credits)
+    print(require(game:GetService("ReplicatedStorage").Modules.Utils).Credits)
 end

@@ -7,7 +7,7 @@ StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 --ORDER GUI HERE INSTEAD OF USING "DisplayOrder" SINCE IT'S AUTOMATICALLY APPLIED HERE
 StarterGui = script.Parent
@@ -31,5 +31,5 @@ local GUIs = {
 }
 
 for index, name in GUIs do
-	CommonUtils:FindFirstChild(StarterGui, name).DisplayOrder = index
+	Utils:FindFirstChild(StarterGui, name).DisplayOrder = index
 end

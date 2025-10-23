@@ -2,7 +2,7 @@ local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local SaveManager = {
     PlayerDatas = {},
@@ -198,7 +198,7 @@ function SaveManager:Save(Player: Player, Data: Folder)
     --i just figured out pairs and ipairs are fucking useless as generalized iteration had been implemented fairly long ago.
     --i want to die.
     for t, i in {Killer = SaveFile.Equipped.Killer, Survivor = SaveFile.Equipped.Survivor} do
-        local Module = CommonUtils:GetCharacterModule(t, i)
+        local Module = Utils:GetCharacterModule(t, i)
         if not Module or Module:HasTag("PreventSave") then
             SaveFile["Equipped"][t] = script:FindFirstChild("Equipped"):FindFirstChild(t).Value --if it's smth like a dev item it doesn't save in publics
         end

@@ -5,7 +5,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local TimeManager
 local CommonFunctions
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local HitboxFolder = workspace.TempObjectFolders.Hitboxes
@@ -130,7 +130,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings)
                 Debris:AddItem(Part, 0.75)
 
                 if Config.PredictVelocity then
-                    CommonUtils:Print(SourcePlayer:GetNetworkPing())
+                    Utils:Print(SourcePlayer:GetNetworkPing())
                     local PingDivider = 6.5 - math.clamp(SourcePlayer:GetNetworkPing(), 0, 3)
                     local PingOffset = Part.CFrame:VectorToObjectSpace(Root.AssemblyLinearVelocity) / PingDivider
                     Part.CFrame *= CFrame.new(PingOffset)
@@ -198,7 +198,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings)
                         end
 
                         if Hum.Health > 0 and Hum.Health - Damage <= 0 then
-                            local KillerModule = require(CommonUtils:GetCharacterModule("Killer", Char:GetAttribute("CharacterName"), Char:GetAttribute("CharacterSkinName")))
+                            local KillerModule = require(Utils:GetCharacterModule("Killer", Char:GetAttribute("CharacterName"), Char:GetAttribute("CharacterSkinName")))
 
                             local KilledSurvivor = {
                                 Name = P:GetAttribute("CharacterName"),
@@ -248,7 +248,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings)
 
                                         local SurvivorAnim = KilledSurvivor.Skin and KillerModule.Config.AnimationIDs.Execution[KilledSurvivor.Skin..KilledSurvivor.Name] or KillerModule.Config.AnimationIDs.Execution[KilledSurvivor.Name]
                                         SurvivorAnim = SurvivorAnim or KillerModule.Config.AnimationIDs.Execution["Default"]
-                                        SurvivorAnim = CommonUtils:LoadAnimationFromID(P, SurvivorAnim)
+                                        SurvivorAnim = Utils:LoadAnimationFromID(P, SurvivorAnim)
 
                                         local ExSound = KilledSurvivor.Skin and KillerModule.Config.Sounds.Execute[KilledSurvivor.Skin..KilledSurvivor.Name] or KillerModule.Config.Sounds.Execute[KilledSurvivor.Name]
                                         ExSound = ExSound or KillerModule.Config.Sounds.Execute["Default"]

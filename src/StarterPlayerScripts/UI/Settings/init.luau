@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 
@@ -14,26 +14,26 @@ local Settings = {
 }
 
 local Classes = {
-    Bool = require(CommonUtils:FindFirstChild(script, "Bool")),
-    Number = require(CommonUtils:FindFirstChild(script, "Number")),
-    String = require(CommonUtils:FindFirstChild(script, "String")),
+    Bool = require(Utils:FindFirstChild(script, "Bool")),
+    Number = require(Utils:FindFirstChild(script, "Number")),
+    String = require(Utils:FindFirstChild(script, "String")),
 }
 local Prefabs = {
-    UIPrefab = CommonUtils:FindFirstChild(script, "SettingsScreen"),
-    Section = CommonUtils:FindFirstChild(script, "Section"),
+    UIPrefab = Utils:FindFirstChild(script, "SettingsScreen"),
+    Section = Utils:FindFirstChild(script, "Section"),
 }
 
-local UIParent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 
 function Settings:Init()
     if self.UIInstance then
         self.UIInstance.Parent = UIParent
-        self.UIInstance.Size = CommonUtils.UDim.Zero
+        self.UIInstance.Size = Utils.UDim.Zero
         return
     end
 
     local UI = Prefabs.UIPrefab
-    UI.Size = CommonUtils.UDim.Zero
+    UI.Size = Utils.UDim.Zero
     UI.Parent = UIParent
     self.UIInstance = UI
     local Content = UI.SettingsContainer.Contents
@@ -113,15 +113,15 @@ function Settings:Open(Time: number)
         SideBar:CloseAll(self)
     end)
 
-    TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Full20Offset}):Play()
+    TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
     self.Opened = true
 end
 
 function Settings:Close(Time: number)
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Zero}):Play()
+        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        self.UIInstance.Size = CommonUtils.UDim.Zero
+        self.UIInstance.Size = Utils.UDim.Zero
     end
     self.Opened = false
 end
@@ -132,7 +132,7 @@ function Settings:Toggle(toggle: boolean)
     end
     if not toggle and self.Enabled then
         self.UIInstance.Parent = script
-        self.UIInstance.Size = CommonUtils.UDim.Zero
+        self.UIInstance.Size = Utils.UDim.Zero
     end
     self.Enabled = toggle
 end

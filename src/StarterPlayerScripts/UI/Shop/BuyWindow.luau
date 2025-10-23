@@ -2,7 +2,7 @@ local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Signal = require(ReplicatedStorage.Utils.Signal)
 
@@ -10,7 +10,7 @@ return {
     New = function(Shop, Module: ModuleScript, skin: boolean?, Parent: Frame, Card)
         local Window = {
             Checking = false,
-            Instance = CommonUtils:FindFirstChild(script, "Window"):Clone(),
+            Instance = Utils:FindFirstChild(script, "Window"):Clone(),
             Connections = {},
             Removed = Signal.new(),
             Purchased = Signal.new(),
@@ -24,7 +24,7 @@ return {
 
         Window.Instance.PriceTag.Text = "Purchase "..CharInfo.Config.Name.." for "..(CharInfo.Config.Price > 0 and CharInfo.Config.Price.."$" or "FREE").."?"
         Window.Instance.Parent = Parent
-        Window.Instance.Size = CommonUtils.UDim.Zero
+        Window.Instance.Size = Utils.UDim.Zero
 
         function Window:Show()
             TweenService:Create(self.Instance, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.253, 0.202)}):Play()
@@ -50,9 +50,9 @@ return {
             end
 
             if not instant then
-                TweenService:Create(self.Instance, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Zero}):Play()
+                TweenService:Create(self.Instance, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
             else
-                self.Instance.Size = CommonUtils.UDim.Zero
+                self.Instance.Size = Utils.UDim.Zero
             end
 
             Debris:AddItem(self.Instance, 0.5)

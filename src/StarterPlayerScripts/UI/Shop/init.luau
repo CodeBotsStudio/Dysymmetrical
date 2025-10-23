@@ -7,7 +7,7 @@ local TweenService = game:GetService("TweenService")
 local SideBar = require(script.Parent.SideBar)
 local Types = require(ReplicatedStorage.Classes.Character)
 local Emote = require(ReplicatedStorage.Classes.Emote)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local BuyWindow = require(script.BuyWindow)
@@ -38,7 +38,7 @@ local Shop = {
 
 local LocalPlayer = Players.LocalPlayer
 
-local UIParent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 
 local Buttons = {
     Purchase = nil,
@@ -48,7 +48,7 @@ local Buttons = {
 
 local Sizes = {
     SideBar = UDim2.fromScale(0.3, 1),
-    ClosedSideBar = CommonUtils.UDim.FullY,
+    ClosedSideBar = Utils.UDim.FullY,
 }
 
 local PreviewInstances = {
@@ -89,7 +89,7 @@ function Shop:ReorderSkins()
     local LO = 0
 
     for n, i in self.LoadedItems.Skins do
-        if CommonUtils:GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
+        if Utils:GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
             table.insert(Ordered.Owned, i)
         else
             table.insert(Ordered.Unowned, i)
@@ -98,8 +98,8 @@ function Shop:ReorderSkins()
 
     table.sort(Ordered.Owned, function(a, b)
         local Modules = {
-            A = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
-            B = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+            A = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
+            B = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
         }
 
         return
@@ -108,8 +108,8 @@ function Shop:ReorderSkins()
     end)
     table.sort(Ordered.Unowned, function(a, b)
         local Modules = {
-            A = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
-            B = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+            A = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
+            B = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
         }
 
         return
@@ -145,7 +145,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
         local function CheckSkinOwnLabels()
             for n, i in self.LoadedItems.Skins do
-                if CommonUtils:GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
+                if Utils:GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
                     i.Container.Owned.BackgroundTransparency = 0.55
                     i.Container.Owned.TextLabel.TextTransparency = 0
                 end
@@ -153,7 +153,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
         end
 
         for _, i in Skins:GetChildren() do
-            local Module = CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
+            local Module = Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
 
             if Module:HasTag("Dev") or Module:HasTag("Milestone") then
                 continue
@@ -222,8 +222,8 @@ local function SwitchSection(sectionName: string)
 end
 
 function Shop:Init()
-    UI = CommonUtils:FindFirstChild(script, "ShopUI"):Clone()
-    UI.Size = CommonUtils.UDim.Zero
+    UI = Utils:FindFirstChild(script, "ShopUI"):Clone()
+    UI.Size = Utils.UDim.Zero
     UI.Parent = UIParent
     self.UIInstance = UI
 
@@ -255,7 +255,7 @@ function Shop:Init()
         end
     end
 
-    local templates = CommonUtils:FindFirstChild(script, "Templates")
+    local templates = Utils:FindFirstChild(script, "Templates")
     Templates.CardTemplate = Templates.CardTemplate or templates.CardTemplate
     Templates.Header = Templates.Header or templates.Header
     Templates.Text = Templates.Text or templates.TextContainer
@@ -285,13 +285,13 @@ function Shop:Init()
     end))
     table.insert(Conns, Buttons.Purchase.MouseButton1Click:Connect(function()
         Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-        if not CommonUtils:GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
+        if not Utils:GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
             if self.SelectedItem.Type == "Emote" then
-                self:CreateBuyWindow(CommonUtils:GetEmoteModule(self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
+                self:CreateBuyWindow(Utils:GetEmoteModule(self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
                 return
             end
 
-            self:CreateBuyWindow(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
+            self:CreateBuyWindow(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
         end
     end))
 
@@ -343,12 +343,12 @@ function Shop:Open(Time: number)
     if workspace.Sounds:FindFirstChild("EmotePreview") then
         workspace.Sounds.EmotePreview:Destroy()
     end
-    SkinContainer.Parent.Size = CommonUtils.UDim.FullY
-    SideContainer.Size = CommonUtils.UDim.FullY
+    SkinContainer.Parent.Size = Utils.UDim.FullY
+    SideContainer.Size = Utils.UDim.FullY
     ShopContainer.Parent.Size = UDim2.fromScale(0.7, 1)
     self.SkinMenu.Open = false
 
-    TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Full20Offset}):Play()
+    TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
     self.Opened = true
 end
 
@@ -360,9 +360,9 @@ function Shop:Close(Time: number)
         workspace.Sounds.EmotePreview:Destroy()
     end
     if Time > 0 then
-        TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Zero}):Play()
+        TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        UI.Size = CommonUtils.UDim.Zero
+        UI.Size = Utils.UDim.Zero
     end
     self.Opened = false
 end
@@ -404,7 +404,7 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
     PreviewInstances.Render.Image = info.Config.Render
     PreviewInstances.Title.Text = info.Config.Name
 
-    if CommonUtils:GetPlayerOwned(LocalPlayer, Type.."s."..codeName) then
+    if Utils:GetPlayerOwned(LocalPlayer, Type.."s."..codeName) then
         Buttons.Purchase.Title.Text = "Purchased"
     else
         Buttons.Purchase.Title.Text = "Purchase"
@@ -441,7 +441,7 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
             local AnimIDs = info.AnimationIds
             if typeof(AnimIDs) == "string" then
                 LoadedEmoteTracks[Module.Name] = {
-                    Animation = CommonUtils:LoadAnimationFromID(EmoteRig, AnimIDs),
+                    Animation = Utils:LoadAnimationFromID(EmoteRig, AnimIDs),
                     Sound = nil,
                 }
             else
@@ -449,7 +449,7 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
 
                 for _, ID: string in AnimIDs do
                     LoadedEmoteTracks[Module.Name][ID] = {
-                        Animation = CommonUtils:LoadAnimationFromID(EmoteRig, ID),
+                        Animation = Utils:LoadAnimationFromID(EmoteRig, ID),
                         Sound = nil,
                     }
                 end
@@ -501,7 +501,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
     local LO = 0
 
     for _, module in ReplicatedStorage.Characters.Killers:GetChildren() do
-        if CommonUtils:GetPlayerOwned(LocalPlayer, "Killers."..module.Name) then
+        if Utils:GetPlayerOwned(LocalPlayer, "Killers."..module.Name) then
             table.insert(Ordered.Owned, module)
         else
             table.insert(Ordered.Unowned, module)
@@ -547,7 +547,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
             return
         end
 
-        local Module = CommonUtils:GetCharacterModule("Killer", name)
+        local Module = Utils:GetCharacterModule("Killer", name)
         local KillerInfo: Types.Killer = require(Module)
 
         local Card = Templates.CardTemplate:Clone()
@@ -559,7 +559,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
         Container.CharacterRender.Image = KillerInfo.Config.Render
         Container.Price.Text = KillerInfo.Config.Price > 0 and tostring(KillerInfo.Config.Price).."$" or "FREE"
 
-        if CommonUtils:GetPlayerOwned(LocalPlayer, "Killers."..name) then
+        if Utils:GetPlayerOwned(LocalPlayer, "Killers."..name) then
             Container.Owned.BackgroundTransparency = 0.55
             Container.Owned.TextLabel.TextTransparency = 0
         end
@@ -595,7 +595,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
     LO = 0
 
     for _, module in ReplicatedStorage.Characters.Survivors:GetChildren() do
-        if CommonUtils:GetPlayerOwned(LocalPlayer, "Survivors."..module.Name) then
+        if Utils:GetPlayerOwned(LocalPlayer, "Survivors."..module.Name) then
             table.insert(Ordered.Owned, module)
         else
             table.insert(Ordered.Unowned, module)
@@ -640,7 +640,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
             return
         end
 
-        local Module = CommonUtils:GetCharacterModule("Survivor", name)
+        local Module = Utils:GetCharacterModule("Survivor", name)
         local SurvivorInfo: Types.Killer = require(Module)
 
         local Card = Templates.CardTemplate:Clone()
@@ -652,7 +652,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
         Container.CharacterRender.Image = SurvivorInfo.Config.Render
         Container.Price.Text = SurvivorInfo.Config.Price > 0 and tostring(SurvivorInfo.Config.Price).."$" or "FREE"
 
-        if CommonUtils:GetPlayerOwned(LocalPlayer, "Survivors."..name) then
+        if Utils:GetPlayerOwned(LocalPlayer, "Survivors."..name) then
             Container.Owned.BackgroundTransparency = 0.55
             Container.Owned.TextLabel.TextTransparency = 0
         end
@@ -688,7 +688,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
     LO = 0
 
     for _, module in ReplicatedStorage.Assets.Emotes:GetChildren() do
-        if CommonUtils:GetPlayerOwned(LocalPlayer, "Emotes."..module.Name) then
+        if Utils:GetPlayerOwned(LocalPlayer, "Emotes."..module.Name) then
             table.insert(Ordered.Owned, module)
         else
             table.insert(Ordered.Unowned, module)
@@ -733,7 +733,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
             return
         end
 
-        local Module = CommonUtils:GetEmoteModule(name)
+        local Module = Utils:GetEmoteModule(name)
         local EmoteInfo: Emote.Emote = require(Module)
 
         local Card = Templates.CardTemplate:Clone()
@@ -745,7 +745,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
         Container.CharacterRender.Image = EmoteInfo.Config.Render
         Container.Price.Text = EmoteInfo.Config.Price > 0 and tostring(EmoteInfo.Config.Price).."$" or "FREE"
 
-        if CommonUtils:GetPlayerOwned(LocalPlayer, "Emotes."..name) then
+        if Utils:GetPlayerOwned(LocalPlayer, "Emotes."..name) then
             Container.Owned.BackgroundTransparency = 0.55
             Container.Owned.TextLabel.TextTransparency = 0
         end
@@ -779,7 +779,7 @@ function Shop:CreateBuyWindow(Module: ModuleScript, skin: boolean?, Parent: Fram
 
     local Window = BuyWindow.New(self, Module, skin, Parent, Card)
     Window.Purchased:Connect(function()
-        if CommonUtils:GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
+        if Utils:GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
             Buttons.Purchase.Title.Text = "Purchased"
         else
             Buttons.Purchase.Title.Text = "Purchase"

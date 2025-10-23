@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local GlobalTurnToMoveDirection = {
     HeadPreventionFactors = {},
@@ -46,13 +46,13 @@ function GlobalTurnToMoveDirection:SetupPlayer(Player: Player)
 end
 
 function GlobalTurnToMoveDirection:SetupCharacter(Char: Model): RBXScriptConnection?
-    local Humanoid = CommonUtils:FindFirstChild(Char, "Humanoid")
+    local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
     if Humanoid.RigType ~= Enum.HumanoidRigType.R6 then
     	return
     end
-    local HumanoidRootPart = CommonUtils:FindFirstChild(Char, "HumanoidRootPart")
-    local Torso = CommonUtils:FindFirstChild(Char, "Torso")
-    local Head = CommonUtils:FindFirstChild(Char, "Head")
+    local HumanoidRootPart = Utils:FindFirstChild(Char, "HumanoidRootPart")
+    local Torso = Utils:FindFirstChild(Char, "Torso")
+    local Head = Utils:FindFirstChild(Char, "Head")
     --
     local RootJoint = HumanoidRootPart:FindFirstChild("RootJoint")
     local Neck = Torso.Neck

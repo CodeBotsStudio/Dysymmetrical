@@ -18,14 +18,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local PlayerScripts = LocalPlayer.PlayerScripts
 --
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local InputManager = require(PlayerScripts.InputManager)
 --
 local char = LocalPlayer.Character
-local HumanoidRootPart: BasePart = CommonUtils:FindFirstChild(char, "HumanoidRootPart")
-local Humanoid = CommonUtils:FindFirstChild(char, "Humanoid")
-local Role: StringValue = CommonUtils:FindFirstChild(char, "Role")
+local HumanoidRootPart: BasePart = Utils:FindFirstChild(char, "HumanoidRootPart")
+local Humanoid = Utils:FindFirstChild(char, "Humanoid")
+local Role: StringValue = Utils:FindFirstChild(char, "Role")
 local playersFolder = workspace.Players
 --
 local PlayerAttributeScripts = char.PlayerAttributeScripts
@@ -56,7 +56,7 @@ function Sprinting:ReloadAnimation(animId: string)
 	if self.FootstepConnection then
 		self.FootstepConnection:Disconnect()
 	end
-	self.SprintTrack = CommonUtils:LoadAnimationFromID(char, animId)
+	self.SprintTrack = Utils:LoadAnimationFromID(char, animId)
 	self.FootstepConnection = self.SprintTrack:GetMarkerReachedSignal("Footstep"):Connect(function()
 		FootstepPlayer:PlayFootstep(HumanoidRootPart)
 	end)
@@ -178,7 +178,7 @@ function Sprinting:Init()
 		if self.TweenSpeed then
 			local ValueToTweenTo = self.SpeedApplied and SprintMultiplier or 1
 			
-			SpeedManager.SpeedFactors[FactorName] = CommonUtils:Lerp(SpeedManager.SpeedFactors[FactorName], ValueToTweenTo, delta * 5.5)
+			SpeedManager.SpeedFactors[FactorName] = Utils:Lerp(SpeedManager.SpeedFactors[FactorName], ValueToTweenTo, delta * 5.5)
 		else
 			SpeedManager.SpeedFactors[FactorName] = self.SpeedApplied and SprintMultiplier or 1
 		end

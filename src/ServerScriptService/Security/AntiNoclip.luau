@@ -2,7 +2,7 @@ local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local CommonFunctions = require(ServerScriptService.System.CommonFunctions)
 local AntiNoclip = {
 	Kick = false,
@@ -44,8 +44,8 @@ end
 function AntiNoclip:Init()
     Players.PlayerAdded:Connect(function(Player)
         Player.CharacterAdded:Connect(function(Character)
-        	local Humanoid = CommonUtils:FindFirstChild(Character, "Humanoid")
-        	local HumanoidRootPart = CommonUtils:FindFirstChild(Character, "HumanoidRootPart")
+        	local Humanoid = Utils:FindFirstChild(Character, "Humanoid")
+        	local HumanoidRootPart = Utils:FindFirstChild(Character, "HumanoidRootPart")
         	local NoclipPart = self:_SetupPart(Character, HumanoidRootPart)
 
             local RayParams = RaycastParams.new()

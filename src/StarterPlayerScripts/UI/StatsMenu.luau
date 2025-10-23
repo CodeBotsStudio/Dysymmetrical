@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -18,24 +18,24 @@ local Prefabs = {
     Stat = script.Prefabs.Stat,
 }
 
-local UIParent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 
 function StatsMenu:Init()
     if self.UIInstance then
         self.UIInstance.Parent = UIParent
-        self.UIInstance.Size = CommonUtils.UDim.Zero
+        self.UIInstance.Size = Utils.UDim.Zero
         return
     end
 
     local UI = script.StatsMenu
-    UI.Size = CommonUtils.UDim.Zero
+    UI.Size = Utils.UDim.Zero
     UI.Parent = UIParent
     self.UIInstance = UI
     local Content = UI.StatsContainer.Content
 
     local CurrentLayoutOrder = 0
     
-    local Folders = CommonUtils:FindFirstChild(LocalPlayer, "PlayerData.Stats"):GetChildren()
+    local Folders = Utils:FindFirstChild(LocalPlayer, "PlayerData.Stats"):GetChildren()
 
     table.sort(Folders, function(a, b)
         return a:GetAttribute("LayoutOrder") < b:GetAttribute("LayoutOrder")
@@ -70,7 +70,7 @@ function StatsMenu:Init()
             Stat.Text = DisplayTitle..": "
 
             if StatValue:GetAttribute("FormatTime") == true then
-                Stat.Text = Stat.Text..CommonUtils:ConvertToDHMS(StatValue.Value)
+                Stat.Text = Stat.Text..Utils:ConvertToDHMS(StatValue.Value)
             else
                 Stat.Text = Stat.Text..tostring(StatValue.Value)
             end
@@ -80,7 +80,7 @@ function StatsMenu:Init()
             StatValue.Changed:Connect(function(value)
                 Stat.Text = DisplayTitle..": "
 
-                local RealValue = StatValue:GetAttribute("FormatTime") == true and CommonUtils:ConvertToDHMS(value) or tostring(value)
+                local RealValue = StatValue:GetAttribute("FormatTime") == true and Utils:ConvertToDHMS(value) or tostring(value)
                 Stat.Text = Stat.Text..RealValue
             end)
 
@@ -99,15 +99,15 @@ function StatsMenu:Open(Time: number)
         SideBar:CloseAll(self)
     end)
 
-    TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Full20Offset}):Play()
+    TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
     self.Opened = true
 end
 
 function StatsMenu:Close(Time: number)
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Zero}):Play()
+        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        self.UIInstance.Size = CommonUtils.UDim.Zero
+        self.UIInstance.Size = Utils.UDim.Zero
     end
     self.Opened = false
 end
@@ -118,7 +118,7 @@ function StatsMenu:Toggle(toggle: boolean)
     end
     if not toggle and self.Enabled then
         self.UIInstance.Parent = script
-        self.UIInstance.Size = CommonUtils.UDim.Zero
+        self.UIInstance.Size = Utils.UDim.Zero
     end
     self.Enabled = toggle
 end

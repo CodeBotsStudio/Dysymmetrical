@@ -2,7 +2,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local PlayerManager = require(script.Parent.PlayerManager)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
@@ -34,21 +34,21 @@ function ServerCharacterManager:SetupCharacter(player: Player, charName: string,
     end
 
     print("sending to "..player.Name)
-    self:_InitCharacter(player, CommonUtils:GetCharacterModule(charType, charName, skinName))
+    self:_InitCharacter(player, Utils:GetCharacterModule(charType, charName, skinName))
 
     return Char
 end
 
 --- Inits a character's abilities and sets its properties accordingly as specified in its `GameplayConfig`.
 function ServerCharacterManager:_InitCharacter(player: Player, charModule: ModuleScript)
-    local module = CommonUtils:CopyTable(require(charModule))
+    local module = Utils:CopyTable(require(charModule))
     module.Owner = player
 
     --Abilities
     local Char = player.Character
     local CharacterAbilities = require(Char.PlayerAbilities.CharacterAbilities)
 
-    local Humanoid = CommonUtils:FindFirstChild(Char, "Humanoid")
+    local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
     Humanoid.MaxHealth = module.GameplayConfig.Health
     Humanoid.Health = module.GameplayConfig.Health
     Humanoid.JumpPower = 0
@@ -103,7 +103,7 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
                         if n == "Survivor" then --no need to load survivor execution anims on killers
                             continue
                         end
-                        module.GameplayConfig.Cache.Animations.Execution[name][n] = CommonUtils:LoadAnimationFromID(Char, ie, false)
+                        module.GameplayConfig.Cache.Animations.Execution[name][n] = Utils:LoadAnimationFromID(Char, ie, false)
                     end
                 end
             end

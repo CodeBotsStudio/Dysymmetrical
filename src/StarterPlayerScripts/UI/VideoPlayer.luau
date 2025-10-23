@@ -1,7 +1,7 @@
 --credits to PirosMacska for this since i was too lazy to write it myself -Dyscarn (Driftwood thing)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local module = {}
 
@@ -16,7 +16,7 @@ local music: Sound
 function module:Init()
 	frames = {}
 	frame_threads = {}
-	ScreenGUI = CommonUtils:FindFirstChild(Player.PlayerGui, "VideoPlayer")
+	ScreenGUI = Utils:FindFirstChild(Player.PlayerGui, "VideoPlayer")
 end
 
 function module:LoadVideo(assetids: {string})
@@ -26,7 +26,7 @@ function module:LoadVideo(assetids: {string})
 
 	for _, rbxassetid in assetids do
 		local label = Instance.new("ImageLabel")
-		label.Size = CommonUtils.UDim.Full
+		label.Size = Utils.UDim.Full
 		label.Parent = ScreenGUI:FindFirstChild("Frames")
 		label.BackgroundTransparency = 0.999
 		label.ImageTransparency = 0.999
@@ -42,7 +42,7 @@ function module:LoadVideo(assetids: {string})
 
 			label.BackgroundTransparency = 1
 			label.ImageTransparency = 1
-			CommonUtils:Print("loaded")
+			Utils:Print("loaded")
 		end)
 		table.insert(threads, thread)
 	end
@@ -58,7 +58,7 @@ function module:LoadVideo(assetids: {string})
 		end
 	end
 
-	CommonUtils:Print("loaded")
+	Utils:Print("loaded")
 end
 
 function module:Reset()
@@ -82,10 +82,10 @@ function module:Reset()
 end
 
 function module:AddFrame(rbxassetid: string)
-	CommonUtils:Print("loading video...")
+	Utils:Print("loading video...")
 
 	local label = Instance.new("ImageLabel")
-	label.Size = CommonUtils.UDim.Full
+	label.Size = Utils.UDim.Full
 	label.Parent = ScreenGUI.Frames
 	label.BackgroundTransparency = 0.999
 	label.ImageTransparency = 0.999
@@ -104,7 +104,7 @@ function module:AddFrame(rbxassetid: string)
 		label.BackgroundTransparency = 1
 		label.ImageTransparency = 1
 
-		CommonUtils:Print("loaded")
+		Utils:Print("loaded")
 	end)
 
 	table.insert(frame_threads, thread)
@@ -117,7 +117,7 @@ function module:SetAudio(assetid: string)
 	music.Looped = false
 	music.PlaybackSpeed = 1
 
-	CommonUtils:Print(music.TimeLength)
+	Utils:Print(music.TimeLength)
 
 	if not music.IsLoaded then
 		while not music.IsLoaded do
@@ -127,7 +127,7 @@ function module:SetAudio(assetid: string)
 end
 
 function module:Play(fps: number)
-	CommonUtils:Print("Play")
+	Utils:Print("Play")
 
 	--Wait for individualualy added frames to load
 	if #frame_threads > 0 then
@@ -145,7 +145,7 @@ function module:Play(fps: number)
 	local spf = 1 / fps
 
 	ScreenGUI.Enabled = true
-	CommonUtils:Print("Play")
+	Utils:Print("Play")
 
 	local startTime = time()
 
@@ -174,7 +174,7 @@ function module:Play(fps: number)
 		end
 	end
 
-	CommonUtils:Print(time() - startTime)
+	Utils:Print(time() - startTime)
 
 	if music then
 		music:Stop()

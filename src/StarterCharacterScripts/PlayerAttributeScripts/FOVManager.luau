@@ -7,7 +7,7 @@ local FOVManager = {
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 --
 local Camera = workspace.CurrentCamera
 local LocalPlayer = game:GetService("Players").LocalPlayer
@@ -21,7 +21,7 @@ function FOVManager:Init()
 				FOV *= factor
 			end
 
-			Camera.FieldOfView = CommonUtils:Lerp(
+			Camera.FieldOfView = Utils:Lerp(
 				Camera.FieldOfView,
 				FOV,
 				delta * self.DeltaMultiplier

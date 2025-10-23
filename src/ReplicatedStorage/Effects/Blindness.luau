@@ -4,7 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Effect = require(ReplicatedStorage.Classes.Effect)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local Blindness = Effect:GetDefaultEffect()
 Blindness.Name = "Blindness"
@@ -25,7 +25,7 @@ Blindness.ApplyEffect = function(own: Effect.Effect, char: Model, level: number,
 
         CC = Instance.new("ColorCorrectionEffect")
         CC.Name = "BlindnessColorCorrection"
-        CC.Brightness = CommonUtils:GetPlayerSetting(Players.LocalPlayer, "Accessibility.EpilepsyMode") and 0.99 or -0.24
+        CC.Brightness = Utils:GetPlayerSetting(Players.LocalPlayer, "Accessibility.EpilepsyMode") and 0.99 or -0.24
         CC.Saturation = 1
         CC.Parent = Lighting
 

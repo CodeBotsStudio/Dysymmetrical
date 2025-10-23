@@ -1,11 +1,11 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 return {
     Init = function(_)
-        CommonUtils:FindFirstChild(workspace, "TempObjectFolders.Hitboxes").ChildAdded:Connect(function(Child)
-            if Child:IsA("BasePart") and CommonUtils:GetPlayerSetting(Players.LocalPlayer, "Advanced.ShowHitboxes") then
+        Utils:FindFirstChild(workspace, "TempObjectFolders.Hitboxes").ChildAdded:Connect(function(Child)
+            if Child:IsA("BasePart") and Utils:GetPlayerSetting(Players.LocalPlayer, "Advanced.ShowHitboxes") then
                 Child.Material = Enum.Material.ForceField
                 Child.Transparency = 0.65
             end

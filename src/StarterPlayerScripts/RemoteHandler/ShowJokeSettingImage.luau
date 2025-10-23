@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
@@ -48,9 +48,9 @@ local SoundsTable = {
 }
 
 return function()
-    CommonUtils:PreloadAssets({Images, SoundsTable})
+    Utils:PreloadAssets({Images, SoundsTable})
 
-    local ImagePreset = CommonUtils:FindFirstChild(script, "ImageLabel")
+    local ImagePreset = Utils:FindFirstChild(script, "ImageLabel")
 
     Network:SetConnection("ShowJokeSettingImage", "REMOTE_EVENT", function(isVictim: boolean, role: string)
         if not role then

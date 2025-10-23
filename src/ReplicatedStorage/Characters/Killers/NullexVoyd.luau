@@ -9,7 +9,7 @@ local SoundService = game:GetService("SoundService")
 local Character = require(ReplicatedStorage.Classes.Character)
 local Ability = require(ReplicatedStorage.Classes.Ability)
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 --Character Definition
@@ -88,8 +88,8 @@ CallbackPing.Behaviour = function(self)
     end))
 
     --shows all players' aura
-    for _, plr: Model in CommonUtils:GetCharactersWithRoles(false).Survivor or {} do
-        CommonUtils:RevealPlayerAura(plr, self.Duration)
+    for _, plr: Model in Utils:GetCharactersWithRoles(false).Survivor or {} do
+        Utils:RevealPlayerAura(plr, self.Duration)
     end
 end
 

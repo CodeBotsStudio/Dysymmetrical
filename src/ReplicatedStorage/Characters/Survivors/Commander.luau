@@ -9,7 +9,7 @@ local TweenService = game:GetService("TweenService")
 local Character = require(ReplicatedStorage.Classes.Character)
 local Ability = require(ReplicatedStorage.Classes.Ability)
 local Hitbox = require(ReplicatedStorage.Classes.Hitbox)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
@@ -99,7 +99,7 @@ local Reload: Ability.Ability = Ability:GetDefaultAbilitySettings()
 Reload.Name = "Reload"
 Reload.InputName = "SecondAbility"
 Reload.SlownessLevel = 2
-Reload.Description = "Commander reloads his gun. He takes "..tostring(Reload.Duration).." seconds to do so and gets Slowness"..CommonUtils:IntToRoman(Reload.SlownessLevel).." while reloading."
+Reload.Description = "Commander reloads his gun. He takes "..tostring(Reload.Duration).." seconds to do so and gets Slowness"..Utils:IntToRoman(Reload.SlownessLevel).." while reloading."
 Reload.Duration = 5
 Reload.Cooldown = 40
 
@@ -143,7 +143,7 @@ Justice.ExtraInit = function(self)
             self.UsesLeft = 1
         end))
     else
-        self.JusticeModel = CommonUtils:FindFirstChild(self.OwnerProperties.Character, "Deagle")
+        self.JusticeModel = Utils:FindFirstChild(self.OwnerProperties.Character, "Deagle")
     end
 end
 

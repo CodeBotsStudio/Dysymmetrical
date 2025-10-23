@@ -2,7 +2,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
 local EmoteManager = {
@@ -13,7 +13,7 @@ local EmoteManager = {
 
 function EmoteManager:Init()
 	local LocalPlayer = game:GetService("Players").LocalPlayer
-	local EquippedEmotes = CommonUtils:FindFirstChild(LocalPlayer, "PlayerData.Equipped.Emotes")
+	local EquippedEmotes = Utils:FindFirstChild(LocalPlayer, "PlayerData.Equipped.Emotes")
 
 	self.Char = Players.LocalPlayer.Character
 	self.Char:SetAttribute("Emoting", false)
@@ -95,12 +95,12 @@ function EmoteManager:ReloadAvailableContent(EquippedEmotes: Folder)
 			continue
 		end
 
-		local Module = CommonUtils:GetEmoteModule(emote.Value)
+		local Module = Utils:GetEmoteModule(emote.Value)
 		if not Module then
 			return
 		end
 
-		self.EmotesAvailable[emote.Value] = CommonUtils:CopyTable(require(Module))
+		self.EmotesAvailable[emote.Value] = Utils:CopyTable(require(Module))
 		Network:FireServerConnection("InitEmote", "REMOTE_EVENT", Module.Name)
 		self.EmotesAvailable[emote.Value]:Init(Players.LocalPlayer, self.Animator)
 	end

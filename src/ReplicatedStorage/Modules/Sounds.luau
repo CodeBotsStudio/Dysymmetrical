@@ -7,7 +7,7 @@ local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 local Rand = Random.new()
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local SoundFolder = game:GetService("ReplicatedStorage").Assets.Sounds
 
@@ -22,7 +22,7 @@ local Sounds = {
 
 function Sounds:Init()
     if not RunService:IsServer() then
-        CommonUtils:PreloadAssets(self.CommonlyUsedSounds)
+        Utils:PreloadAssets(self.CommonlyUsedSounds)
     end
     workspace.Themes.ChildAdded:Connect(function()
         self:UpdateThemes()
@@ -101,7 +101,7 @@ function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any
     if SoundProperties then
         for name, value in SoundProperties do
             if name == "Position" then
-                Part = CommonUtils:GetInvisPart(typeof(value) == "Vector3" and CFrame.new(value) or value)
+                Part = Utils:GetInvisPart(typeof(value) == "Vector3" and CFrame.new(value) or value)
                 Part.Name = Sound.Name
                 Part.Parent = workspace.Sounds
                 Sound.Parent = Part
@@ -160,7 +160,7 @@ function Sounds:PlayTheme(ID: string | Instance, properties: {[string]: any}): S
             properties.Looped = true
         end
 
-        properties = CommonUtils:CopyTable(properties)
+        properties = Utils:CopyTable(properties)
 
         local Priority = properties.Priority or 1
         properties.Priority = nil

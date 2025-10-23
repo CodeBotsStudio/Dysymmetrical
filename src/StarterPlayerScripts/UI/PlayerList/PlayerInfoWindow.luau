@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Signal = require(ReplicatedStorage.Utils.Signal)
 
@@ -12,11 +12,11 @@ return {
     New = function(Player: Player, Parent: ScreenGui)
         local Window = {
             PlayerShown = Player,
-            Instance = CommonUtils:FindFirstChild(script, "PlayerInfoWindow"):Clone(),
+            Instance = Utils:FindFirstChild(script, "PlayerInfoWindow"):Clone(),
             Connections = {},
             Removed = Signal.new(),
         }
-        Window.Instance.Size = CommonUtils.UDim.Zero
+        Window.Instance.Size = Utils.UDim.Zero
 
         --user portrait
         task.spawn(function()
@@ -25,27 +25,27 @@ return {
 
         --time played
         task.spawn(function()
-            local HiddenTime = CommonUtils:FindFirstChild(Player, "PlayerData.Settings.Privacy.HidePlaytime")
-            local TimePlayed = CommonUtils:GetPlayerStat(Player, "General.TimePlayed", false)
+            local HiddenTime = Utils:FindFirstChild(Player, "PlayerData.Settings.Privacy.HidePlaytime")
+            local TimePlayed = Utils:GetPlayerStat(Player, "General.TimePlayed", false)
 
-            Window.Instance.TimePlayed.TimeLabel.Text = HiddenTime.Value and "(Hidden)" or CommonUtils:ConvertToDHMS(TimePlayed.Value)
+            Window.Instance.TimePlayed.TimeLabel.Text = HiddenTime.Value and "(Hidden)" or Utils:ConvertToDHMS(TimePlayed.Value)
             Window.Instance.TimePlayed.TimeLabel.TextColor3 = HiddenTime.Value and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(255, 255, 255)
 
             table.insert(Window.Connections, TimePlayed.Changed:Connect(function(value: number)
-                Window.Instance.TimePlayed.TimeLabel.Text = HiddenTime.Value and "(Hidden)" or CommonUtils:ConvertToDHMS(value)
+                Window.Instance.TimePlayed.TimeLabel.Text = HiddenTime.Value and "(Hidden)" or Utils:ConvertToDHMS(value)
                 Window.Instance.TimePlayed.TimeLabel.TextColor3 = HiddenTime.Value and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(255, 255, 255)
             end))
 
             table.insert(Window.Connections, HiddenTime.Changed:Connect(function(value: boolean)
-                Window.Instance.TimePlayed.TimeLabel.Text = value and "(Hidden)" or CommonUtils:ConvertToDHMS(TimePlayed.Value)
+                Window.Instance.TimePlayed.TimeLabel.Text = value and "(Hidden)" or Utils:ConvertToDHMS(TimePlayed.Value)
                 Window.Instance.TimePlayed.TimeLabel.TextColor3 = value and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(255, 255, 255)
             end))
         end)
 
         --surv wins
         task.spawn(function()
-            local HiddenWins = CommonUtils:FindFirstChild(Player, "PlayerData.Settings.Privacy.HideSurvivorWins")
-            local SurvivorWins = CommonUtils:GetPlayerStat(Player, "SurvivorStats.SurvivorWins", false)
+            local HiddenWins = Utils:FindFirstChild(Player, "PlayerData.Settings.Privacy.HideSurvivorWins")
+            local SurvivorWins = Utils:GetPlayerStat(Player, "SurvivorStats.SurvivorWins", false)
 
             Window.Instance.Wins.Survivor.Amount.Text = HiddenWins.Value and "(Hidden)" or tostring(SurvivorWins.Value)
             Window.Instance.Wins.Survivor.Amount.TextColor3 = HiddenWins.Value and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(255, 255, 255)
@@ -62,8 +62,8 @@ return {
         end)
         --killer wins
         task.spawn(function()
-            local HiddenWins = CommonUtils:FindFirstChild(Player, "PlayerData.Settings.Privacy.HideKillerWins")
-            local KillerWins = CommonUtils:GetPlayerStat(Player, "KillerStats.KillerWins", false)
+            local HiddenWins = Utils:FindFirstChild(Player, "PlayerData.Settings.Privacy.HideKillerWins")
+            local KillerWins = Utils:GetPlayerStat(Player, "KillerStats.KillerWins", false)
 
             Window.Instance.Wins.Killer.Amount.Text = HiddenWins.Value and "(Hidden)" or tostring(KillerWins.Value)
             Window.Instance.Wins.Killer.Amount.TextColor3 = HiddenWins.Value and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(255, 255, 255)
@@ -81,7 +81,7 @@ return {
 
         --equipped survivor
         task.spawn(function()
-            local EquippedSurvivor = CommonUtils:GetPlayerEquipped(Player, "Survivor", false)
+            local EquippedSurvivor = Utils:GetPlayerEquipped(Player, "Survivor", false)
             
             local LastSurvivor = ""
 
@@ -92,11 +92,11 @@ return {
                     if SkinConn then
                         SkinConn:Disconnect()
                     end
-                    local SkinValue = CommonUtils:GetPlayerEquipped(Player, "Skins."..Value, false)
+                    local SkinValue = Utils:GetPlayerEquipped(Player, "Skins."..Value, false)
 
                     local function ReloadSkin(Skin: string)
                         if #Skin <= 0 then
-                            local Default = require(CommonUtils:GetCharacterModule("Survivor", Value))
+                            local Default = require(Utils:GetCharacterModule("Survivor", Value))
 
                             Window.Instance.CharactersUsing.Survivor.PortraitLabel.SkinLabel.Text = "Default"
                             Window.Instance.CharactersUsing.Survivor.PortraitLabel.PortraitImage.Image = Default.Config.Render
@@ -104,7 +104,7 @@ return {
                             return
                         end
 
-                        local SkinMod = require(CommonUtils:GetCharacterModule("Survivor", Value, Skin))
+                        local SkinMod = require(Utils:GetCharacterModule("Survivor", Value, Skin))
 
                         Window.Instance.CharactersUsing.Survivor.PortraitLabel.SkinLabel.Text = SkinMod.Config.Name
                         Window.Instance.CharactersUsing.Survivor.PortraitLabel.PortraitImage.Image = SkinMod.Config.Render
@@ -115,7 +115,7 @@ return {
                     ReloadSkin(SkinValue.Value)
                 end
 
-                Window.Instance.CharactersUsing.Survivor.NameLabel.Text = require(CommonUtils:GetCharacterModule("Survivor", Value)).Config.Name
+                Window.Instance.CharactersUsing.Survivor.NameLabel.Text = require(Utils:GetCharacterModule("Survivor", Value)).Config.Name
             end
 
             EquippedSurvivor.Changed:Connect(Reload)
@@ -123,7 +123,7 @@ return {
         end)
         --equipped killer
         task.spawn(function()
-            local EquippedKiller = CommonUtils:GetPlayerEquipped(Player, "Killer", false)
+            local EquippedKiller = Utils:GetPlayerEquipped(Player, "Killer", false)
             
             local LastKiller = ""
 
@@ -134,11 +134,11 @@ return {
                     if SkinConn then
                         SkinConn:Disconnect()
                     end
-                    local SkinValue = CommonUtils:GetPlayerEquipped(Player, "Skins."..Value, false)
+                    local SkinValue = Utils:GetPlayerEquipped(Player, "Skins."..Value, false)
 
                     local function ReloadSkin(Skin: string)
                         if #Skin <= 0 then
-                            local Default = require(CommonUtils:GetCharacterModule("Killer", Value))
+                            local Default = require(Utils:GetCharacterModule("Killer", Value))
 
                             Window.Instance.CharactersUsing.Killer.PortraitLabel.SkinLabel.Text = "Default"
                             Window.Instance.CharactersUsing.Killer.PortraitLabel.PortraitImage.Image = Default.Config.Render
@@ -146,7 +146,7 @@ return {
                             return
                         end
 
-                        local SkinMod = require(CommonUtils:GetCharacterModule("Killer", Value, Skin))
+                        local SkinMod = require(Utils:GetCharacterModule("Killer", Value, Skin))
 
                         Window.Instance.CharactersUsing.Killer.PortraitLabel.SkinLabel.Text = SkinMod.Config.Name
                         Window.Instance.CharactersUsing.Killer.PortraitLabel.PortraitImage.Image = SkinMod.Config.Render
@@ -157,7 +157,7 @@ return {
                     ReloadSkin(SkinValue.Value)
                 end
 
-                Window.Instance.CharactersUsing.Killer.NameLabel.Text = require(CommonUtils:GetCharacterModule("Killer", Value)).Config.Name
+                Window.Instance.CharactersUsing.Killer.NameLabel.Text = require(Utils:GetCharacterModule("Killer", Value)).Config.Name
             end
 
             EquippedKiller.Changed:Connect(Reload)
@@ -192,15 +192,15 @@ return {
             end
 
             if not instant then
-                TweenService:Create(self.Instance, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Zero}):Play()
+                TweenService:Create(self.Instance, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
             else
-                self.Instance.Size = CommonUtils.UDim.Zero
+                self.Instance.Size = Utils.UDim.Zero
             end
 
             Debris:AddItem(self.Instance, 0.5)
         end
 
-        local HideButton = CommonUtils:FindFirstChild(Window.Instance, "Hide")
+        local HideButton = Utils:FindFirstChild(Window.Instance, "Hide")
         table.insert(Window.Connections, HideButton.MouseEnter:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end))

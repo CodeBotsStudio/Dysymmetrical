@@ -11,15 +11,7 @@ function Initter:Init()
             continue
         end
         if i:IsA("ModuleScript") and not i:HasTag("PreventInit") then
-            pcall(function()
-                local Scr = require(i)
-    		    if type(Scr) == "table" and Scr["Init"] and type(Scr["Init"]) == "function" then
-                    if i.Name ~= "ModPanel" then
-                        self.CurrentlyInitting = i.Name
-                    end
-    		    	Scr:Init()
-    		    end
-            end)
+            require(i):Init()
         end
     end
 

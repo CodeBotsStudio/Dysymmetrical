@@ -2,7 +2,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
 return function()
@@ -16,8 +16,8 @@ return function()
             ItemType = ItemType.Parent.Parent
         end
         ItemType = ItemType.Name
-        local Money = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Stats.Currency.Money")
-        local NetWorth = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Stats.Currency.NetWorth")
+        local Money = Utils:FindFirstChild(SourcePlayer, "PlayerData.Stats.Currency.Money")
+        local NetWorth = Utils:FindFirstChild(SourcePlayer, "PlayerData.Stats.Currency.NetWorth")
         local Price = require(Module).Config.Price
 
         if Price > Money.Value then
@@ -32,7 +32,7 @@ return function()
 
             local Parent = SourcePlayer.PlayerData.Purchased[ItemType]
             if ItemType == "Skins" then
-                Parent = Parent:FindFirstChild(Module.Parent.Name) or CommonUtils:CreateMissingPurchasedSkinValue(SourcePlayer, Module.Parent.Name)
+                Parent = Parent:FindFirstChild(Module.Parent.Name) or Utils:CreateMissingPurchasedSkinValue(SourcePlayer, Module.Parent.Name)
             end
 
             Product.Parent = Parent

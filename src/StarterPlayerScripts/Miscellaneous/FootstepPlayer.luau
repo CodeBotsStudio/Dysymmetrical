@@ -3,7 +3,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local FootstepPlayer = {
@@ -21,15 +21,15 @@ function FootstepPlayer:PlayFootstep(Anchor: BasePart)
 end
 
 function FootstepPlayer:_SetupChar(character: Model)
-	local HRP = CommonUtils:FindFirstChild(character, "HumanoidRootPart")
+	local HRP = Utils:FindFirstChild(character, "HumanoidRootPart")
 	if not HRP then
 		return
 	end
-	local Humanoid = CommonUtils:FindFirstChild(character, "Humanoid")
+	local Humanoid = Utils:FindFirstChild(character, "Humanoid")
 	if not Humanoid then
 		return
 	end
-	CommonUtils:FindFirstChild(Humanoid, "Animator").AnimationPlayed:Connect(function(track: AnimationTrack)
+	Utils:FindFirstChild(Humanoid, "Animator").AnimationPlayed:Connect(function(track: AnimationTrack)
 		track:GetMarkerReachedSignal("Footstep"):Connect(function()
 			if (character.PlayerAttributes.Sprinting and character.PlayerAttributes.Sprinting.Value) or Humanoid.FloorMaterial == Enum.Material.Air or HRP.Anchored then
 				return

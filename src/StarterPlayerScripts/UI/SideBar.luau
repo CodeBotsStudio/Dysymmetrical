@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local LocalPlayer = Players.LocalPlayer
@@ -22,7 +22,7 @@ type Button = {
 }
 
 local UI
-local BarButtonPrefab = CommonUtils:FindFirstChild(script, "Button")
+local BarButtonPrefab = Utils:FindFirstChild(script, "Button")
 
 function SideBar:Toggle(visible: boolean)
     UI.Visible = visible
@@ -39,12 +39,12 @@ function SideBar:CloseAll(Remaining: any)
 end
 
 function SideBar:Init()
-    UI = CommonUtils:FindFirstChild(script, "SideBarUI"):Clone()
-    UI.Parent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "SideBar")
+    UI = Utils:FindFirstChild(script, "SideBarUI"):Clone()
+    UI.Parent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "SideBar")
 
     local MoneyLabel = UI.Money.CurrentBalance
 
-    local Cash = CommonUtils:GetPlayerStat(LocalPlayer, "Currency.Money", false)
+    local Cash = Utils:GetPlayerStat(LocalPlayer, "Currency.Money", false)
     MoneyLabel.Text = tostring(Cash.Value).." $"
     Cash.Changed:Connect(function(value: number)
         MoneyLabel.Text = tostring(value).." $"
@@ -110,7 +110,7 @@ function SideBar:Init()
         end)
 
         LocalPlayer.CharacterAdded:Connect(function(char: Model)
-            Menu:Toggle(CommonUtils:FindFirstChild(char, "Role").Value == "Spectator")
+            Menu:Toggle(Utils:FindFirstChild(char, "Role").Value == "Spectator")
         end)
 
         self.MenuModules[name] = Menu
@@ -118,7 +118,7 @@ function SideBar:Init()
     end
 
     LocalPlayer.CharacterAdded:Connect(function(char: Model)
-        self:Toggle(CommonUtils:FindFirstChild(char, "Role").Value == "Spectator")
+        self:Toggle(Utils:FindFirstChild(char, "Role").Value == "Spectator")
     end)
 end
 

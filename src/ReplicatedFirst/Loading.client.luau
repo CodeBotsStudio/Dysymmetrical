@@ -49,7 +49,7 @@ local TweenService = game:GetService("TweenService")
 local function Finish()
     if not game:GetService("RunService"):IsStudio() then
         --don't remove this or you'll get in trouble! salutations! (unless you mention the engine in the game's description)
-        print(require(game:GetService("ReplicatedStorage").Modules.CommonUtils).Credits)
+        print(require(game:GetService("ReplicatedStorage").Modules.Utils).Credits)
     end
 
     loaded = true

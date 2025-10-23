@@ -4,17 +4,17 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
 local RewardNotifications = {}
 
 function RewardNotifications:Init()
-    local Container = CommonUtils:FindFirstChild(script, "RewardNotificationContainer")
+    local Container = Utils:FindFirstChild(script, "RewardNotificationContainer")
     Container.Parent = Players.LocalPlayer.PlayerGui.RewardNotifications
 
-    local Prefab = CommonUtils:FindFirstChild(script, "RewardNotification")
-    local AchievementPrefab = CommonUtils:FindFirstChild(script, "AchievementNotification")
+    local Prefab = Utils:FindFirstChild(script, "RewardNotification")
+    local AchievementPrefab = Utils:FindFirstChild(script, "AchievementNotification")
 
     Network:SetConnection("ShowRewardNotification", "REMOTE_EVENT", function(Module: ModuleScript | string, Type: string)
         if not Type then
@@ -24,7 +24,7 @@ function RewardNotifications:Init()
         local IsAchievement = Type:lower():find("achievement")
 
         local Card = (IsAchievement and AchievementPrefab or Prefab):Clone()
-        local Info = IsAchievement and CommonUtils:GetAchievementData(Module) or require(Module)
+        local Info = IsAchievement and Utils:GetAchievementData(Module) or require(Module)
         
         Card.ImageContainer.Render.Image = IsAchievement and Info.Icon or Info.Config.Render
 
@@ -47,11 +47,11 @@ function RewardNotifications:Init()
 
         Card.TextContainer.RewardQuote.Text = Quote
 
-        Card.Size = CommonUtils.UDim.Zero
+        Card.Size = Utils.UDim.Zero
         Card.Parent = Container
         TweenService:Create(Card, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = UDim2.fromScale(1, 0.2)}):Play()
         task.wait(5)
-        TweenService:Create(Card, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {Size = CommonUtils.UDim.Zero}):Play()
+        TweenService:Create(Card, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {Size = Utils.UDim.Zero}):Play()
         task.wait(1)
         Card:Destroy()
     end)

@@ -6,7 +6,7 @@ local Rand = Random.new()
 
 local MapManager = require(ServerScriptService.Managers.MapManager)
 local ServerCharacterManager = require(ServerScriptService.Managers.ServerCharacterManager)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local TimeManager = require(ServerScriptService.Managers.TimeManager)
@@ -42,20 +42,20 @@ end
 --- Starts the round right away. There's no more mystery to it.
 --- Chooses a killer, resets their malice, increases everyone else's in the round by 1, spawns a map, sets up all characters, sets the round time and plays the killer intro. 
 function RoundManager:StartRound()
-    local LoadedPlayers = CommonUtils:GetLoadedPlayers(false)
-    CommonUtils:Fade(LoadedPlayers, "In", 0.6, true)
+    local LoadedPlayers = Utils:GetLoadedPlayers(false)
+    Utils:Fade(LoadedPlayers, "In", 0.6, true)
     
     --shuffling so that if there's a tie it chooses a truly random one
-    RoundManager.CurrentRound.PlayersAccepted = CommonUtils:ShuffleTable(LoadedPlayers)
+    RoundManager.CurrentRound.PlayersAccepted = Utils:ShuffleTable(LoadedPlayers)
 
     local HighestMalice = {
         Player = RoundManager.CurrentRound.PlayersAccepted[1],
-        Value = CommonUtils:GetPlayerStat(RoundManager.CurrentRound.PlayersAccepted[1], "General.Malice"),
+        Value = Utils:GetPlayerStat(RoundManager.CurrentRound.PlayersAccepted[1], "General.Malice"),
         Char = nil,
     }
 
     for _, Player: Player in ipairs(RoundManager.CurrentRound.PlayersAccepted) do
-        local Malice = CommonUtils:GetPlayerStat(Player, "General.Malice")
+        local Malice = Utils:GetPlayerStat(Player, "General.Malice")
         if Malice > HighestMalice.Value then
             HighestMalice.Player = Player
             HighestMalice.Value = Malice
@@ -78,7 +78,7 @@ function RoundManager:StartRound()
     if RoundManager.CanSpawnKiller then --if one is testing survivor then the round'll never end
         table.remove(RoundManager.CurrentRound.PlayersRemaining, table.find(RoundManager.CurrentRound.PlayersRemaining, HighestMalice.Player))
     end
-    CommonUtils:Print(RoundManager.CurrentRound.PlayersRemaining)
+    Utils:Print(RoundManager.CurrentRound.PlayersRemaining)
 
     RoundState.Value = "InRound"
     TimeManager:SetTime(TimeManager.Config.RoundTime)
@@ -98,14 +98,14 @@ function RoundManager:StartRound()
         end
     end)
 
-    RoundManager.Callables:PlayIntro(CommonUtils:GetPlayerEquipped(RoundManager.CurrentRound.Killer.Player, "Killer"),
-        CommonUtils:GetPlayerEquipped(RoundManager.CurrentRound.Killer.Player, "Skins."..CommonUtils:GetPlayerEquipped(RoundManager.CurrentRound.Killer.Player, "Killer"))
+    RoundManager.Callables:PlayIntro(Utils:GetPlayerEquipped(RoundManager.CurrentRound.Killer.Player, "Killer"),
+        Utils:GetPlayerEquipped(RoundManager.CurrentRound.Killer.Player, "Skins."..Utils:GetPlayerEquipped(RoundManager.CurrentRound.Killer.Player, "Killer"))
     )
 end
 
 --- Plays the intro to everyone (whose game has loaded).
 function RoundManager.Callables:PlayIntro(RootName: string, SkinName: string?)
-    Network:FireClientConnection(CommonUtils:GetLoadedPlayers(), "PlayIntro", "REMOTE_EVENT",
+    Network:FireClientConnection(Utils:GetLoadedPlayers(), "PlayIntro", "REMOTE_EVENT",
         RootName,
         RoundManager.CurrentRound.Killer.Player.Name,
         SkinName
@@ -132,14 +132,14 @@ function RoundManager.Callables:InitLMS(LastMan: Player)
     workspace:SetAttribute("LMS", true)
 
     --reveals auras
-    CommonUtils:RevealPlayerAuraTo(RoundManager.CurrentRound.Killer.Player, LastMan, 10)
-    CommonUtils:RevealPlayerAuraTo(LastMan, RoundManager.CurrentRound.Killer.Player, 10)
+    Utils:RevealPlayerAuraTo(RoundManager.CurrentRound.Killer.Player, LastMan, 10)
+    Utils:RevealPlayerAuraTo(LastMan, RoundManager.CurrentRound.Killer.Player, 10)
 
     Network:FireConnection("LMSVoiceline")
 
     --plays the music
     --i'm sure that there's a better way to check special LMS's
-    local Mod = require(CommonUtils:GetCharacterModule("Killer", RoundManager.CurrentRound.Killer.Character:GetAttribute("CharacterName"), RoundManager.CurrentRound.Killer.Character:GetAttribute("CharacterSkinName")))
+    local Mod = require(Utils:GetCharacterModule("Killer", RoundManager.CurrentRound.Killer.Character:GetAttribute("CharacterName"), RoundManager.CurrentRound.Killer.Character:GetAttribute("CharacterSkinName")))
     local SpecialLMS = Mod.Config.SpecialLastManStandings
     local Specials = SpecialLMS[LastMan.Character:GetAttribute("CharacterName")]
     
@@ -177,7 +177,7 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
             CommonFunctions:GrantRewardToPlayer(RoundManager.CurrentRound.Killer.Player, 120, 180, "winning a match as Killer")
         end
         --survivor losses aren't handled here since when a player dies it directly counts
-        CommonUtils:Print("killer wins")
+        Utils:Print("killer wins")
     elseif winner == "Survivors" then
         if RoundManager.CurrentRound.Killer.Player then
             CommonFunctions:UpdatePlayerStat(RoundManager.CurrentRound.Killer.Player, "KillerStats.KillerLosses", 1)
@@ -187,12 +187,12 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
             CommonFunctions:GrantRewardToPlayer(RoundManager.CurrentRound.Killer.Player, 70, 110, "winning a match as Survivor")
         end
         
-        CommonUtils:Print("survivors win")
+        Utils:Print("survivors win")
     else
-        CommonUtils:Print("NO ONE WON!!1! https://www.youtube.com/watch?v=L8XbI9aJOXk")
+        Utils:Print("NO ONE WON!!1! https://www.youtube.com/watch?v=L8XbI9aJOXk")
     end
 
-    CommonUtils:Fade(CommonUtils:GetLoadedPlayers(), "In", 0.7, true)
+    Utils:Fade(Utils:GetLoadedPlayers(), "In", 0.7, true)
     
     TimeManager:SetTime(TimeManager.Config.LobbyTime)
 
@@ -222,7 +222,7 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
     --duh
     RoundState.Value = "Lobby"
 
-    CommonUtils:Fade(CommonUtils:GetLoadedPlayers(), "Out", 0.7, true)
+    Utils:Fade(Utils:GetLoadedPlayers(), "Out", 0.7, true)
 
     --resetting TimeManager for lobby
     TimeManager.OnTimerEnd = function()
@@ -254,7 +254,7 @@ function RoundManager.Utils:CheckForKillerWin()
 
     local RemainingSurvivor
 
-    for role, player in CommonUtils:GetCharactersWithRoles() do
+    for role, player in Utils:GetCharactersWithRoles() do
 
         if role == "Killer" then
             Killers += 1
@@ -281,10 +281,10 @@ end
 
 --- Gets a character's module depending on a player's equipped values.
 function RoundManager.Utils:GetCharacterModule(player: Player, charType: "Killer" | "Survivor")
-    local EquippedCharacter = CommonUtils:GetPlayerEquipped(player, charType)
-    local EquippedSkin = CommonUtils:GetPlayerEquipped(player, "Skins."..EquippedCharacter)
+    local EquippedCharacter = Utils:GetPlayerEquipped(player, charType)
+    local EquippedSkin = Utils:GetPlayerEquipped(player, "Skins."..EquippedCharacter)
 
-    return CommonUtils:GetCharacterModule(charType, EquippedCharacter, EquippedSkin)
+    return Utils:GetCharacterModule(charType, EquippedCharacter, EquippedSkin)
 end
 
 --- Sets up a player in the round's player list while also spawning its character.
@@ -294,18 +294,18 @@ function RoundManager.Utils:SetupPlayer(Player: Player, IsKiller: boolean)
     local Char
 
     if IsKiller and RoundManager.CanSpawnKiller then --RoundManager.CanSpawnKiller is for debugging
-        CommonUtils:GetPlayerStat(Player, "General.Malice", false).Value = 1 --resets malice
+        Utils:GetPlayerStat(Player, "General.Malice", false).Value = 1 --resets malice
 
         local KillerSpawns = Spawns.Killers:GetChildren()
 
         local ChosenSpawn = KillerSpawns[Rand:NextInteger(1, #KillerSpawns)].CFrame
-        local EquippedKillerName = CommonUtils:GetPlayerEquipped(Player, "Killer")
+        local EquippedKillerName = Utils:GetPlayerEquipped(Player, "Killer")
 
         --spawns the character
         Char = ServerCharacterManager:SetupCharacter(Player,
             EquippedKillerName,
             "Killer",
-            CommonUtils:GetPlayerEquipped(Player, "Skins."..EquippedKillerName),
+            Utils:GetPlayerEquipped(Player, "Skins."..EquippedKillerName),
             ChosenSpawn
         )
 
@@ -328,13 +328,13 @@ function RoundManager.Utils:SetupPlayer(Player: Player, IsKiller: boolean)
         local SurvivorSpawns = Spawns.Survivors:GetChildren()
 
         local ChosenSpawn = SurvivorSpawns[Rand:NextInteger(1, #SurvivorSpawns)].CFrame
-        local EquippedSurvivorName = CommonUtils:GetPlayerEquipped(Player, "Survivor")
+        local EquippedSurvivorName = Utils:GetPlayerEquipped(Player, "Survivor")
 
         --spawns the character
         Char = ServerCharacterManager:SetupCharacter(Player,
             EquippedSurvivorName,
             "Survivor",
-            CommonUtils:GetPlayerEquipped(Player, "Skins."..EquippedSurvivorName),
+            Utils:GetPlayerEquipped(Player, "Skins."..EquippedSurvivorName),
             ChosenSpawn
         )
 

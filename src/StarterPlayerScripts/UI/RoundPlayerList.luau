@@ -4,19 +4,19 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local LocalPlayer = Players.LocalPlayer
 local RoundState: StringValue = ReplicatedStorage.RoundInfo.CurrentState
 
 local RoundPlayerList = {}
 
-local TemplateFolder = CommonUtils:FindFirstChild(script, "Templates")
+local TemplateFolder = Utils:FindFirstChild(script, "Templates")
 local Prefabs = {
-    UI = CommonUtils:FindFirstChild(script, "RoundPlayerListUI"),
-    Card = CommonUtils:FindFirstChild(TemplateFolder, "Card"),
+    UI = Utils:FindFirstChild(script, "RoundPlayerListUI"),
+    Card = Utils:FindFirstChild(TemplateFolder, "Card"),
 }
-local UIParent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "RoundPlayerList")
+local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "RoundPlayerList")
 
 function RoundPlayerList:Init()
     LocalPlayer.CharacterAdded:Connect(function(Char: Model)
@@ -25,7 +25,7 @@ function RoundPlayerList:Init()
 end
 
 function RoundPlayerList:_InitUI(Char: Model)
-    if CommonUtils:FindFirstChild(Char, "Role").Value == "Spectator" then
+    if Utils:FindFirstChild(Char, "Role").Value == "Spectator" then
         return
     end
 
@@ -39,7 +39,7 @@ function RoundPlayerList:_InitUI(Char: Model)
     local Conns: {[string]: RBXScriptConnection} = {}
 
     for _, Character in workspace.Players:GetChildren() do
-        if not CommonUtils:FindFirstChild(Character, "Role") or Character.Role.Value ~= "Survivor" then
+        if not Utils:FindFirstChild(Character, "Role") or Character.Role.Value ~= "Survivor" then
             continue
         end
 
@@ -47,11 +47,11 @@ function RoundPlayerList:_InitUI(Char: Model)
         Card.Name = Character.Name
 
         --should show the skin portrait if equipped
-        Card.Portrait.Image = require(CommonUtils:GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"), Character:GetAttribute("CharacterSkinName"))).Config.Render
+        Card.Portrait.Image = require(Utils:GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"), Character:GetAttribute("CharacterSkinName"))).Config.Render
         --should show the root character's name without caring about the skin
-        Card.CharacterName.Text = require(CommonUtils:GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"))).Config.Name
+        Card.CharacterName.Text = require(Utils:GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"))).Config.Name
 
-        local Humanoid = CommonUtils:FindFirstChild(Character, "Humanoid")
+        local Humanoid = Utils:FindFirstChild(Character, "Humanoid")
 
         if Character == LocalPlayer.Character then
             Card.PlayerHealth.TextTransparency = 1
@@ -96,7 +96,7 @@ function RoundPlayerList:_InitUI(Char: Model)
 
                 local HealthPercentageMagnitude = Humanoid.Health / Humanoid.MaxHealth
                 Card.PlayerHealth.TextColor3 = Color3.fromRGB(
-                    CommonUtils:MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
+                    Utils:MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
                     HealthPercentageMagnitude * 180 + 75,
                     75
                 )

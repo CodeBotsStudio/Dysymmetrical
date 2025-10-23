@@ -4,7 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local rand = Random.new()
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Network = require(game:GetService("ReplicatedStorage").Modules.Network)
 
@@ -106,17 +106,17 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
                 return
             end
 
-            CommonUtils:PreloadAssets({own.Config.Render, own.AnimationIds, own.SoundIds})
+            Utils:PreloadAssets({own.Config.Render, own.AnimationIds, own.SoundIds})
 
             if typeof(own.AnimationIds) == "string" then
                 own.AnimationTracks[own.AnimationIds] = {
-                    Animation = CommonUtils:LoadAnimationFromID(own.Owner.Character, own.AnimationIds),
+                    Animation = Utils:LoadAnimationFromID(own.Owner.Character, own.AnimationIds),
                     Sound = nil,
                 }
             else
                 for _, id: string in own.AnimationIds do
                     own.AnimationTracks[id] = {
-                        Animation = CommonUtils:LoadAnimationFromID(own.Owner.Character, id),
+                        Animation = Utils:LoadAnimationFromID(own.Owner.Character, id),
                         Sound = nil,
                     }
                 end

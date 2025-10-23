@@ -6,13 +6,13 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local EffectDisplay: Frame
 
 function EffectViewer:Init()
-    EffectDisplay = CommonUtils:FindFirstChild(script, "EffectDisplay")
-    local UIPrefab = CommonUtils:FindFirstChild(script, "StatusContainer")
+    EffectDisplay = Utils:FindFirstChild(script, "EffectDisplay")
+    local UIPrefab = Utils:FindFirstChild(script, "StatusContainer")
 
     LocalPlayer.CharacterAdded:Connect(function(Char: Model)
         self:_SetupUI(UIPrefab:Clone(), Char)
@@ -20,7 +20,7 @@ function EffectViewer:Init()
 end
 
 function EffectViewer:_SetupUI(UI: Frame, char: Model)
-    if CommonUtils:FindFirstChild(char, "Role").Value == "Spectator" then
+    if Utils:FindFirstChild(char, "Role").Value == "Spectator" then
         UI:Destroy()
         return
     end
@@ -40,12 +40,12 @@ function EffectViewer:_SetupUI(UI: Frame, char: Model)
 	    		Display.Name = name
 	    		Display.Title.Text = effect.Name
                 if effect.Level > 1 then
-                    local RomanLevel = CommonUtils:IntToRoman(effect.Level)
+                    local RomanLevel = Utils:IntToRoman(effect.Level)
                     Display.Title.Text = Display.Title.Text.." "..RomanLevel
                 end
 	    		Display.Parent = UI
 	    	end
-	    	Display.Timer.Text = CommonUtils:ConvertToMinSec(effect.TimeLeft + 1)
+	    	Display.Timer.Text = Utils:ConvertToMinSec(effect.TimeLeft + 1)
 	    end
     
 	    for _, display in UI:GetChildren() do

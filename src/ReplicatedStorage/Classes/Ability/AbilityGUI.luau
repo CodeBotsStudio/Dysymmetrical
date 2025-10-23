@@ -3,7 +3,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 type Ability = {
     ModuleCode: any,
@@ -29,11 +29,11 @@ local AbilityGUI = {
     },
 }
 
-local PrefabContainer = CommonUtils:FindFirstChild(script, "Prefabs")
+local PrefabContainer = Utils:FindFirstChild(script, "Prefabs")
 local Prefabs = {
-    Container = CommonUtils:FindFirstChild(PrefabContainer, "CharacterAbilitiesContainer"),
-    AbilityContainer = CommonUtils:FindFirstChild(PrefabContainer, "AbilityContainer"),
-    UsesLeftText = CommonUtils:FindFirstChild(PrefabContainer, "UsesLeft"),
+    Container = Utils:FindFirstChild(PrefabContainer, "CharacterAbilitiesContainer"),
+    AbilityContainer = Utils:FindFirstChild(PrefabContainer, "AbilityContainer"),
+    UsesLeftText = Utils:FindFirstChild(PrefabContainer, "UsesLeft"),
 }
 
 --- Function used to init a character's ability GUI based on their ability table's info stored in `StarterCharacterScripts.PlayerAbilities.CharacterAbilities`.

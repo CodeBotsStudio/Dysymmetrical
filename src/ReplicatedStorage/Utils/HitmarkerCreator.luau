@@ -5,7 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local AppearTweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
@@ -13,7 +13,7 @@ local DisappearTweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDi
 
 local FinalBillboardSize = UDim2.fromScale(0.7, 0.7)
 
-local HitmarkerPrefab = CommonUtils:FindFirstChild(script, "Hitmarker")
+local HitmarkerPrefab = Utils:FindFirstChild(script, "Hitmarker")
 local HitmarkerFolder = workspace.TempObjectFolders.Hitmarkers
 
 local SoundGroup: SoundGroup = SoundService.SoundGroups.Master.UI
@@ -27,7 +27,7 @@ function HitmarkerCreator:ShowHitmarker(position: Vector3, dmgAmount: number, pl
 	Hitmarker.Parent = HitmarkerFolder
 	--
 	if playSound then
-		local SoundID = CommonUtils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.HitsoundID")
+		local SoundID = Utils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.HitsoundID")
 		if SoundID and #SoundID > 0 then
 			task.spawn(function()
 				Sounds:PlaySound(SoundID, {Volume = 0.5, SoundGroup = SoundGroup})

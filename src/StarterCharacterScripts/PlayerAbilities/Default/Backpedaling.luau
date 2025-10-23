@@ -4,12 +4,12 @@ local Backpedaling = {}
 --
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 --
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local char = LocalPlayer.Character
-local HumanoidRootPart: BasePart = CommonUtils:FindFirstChild(char, "HumanoidRootPart")
-local Humanoid = CommonUtils:FindFirstChild(char, "Humanoid")
+local HumanoidRootPart: BasePart = Utils:FindFirstChild(char, "HumanoidRootPart")
+local Humanoid = Utils:FindFirstChild(char, "Humanoid")
 --
 local SpeedManager = require(script.Parent.Parent.Parent.PlayerAttributeScripts.SpeedManager)
 --

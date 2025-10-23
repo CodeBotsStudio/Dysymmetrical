@@ -3,17 +3,17 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
 local MoneyXPRewards = {}
 
 function MoneyXPRewards:Init()
-    local UI = CommonUtils:FindFirstChild(Players.LocalPlayer.PlayerGui, "MoneyXPRewards")
-    local Prefab = CommonUtils:FindFirstChild(script, "Reward")
+    local UI = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "MoneyXPRewards")
+    local Prefab = Utils:FindFirstChild(script, "Reward")
 
     Network:SetConnection("GrantReward", "REMOTE_EVENT", function(Money: number?, EXP: number?, Reason: string?)
-        if not CommonUtils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.ShowRewardNotifications") then
+        if not Utils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.ShowRewardNotifications") then
             return
         end
 

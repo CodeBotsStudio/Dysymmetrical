@@ -10,7 +10,7 @@ local LocalPlayer = Players.LocalPlayer
 
 local Mouse = LocalPlayer:GetMouse()
 local InputManager = require(LocalPlayer.PlayerScripts.InputManager)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local TopbarPlus = require(ReplicatedStorage.Packages.TopbarPlus)
 
 local EmotePanel = {
@@ -22,13 +22,13 @@ local UI
 local UISize = UDim2.fromScale(0.407, 0.723)
 
 function EmotePanel:Init()
-    local ScreenGui = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "EmotePanel")
+    local ScreenGui = Utils:FindFirstChild(LocalPlayer.PlayerGui, "EmotePanel")
 
-    UI = CommonUtils:FindFirstChild(script, "EmotePanel")
+    UI = Utils:FindFirstChild(script, "EmotePanel")
     UI.Parent = ScreenGui
 
-    local Selector = CommonUtils:FindFirstChild(UI, "Selector")
-    local EmoteButtonContainer = CommonUtils:FindFirstChild(UI, "EmoteContainer")
+    local Selector = Utils:FindFirstChild(UI, "Selector")
+    local EmoteButtonContainer = Utils:FindFirstChild(UI, "EmoteContainer")
 
     local SelectedEmote = ""
 
@@ -40,7 +40,7 @@ function EmotePanel:Init()
 
         local EmoteToPlay = EmoteButtonContainer[SelectedEmote]:GetAttribute("Name")
         if LocalPlayer.Character and EmoteToPlay and #EmoteToPlay > 0 then
-            local EmoteManager = require(CommonUtils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager"))
+            local EmoteManager = require(Utils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager"))
             if EmoteManager.CurrentlyPlayingEmote and EmoteManager.CurrentlyPlayingEmote.Name == EmoteToPlay then return end
             EmoteManager:PlayEmote(EmoteToPlay)
         end
@@ -48,8 +48,8 @@ function EmotePanel:Init()
 
     local function ReloadContent()
         for _, i in EmoteButtonContainer:GetChildren() do
-            local EquippedEmote = CommonUtils:GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
-            local EmoteModule = EquippedEmote and #EquippedEmote > 0 and CommonUtils:GetEmoteModule(EquippedEmote)
+            local EquippedEmote = Utils:GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
+            local EmoteModule = EquippedEmote and #EquippedEmote > 0 and Utils:GetEmoteModule(EquippedEmote)
             if EmoteModule then
                 i:SetAttribute("Name", EquippedEmote)
                 EmoteModule = require(EmoteModule)
@@ -70,7 +70,7 @@ function EmotePanel:Init()
     end
 
     ReloadContent()
-    for _, i in CommonUtils:GetPlayerEquipped(LocalPlayer, "Emotes", false):GetChildren() do
+    for _, i in Utils:GetPlayerEquipped(LocalPlayer, "Emotes", false):GetChildren() do
         i.Changed:Connect(ReloadContent)
     end
 
@@ -119,7 +119,7 @@ function EmotePanel:Init()
                     return
                 end
 
-                local EmoteManager = require(CommonUtils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager"))
+                local EmoteManager = require(Utils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager"))
                 
                 if EmoteManager.CurrentlyPlayingEmote then
                     EmoteManager:StopEmote(EmoteManager.CurrentlyPlayingEmote)
@@ -153,7 +153,7 @@ end
 
 function EmotePanel:_Close()
     self.Open = false
-    TweenService:Create(UI, Info, {Size = CommonUtils.UDim.Zero}):Play()
+    TweenService:Create(UI, Info, {Size = Utils.UDim.Zero}):Play()
 end
 
 return EmotePanel

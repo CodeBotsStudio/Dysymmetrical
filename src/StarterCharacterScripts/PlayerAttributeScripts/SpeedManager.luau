@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
 local SpeedManager = {
@@ -14,7 +14,7 @@ local SpeedManager = {
 
 function SpeedManager:Init()
 	local char = Players.LocalPlayer.Character
-	local humanoid = CommonUtils:FindFirstChild(char, "Humanoid")
+	local humanoid = Utils:FindFirstChild(char, "Humanoid")
 
 	table.insert(self.Conns, RunService.PreSimulation:Connect(function(_delta: number)
 		local CurrentSpeed = char:GetAttribute("BaseSpeed")

@@ -5,17 +5,17 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Signal = require(ReplicatedStorage.Utils.Signal)
 
-local ButtonPrefab = CommonUtils:FindFirstChild(script, "EmoteButton")
+local ButtonPrefab = Utils:FindFirstChild(script, "EmoteButton")
 
 return {
     New = function(Slot: number, Parent: Instance)
         local Window = {
-            Instance = CommonUtils:FindFirstChild(script, "EmoteEquipWindow"):Clone(),
+            Instance = Utils:FindFirstChild(script, "EmoteEquipWindow"):Clone(),
             Connections = {},
             Equipped = Signal.new(),
             Removed = Signal.new(),
@@ -48,16 +48,16 @@ return {
             end
 
             if not instant then
-                TweenService:Create(self.Instance, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Zero}):Play()
+                TweenService:Create(self.Instance, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
             else
-                self.Instance.Size = CommonUtils.UDim.Zero
+                self.Instance.Size = Utils.UDim.Zero
             end
 
             Debris:AddItem(self.Instance, 0.5)
         end
 
         local EmotesToInstantiate = {}
-        for _, i in CommonUtils:GetPlayerOwned(Players.LocalPlayer, "Emotes", false):GetChildren() do
+        for _, i in Utils:GetPlayerOwned(Players.LocalPlayer, "Emotes", false):GetChildren() do
             table.insert(EmotesToInstantiate, i.Name)
         end
         table.sort(EmotesToInstantiate, function(a, b)
@@ -65,7 +65,7 @@ return {
         end)
 
         for _, i in EmotesToInstantiate do
-            local EmoteInfo = require(CommonUtils:GetEmoteModule(i))
+            local EmoteInfo = require(Utils:GetEmoteModule(i))
 
             local Button = ButtonPrefab:Clone()
             Button.Name = i

@@ -9,7 +9,7 @@ local Ragdoll = {
 	HandledHumanoids = {},
 }
 
-local CommonUtils = require(script.Parent.CommonUtils)
+local Utils = require(script.Parent.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
 function Ragdoll:Init()
@@ -36,15 +36,15 @@ function Ragdoll:Init()
 		end
 		Players.PlayerAdded:Connect(function(Player: Player)
 			Player.CharacterAdded:Connect(function(Char: Model)
-				AddHumRagdoll(CommonUtils:FindFirstChild(Char, "Humanoid"))
+				AddHumRagdoll(Utils:FindFirstChild(Char, "Humanoid"))
 			end)
 		end)
 		for _, Player: Player in Players:GetPlayers() do
 			Player.CharacterAdded:Connect(function(Char: Model)
-				AddHumRagdoll(CommonUtils:FindFirstChild(Char, "Humanoid"))
+				AddHumRagdoll(Utils:FindFirstChild(Char, "Humanoid"))
 			end)
 			if Player.Character then
-				AddHumRagdoll(CommonUtils:FindFirstChild(Player.Character, "Humanoid"))
+				AddHumRagdoll(Utils:FindFirstChild(Player.Character, "Humanoid"))
 			end
 		end
 	else
@@ -59,7 +59,7 @@ function Ragdoll:Init()
 					rag:PivotTo(Position)
 				end
 				if Force then
-					local Silly = CommonUtils:GetPlayerSetting(Players.LocalPlayer, "Advanced.SillyRagdolls")
+					local Silly = Utils:GetPlayerSetting(Players.LocalPlayer, "Advanced.SillyRagdolls")
 					local ForceArr = Force:split("|")
 					rag.PrimaryPart.Velocity = Vector3.new(ForceArr[1], ForceArr[2], ForceArr[3]) * (Silly and 10 or 1)
 				end
@@ -68,12 +68,8 @@ function Ragdoll:Init()
 
 		local function AddHumRagdoll(Desc: Instance, Primary: BasePart?)
 			local Parent = Desc.Parent
-			Primary = Primary or (Parent and Parent:IsA("Model") and (Parent.PrimaryPart or CommonUtils:FindFirstChild(Parent, "HumanoidRootPart", false)))
-			if Desc:IsA("Humanoid") then
-				print(Parent, Primary)
-			end
+			Primary = Primary or (Parent and Parent:IsA("Model") and (Parent.PrimaryPart or Utils:FindFirstChild(Parent, "HumanoidRootPart", false)))
 			if Primary and Desc:IsA("Humanoid") then
-				print("enabling ragdoll for "..Parent.Name)
 				if table.find(self.HandledHumanoids, Desc) then
 					return
 				end
@@ -96,12 +92,12 @@ function Ragdoll:Init()
 		end
 		Players.PlayerAdded:Connect(function(Player: Player)
 			Player.CharacterAdded:Connect(function(Char: Model)
-				AddHumRagdoll(CommonUtils:FindFirstChild(Char, "Humanoid"), CommonUtils:FindFirstChild(Char, "HumanoidRootPart"))
+				AddHumRagdoll(Utils:FindFirstChild(Char, "Humanoid"), Utils:FindFirstChild(Char, "HumanoidRootPart"))
 			end)
 		end)
 		Network:SetConnection("SetupLocalRagdoll", "REMOTE_EVENT", function(p: Player)
 			if p.Character then
-				AddHumRagdoll(CommonUtils:FindFirstChild(p.Character, "Humanoid"), CommonUtils:FindFirstChild(p.Character, "HumanoidRootPart"))
+				AddHumRagdoll(Utils:FindFirstChild(p.Character, "Humanoid"), Utils:FindFirstChild(p.Character, "HumanoidRootPart"))
 			end
 		end)
 	end
@@ -134,7 +130,7 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 		if not RagdollFolder then
 			return
 		end
-		local Silly = CommonUtils:GetPlayerSetting(Players.LocalPlayer, "Advanced.SillyRagdolls")
+		local Silly = Utils:GetPlayerSetting(Players.LocalPlayer, "Advanced.SillyRagdolls")
 		--handle ragdoll limit option
 		Char = Character:Clone()
 		Char.Parent = RagdollFolder
@@ -160,7 +156,7 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 			end
 		end
 		task.spawn(function()
-			local Humanoid = CommonUtils:FindFirstChild(Char, "Humanoid")
+			local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
 			if Humanoid then
 				Humanoid.Health = 1
 				Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff

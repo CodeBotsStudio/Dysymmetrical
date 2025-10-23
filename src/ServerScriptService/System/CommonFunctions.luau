@@ -39,12 +39,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
 local DominoEffectModule = require(ReplicatedStorage.Effects.SurvivorSpecific.DominoEffect)
 
-function CommonUtils:Init()
+function Utils:Init()
 	Network:SetConnection("GetPermRank", "REMOTE_FUNCTION", function(Player: Player): number
 		return self:GetPlayerPermissionRank(Player)
 	end)
@@ -65,17 +65,17 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	--correction: the hitboxes in Forsaken are FULLY server-handled, but it doesn't lag because THEIR GAME SOMEHOW DOESN'T LAG AT ALL. WHAT????
 	--quick thing: hitboxes are now fully server-sided. yup. i had to. :(
 
-	if CommonUtils:FindFirstChild(Char, "Role") and Char.Role.Value == "Survivor" then
+	if Utils:FindFirstChild(Char, "Role") and Char.Role.Value == "Survivor" then
 		Char.Killer.Value = sourcePlayer
 	end
 	
 	reason = reason or "HAHAHA https://www.youtube.com/watch?v=L8XbI9aJOXk" --OnlyIvo
 
-	if CommonUtils:FindFirstChild(Char, "PlayerAttributes.Effects.Resistance", false) then
+	if Utils:FindFirstChild(Char, "PlayerAttributes.Effects.Resistance", false) then
 		inflictedDamage /= Char.PlayerAttributes.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
 
-	if not CommonUtils:FindFirstChild(Char, "Effects.Blocking", false) then
+	if not Utils:FindFirstChild(Char, "Effects.Blocking", false) then
 		targetHumanoid:TakeDamage(inflictedDamage)
 	else
 		self:ApplyEffect(sourcePlayer.Character:FindFirstChildOfClass("Humanoid"), "Slowness", 6, 2, "KillerSpecific")
@@ -83,14 +83,14 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	end
 	
 	--NOTE: this is from Driftwood and you can use it as an example.
-	if CommonUtils:FindFirstChild(Char, "Effects.Domino Effect", false) and table.find(DominoEffectModule.Attacks, reason) then
+	if Utils:FindFirstChild(Char, "Effects.Domino Effect", false) and table.find(DominoEffectModule.Attacks, reason) then
 		Network:FireClientConnection(sourcePlayer, "ExecuteReplicatedModule", "REMOTE_EVENT", ReplicatedStorage.Effects.SurvivorSpecific.DominoEffect.ApplyInk:GetFullName())
 		Char.Effects["Domino Effect"]:Destroy()
-		CommonUtils:GetEffectModule("Domino Effect", "SurvivorSpecific"):Remove(Char)
+		Utils:GetEffectModule("Domino Effect", "SurvivorSpecific"):Remove(Char)
 	end
 
 	Network:FireClientConnection(sourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, inflictedDamage)
-	if CommonUtils:GetPlayerSetting(sourcePlayer, "Miscellaneous.ImageFlashOnHit") then
+	if Utils:GetPlayerSetting(sourcePlayer, "Miscellaneous.ImageFlashOnHit") then
 		Network:FireClientConnection(sourcePlayer, "ShowJokeSettingImage", "REMOTE_EVENT", false, sourcePlayer.Character.Role.Value)
 	end
 
@@ -114,13 +114,13 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	--printing
 	local targetName = Char.Name or "Dummy"
     if workspace:GetAttribute("DebugAllowed") then
-		CommonUtils:Print("[DamageDealt] Target: "..targetName.." || InflictedDamage: "..tostring(inflictedDamage).." || Reason: "..tostring(reason))
+		Utils:Print("[DamageDealt] Target: "..targetName.." || InflictedDamage: "..tostring(inflictedDamage).." || Reason: "..tostring(reason))
 	end
 
 	if Player then
 		Network:FireClientConnection(Player, "DamagePlayer", "REMOTE_EVENT", sourcePlayer, reason)
-		if CommonUtils:GetPlayerSetting(Player, "Miscellaneous.ImageFlashOnHit") then
-			Network:FireClientConnection(Player, "ShowJokeSettingImage", "REMOTE_EVENT", true, CommonUtils:FindFirstChild(Char, "Role") and Char.Role.Value or "Survivor")
+		if Utils:GetPlayerSetting(Player, "Miscellaneous.ImageFlashOnHit") then
+			Network:FireClientConnection(Player, "ShowJokeSettingImage", "REMOTE_EVENT", true, Utils:FindFirstChild(Char, "Role") and Char.Role.Value or "Survivor")
 		end
 	end
 	Network:FireClientConnection(sourcePlayer, "DamagedPlayer", "REMOTE_EVENT", Player, targetHumanoid, reason)
@@ -129,7 +129,7 @@ end
 --- Applies an effect on a specific humanoid. It can be a player or an NPC, it doesn't matter.
 function CommonFunctions:ApplyEffect(hum: Humanoid, name: string, level: number?, duration: number?, subfolder: string?)
 	local char = hum.Parent
-	local EffectModule = CommonUtils:GetEffectModule(name, subfolder)
+	local EffectModule = Utils:GetEffectModule(name, subfolder)
 
 	local EffectValue = Instance.new("NumberValue")
 
@@ -140,7 +140,7 @@ function CommonFunctions:ApplyEffect(hum: Humanoid, name: string, level: number?
 	end
 	EffectValue:SetAttribute("Duration", duration or EffectModule.Duration)
 
-	EffectValue.Parent = CommonUtils:FindFirstChild(char, "Effects")
+	EffectValue.Parent = Utils:FindFirstChild(char, "Effects")
 	
 	task.delay(duration, function()
 		if EffectValue then
@@ -204,14 +204,14 @@ function CommonFunctions:_GrantEXPToPlayer(Player: Player, amount: number, visua
 	end
 	local CharacterName = Player.Character:GetAttribute("CharacterName")
 
-	local CharValue = CommonUtils:GetPlayerOwned(Player, Role.Value.."s."..CharacterName, false)
+	local CharValue = Utils:GetPlayerOwned(Player, Role.Value.."s."..CharacterName, false)
 	CharValue.Value += amount
 end
 
 --- Updates a player's stat specified by a `string` path.
 --- Stats are all either `int`s or `number`s.
 function CommonFunctions:UpdatePlayerStat(Player: Player, path: string, amount: number)
-    local Stat = CommonUtils:FindFirstChild(Player, "PlayerData.Stats."..path)
+    local Stat = Utils:FindFirstChild(Player, "PlayerData.Stats."..path)
 	if Stat then
 		Stat.Value += amount
 	else
@@ -220,7 +220,7 @@ function CommonFunctions:UpdatePlayerStat(Player: Player, path: string, amount: 
 end
 
 --- Function used instead of the typical `Player:Kick()` to auto-generate an anti-cheat kick message and keep consistency.
---- Use `CommonUtils.KickIDs`.
+--- Use `Utils.KickIDs`.
 function CommonFunctions:KickPlayer(Player: Player, KickMessage: {
     ID: string,
     Message: string,
@@ -232,7 +232,7 @@ end
 --TODO: Achievement UI
 --- Increments a player's progress of a specific achievement.
 function CommonFunctions:IncrementAchievementProgress(Player: Player, AchievementPath: string, Amount: number)
-	local SplitPath = CommonUtils:SplitStringPath(AchievementPath)
+	local SplitPath = Utils:SplitStringPath(AchievementPath)
 	local Achievement: Achievements.Achievement = Achievements
 	for _, step in SplitPath do
 		Achievement = Achievement[step]
@@ -246,7 +246,7 @@ function CommonFunctions:IncrementAchievementProgress(Player: Player, Achievemen
 		return
 	end
 
-	local AValue = CommonUtils:FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath)
+	local AValue = Utils:FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath)
 	if AValue.Value + Amount >= Achievement.Requirement then
 		self:CompleteAchievement(Player, AchievementPath)
 	else
@@ -257,7 +257,7 @@ end
 --- Grants a player an achievement instantly.
 --- Useful to grant boolean achievements or just complete achievements that have a numeric requirement.
 function CommonFunctions:CompleteAchievement(Player: Player, AchievementPath: string)
-	local SplitPath = CommonUtils:SplitStringPath(AchievementPath)
+	local SplitPath = Utils:SplitStringPath(AchievementPath)
 	local Achievement: Achievements.Achievement = Achievements
 	for _, step in SplitPath do
 		Achievement = Achievement[step]
@@ -269,7 +269,7 @@ function CommonFunctions:CompleteAchievement(Player: Player, AchievementPath: st
 
 	--TODO: achievement rewards
 	if Achievement.Requirement then
-		CommonUtils:FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath).Value = Achievement.Requirement
+		Utils:FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath).Value = Achievement.Requirement
 	else
 		local AValue = Instance.new("BoolValue")
 		AValue.Name = SplitPath[#SplitPath]
@@ -282,7 +282,7 @@ function CommonFunctions:CompleteAchievement(Player: Player, AchievementPath: st
 
 			InstPath = InstPath.."."..step
 		end
-		AValue.Parent = CommonUtils:FindFirstChild(Player, "PlayerData.Achievements."..InstPath)
+		AValue.Parent = Utils:FindFirstChild(Player, "PlayerData.Achievements."..InstPath)
 	end
 
 	Network:FireClientConnection(Player, "CompletedAchievement", "REMOTE_EVENT", Achievement)

@@ -3,7 +3,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local KillerIntroClass = {}
@@ -76,7 +76,7 @@ function KillerIntroClass:New2DIntro(Config: IntroSettings, IntroModule: ModuleS
             local VideoPlayer = require(Players.LocalPlayer.PlayerScripts.UI.VideoPlayer)
 
             local Intro = require(IntroModule)
-            local Module = require(CommonUtils:GetCharacterModule("Killer", Config.KillerName, Config.SkinName))
+            local Module = require(Utils:GetCharacterModule("Killer", Config.KillerName, Config.SkinName))
 
             if Intro.Frames then
                 VideoPlayer:LoadVideo(Intro.Frames)
@@ -155,14 +155,14 @@ function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
                 return
             end
 
-            local Module = CommonUtils:GetCharacterModule("Killer", Config.KillerName, Config.SkinName)
+            local Module = Utils:GetCharacterModule("Killer", Config.KillerName, Config.SkinName)
 
-            local PlayerRig = CommonUtils:FindFirstChild(workspace.Players, Config.PlayerName)
+            local PlayerRig = Utils:FindFirstChild(workspace.Players, Config.PlayerName)
             --yield until the char loads properly
-            local HRP = CommonUtils:FindFirstChild(PlayerRig, "HumanoidRootPart")
+            local HRP = Utils:FindFirstChild(PlayerRig, "HumanoidRootPart")
 
             local KillerRig = PlayerRig:Clone()
-            HRP = CommonUtils:FindFirstChild(KillerRig, "HumanoidRootPart")
+            HRP = Utils:FindFirstChild(KillerRig, "HumanoidRootPart")
             KillerRig.Parent = workspace.TempObjectFolders.Intro
             HRP.Anchored = true
             KillerRig:PivotTo(CFrame.new(0, 10000, 0))
@@ -191,7 +191,7 @@ function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
                 "CameraRig",
             } do
                 if Module.Config.AnimationIDs[i] then
-                    own.Animations[i] = CommonUtils:LoadAnimationFromID(i:find("Killer") and KillerRig or CameraRig, Module.Config.AnimationIDs[i])
+                    own.Animations[i] = Utils:LoadAnimationFromID(i:find("Killer") and KillerRig or CameraRig, Module.Config.AnimationIDs[i])
                 end
             end
         end,

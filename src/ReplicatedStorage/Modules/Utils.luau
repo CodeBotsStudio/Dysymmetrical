@@ -11,7 +11,7 @@ local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Effect = require(ReplicatedStorage.Classes.Effect)
 local Network = require(ReplicatedStorage.Modules.Network)
 
-local CommonUtils = {
+local Utils = {
     --- INTERNAL: Used for cloned ragdolling.
     TransparentParts = {},
     AuraColors = {
@@ -31,7 +31,7 @@ local CommonUtils = {
 }
 
 --- If you change this, you're a bum.
-CommonUtils.Credits = [[
+Utils.Credits = [[
 
 ######  #     #  #####  #     # #     # #     # ####### ####### ######   ###   #####     #    #       
 #     #  #   #  #     #  #   #  ##   ## ##   ## #          #    #     #   #   #     #   # #   #       
@@ -46,7 +46,7 @@ This game is using Dysymmetrical, an open-source asymmetrical game engine availa
 Credits to Dyscarn for making it! (hello!)
 ]]
 
-function CommonUtils:Init()
+function Utils:Init()
     if not RunService:IsServer() then
         local function AddToR(i)
             if i:IsA("BasePart") and i.Transparency >= 0.75 then
@@ -73,7 +73,9 @@ function CommonUtils:Init()
             self:_Fade(FadeType, Duration, Yield, StartTransparency, FadeColor)
         end)
     else
+        print("connecting")
         Network:SetConnection("CreateMissingSkinValue", "REMOTE_FUNCTION", function(SourcePlayer: Player, name: string)
+            print("got it")
             return self:CreateMissingSkinValue(SourcePlayer, name)
         end)
         Network:SetConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", function(SourcePlayer: Player, name: string)
@@ -87,12 +89,12 @@ function CommonUtils:Init()
 end
 
 --- Splits a path into multiple strings.
-function CommonUtils:SplitStringPath(path: string): {string}
+function Utils:SplitStringPath(path: string): {string}
     return path:split(".")
 end
 
 --- Returns a completely invisible, uncollidable, undetectable, 1 cubic stud sized part in CFrame `cf` and parented to `parent`.
-function CommonUtils:GetInvisPart(cf: CFrame?, parent: Instance?): Part
+function Utils:GetInvisPart(cf: CFrame?, parent: Instance?): Part
     local Part = Instance.new("Part")
     Part.CanCollide = false
     Part.CanQuery = false
@@ -113,7 +115,7 @@ function CommonUtils:GetInvisPart(cf: CFrame?, parent: Instance?): Part
 end
 
 --- Makes a copy of an entire table.
-function CommonUtils:CopyTable<T>(CloneThis: T & {}) : T
+function Utils:CopyTable<T>(CloneThis: T & {}) : T
 	local MetaTable = getmetatable(CloneThis)
 	local NewTable = (MetaTable and setmetatable({}, MetaTable :: {}?) or {}) :: typeof(CloneThis)
 
@@ -129,7 +131,7 @@ function CommonUtils:CopyTable<T>(CloneThis: T & {}) : T
 end
 
 --- Shuffles a table to make it have a random order.
-function CommonUtils:ShuffleTable(t: {any} | {[any]: any}): {any} | {[any]: any}
+function Utils:ShuffleTable(t: {any} | {[any]: any}): {any} | {[any]: any}
     local j, temp
 
 	for i = #t, 1, -1 do
@@ -143,7 +145,7 @@ function CommonUtils:ShuffleTable(t: {any} | {[any]: any}): {any} | {[any]: any}
 end
 
 --- Loads any assets in the function's parameter for proper use without loading them right when used.
-function CommonUtils:PreloadAssets(assets: string | {string})
+function Utils:PreloadAssets(assets: string | {string})
     task.defer(function()
         local loadedAssets = {}
         local checkedAssets = {}
@@ -188,8 +190,8 @@ end
 
 --- Gets the mouse position in the screen. Also supports Mobile devices in a different way.
 --- Never call this from server as it won't return anything.
---- This isn't supposed to be called at all, use `CommonUtils:GetPlayerMousePosition()` instead
-function CommonUtils:_GetMousePosition(LockToClosestPlayer: boolean): Vector3
+--- This isn't supposed to be called at all, use `Utils:GetPlayerMousePosition()` instead
+function Utils:_GetMousePosition(LockToClosestPlayer: boolean): Vector3
     --only available in client
     if RunService:IsServer() then
         return
@@ -259,7 +261,7 @@ function CommonUtils:_GetMousePosition(LockToClosestPlayer: boolean): Vector3
 end
 
 --- Gets a player's mouse position from any side.
-function CommonUtils:GetPlayerMousePosition(Player: Player, LockToClosestPlayer: boolean): Vector3
+function Utils:GetPlayerMousePosition(Player: Player, LockToClosestPlayer: boolean): Vector3
     if RunService:IsServer() then
         return Network:FireClientConnection(Player, "GetMousePosition", "REMOTE_FUNCTION", LockToClosestPlayer)
     else
@@ -268,7 +270,7 @@ function CommonUtils:GetPlayerMousePosition(Player: Player, LockToClosestPlayer:
 end
 
 --- Gets the closest player from a specific group to a position in a radius.
-function CommonUtils:GetClosestPlayerFromPosition(Position: Vector3, Options): (Model, number)
+function Utils:GetClosestPlayerFromPosition(Position: Vector3, Options): (Model, number)
     Options = Options or {}
 
     Options.MaxDistance = Options.MaxDistance or 999
@@ -310,7 +312,7 @@ function CommonUtils:GetClosestPlayerFromPosition(Position: Vector3, Options): (
 end
 
 --- Checks if a certain `Instance` is on screen.
-function CommonUtils:IsOnScreen(Thing: Instance): boolean
+function Utils:IsOnScreen(Thing: Instance): boolean
     if RunService:IsServer() or not Thing:IsA("Instance") then
         return
     end
@@ -361,7 +363,7 @@ end
 
 --- CLIENT FUNCTION: Reveals a player's aura (highlight) for a specific duration.
 --- If a color for the aura isn't specified, it'll be automatically chosen depending on their role.
-function CommonUtils:RevealPlayerAura(RevealedPlayer: Player | Model, Duration: number?, Color: Color3?)
+function Utils:RevealPlayerAura(RevealedPlayer: Player | Model, Duration: number?, Color: Color3?)
     if RunService:IsServer() then
         return
     end
@@ -402,7 +404,7 @@ end
 
 --- SERVER FUNCTION: Reveals a player's aura (highlight) to a specific player for a speficic duration.
 --- If a color for the aura isn't specified, it'll be automatically chosen depending on their role.
-function CommonUtils:RevealPlayerAuraTo(Player: Player | Model, RevealedPlayer: Player | Model, Duration: number?, Color: Color3?)
+function Utils:RevealPlayerAuraTo(Player: Player | Model, RevealedPlayer: Player | Model, Duration: number?, Color: Color3?)
     if not RunService:IsServer() then
         return
     end
@@ -413,9 +415,9 @@ function CommonUtils:RevealPlayerAuraTo(Player: Player | Model, RevealedPlayer: 
 end
 
 --- Tries to get an instance from a set path with a string.
---- The syntax is exactly the same as in another language when looking for a variable (e. g. "ReplicatedStorage.Modules.CommonUtils").
+--- The syntax is exactly the same as in another language when looking for a variable (e. g. "ReplicatedStorage.Modules.Utils").
 --- It's useful when sending an object's path between peers (S2C / C2S) to save bandwidth by using a string instead of an Instance reference.
-function CommonUtils:GetInstanceFromPath(path: string): Instance
+function Utils:GetInstanceFromPath(path: string): Instance
     local Names = self:SplitStringPath(path)
     
     local Inst
@@ -430,7 +432,7 @@ function CommonUtils:GetInstanceFromPath(path: string): Instance
     if Inst then
         return Inst
     elseif workspace:GetAttribute("DebugAllowed") then
-        warn("[CommonUtils:GetInstanceFromPath()] Instance not found for path: " .. path)
+        warn("[Utils:GetInstanceFromPath()] Instance not found for path: " .. path)
     end
 
     return
@@ -438,17 +440,17 @@ end
 
 --- Retrieves a player's stat through a string path.
 --- If `value` is false, it'll return the `ValueBase` object instead of the value itself to modify it or to get a property from it (e.g. attributes).
-function CommonUtils:GetPlayerStat(Player: Player, path: string, value: boolean?): ValueBase | any
+function Utils:GetPlayerStat(Player: Player, path: string, value: boolean?): ValueBase | any
     if value == nil then
         value = true
     end
 
-    local Stat = CommonUtils:FindFirstChild(Player, "PlayerData.Stats."..path)
+    local Stat = Utils:FindFirstChild(Player, "PlayerData.Stats."..path)
     return value and Stat.Value or Stat
 end
 
 --- Retrieves a player's setting value through a string path.
-function CommonUtils:GetPlayerSetting(Player: Player, path: string): any
+function Utils:GetPlayerSetting(Player: Player, path: string): any
     local splitPath = self:SplitStringPath(path)
     local PlayerSettings = self:FindFirstChild(Player, "PlayerData.Settings", false)
     if #splitPath == 1 then
@@ -457,7 +459,7 @@ function CommonUtils:GetPlayerSetting(Player: Player, path: string): any
         local Setting = PlayerSettings
         for _, step in splitPath do
             if not Setting then
-                warn("[CommonUtils:GetPlayerSetting()] Child \""..step.."\" not found! Returning nil!")
+                warn("[Utils:GetPlayerSetting()] Child \""..step.."\" not found! Returning nil!")
                 return
             end
             Setting = Setting:FindFirstChild(step)
@@ -469,13 +471,13 @@ end
 --- Retrieves a player's equipped item of a type through a string path.
 --- Also works for emotes.
 --- If `value` is false, it'll return the `StringValue` object instead of the value itself.
-function CommonUtils:GetPlayerEquipped(Player: Player, path: string, value: boolean?): StringValue | string
+function Utils:GetPlayerEquipped(Player: Player, path: string, value: boolean?): StringValue | string
     if value == nil then
         value = true
     end
 
     local splitPath = self:SplitStringPath(path)
-    local Equipped = CommonUtils:FindFirstChild(Player, "PlayerData.Equipped", false)
+    local Equipped = Utils:FindFirstChild(Player, "PlayerData.Equipped", false)
     if #splitPath == 1 then
         local Child = Equipped:FindFirstChild(splitPath[1])
         return value and Child.Value or Child
@@ -483,7 +485,7 @@ function CommonUtils:GetPlayerEquipped(Player: Player, path: string, value: bool
         local Child = Equipped
         for _, step in splitPath do
             if not Child then
-                warn("[CommonUtils:GetPlayerEquipped()] Child \""..step.."\" not found! Returning nil!")
+                warn("[Utils:GetPlayerEquipped()] Child \""..step.."\" not found! Returning nil!")
                 return
             end
 
@@ -492,9 +494,11 @@ function CommonUtils:GetPlayerEquipped(Player: Player, path: string, value: bool
 
                 if not Child then
                     if RunService:IsServer() then
-                        Child = CommonUtils:CreateMissingSkinValue(Player, step)
+                        Child = Utils:CreateMissingSkinValue(Player, step)
                     else
+                        print("uhh")
                         Child = Network:FireServerConnection("CreateMissingSkinValue", "REMOTE_FUNCTION", step)
+                        print("supposedly fired")
                     end
                 end
 
@@ -510,12 +514,12 @@ end
 --- Retrieves a player's purchased item of a type through a string path.
 --- Also works for emotes.
 --- If `value` is false, it'll return the `StringValue` object instead of the value itself.
-function CommonUtils:GetPlayerOwned(Player: Player, path: string, value: boolean?): StringValue | string
+function Utils:GetPlayerOwned(Player: Player, path: string, value: boolean?): StringValue | string
     if value == nil then
         value = true
     end
 
-    local Child = CommonUtils:FindFirstChild(Player, "PlayerData.Purchased."..path, false)
+    local Child = Utils:FindFirstChild(Player, "PlayerData.Purchased."..path, false)
     if not Child then
         return
     end
@@ -524,8 +528,8 @@ end
 
 --- Checks if a player has an effect.
 --- @return Returns a `boolean` indicating if the specified player has the effect and the level if it's true.
-function CommonUtils:CheckPlayerEffect(Player: Player, effectName: string): (boolean & number)?
-    if Player.Character and CommonUtils:FindFirstChild(Player.Character, "Effects."..effectName) then
+function Utils:CheckPlayerEffect(Player: Player, effectName: string): (boolean & number)?
+    if Player.Character and Utils:FindFirstChild(Player.Character, "Effects."..effectName) then
         return true, Player.Character.Effects[effectName].Value
     end
 
@@ -534,13 +538,13 @@ end
 
 --- Linear interpolation: formula used to get a certain value between two specified values by using a magnitude from 0 to 1.
 --- See [Lerping](https://rfcs.luau.org/function-math-lerp.html).
-function CommonUtils:Lerp(a: number, b: number, t: number): number
+function Utils:Lerp(a: number, b: number, t: number): number
     return a + (b - a) * t
 end
 
 --- Function used instead of the built-in print to trace for bugs in public playtesting.
 --- If called from Server, it'll also print to all clients to trace server values.
-function CommonUtils:Print(...)
+function Utils:Print(...)
     if RunService:IsServer() then
         print(...)
         if workspace:GetAttribute("DebugAllowed") == true and not RunService:IsStudio() then
@@ -552,12 +556,12 @@ function CommonUtils:Print(...)
 end
 
 --- @return Returns a string containing the passed number to be 2 digits or more, filling the blank spaces with zeros.
-function CommonUtils:FormatInt(Int: number): string
+function Utils:FormatInt(Int: number): string
 	return string.format("%02i", Int)
 end
 
 --- Function that'll turn a seconds value to Days:Hours:Minutes:Seconds format in a string.
-function CommonUtils:ConvertToDHMS(Seconds: number): string
+function Utils:ConvertToDHMS(Seconds: number): string
 	local Minutes = (Seconds - Seconds % 60) / 60
 	Seconds -= Minutes * 60
 	local Hours = (Minutes - Minutes % 60) / 60
@@ -579,13 +583,13 @@ function CommonUtils:ConvertToDHMS(Seconds: number): string
 end
 
 --- Function that works like `FormatInt` but is used to return seconds in Minutes:Seconds format.
-function CommonUtils:ConvertToMinSec(Seconds: number): string
+function Utils:ConvertToMinSec(Seconds: number): string
 	return string.format("%02i:%02i", Seconds / 60, Seconds % 60)
 end
 
 --- Gets a character's module from a specific type.
 --- It also supports skins using `skinName` as an optional last parameter.
-function CommonUtils:GetCharacterModule(charType: "Survivor" | "Killer", charName: string, skinName: string?): ModuleScript
+function Utils:GetCharacterModule(charType: "Survivor" | "Killer", charName: string, skinName: string?): ModuleScript
     local CharFolder = ReplicatedStorage.Characters
 
     local Module
@@ -613,7 +617,7 @@ function CommonUtils:GetCharacterModule(charType: "Survivor" | "Killer", charNam
 end
 
 --- Gets an emote's module. Just used as a shortcut, and also serves use for tracing errors (it has a custom error message).
-function CommonUtils:GetEmoteModule(EmoteName: string): ModuleScript
+function Utils:GetEmoteModule(EmoteName: string): ModuleScript
     local EmoteFolder = ReplicatedStorage.Assets.Emotes
 
     local Module = EmoteFolder:FindFirstChild(EmoteName)
@@ -643,7 +647,7 @@ local RomanNumeralMap = {
 }
 
 --- Converts an `int` to roman numerals in a `string`. 
-function CommonUtils:IntToRoman(num: number): string
+function Utils:IntToRoman(num: number): string
     local roman = ""
 
     while num > 0 do
@@ -660,7 +664,7 @@ end
 
 --- Gets an effect's module.
 --- Also supports subfolders in `ReplicatedStorage.Effects`.
-function CommonUtils:GetEffectModule(name: string, subfolder: string?, module: boolean?): Effect.Effect
+function Utils:GetEffectModule(name: string, subfolder: string?, module: boolean?): Effect.Effect
     if module == nil then
         module = false
     end
@@ -668,9 +672,9 @@ function CommonUtils:GetEffectModule(name: string, subfolder: string?, module: b
 	local Effect: ModuleScript
 
 	if subfolder and #subfolder > 0 then
-        Effect = CommonUtils:FindFirstChild(ReplicatedStorage.Effects, subfolder.."."..name, false)
+        Effect = Utils:FindFirstChild(ReplicatedStorage.Effects, subfolder.."."..name, false)
 	else
-        Effect = CommonUtils:FindFirstChild(ReplicatedStorage.Effects, name, false)
+        Effect = Utils:FindFirstChild(ReplicatedStorage.Effects, name, false)
 	end
 
     if not Effect:IsA("ModuleScript") then
@@ -682,7 +686,7 @@ end
 
 --- Calculates a character's level from an EXP value.
 --- Will increase the requirement for the next level until level 100 and begins at 1.
-function CommonUtils:CalculateLevelFromEXP(EXP: number): (number, number, number)
+function Utils:CalculateLevelFromEXP(EXP: number): (number, number, number)
 	local Levels = 1
 	local EXPForNextLevel = 100
 	local EXPRemaining = EXP
@@ -700,19 +704,19 @@ end
 
 --- Loads an animation into a rig, returning the corresponding `AnimationTrack` for usage.
 --- If `YieldUntilLoad` is true, the code executing this function will yield until the `AnimationTrack` is fully loaded. Defaults to `false`.
-function CommonUtils:LoadAnimationFromID(Rig: Model, ID: string | {string} | {[string]: string}, YieldUntilLoad: boolean?): AnimationTrack
+function Utils:LoadAnimationFromID(Rig: Model, ID: string | {string} | {[string]: string}, YieldUntilLoad: boolean?): AnimationTrack
     if not Rig then
-        error("[CommonUtils:LoadAnimationFromID()]: Rig not provided or nil.")
+        error("[Utils:LoadAnimationFromID()]: Rig not provided or nil.")
         return
     end
 
     if not ID or #ID < 0 then
-        error("[CommonUtils:LoadAnimationFromID()]: Animation ID invalid or nil.")
+        error("[Utils:LoadAnimationFromID()]: Animation ID invalid or nil.")
         return
     end
 
     if typeof(ID) == "table" then
-        ID = CommonUtils:DictToTable(ID)
+        ID = Utils:DictToTable(ID)
         ID = ID[math.random(1, #ID)]
     end
 
@@ -759,7 +763,7 @@ end
 
 --- Turns a dictionary into a table, removing the keys and making them numbers.
 --- Primarily used for randomness as it isn't ordered in any way.
-function CommonUtils:DictToTable<T>(Dictionary: {[any]: T}): {T}
+function Utils:DictToTable<T>(Dictionary: {[any]: T}): {T}
     local NewTable = {}
 
     for _, item in Dictionary do
@@ -772,7 +776,7 @@ end
 --- Shows a black fade in/out in a player's UI.
 --- If it's called from server, the player(s) must be specified.
 --- If it's called from client, it can't be sent to other clients.
-function CommonUtils:Fade(Target: Player | {Player}, FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
+function Utils:Fade(Target: Player | {Player}, FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
     if RunService:IsServer() then
         Network:FireClientConnection(Target, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
         if Yield and Duration > 0 then
@@ -783,15 +787,15 @@ function CommonUtils:Fade(Target: Player | {Player}, FadeType: "In" | "Out", Dur
     end
 end
 
---- INTERNAL: Makes `CommonUtils:Fade()` work. Use that one instead.
-function CommonUtils:_Fade(FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
+--- INTERNAL: Makes `Utils:Fade()` work. Use that one instead.
+function Utils:_Fade(FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
     if RunService:IsServer() then
-        warn("[CommonUtils:Fade()] Tried to call internal fade function from server! Preventing fade execution...")
+        warn("[Utils:Fade()] Tried to call internal fade function from server! Preventing fade execution...")
         return
     end
 
     if workspace:GetAttribute("ClientLoaded") ~= true then
-        warn("[CommonUtils:Fade()] Tried to call fade when client hasn't loaded yet! Preventing fade execution...")
+        warn("[Utils:Fade()] Tried to call fade when client hasn't loaded yet! Preventing fade execution...")
         return
     end
 
@@ -800,7 +804,7 @@ function CommonUtils:_Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
 
     if FadeType == "In" then
         if self.FadeFrame and self.FadeFrame.Parent then
-            warn("[CommonUtils:Fade()] Fade already exists! Preventing fade execution...")
+            warn("[Utils:Fade()] Fade already exists! Preventing fade execution...")
             return
         end
         
@@ -809,7 +813,7 @@ function CommonUtils:_Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
         self.FadeFrame.BackgroundTransparency = StartTransparency or 1
         self.FadeFrame.BackgroundColor3 = FadeColor and Color3.fromRGB(FadeColor.R, FadeColor.G, FadeColor.B) or Color3.fromRGB(0, 0, 0)
         self.FadeFrame.Size = self.UDim.Full
-        self.FadeFrame.Parent = CommonUtils:FindFirstChild(Players.LocalPlayer.PlayerGui, "KillerIntros")
+        self.FadeFrame.Parent = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "KillerIntros")
 
         if Duration <= 0 then
             self.FadeFrame.BackgroundTransparency = 0
@@ -823,7 +827,7 @@ function CommonUtils:_Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
         end
     elseif FadeType == "Out" then
         if not self.FadeFrame or not self.FadeFrame.Parent then
-            warn("[CommonUtils:Fade()] Fade non-existant! Call with `In` type first! Preventing fade execution...")
+            warn("[Utils:Fade()] Fade non-existant! Call with `In` type first! Preventing fade execution...")
             return
         end
 
@@ -839,12 +843,12 @@ function CommonUtils:_Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
             Twn.Completed:Wait()
         end
     else
-        warn("[CommonUtils:Fade()] Fade type not specified! Preventing fade execution...")
+        warn("[Utils:Fade()] Fade type not specified! Preventing fade execution...")
     end
 end
 
 --- Returns a list of every player whose game has loaded.
-function CommonUtils:GetLoadedPlayers(IncludeAFK: boolean?): {Player}
+function Utils:GetLoadedPlayers(IncludeAFK: boolean?): {Player}
     if IncludeAFK == nil then
         IncludeAFK = true
     end
@@ -863,8 +867,8 @@ function CommonUtils:GetLoadedPlayers(IncludeAFK: boolean?): {Player}
 end
 
 --- Returns a list of every loaded player's character.
---- Also read `CommonUtils:GetLoadedPlayers()`.
-function CommonUtils:GetLoadedCharacters(IncludeAFK: boolean?): {Model}
+--- Also read `Utils:GetLoadedPlayers()`.
+function Utils:GetLoadedCharacters(IncludeAFK: boolean?): {Model}
     local t: {Model} = {}
 
     for _, i in self:GetLoadedPlayers(IncludeAFK) do
@@ -877,7 +881,7 @@ function CommonUtils:GetLoadedCharacters(IncludeAFK: boolean?): {Model}
 end
 
 --- Returns a list of all characters from every role instantiated.
-function CommonUtils:GetCharactersWithRoles(IncludeAFK: boolean?): {[string]: {Model}}
+function Utils:GetCharactersWithRoles(IncludeAFK: boolean?): {[string]: {Model}}
     local Characters = {}
 
     for _, Character in self:GetLoadedCharacters(IncludeAFK) do
@@ -902,12 +906,13 @@ function CommonUtils:GetCharactersWithRoles(IncludeAFK: boolean?): {[string]: {M
 end
 
 --- INTERNAL | SERVER FUNCTION: Used to create a character's equipped skin value for a player if it's missing.
-function CommonUtils:CreateMissingSkinValue(SourcePlayer: Player, name: string)
+function Utils:CreateMissingSkinValue(SourcePlayer: Player, name: string)
+    print("creating missing skin value")
     if not RunService:IsServer() then
         return
     end
 
-    local SkinValue = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins."..name, false)
+    local SkinValue = Utils:FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins."..name, false)
     if SkinValue then
         return SkinValue
     end
@@ -921,12 +926,12 @@ function CommonUtils:CreateMissingSkinValue(SourcePlayer: Player, name: string)
 end
 
 --- INTERNAL | SERVER FUNCTION: Used to create a character's purchased skin value for a player if it's missing.
-function CommonUtils:CreateMissingPurchasedSkinValue(SourcePlayer: Player, name: string)
+function Utils:CreateMissingPurchasedSkinValue(SourcePlayer: Player, name: string)
     if not RunService:IsServer() then
         return
     end
 
-    local SkinFolder = CommonUtils:FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins."..name, false)
+    local SkinFolder = Utils:FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins."..name, false)
     if SkinFolder then
         return SkinFolder
     end
@@ -940,9 +945,9 @@ end
 
 --- Util to replace `Instance:FindFirstChild()` if you know that a certain instance IS going to be there soon if it isn't already there (e.g. Role value in the character).
 --- An example of a replaceable chunk of code is `local Role = Char:FindFirstChild("Role") or Char:WaitForChild("Role", 30)`.
-function CommonUtils:FindFirstChild(Parent: Instance, ChildPath: string, YieldPerStep: boolean?, Timeout: number?): Instance
+function Utils:FindFirstChild(Parent: Instance, ChildPath: string, YieldPerStep: boolean?, Timeout: number?): Instance
     if not Parent then
-        warn("[CommonUtils:FindFirstChild()] `Parent` is nil!")
+        warn("[Utils:FindFirstChild()] `Parent` is nil!")
         return
     end
 
@@ -965,7 +970,7 @@ function CommonUtils:FindFirstChild(Parent: Instance, ChildPath: string, YieldPe
     end
 
     if not Result or Result == Parent then
-        -- warn("[CommonUtils:FindFirstChild()] Couldn't find \""..Parent.Name.."."..ChildPath.."\"!", debug.traceback())
+        -- warn("[Utils:FindFirstChild()] Couldn't find \""..Parent.Name.."."..ChildPath.."\"!", debug.traceback())
         return
     end
 
@@ -973,12 +978,12 @@ function CommonUtils:FindFirstChild(Parent: Instance, ChildPath: string, YieldPe
 end
 
 --- Maps a numeric range onto another and returns position `t`.
-function CommonUtils:MapToRange(t: number, a: number, b: number, c: number, d: number): number
+function Utils:MapToRange(t: number, a: number, b: number, c: number, d: number): number
 	return c + ((d - c) / (b - a)) * (t - a)
 end
 
 --- Returns an achievement's data table through an `AchievementGroup.AchievementName` path.
-function CommonUtils:GetAchievementData(path: string): Achievements.Achievement
+function Utils:GetAchievementData(path: string): Achievements.Achievement
     local steps = self:SplitStringPath(path)
     
     local Achievement = Achievements
@@ -989,4 +994,4 @@ function CommonUtils:GetAchievementData(path: string): Achievements.Achievement
     return Achievement
 end
 
-return CommonUtils
+return Utils

@@ -9,11 +9,11 @@ local CharManager = {}
 local LocalPlayer = Players.LocalPlayer
 
 local AbilityGUI = require(ReplicatedStorage.Classes.Ability.AbilityGUI)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 function CharManager:Init()
     LocalPlayer.CharacterAdded:Connect(function(Char: Model)
-        if CommonUtils:FindFirstChild(Char, "Role").Value ~= "Spectator" then
+        if Utils:FindFirstChild(Char, "Role").Value ~= "Spectator" then
             self:LoadCharacter(Char:GetAttribute("CharacterName"), Char.Role.Value, Char:GetAttribute("CharacterSkinName"))
         end
     end)
@@ -30,7 +30,7 @@ function CharManager:_InitCharacterAbilities(Module)
             Ability:Init(Module, LocalPlayer)
         end
     end
-    CommonUtils:Print(CharacterAbilities.Abilities)
+    Utils:Print(CharacterAbilities.Abilities)
 end
 
 --- Loads a specific character's client stuff. The character itself is spawned in in `ServerScriptService.Managers.ServerCharacterManager`.
@@ -40,12 +40,12 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     end)
 
     local Char: Model = LocalPlayer.Character
-    local Animate = CommonUtils:FindFirstChild(Char, "Animate")
+    local Animate = Utils:FindFirstChild(Char, "Animate")
 
-    local CharModule = CommonUtils:CopyTable(require(CommonUtils:GetCharacterModule(charType, charName, skinName)))
+    local CharModule = Utils:CopyTable(require(Utils:GetCharacterModule(charType, charName, skinName)))
     CharModule.Owner = LocalPlayer
 
-    CommonUtils:PreloadAssets(CharModule.Config)
+    Utils:PreloadAssets(CharModule.Config)
 
     Animate.idle.IdleAnim.AnimationId = CharModule.Config.AnimationIDs.IdleAnimation
     Animate.walk.WalkAnim.AnimationId = CharModule.Config.AnimationIDs.WalkAnimation

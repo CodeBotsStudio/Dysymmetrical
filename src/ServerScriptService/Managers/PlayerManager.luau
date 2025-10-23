@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local TimeManager = require(ServerScriptService.Managers.TimeManager)
 
 local AntiFly = require(ServerScriptService.Security.AntiFly)
@@ -44,7 +44,7 @@ function PlayerManager:Init()
 
 			char.Parent = PlayerFolder
 			
-        	CommonUtils:FindFirstChild(char, "Humanoid").BreakJointsOnDeath = false
+        	Utils:FindFirstChild(char, "Humanoid").BreakJointsOnDeath = false
 
 			task.delay(1, function()
 				if Role.Value ~= "Spectator" then
@@ -138,7 +138,7 @@ function PlayerManager:Init()
 		end)
 		
 		task.spawn(function()
-			local TimePlayed = CommonUtils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
+			local TimePlayed = Utils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
 			RunService.Heartbeat:Connect(function(delta: number)
 				TimePlayed.Value += delta
 			end)
@@ -217,7 +217,7 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: "K
 
 	--gets the skin if queued to
 	if skinName ~= nil and #skinName > 0 then
-		char = CommonUtils:FindFirstChild(CharFolder.Skins[RigType], RigName.."."..skinName, false)
+		char = Utils:FindFirstChild(CharFolder.Skins[RigType], RigName.."."..skinName, false)
 	end
 
 	--if there's a skin then it gets cloned and used

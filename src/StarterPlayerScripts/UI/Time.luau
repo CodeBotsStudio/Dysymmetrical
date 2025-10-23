@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local function toMS(s: number): string
 	return string.format("%02i:%02i", s/60, s%60)
@@ -14,8 +14,8 @@ return {
         local TimeRemaining = TimeStats.TimeRemaining
         local State = TimeStats.CurrentState
 
-        local Frame = CommonUtils:FindFirstChild(script, "TimeInfo")
-        Frame.Parent = CommonUtils:FindFirstChild(game:GetService("Players").LocalPlayer.PlayerGui, "Time")
+        local Frame = Utils:FindFirstChild(script, "TimeInfo")
+        Frame.Parent = Utils:FindFirstChild(game:GetService("Players").LocalPlayer.PlayerGui, "Time")
         local TimeLabel = Frame.TimeLabel
         local Label = Frame.Label
 

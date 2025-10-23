@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local InputManager = require(script.Parent.Parent.InputManager)
 local PlayerInfoWindow = require(script.PlayerInfoWindow)
@@ -12,12 +12,12 @@ local PlayerList = {}
 local LocalPlayer = Players.LocalPlayer
 
 function PlayerList:Init()
-    local UI = CommonUtils:FindFirstChild(script, "PlayerList")
-    UI.Parent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "PlayerList")
+    local UI = Utils:FindFirstChild(script, "PlayerList")
+    UI.Parent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "PlayerList")
 
-    local PlayerPrefab = CommonUtils:FindFirstChild(script, "PlayerContainer")
+    local PlayerPrefab = Utils:FindFirstChild(script, "PlayerContainer")
 
-    local ToggleButton = CommonUtils:FindFirstChild(UI, "Topbar.ToggleButton")
+    local ToggleButton = Utils:FindFirstChild(UI, "Topbar.ToggleButton")
 
     local CurrentPlayerWindow
 
@@ -41,8 +41,8 @@ function PlayerList:Init()
         Container.PlayerLabel.Text = Player.DisplayName
 
         --money
-        local HiddenMoney = CommonUtils:FindFirstChild(Player, "PlayerData.Settings.Privacy.HideMoney")
-        local MoneyValue = CommonUtils:FindFirstChild(Player, "leaderstats.Money")
+        local HiddenMoney = Utils:FindFirstChild(Player, "PlayerData.Settings.Privacy.HideMoney")
+        local MoneyValue = Utils:FindFirstChild(Player, "leaderstats.Money")
 
         Container.MoneyLabel.Text = HiddenMoney.Value and "(Hidden)" or tostring(MoneyValue.Value)
         Container.MoneyLabel.TextColor3 = HiddenMoney.Value and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(255, 255, 255)
@@ -57,7 +57,7 @@ function PlayerList:Init()
         end)
 
         --malice
-        local MaliceValue = CommonUtils:FindFirstChild(Player, "leaderstats.Malice")
+        local MaliceValue = Utils:FindFirstChild(Player, "leaderstats.Malice")
         Container.MaliceLabel.Text = tostring(MaliceValue.Value)
         MaliceValue.Changed:Connect(function(value: number)
             Container.MaliceLabel.Text = tostring(value)
@@ -89,7 +89,7 @@ function PlayerList:Init()
     end
 
     LocalPlayer.CharacterAdded:Connect(function(Char: Model)
-        local Role = CommonUtils:FindFirstChild(Char, "Role")
+        local Role = Utils:FindFirstChild(Char, "Role")
         if Role.Value ~= "Spectator" then
             if CurrentPlayerWindow then
                 CurrentPlayerWindow:Hide(true)

@@ -8,12 +8,12 @@ local EmoteEquipWindow = require(script.EmoteEquipWindow)
 local SideBar = require(script.Parent.SideBar)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Types = require(ReplicatedStorage.Classes.Character)
-local CommonUtils = require(ReplicatedStorage.Modules.CommonUtils)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local LocalPlayer = Players.LocalPlayer
 
-local UIParent = CommonUtils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 
 local Inventory = {
     Opened = false,
@@ -40,7 +40,7 @@ local Inventory = {
 
 local Sizes = {
     SideBar = UDim2.fromScale(0.3, 1),
-    ClosedSideBar = CommonUtils.UDim.FullY,
+    ClosedSideBar = Utils.UDim.FullY,
 }
 
 local UI
@@ -89,8 +89,8 @@ function Inventory:ReorderSkins()
 
     table.sort(Ordered, function(a, b)
         local Modules = {
-            A = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
-            B = require(CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+            A = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
+            B = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
         }
 
         return
@@ -165,14 +165,14 @@ end
 
 function Inventory:ReloadEquippedEmotes()
     for _, i in EmoteContainer.EmoteContainer:GetChildren() do
-        local Value = CommonUtils:GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
+        local Value = Utils:GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
         if #Value <= 0 then
             i.Render.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
             i.NameLabel.Text = ""
             continue
         end
 
-        local EmoteInfo = require(CommonUtils:GetEmoteModule(Value))
+        local EmoteInfo = require(Utils:GetEmoteModule(Value))
         i.Render.Image = EmoteInfo.Config.Render
         i.NameLabel.Text = EmoteInfo.Config.Name
     end
@@ -192,7 +192,7 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
         table.clear(self.ItemModules.Skins)
 
         local charName = self.SelectedItem.Name
-        local EquippedSkin = CommonUtils:GetPlayerEquipped(LocalPlayer, "Skins."..charName, false)
+        local EquippedSkin = Utils:GetPlayerEquipped(LocalPlayer, "Skins."..charName, false)
 
         local function CheckSkinEquipLabels()
             for _, i in self.LoadedItems.Skins do
@@ -209,7 +209,7 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
         end
 
         for _, i in (LocalPlayer.PlayerData.Purchased.Skins:FindFirstChild(self.SelectedItem.Name) or Network:FireServerConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", self.SelectedItem.Name)):GetChildren() do
-            local Module = CommonUtils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
+            local Module = Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
             local Info = require(Module)
             local name = Module.Name
 
@@ -264,8 +264,8 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
 end
 
 function Inventory:Init()
-    UI = CommonUtils:FindFirstChild(script, "InventoryUI"):Clone()
-    UI.Size = CommonUtils.UDim.Zero
+    UI = Utils:FindFirstChild(script, "InventoryUI"):Clone()
+    UI.Size = Utils.UDim.Zero
     UI.Parent = UIParent
     self.UIInstance = UI
 
@@ -297,7 +297,7 @@ function Inventory:Init()
         end
     end
 
-    local templates = CommonUtils:FindFirstChild(script, "Templates")
+    local templates = Utils:FindFirstChild(script, "Templates")
     Templates.CardTemplate = Templates.CardTemplate or templates.CardTemplate
     Templates.Header = Templates.Header or templates.Header
     Templates.Text = Templates.Text or templates.TextContainer
@@ -315,8 +315,8 @@ function Inventory:Init()
     Buttons.Equip = ButtonsContainer.Equip
     Buttons.Skins = ButtonsContainer.Skins
 
-    Equipped.EquippedKiller = CommonUtils:GetPlayerEquipped(LocalPlayer, "Killer", false)
-    Equipped.EquippedSurvivor = CommonUtils:GetPlayerEquipped(LocalPlayer, "Survivor", false)
+    Equipped.EquippedKiller = Utils:GetPlayerEquipped(LocalPlayer, "Killer", false)
+    Equipped.EquippedSurvivor = Utils:GetPlayerEquipped(LocalPlayer, "Survivor", false)
 
     local Conns = {}
 
@@ -398,8 +398,8 @@ function Inventory:Open(Time: number)
 
     self:ToggleSkinsMenu(false)
     PreviewInstances.Render.Image = ""
-    SkinContainer.Parent.Size = CommonUtils.UDim.FullY
-    SideContainer.Size = CommonUtils.UDim.FullY
+    SkinContainer.Parent.Size = Utils.UDim.FullY
+    SideContainer.Size = Utils.UDim.FullY
     InventoryContainer.Parent.Size = UDim2.fromScale(0.7, 1)
     self.SkinMenu.Open = false
     if self.EmoteWindow then
@@ -407,7 +407,7 @@ function Inventory:Open(Time: number)
         self.EmoteWindow = nil
     end
 
-    TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Full20Offset}):Play()
+    TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
     self.Opened = true
 end
 
@@ -416,9 +416,9 @@ function Inventory:Close(Time: number)
         self.EmoteWindow:Hide()
     end
     if Time > 0 then
-        TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = CommonUtils.UDim.Zero}):Play()
+        TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        UI.Size = CommonUtils.UDim.Zero
+        UI.Size = Utils.UDim.Zero
     end
     self.Opened = false
 end
@@ -480,8 +480,8 @@ function Inventory:ReloadContent()
 
     table.sort(Ordered, function(a, b)
         local Modules = {
-            A = require(CommonUtils:GetCharacterModule("Killer", a.Name)),
-            B = require(CommonUtils:GetCharacterModule("Killer", b.Name)),
+            A = require(Utils:GetCharacterModule("Killer", a.Name)),
+            B = require(Utils:GetCharacterModule("Killer", b.Name)),
         }
 
         return
@@ -497,7 +497,7 @@ function Inventory:ReloadContent()
             return
         end
 
-        local KillerInfo: Types.Killer = require(CommonUtils:GetCharacterModule("Killer", name))
+        local KillerInfo: Types.Killer = require(Utils:GetCharacterModule("Killer", name))
 
         local Card = Templates.CardTemplate:Clone()
         local Container = Card.Container
@@ -535,8 +535,8 @@ function Inventory:ReloadContent()
 
     table.sort(Ordered, function(a, b)
         local Modules = {
-            A = require(CommonUtils:GetCharacterModule("Survivor", a.Name)),
-            B = require(CommonUtils:GetCharacterModule("Survivor", b.Name)),
+            A = require(Utils:GetCharacterModule("Survivor", a.Name)),
+            B = require(Utils:GetCharacterModule("Survivor", b.Name)),
         }
 
         return
@@ -553,7 +553,7 @@ function Inventory:ReloadContent()
             return
         end
 
-        local SurvivorInfo: Types.Survivor = require(CommonUtils:GetCharacterModule("Survivor", name))
+        local SurvivorInfo: Types.Survivor = require(Utils:GetCharacterModule("Survivor", name))
 
         local Card = Templates.CardTemplate:Clone()
         local Container = Card.Container
