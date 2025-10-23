@@ -184,7 +184,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 FOVManager = require(own.Owner.Character.PlayerAttributeScripts.FOVManager),
                 EffectManager = require(own.Owner.Character.PlayerAttributeScripts.EffectManager),
                 EmoteManager = require(own.Owner.Character.Miscellaneous.EmoteManager),
-                TurnToMoveDirection = require(own.Owner.Character.Miscellaneous.TurnToMoveDirection),
+                TurnToMoveDirection = require(own.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
             }
 
             own.UsesLeft = own.UseSettings.InitialUses

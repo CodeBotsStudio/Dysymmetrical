@@ -29,6 +29,7 @@ function PlayerManager:Init()
 	Players.PlayerAdded:Connect(function(plr: Player)
 		plr.CharacterAdded:Connect(function(char)
 			AntiFly:_SetupCharacter(plr, char)
+			
 			local Role = char:FindFirstChild("Role")
 			if not Role then
 				Role = Instance.new("StringValue")

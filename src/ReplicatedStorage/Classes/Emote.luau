@@ -1,4 +1,5 @@
 --!nocheck
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local rand = Random.new()
@@ -124,7 +125,7 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
             local char = own.Owner.Character
             own.HumanoidRootPart = char.HumanoidRootPart
             own.SpeedManager = require(char.PlayerAttributeScripts.SpeedManager)
-            own.TurnToMoveDirection = require(char.Miscellaneous.TurnToMoveDirection)
+            own.TurnToMoveDirection = require(Players.LocalPlayer.PlayerScripts.Miscellaneous.TurnToMoveDirection)
 
             if own.SoundIds then
                 if typeof(own.SoundIds) == "string" then
