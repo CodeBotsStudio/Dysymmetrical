@@ -91,6 +91,10 @@ function GlobalTurnToMoveDirection:SetupCharacter(Char: Model): RBXScriptConnect
     end
 
     return RunService.PreRender:Connect(function(_delta: number)
+		--failsafe
+		if not Char or not HumanoidRootPart or not Torso then
+			return
+		end
         if Humanoid.WalkSpeed <= 0.1 or HumanoidRootPart.Anchored or #self.HeadPreventionFactors > 0 or Char:GetAttribute("Ragdolling") then
 	    	if Updating then
 	    		Updating = false
