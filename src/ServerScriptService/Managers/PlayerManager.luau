@@ -251,6 +251,8 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: "K
 	--failsafe
 	self:CancelAutoRespawn(plr)
 
+	Network:FireAllClientConnection("SetupLocalRagdoll", "REMOTE_EVENT", plr)
+
 	return char
 end
 

@@ -36,12 +36,15 @@ function Ragdoll:Init()
 		end
 		Players.PlayerAdded:Connect(function(Player: Player)
 			Player.CharacterAdded:Connect(function(Char: Model)
-				AddHumRagdoll(CommonUtils:FindFirstChild(Char, "HumanoidRootPart"))
+				AddHumRagdoll(CommonUtils:FindFirstChild(Char, "Humanoid"))
 			end)
 		end)
 		for _, Player: Player in Players:GetPlayers() do
+			Player.CharacterAdded:Connect(function(Char: Model)
+				AddHumRagdoll(CommonUtils:FindFirstChild(Char, "Humanoid"))
+			end)
 			if Player.Character then
-				AddHumRagdoll(CommonUtils:FindFirstChild(Player.Character, "HumanoidRootPart"))
+				AddHumRagdoll(CommonUtils:FindFirstChild(Player.Character, "Humanoid"))
 			end
 		end
 	else
@@ -63,10 +66,14 @@ function Ragdoll:Init()
 			end
 		end)
 
-		local function AddHumRagdoll(Desc: Instance)
+		local function AddHumRagdoll(Desc: Instance, Primary: BasePart?)
 			local Parent = Desc.Parent
-			local Primary = Parent and Parent:IsA("Model") and Parent.PrimaryPart
+			Primary = Primary or (Parent and Parent:IsA("Model") and (Parent.PrimaryPart or CommonUtils:FindFirstChild(Parent, "HumanoidRootPart", false)))
+			if Desc:IsA("Humanoid") then
+				print(Parent, Primary)
+			end
 			if Primary and Desc:IsA("Humanoid") then
+				print("enabling ragdoll for "..Parent.Name)
 				if table.find(self.HandledHumanoids, Desc) then
 					return
 				end
@@ -74,6 +81,7 @@ function Ragdoll:Init()
 				Parent.Archivable = true
 				
 				table.insert(self.HandledHumanoids, Desc)
+				Desc.BreakJointsOnDeath = false
 				Desc.Died:Connect(function()
 					task.wait()
 					if not Primary.Anchored then
@@ -88,14 +96,14 @@ function Ragdoll:Init()
 		end
 		Players.PlayerAdded:Connect(function(Player: Player)
 			Player.CharacterAdded:Connect(function(Char: Model)
-				AddHumRagdoll(CommonUtils:FindFirstChild(Char, "HumanoidRootPart"))
+				AddHumRagdoll(CommonUtils:FindFirstChild(Char, "Humanoid"), CommonUtils:FindFirstChild(Char, "HumanoidRootPart"))
 			end)
 		end)
-		for _, Player: Player in Players:GetPlayers() do
-			if Player.Character then
-				AddHumRagdoll(CommonUtils:FindFirstChild(Player.Character, "HumanoidRootPart"))
+		Network:SetConnection("SetupLocalRagdoll", "REMOTE_EVENT", function(p: Player)
+			if p.Character then
+				AddHumRagdoll(CommonUtils:FindFirstChild(p.Character, "Humanoid"), CommonUtils:FindFirstChild(p.Character, "HumanoidRootPart"))
 			end
-		end
+		end)
 	end
 end
 
@@ -156,14 +164,14 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 			if Humanoid then
 				Humanoid.Health = 1
 				Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
-				-- if RunService:IsClient() and Players.LocalPlayer.Character == Character then
-				-- 	Humanoid = Character:FindFirstChildOfClass("Humanoid")
-				-- 	if Humanoid and Humanoid.BreakJointsOnDeath then
-				-- 		workspace.CurrentCamera.CameraSubject = Character:FindFirstChild("Head") or Humanoid
-				-- 	else
-				-- 		workspace.CurrentCamera.CameraSubject = Humanoid
-				-- 	end
-				-- end
+				if RunService:IsClient() and Players.LocalPlayer.Character == Character then
+					Humanoid = Character:FindFirstChildOfClass("Humanoid")
+					if Humanoid and Humanoid.BreakJointsOnDeath then
+						workspace.CurrentCamera.CameraSubject = Character:FindFirstChild("Head") or Humanoid
+					else
+						workspace.CurrentCamera.CameraSubject = Humanoid
+					end
+				end
 			end
 		end)
 		task.delay(30, function()
@@ -186,13 +194,15 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
         	BallSocketConstraint.Name = "TemporaryRagdollInstance"
         	local Attachment = Instance.new("Attachment")
         	Attachment.Name = "TemporaryRagdollInstance"
+        	local Attachment1 = Instance.new("Attachment")
+        	Attachment1.Name = "TemporaryRagdollInstance"
         	Attachment.Parent = i.Part0
-        	Attachment.Parent = i.Part1
+        	Attachment1.Parent = i.Part1
         	BallSocketConstraint.Parent = i.Parent
         	BallSocketConstraint.Attachment0 = Attachment
-        	BallSocketConstraint.Attachment1 = Attachment
+        	BallSocketConstraint.Attachment1 = Attachment1
         	Attachment.CFrame = i.C0
-        	Attachment.CFrame = i.C1
+        	Attachment1.CFrame = i.C1
         	BallSocketConstraint.LimitsEnabled = true
         	BallSocketConstraint.TwistLimitsEnabled = true
         	i.Enabled = false
