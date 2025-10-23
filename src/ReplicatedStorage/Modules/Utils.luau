@@ -72,20 +72,11 @@ function Utils:Init()
         Network:SetConnection("Fade", "REMOTE_EVENT", function(FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
             self:_Fade(FadeType, Duration, Yield, StartTransparency, FadeColor)
         end)
-    else
-        print("connecting")
-        Network:SetConnection("CreateMissingSkinValue", "REMOTE_FUNCTION", function(SourcePlayer: Player, name: string)
-            print("got it")
-            return self:CreateMissingSkinValue(SourcePlayer, name)
-        end)
-        Network:SetConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", function(SourcePlayer: Player, name: string)
-            return self:CreateMissingPurchasedSkinValue(SourcePlayer, name)
+
+        Network:SetConnection("GetMousePosition", "REMOTE_FUNCTION", function(v)
+            return self:_GetMousePosition(v)
         end)
     end
-
-    Network:SetConnection("GetMousePosition", "REMOTE_FUNCTION", function(v)
-        return self:_GetMousePosition(v)
-    end)
 end
 
 --- Splits a path into multiple strings.
@@ -496,9 +487,7 @@ function Utils:GetPlayerEquipped(Player: Player, path: string, value: boolean?):
                     if RunService:IsServer() then
                         Child = Utils:CreateMissingSkinValue(Player, step)
                     else
-                        print("uhh")
                         Child = Network:FireServerConnection("CreateMissingSkinValue", "REMOTE_FUNCTION", step)
-                        print("supposedly fired")
                     end
                 end
 
@@ -907,7 +896,6 @@ end
 
 --- INTERNAL | SERVER FUNCTION: Used to create a character's equipped skin value for a player if it's missing.
 function Utils:CreateMissingSkinValue(SourcePlayer: Player, name: string)
-    print("creating missing skin value")
     if not RunService:IsServer() then
         return
     end
