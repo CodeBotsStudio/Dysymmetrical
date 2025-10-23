@@ -2,6 +2,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
@@ -224,6 +225,7 @@ end
 function Shop:Init()
     UI = Utils:FindFirstChild(script, "ShopUI"):Clone()
     UI.Size = Utils.UDim.Zero
+    UI.Visible = false
     UI.Parent = UIParent
     self.UIInstance = UI
 
@@ -309,6 +311,10 @@ function Shop:Init()
         self:ToggleSkinsMenu()
     end))
 
+    table.insert(Conns, RunService.PreRender:Connect(function()
+        self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
+    end))
+
     table.insert(Conns, UI.Destroying:Connect(function()
         for _, i in Conns do
             i:Disconnect()
@@ -363,6 +369,7 @@ function Shop:Close(Time: number)
         TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
         UI.Size = Utils.UDim.Zero
+        UI.Visible = false
     end
     self.Opened = false
 end

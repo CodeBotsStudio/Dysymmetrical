@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
@@ -29,11 +30,13 @@ function Settings:Init()
     if self.UIInstance then
         self.UIInstance.Parent = UIParent
         self.UIInstance.Size = Utils.UDim.Zero
+        self.UIInstance.Visible = false
         return
     end
 
     local UI = Prefabs.UIPrefab
     UI.Size = Utils.UDim.Zero
+    UI.Visible = false
     UI.Parent = UIParent
     self.UIInstance = UI
     local Content = UI.SettingsContainer.Contents
@@ -103,6 +106,10 @@ function Settings:Init()
 
         SettingSection.Parent = Content
     end
+
+    RunService.PreRender:Connect(function()
+        self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
+    end)
 end
 
 function Settings:Open(Time: number)
@@ -122,6 +129,7 @@ function Settings:Close(Time: number)
         TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
         self.UIInstance.Size = Utils.UDim.Zero
+        self.UIInstance.Visible = false
     end
     self.Opened = false
 end

@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
@@ -37,11 +38,13 @@ function CreditsMenu:Init()
     if self.UIInstance then
         self.UIInstance.Parent = UIParent
         self.UIInstance.Size = Utils.UDim.Zero
+        self.UIInstance.Visible = false
         return
     end
 
     local UI = Utils:FindFirstChild(script, "CreditsMenu")
     UI.Size = Utils.UDim.Zero
+    UI.Visible = false
     self.UIInstance = UI
     UI.Parent = UIParent
 
@@ -75,6 +78,10 @@ function CreditsMenu:Init()
             CreditPrefab.Parent = UI.Content
         end
     end
+
+    RunService.PreRender:Connect(function()
+        self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
+    end)
 end
 
 function CreditsMenu:Open(Time: number)

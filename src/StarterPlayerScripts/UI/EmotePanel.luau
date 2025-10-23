@@ -75,6 +75,11 @@ function EmotePanel:Init()
     end
 
     RunService.PreRender:Connect(function()
+        UI.Visible = UI.Size ~= Utils.UDim.Zero
+        if not UI.Visible then
+            return
+        end
+
         local CenterOfScreen = ScreenGui.AbsoluteSize / 2
         local MousePosition = Vector2.new(Mouse.X, Mouse.Y) - CenterOfScreen
 

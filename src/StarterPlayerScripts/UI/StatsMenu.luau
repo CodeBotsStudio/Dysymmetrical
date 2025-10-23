@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
@@ -24,11 +25,13 @@ function StatsMenu:Init()
     if self.UIInstance then
         self.UIInstance.Parent = UIParent
         self.UIInstance.Size = Utils.UDim.Zero
+        self.UIInstance.Visible = false
         return
     end
 
     local UI = script.StatsMenu
     UI.Size = Utils.UDim.Zero
+    UI.Visible = false
     UI.Parent = UIParent
     self.UIInstance = UI
     local Content = UI.StatsContainer.Content
@@ -89,6 +92,10 @@ function StatsMenu:Init()
         
         Section.Parent = Content
     end
+
+    RunService.PreRender:Connect(function()
+        self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
+    end)
 end
 
 function StatsMenu:Open(Time: number)

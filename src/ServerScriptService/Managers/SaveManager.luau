@@ -11,7 +11,7 @@ local SaveManager = {
 local _, Storage = pcall(function()
     return DataStoreService:GetDataStore("DriftwoodThing")
 end)
-local StoreKey = "driftwooding71"
+local StoreKey = "driftwooding77"
 
 local function ConvertInstanceTreeToTable(obj)
     local tree = {}
@@ -29,7 +29,8 @@ end
 
 function SaveManager:Init()
     local function LoadPlayer(Player: Player)
-        self.PlayerDatas[Player.UserId] = self:Load(Player)
+		self.PlayerDatas[Player.UserId] = self:Load(Player)
+		print(self.PlayerDatas[Player.UserId]:GetDescendants())
         for AchievementGroupCodeName, AchievementGroup in Achievements do
             if not self.PlayerDatas[Player.UserId].Achievements:FindFirstChild(AchievementGroupCodeName) then
                 local Group = Instance.new("Folder")
@@ -110,15 +111,8 @@ function SaveManager:Load(Player: Player): Folder
             end
         end
 
-        for v, i in GetAsync.AchievementsData do
-            if not ClonedData.AchievementsData:FindFirstChild(v, true) then
-                continue --break
-            end
-            ClonedData.AchievementsData:FindFirstChild(v, true).Value = i
-        end
-
 		for v, i in GetAsync.Equipped.Emotes do
-			local Emote = Instance.new("NumberValue")
+			local Emote = Instance.new("StringValue")
 			Emote.Name = v
 			Emote.Value = i
 			Emote.Parent = ClonedData.Equipped.Emotes

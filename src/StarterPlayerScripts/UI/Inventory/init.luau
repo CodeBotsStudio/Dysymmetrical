@@ -2,6 +2,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local EmoteEquipWindow = require(script.EmoteEquipWindow)
@@ -266,6 +267,7 @@ end
 function Inventory:Init()
     UI = Utils:FindFirstChild(script, "InventoryUI"):Clone()
     UI.Size = Utils.UDim.Zero
+    UI.Visible = false
     UI.Parent = UIParent
     self.UIInstance = UI
 
@@ -352,6 +354,10 @@ function Inventory:Init()
         self:ToggleSkinsMenu()
     end))
 
+    table.insert(Conns, RunService.PreRender:Connect(function()
+        self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
+    end))
+
     table.insert(Conns, UI.Destroying:Connect(function()
         for _, i in Conns do
             i:Disconnect()
@@ -419,6 +425,7 @@ function Inventory:Close(Time: number)
         TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
         UI.Size = Utils.UDim.Zero
+        UI.Visible = false
     end
     self.Opened = false
 end
