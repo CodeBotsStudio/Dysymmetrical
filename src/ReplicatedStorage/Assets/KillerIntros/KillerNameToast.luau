@@ -1,4 +1,4 @@
-return function(Parent: ScreenGui, name: string, plrName: string)
+return function(Parent: ScreenGui, name: string, plrNames: {string})
 	local TweenService = game:GetService("TweenService")
 	
 	local Group = script:FindFirstChildOfClass("Frame"):Clone()
@@ -14,7 +14,7 @@ return function(Parent: ScreenGui, name: string, plrName: string)
 
 	local Frame = Group.Frame
 	Frame.KillerName.Text = name
-	Frame.PlayerName.Text = "("..plrName..")"
+	Frame.PlayerName.Text = "("..plrNames[1]..")"
 
 	task.wait(1)
 

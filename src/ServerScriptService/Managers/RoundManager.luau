@@ -23,9 +23,11 @@ local RoundManager = {
     CurrentRound = {
         PlayersAccepted = {},
         PlayersRemaining = {},
-        Killer = {
-            Player = nil,
-            Character = nil,
+        Killers = {
+            {
+                Player = nil,
+                Character = nil,
+            },
         },
         StartedLMS = false,
     },
@@ -34,6 +36,7 @@ local RoundManager = {
 }
 
 function RoundManager:Init()
+    RoundManager.CurrentRound.Killers = {}
     TimeManager.OnTimerEnd = function()
         RoundManager:StartRound()
     end
@@ -48,35 +51,40 @@ function RoundManager:StartRound()
     --shuffling so that if there's a tie it chooses a truly random one
     RoundManager.CurrentRound.PlayersAccepted = Utils:ShuffleTable(LoadedPlayers)
 
-    local HighestMalice = {
-        Player = RoundManager.CurrentRound.PlayersAccepted[1],
-        Value = Utils:GetPlayerStat(RoundManager.CurrentRound.PlayersAccepted[1], "General.Malice"),
-        Char = nil,
-    }
+    local HighestMalice
 
-    for _, Player: Player in ipairs(RoundManager.CurrentRound.PlayersAccepted) do
-        local Malice = Utils:GetPlayerStat(Player, "General.Malice")
-        if Malice > HighestMalice.Value then
-            HighestMalice.Player = Player
-            HighestMalice.Value = Malice
+    local PlayersOrderedByMalice = RoundManager.CurrentRound.PlayersAccepted
+    table.sort(PlayersOrderedByMalice, function(a, b)
+        return Utils:GetPlayerStat(a, "General.Malice") > Utils:GetPlayerStat(b, "General.Malice")
+    end)
+    for i = 0, workspace:GetAttribute("KillersAllowed") - 1 do
+        local Player = PlayersOrderedByMalice[i]
+        if i == 0 then
+            HighestMalice = Player
         end
+
+        RoundManager.CurrentRound.Killers[i] = {
+            Player = Player,
+            Character = Player.Character
+        }
     end
 
     MapManager:GetRandomMap()
 
-    for _, Player: Player in RoundManager.CurrentRound.PlayersAccepted do
-        RoundManager.Utils:SetupPlayer(Player, Player == HighestMalice.Player)
+    for i, Player: Player in RoundManager.CurrentRound.PlayersAccepted do
+        RoundManager.Utils:SetupPlayer(Player, i <= workspace:GetAttribute("KillersAllowed") and i or nil)
     end
 
-    RoundManager.CurrentRound.Killer.Player = HighestMalice.Player
-    for _, plr in RoundManager.CurrentRound.PlayersAccepted do
-        if RoundManager.CanSpawnKiller and plr == HighestMalice.Player then
+    for i, plr in ipairs(RoundManager.CurrentRound.PlayersAccepted) do
+        if RoundManager.CanSpawnKiller and i <= workspace:GetAttribute("KillersAllowed") then
             continue
         end
         RoundManager.CurrentRound.PlayersRemaining[plr.UserId] = plr
     end
     if RoundManager.CanSpawnKiller then --if one is testing survivor then the round'll never end
-        table.remove(RoundManager.CurrentRound.PlayersRemaining, table.find(RoundManager.CurrentRound.PlayersRemaining, HighestMalice.Player))
+        for _, i in RoundManager.CurrentRound.Killers do
+            table.remove(RoundManager.CurrentRound.PlayersRemaining, table.find(RoundManager.CurrentRound.PlayersRemaining, i.Player))
+        end
     end
     Utils:Print(RoundManager.CurrentRound.PlayersRemaining)
 
@@ -98,16 +106,22 @@ function RoundManager:StartRound()
         end
     end)
 
-    RoundManager.Callables:PlayIntro(Utils:GetPlayerEquipped(RoundManager.CurrentRound.Killer.Player, "Killer"),
-        Utils:GetPlayerEquipped(RoundManager.CurrentRound.Killer.Player, "Skins."..Utils:GetPlayerEquipped(RoundManager.CurrentRound.Killer.Player, "Killer"))
+    RoundManager.Callables:PlayIntro(Utils:GetPlayerEquipped(HighestMalice, "Killer"),
+        Utils:GetPlayerEquipped(HighestMalice, "Skins."..Utils:GetPlayerEquipped(HighestMalice, "Killer"))
     )
 end
 
 --- Plays the intro to everyone (whose game has loaded).
 function RoundManager.Callables:PlayIntro(RootName: string, SkinName: string?)
+    local PlayerNames = {}
+
+    for _, i in ipairs(RoundManager.CurrentRound.Killers) do
+        table.insert(PlayerNames, i.Player.Name)
+    end
+
     Network:FireClientConnection(Utils:GetLoadedPlayers(), "PlayIntro", "REMOTE_EVENT",
         RootName,
-        RoundManager.CurrentRound.Killer.Player.Name,
+        PlayerNames,
         SkinName
     )
 
@@ -122,9 +136,9 @@ end
 
 --- Initiates the Last Man Standing sequence (1v1). The Last Man (survivor) must be specified.
 function RoundManager.Callables:InitLMS(LastMan: Player)
-    local allowed = false
+    local allowed = true
     --failsafe
-    if not allowed or RoundManager.CurrentRound.StartedLMS or not RoundManager.CurrentRound.Killer.Player or not RoundManager.CurrentRound.Killer.Character or LastMan == RoundManager.CurrentRound.Killer.Player then
+    if not allowed or RoundManager.CurrentRound.StartedLMS or not RoundManager.CurrentRound.Killers[0] or not RoundManager.CurrentRound.Killers[0].Character then
         return
     end
 
@@ -132,14 +146,16 @@ function RoundManager.Callables:InitLMS(LastMan: Player)
     workspace:SetAttribute("LMS", true)
 
     --reveals auras
-    Utils:RevealPlayerAuraTo(RoundManager.CurrentRound.Killer.Player, LastMan, 10)
-    Utils:RevealPlayerAuraTo(LastMan, RoundManager.CurrentRound.Killer.Player, 10)
+    for _, i in RoundManager.CurrentRound.Killers do
+        Utils:RevealPlayerAuraTo(i.Player, LastMan, 10)
+        Utils:RevealPlayerAuraTo(LastMan, i.Player, 10)
+    end
 
     Network:FireConnection("LMSVoiceline")
 
     --plays the music
     --i'm sure that there's a better way to check special LMS's
-    local Mod = require(Utils:GetCharacterModule("Killer", RoundManager.CurrentRound.Killer.Character:GetAttribute("CharacterName"), RoundManager.CurrentRound.Killer.Character:GetAttribute("CharacterSkinName")))
+    local Mod = require(Utils:GetCharacterModule("Killer", RoundManager.CurrentRound.Killers[1].Character:GetAttribute("CharacterName"), RoundManager.CurrentRound.Killers[1].Character:GetAttribute("CharacterSkinName")))
     local SpecialLMS = Mod.Config.SpecialLastManStandings
     local Specials = SpecialLMS[LastMan.Character:GetAttribute("CharacterName")]
     
@@ -172,19 +188,19 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
 
     --checking who won and giving the proper amounts to their stats
     if winner == "Killer" then
-        if RoundManager.CurrentRound.Killer.Player then
-            CommonFunctions:UpdatePlayerStat(RoundManager.CurrentRound.Killer.Player, "KillerStats.KillerWins", 1)
-            CommonFunctions:GrantRewardToPlayer(RoundManager.CurrentRound.Killer.Player, 120, 180, "winning a match as Killer")
+        for _, i in RoundManager.CurrentRound.Killers do
+            CommonFunctions:UpdatePlayerStat(i.Player, "KillerStats.KillerWins", 1)
+            CommonFunctions:GrantRewardToPlayer(i.Player, 120, 180, "winning a match as Killer")
         end
         --survivor losses aren't handled here since when a player dies it directly counts
         Utils:Print("killer wins")
     elseif winner == "Survivors" then
-        if RoundManager.CurrentRound.Killer.Player then
-            CommonFunctions:UpdatePlayerStat(RoundManager.CurrentRound.Killer.Player, "KillerStats.KillerLosses", 1)
+        for _, i in RoundManager.CurrentRound.Killers do
+            CommonFunctions:UpdatePlayerStat(i.Player, "KillerStats.KillerLosses", 1)
         end
         for _, Player: Player in RoundManager.CurrentRound.PlayersRemaining do
             CommonFunctions:UpdatePlayerStat(Player, "SurvivorStats.SurvivorWins", 1)
-            CommonFunctions:GrantRewardToPlayer(RoundManager.CurrentRound.Killer.Player, 70, 110, "winning a match as Survivor")
+            CommonFunctions:GrantRewardToPlayer(Player, 70, 110, "winning a match as Survivor")
         end
         
         Utils:Print("survivors win")
@@ -205,10 +221,7 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
     
     --restarting variables
     RoundManager.CurrentRound = {
-        Killer = {
-            Player = nil,
-            Character = nil,
-        },
+        Killers = {},
         PlayersAccepted = {},
         PlayersRemaining = {},
         StartedLMS = false,
@@ -231,12 +244,30 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
     TimeManager.CanDecreaseTime = true
 end
 
-function RoundManager.Callables:_OnPlayerDeath(dead: Player)
+function RoundManager.Callables:_OnPlayerDeath(dead: Player, wasKiller: boolean?)
+    wasKiller = wasKiller or false
+
     for _, i in RoundManager.PlayerConnections[dead.UserId] do
         i:Disconnect()
     end
     RoundManager.PlayerConnections[dead.UserId] = nil
-    RoundManager.CurrentRound.PlayersRemaining[dead.UserId] = nil --removing from remaining list
+    if wasKiller then
+        for i, v in RoundManager.CurrentRound.Killers do
+            if v.Player == dead then
+                RoundManager.CurrentRound.Killers[i] = nil
+                break
+            end
+        end
+        --resorts to maintain the minimum indexes possible
+        table.sort(RoundManager.CurrentRound.Killers)
+        local NewTable = {}
+        for _, v in ipairs(RoundManager.CurrentRound.Killers) do
+            table.insert(NewTable, v)
+        end
+        RoundManager.CurrentRound.Killers = NewTable
+    else
+        RoundManager.CurrentRound.PlayersRemaining[dead.UserId] = nil --removing from remaining list
+    end
 
     --info
     if PlayersRemaining:FindFirstChild(dead.UserId) then
@@ -249,28 +280,16 @@ end
 --- Checks which role won by seeing how many players are left in each one.
 --- Also used to check for LMS.
 function RoundManager.Utils:CheckForKillerWin()
-    local Killers = 0
-    local Survivors = 0
+    local Count = Utils:GetCharactersWithRoles()
 
-    local RemainingSurvivor
-
-    for role, player in Utils:GetCharactersWithRoles() do
-
-        if role == "Killer" then
-            Killers += 1
-
-        elseif role == "Survivor" then
-            RemainingSurvivor = player
-            Survivors += 1
-
-        end
-    end
+    local Killers = #Count.Killer
+    local Survivors = #Count.Survivor
 
     if RoundManager.CanSpawnKiller then
         if Killers <= 0 then
             RoundManager.Callables:EndRound("Survivors")
         elseif Survivors == 1 then
-            RoundManager.Callables:InitLMS(RemainingSurvivor)
+            RoundManager.Callables:InitLMS(Count.Survivor[1])
         elseif #RoundManager.CurrentRound.PlayersAccepted > 1 and Survivors <= 0 then
             RoundManager.Callables:EndRound("Killer")
         end
@@ -288,12 +307,12 @@ function RoundManager.Utils:GetCharacterModule(player: Player, charType: "Killer
 end
 
 --- Sets up a player in the round's player list while also spawning its character.
-function RoundManager.Utils:SetupPlayer(Player: Player, IsKiller: boolean)
+function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
     local Spawns = MapManager.CurrentMap.Map.SpawnPoints
 
     local Char
 
-    if IsKiller and RoundManager.CanSpawnKiller then --RoundManager.CanSpawnKiller is for debugging
+    if KillerIndex and RoundManager.CanSpawnKiller then --RoundManager.CanSpawnKiller is for debugging
         Utils:GetPlayerStat(Player, "General.Malice", false).Value = 1 --resets malice
 
         local KillerSpawns = Spawns.Killers:GetChildren()
@@ -312,16 +331,16 @@ function RoundManager.Utils:SetupPlayer(Player: Player, IsKiller: boolean)
         --sets up connections for the round
         RoundManager.PlayerConnections[Player.UserId] = {
             Player.CharacterRemoving:Connect(function()
-                RoundManager.Callables:_OnPlayerDeath(Player)
+                RoundManager.Callables:_OnPlayerDeath(Player, true)
             end),
         
             --checks for death to count kills n shit
             Char.Humanoid.Died:Connect(function()
-                RoundManager.Callables:_OnPlayerDeath(Player)
+                RoundManager.Callables:_OnPlayerDeath(Player, true)
             end)
         }
 
-        RoundManager.CurrentRound.Killer.Character = Char
+        RoundManager.CurrentRound.Killers[KillerIndex].Character = Char
     else
         CommonFunctions:UpdatePlayerStat(Player, "General.Malice", 1) --adds 1 malice
 

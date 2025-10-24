@@ -28,11 +28,11 @@ local IntroContainer = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "Kill
 local ToastPrefab = GetIntroModule("KillerNameToast")
 
 return function()
-	Network:SetConnection("PlayIntro", "REMOTE_EVENT", function(KillerName: string, KillerPlayerName: string, KillerSkin: string?)
+	Network:SetConnection("PlayIntro", "REMOTE_EVENT", function(KillerName: string, KillerPlayerNames: {string}, KillerSkin: string?)
 		local RootKillerModule = require(Utils:GetCharacterModule("Killer", KillerName))
 
 		if Utils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.DisableKillerIntros") then
-			task.spawn(require(ToastPrefab), IntroContainer, RootKillerModule.Config.Name, KillerPlayerName)
+			task.spawn(require(ToastPrefab), IntroContainer, RootKillerModule.Config.Name, KillerPlayerNames)
 
 			Utils:Fade(Players.LocalPlayer, "Out", 0.6)
 			return
@@ -41,7 +41,7 @@ return function()
 		local IntroInfo: KillerIntro.IntroSettings = {
 			KillerName = KillerName,
 			SkinName = KillerSkin,
-			PlayerName = KillerPlayerName,
+			PlayerName = KillerPlayerNames[1],
 		}
 
 		local Intro2D = GetIntroModule(KillerName, KillerSkin)
@@ -50,7 +50,7 @@ return function()
 
 		Intro:Init()
 
-		task.spawn(require(ToastPrefab), IntroContainer, RootKillerModule.Config.Name, KillerPlayerName)
+		task.spawn(require(ToastPrefab), IntroContainer, RootKillerModule.Config.Name, KillerPlayerNames)
 
 		Utils:Fade(Players.LocalPlayer, "Out", 0.6)
 
