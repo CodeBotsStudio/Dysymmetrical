@@ -107,6 +107,10 @@ function TerrorRadiusManager:Init()
     end
 
     for _, i in workspace.Players:GetChildren() do
+        if not i:FindFirstChild("Role") or i.Role.Value ~= "Killer" then
+            continue
+        end
+
         local F = Instance.new("Folder")
         F.Name = i.Name
         F.Parent = self.ThemeFolder
@@ -200,7 +204,7 @@ end
 function TerrorRadiusManager:_CheckAsSurvivor()
     local PlayersFound = {}
     for _, i in workspace.Players:GetChildren() do
-        if not self.ThemeFolder:FindFirstChild(i.Name) then
+        if not self.ThemeFolder:FindFirstChild(i.Name) and i:FindFirstChild("Role") and i.Role.Value == "Killer" then
             local F = Instance.new("Folder")
             F.Name = i.Name
             F.Parent = self.ThemeFolder
@@ -240,7 +244,7 @@ function TerrorRadiusManager:_CheckAsSurvivor()
 
     --HACK: uhhhh i'm too lazy to refactor this to not copy paste code
     if CurrentKillerChosen then
-        local KillerHRP = workspace.Players:FindFirstChild(CurrentKillerChosen)
+        local KillerHRP = workspace.Players:FindFirstChild(CurrentKillerChosen):FindFirstChild("HumanoidRootPart")
 
         local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 1e999
 
@@ -264,7 +268,7 @@ function TerrorRadiusManager:_CheckAsSurvivor()
                 if Distance <= r and Distance > Upcoming and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
                     if s.Name == "L4" then
                         self.InChase = true
-                        self:PlayLayer4()
+                        self:PlayLayer4(CurrentKillerChosen)
                     else
                         self:TweenVolume(s, CalculateSound(Distance))
                     end
@@ -279,12 +283,12 @@ function TerrorRadiusManager:_CheckAsSurvivor()
 
     local ClosestKiller
     for _, i in workspace.Players:GetChildren() do
-        if not i:FindFirstChild("Role") or i.Role.Value ~= "Spectator" then
+        if not i:FindFirstChild("Role") or i.Role.Value ~= "Killer" then
             continue
         end
 
         local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - i:FindFirstChild("HumanoidRootPart").Position).Magnitude or 1e999
-        if Distance <= self.LayerMagnitudes[i.Name]["L1"] and (not ClosestKiller or Distance <= ClosestKiller.Distance) then
+        if Distance <= Radiuses["L1"] and (not ClosestKiller or Distance <= ClosestKiller.Distance) then
             ClosestKiller = {
                 Player = i,
                 Distance = Distance,
@@ -321,7 +325,7 @@ function TerrorRadiusManager:_CheckAsSurvivor()
             if Distance <= r and Distance > Upcoming and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
                 if s.Name == "L4" then
                     self.InChase = true
-                    self:PlayLayer4()
+                    self:PlayLayer4(ClosestKiller)
                 else
                     self:TweenVolume(s, CalculateSound(Distance))
                 end
@@ -340,8 +344,8 @@ function TerrorRadiusManager:_CheckAsKiller()
         and not Utils:FindFirstChild(char, "Effects.Undetectable", false) then
             
             local Distance = (Utils:FindFirstChild(char, "HumanoidRootPart").Position - self.LocalPlayerProps.HRP.Position).Magnitude
-            self.PlayerClose = Distance <= 60
-            self.InChase = Distance <= 25 or self.InChase and Distance <= 35
+            self.PlayerClose = Distance <= Radiuses.L1
+            self.InChase = Distance <= Radiuses.L4 or self.InChase and Distance <= Radiuses.L3
 
             for r: number, s: Sound in self.LayerMagnitudes[self.LocalPlayerProps.Char.Name] do
                 if s.Name == "L4" then
@@ -350,7 +354,7 @@ function TerrorRadiusManager:_CheckAsKiller()
             end
 
             if self.InChase then
-                self:PlayLayer4()
+                self:PlayLayer4(self.LocalPlayerProps.Char.Name)
             end
         end
     end

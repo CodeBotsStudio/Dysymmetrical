@@ -57,30 +57,34 @@ function RoundManager:StartRound()
     table.sort(PlayersOrderedByMalice, function(a, b)
         return Utils:GetPlayerStat(a, "General.Malice") > Utils:GetPlayerStat(b, "General.Malice")
     end)
-    for i = 0, workspace:GetAttribute("KillersAllowed") - 1 do
-        local Player = PlayersOrderedByMalice[i]
-        if i == 0 then
-            HighestMalice = Player
+
+    MapManager:GetRandomMap()
+    
+    for i = 1, workspace:GetAttribute("KillersAllowed") do
+        local P = PlayersOrderedByMalice[i]
+        if i == 1 then
+            HighestMalice = P
         end
 
         RoundManager.CurrentRound.Killers[i] = {
-            Player = Player,
-            Character = Player.Character
+            Player = P,
+            Character = nil
         }
+        print(i)
     end
 
-    MapManager:GetRandomMap()
-
-    for i, Player: Player in RoundManager.CurrentRound.PlayersAccepted do
+    for i, Player: Player in PlayersOrderedByMalice do
+        print(i, i <= workspace:GetAttribute("KillersAllowed"))
         RoundManager.Utils:SetupPlayer(Player, i <= workspace:GetAttribute("KillersAllowed") and i or nil)
     end
 
-    for i, plr in ipairs(RoundManager.CurrentRound.PlayersAccepted) do
+    for i, plr in ipairs(PlayersOrderedByMalice) do
         if RoundManager.CanSpawnKiller and i <= workspace:GetAttribute("KillersAllowed") then
             continue
         end
         RoundManager.CurrentRound.PlayersRemaining[plr.UserId] = plr
     end
+
     if RoundManager.CanSpawnKiller then --if one is testing survivor then the round'll never end
         for _, i in RoundManager.CurrentRound.Killers do
             table.remove(RoundManager.CurrentRound.PlayersRemaining, table.find(RoundManager.CurrentRound.PlayersRemaining, i.Player))
@@ -340,6 +344,7 @@ function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
             end)
         }
 
+        print(KillerIndex)
         RoundManager.CurrentRound.Killers[KillerIndex].Character = Char
     else
         CommonFunctions:UpdatePlayerStat(Player, "General.Malice", 1) --adds 1 malice
