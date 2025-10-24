@@ -11,6 +11,19 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local LocalPlayer = Players.LocalPlayer
 local RoundState: StringValue = ReplicatedStorage.RoundInfo.CurrentState
 
+--[[
+    NOTE: procedure to follow
+    * Get all initial characters and instantiate their chase themes
+    * Every frame:
+        * Check for all killers
+            * If a killer is gone, remove its chase themes
+            * If a new killer appears, instantiate its chase themes
+        * Check if any sound is above 0 volume
+            * If there is one, choose the sound's parent as the selected killer
+            * If not, check which killer is closest
+                * If it's close enough, play its chase theme
+]]
+
 local Radiuses = {
 	["L4Upcoming"] = -1e10, ["L4"] = 15,
 	["L3Upcoming"] = 15, ["L3"] = 30,
@@ -67,7 +80,10 @@ function TerrorRadiusManager:Init()
 
     --slow down on death fx
     table.insert(self.Connections, self.LocalPlayerProps.Humanoid.Died:Connect(function()
-        for _, s in self.ThemeFolder:GetChildren() do
+        for _, s in self.ThemeFolder:GetDescendants() do
+            if not s:IsA("Sound") then
+                continue
+            end
             TweenService:Create(s, TweenInfo.new(0.4), {PlaybackSpeed = 0}):Play()
         end
     end))
@@ -90,24 +106,30 @@ function TerrorRadiusManager:Init()
         return
     end
 
-    local ChaseThemes = require(Utils:GetCharacterModule("Killer", self.Killer:GetAttribute("CharacterName"), self.Killer:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
-    for l, i in ChaseThemes do
-        local Sound = Instance.new("Sound")
-        Sound.Name = l
-        Sound.SoundId = i
-        Sound.Volume = 0
-        Sound.Looped = true
-        Sound.SoundGroup = SoundService.SoundGroups.Master.Music
-        Sound.Parent = self.ThemeFolder
+    for _, i in workspace.Players:GetChildren() do
+        local F = Instance.new("Folder")
+        F.Name = i.Name
+        F.Parent = self.ThemeFolder
 
-		if not Sound.IsLoaded then
-			Sound.Loaded:Wait()
-		end
+        local ChaseThemes = require(Utils:GetCharacterModule("Killer", i:GetAttribute("CharacterName"), i:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
+        for l, v in ChaseThemes do
+            local Sound = Instance.new("Sound")
+            Sound.Name = l
+            Sound.SoundId = v
+            Sound.Volume = 0
+            Sound.Looped = true
+            Sound.SoundGroup = SoundService.SoundGroups.Master.Music
+            Sound.Parent = F
 
-        self:SetLayerMagnitude(Sound, Radiuses[l])
+	    	if not Sound.IsLoaded then
+	    		Sound.Loaded:Wait()
+	    	end
+
+            self:SetLayerMagnitude(Sound, i.Name, Radiuses[l])
+        end
     end
 
-    for _, i in self.ThemeFolder:GetChildren() do
+    for _, i in self.ThemeFolder:GetDescendants() do
         if i:IsA("Sound") and i.Name ~= "L4" then
             i:Play()
         end
@@ -131,8 +153,11 @@ function TerrorRadiusManager:Destroy()
     end
 end
 
-function TerrorRadiusManager:SetLayerMagnitude(SoundInstance: Sound, Radius: number)
-    self.LayerMagnitudes[Radius] = SoundInstance
+function TerrorRadiusManager:SetLayerMagnitude(SoundInstance: Sound, Parent: string, Radius: number)
+    if not self.LayerMagnitudes[Parent] then
+        self.LayerMagnitudes[Parent] = {}
+    end
+    self.LayerMagnitudes[Parent][Radius] = SoundInstance
 end
 
 function TerrorRadiusManager:CheckInRadius()
@@ -149,13 +174,13 @@ function TerrorRadiusManager:TweenVolume(Sound: Sound, TargetVolume: number)
     end
 end
 
-function TerrorRadiusManager:PlayLayer4()
+function TerrorRadiusManager:PlayLayer4(Subfolder: string)
     if self.Playing then
         return
     end
     self.Playing = true
 
-    for _, s: Sound in self.LayerMagnitudes do
+    for _, s: Sound in self.LayerMagnitudes[Subfolder] do
         if s.Name == "L4" then
             s:Play()
             self:TweenVolume(s, 0.5)
@@ -173,14 +198,110 @@ function TerrorRadiusManager:PlayLayer4()
 end
 
 function TerrorRadiusManager:_CheckAsSurvivor()
-    local KillerHRP = Utils:FindFirstChild(self.Killer, "HumanoidRootPart")
-    if not (self.LocalPlayerProps.HRP and KillerHRP) then
+    local PlayersFound = {}
+    for _, i in workspace.Players:GetChildren() do
+        if not self.ThemeFolder:FindFirstChild(i.Name) then
+            local F = Instance.new("Folder")
+            F.Name = i.Name
+            F.Parent = self.ThemeFolder
+
+            local ChaseThemes = require(Utils:GetCharacterModule("Killer", i:GetAttribute("CharacterName"), i:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
+            for l, v in ChaseThemes do
+                local Sound = Instance.new("Sound")
+                Sound.Name = l
+                Sound.SoundId = v
+                Sound.Volume = 0
+                Sound.Looped = true
+                Sound.SoundGroup = SoundService.SoundGroups.Master.Music
+                Sound.Parent = F
+
+	        	if not Sound.IsLoaded then
+	        		Sound.Loaded:Wait()
+	        	end
+
+                self:SetLayerMagnitude(Sound, i.Name, Radiuses[l])
+            end
+        end
+        table.insert(PlayersFound, i.Name)
+    end
+    for _, i in self.ThemeFolder:GetChildren() do
+        if not table.find(PlayersFound, i.Name) then
+            i:Destroy()
+        end
+    end
+
+    local CurrentKillerChosen
+    for _, s in self.ThemeFolder:GetDescendants() do
+        if s:IsA("Sound") and s.Volume > 0 then
+            CurrentKillerChosen = s.Parent.Name
+            break
+        end
+    end
+
+    --HACK: uhhhh i'm too lazy to refactor this to not copy paste code
+    if CurrentKillerChosen then
+        local KillerHRP = workspace.Players:FindFirstChild(CurrentKillerChosen)
+
+        local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 1e999
+
+        for r: number, s: Sound in self.LayerMagnitudes[CurrentKillerChosen] do
+            local Upcoming = Radiuses[s.Name.."Upcoming"] or -1e10
+
+            if self.InChase then
+                if Distance < Radiuses["L1"] and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
+                    if s.Name == "L4" then
+                        self:TweenVolume(s, Distance < 55 and 0.5 or CalculateSound(Distance))
+                    else
+                        self:TweenVolume(s, 0)
+                    end
+                else
+                    self.InChase = false
+                    if s.Name == "L4" then
+                        self:TweenVolume(s, 0)
+                    end
+                end
+            else
+                if Distance <= r and Distance > Upcoming and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
+                    if s.Name == "L4" then
+                        self.InChase = true
+                        self:PlayLayer4()
+                    else
+                        self:TweenVolume(s, CalculateSound(Distance))
+                    end
+                else
+                    self:TweenVolume(s, 0)
+                end
+            end
+        end
+
         return
     end
 
+    local ClosestKiller
+    for _, i in workspace.Players:GetChildren() do
+        if not i:FindFirstChild("Role") or i.Role.Value ~= "Spectator" then
+            continue
+        end
+
+        local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - i:FindFirstChild("HumanoidRootPart").Position).Magnitude or 1e999
+        if Distance <= self.LayerMagnitudes[i.Name]["L1"] and (not ClosestKiller or Distance <= ClosestKiller.Distance) then
+            ClosestKiller = {
+                Player = i,
+                Distance = Distance,
+            }
+        end
+    end
+
+    if not ClosestKiller then
+        return
+    end
+    ClosestKiller = ClosestKiller.Player
+
+    local KillerHRP = ClosestKiller:FindFirstChild("HumanoidRootPart")
+
     local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 1e999
 
-    for r: number, s: Sound in self.LayerMagnitudes do
+    for r: number, s: Sound in self.LayerMagnitudes[ClosestKiller.Name] do
         local Upcoming = Radiuses[s.Name.."Upcoming"] or -1e10
 
         if self.InChase then
@@ -222,7 +343,7 @@ function TerrorRadiusManager:_CheckAsKiller()
             self.PlayerClose = Distance <= 60
             self.InChase = Distance <= 25 or self.InChase and Distance <= 35
 
-            for r: number, s: Sound in self.LayerMagnitudes do
+            for r: number, s: Sound in self.LayerMagnitudes[self.LocalPlayerProps.Char.Name] do
                 if s.Name == "L4" then
                     self:TweenVolume(s, (self.PlayerClose and self.InChase) and 0.5 or 0)
                 end

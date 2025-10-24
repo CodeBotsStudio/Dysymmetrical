@@ -30,7 +30,7 @@ end
 function SaveManager:Init()
     local function LoadPlayer(Player: Player)
 		self.PlayerDatas[Player.UserId] = self:Load(Player)
-		print(self.PlayerDatas[Player.UserId]:GetDescendants())
+        
         for AchievementGroupCodeName, AchievementGroup in Achievements do
             if not self.PlayerDatas[Player.UserId].Achievements:FindFirstChild(AchievementGroupCodeName) then
                 local Group = Instance.new("Folder")
