@@ -80,7 +80,7 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
                 table.insert(own.Connections, Network:SetConnection("PlayEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string, soundId: string)
                     if plr == own.Owner and emoteName == own.Config.Name then
                         if soundId and #soundId > 0 then
-                            Sounds:PlaySound(soundId, {Name = "Emote", Parent = own.Owner.Character:FindFirstChild("HumanoidRootPart")})
+                            Sounds:PlaySound(soundId, {Name = "Emote", Parent = own.Owner.Character:FindFirstChild("HumanoidRootPart"), Looped = true})
                         end
 
                         Network:FireClientConnection(plr, "PlayEmote", "REMOTE_EVENT", emoteName)
