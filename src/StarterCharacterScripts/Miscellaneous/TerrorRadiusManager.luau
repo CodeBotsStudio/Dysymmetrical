@@ -241,99 +241,75 @@ function TerrorRadiusManager:_CheckAsSurvivor()
             break
         end
     end
+    if not CurrentKillerChosen then
+        for _, i in workspace.Players:GetChildren() do
+            if not i:FindFirstChild("Role") or i.Role.Value ~= "Killer" then
+                continue
+            end
 
-    --HACK: uhhhh i'm too lazy to refactor this to not copy paste code
-    if CurrentKillerChosen then
-        local KillerHRP = workspace.Players:FindFirstChild(CurrentKillerChosen):FindFirstChild("HumanoidRootPart")
-
-        local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 1e999
-
-        for r: number, s: Sound in self.LayerMagnitudes[CurrentKillerChosen] do
-            local Upcoming = Radiuses[s.Name.."Upcoming"] or -1e10
-
-            if self.InChase then
-                if Distance < Radiuses["L1"] and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
-                    if s.Name == "L4" then
-                        self:TweenVolume(s, Distance < 55 and 0.5 or CalculateSound(Distance))
-                    else
-                        self:TweenVolume(s, 0)
-                    end
-                else
-                    self.InChase = false
-                    if s.Name == "L4" then
-                        self:TweenVolume(s, 0)
-                    end
-                end
-            else
-                if Distance <= r and Distance > Upcoming and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
-                    if s.Name == "L4" then
-                        self.InChase = true
-                        self:PlayLayer4(CurrentKillerChosen)
-                    else
-                        self:TweenVolume(s, CalculateSound(Distance))
-                    end
-                else
-                    self:TweenVolume(s, 0)
-                end
+            local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - i:FindFirstChild("HumanoidRootPart").Position).Magnitude or 1e999
+            if Distance <= Radiuses["L1"] and (not CurrentKillerChosen or Distance <= CurrentKillerChosen.Distance) then
+                CurrentKillerChosen = {
+                    Player = i,
+                    Distance = Distance,
+                }
             end
         end
 
-        return
-    end
-
-    local ClosestKiller
-    for _, i in workspace.Players:GetChildren() do
-        if not i:FindFirstChild("Role") or i.Role.Value ~= "Killer" then
-            continue
+        if not CurrentKillerChosen then
+            return
         end
-
-        local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - i:FindFirstChild("HumanoidRootPart").Position).Magnitude or 1e999
-        if Distance <= Radiuses["L1"] and (not ClosestKiller or Distance <= ClosestKiller.Distance) then
-            ClosestKiller = {
-                Player = i,
-                Distance = Distance,
-            }
-        end
+        CurrentKillerChosen = CurrentKillerChosen.Player
+    else
+        CurrentKillerChosen = workspace.Players:FindFirstChild(CurrentKillerChosen)
     end
 
-    if not ClosestKiller then
-        return
-    end
-    ClosestKiller = ClosestKiller.Player
-
-    local KillerHRP = ClosestKiller:FindFirstChild("HumanoidRootPart")
+    local KillerHRP = CurrentKillerChosen:FindFirstChild("HumanoidRootPart")
 
     local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 1e999
 
-    for r: number, s: Sound in self.LayerMagnitudes[ClosestKiller.Name] do
-        local Upcoming = Radiuses[s.Name.."Upcoming"] or -1e10
+    for n, i in self.LayerMagnitudes do
+        if tostring(n) == tostring(CurrentKillerChosen) then
+            for r, s in i do
+                local Upcoming = Radiuses[s.Name.."Upcoming"] or -1e10
 
-        if self.InChase then
-            if Distance < Radiuses["L1"] and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
-                if s.Name == "L4" then
-                    self:TweenVolume(s, Distance < 55 and 0.5 or CalculateSound(Distance))
+                if self.InChase then
+                    if Distance < Radiuses["L1"] and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
+                        if s.Name == "L4" then
+                            self:TweenVolume(s, Distance < 55 and 0.5 or CalculateSound(Distance))
+                        else
+                            self:TweenVolume(s, 0)
+                        end
+                    else
+                        self.InChase = false
+                        if s.Name == "L4" then
+                            self.Playing = false
+                            self:TweenVolume(s, 0)
+                        end
+                    end
                 else
-                    self:TweenVolume(s, 0)
-                end
-            else
-                self.InChase = false
-                if s.Name == "L4" then
-                    self:TweenVolume(s, 0)
+                    if Distance <= r and Distance > Upcoming and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
+                        if s.Name == "L4" then
+                            self.InChase = true
+                            self:PlayLayer4(tostring(CurrentKillerChosen))
+                        else
+                            self:TweenVolume(s, CalculateSound(Distance))
+                        end
+                    else
+                        self:TweenVolume(s, 0)
+                    end
                 end
             end
-        else
-            if Distance <= r and Distance > Upcoming and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
-                if s.Name == "L4" then
-                    self.InChase = true
-                    self:PlayLayer4(ClosestKiller)
-                else
-                    self:TweenVolume(s, CalculateSound(Distance))
-                end
-            else
-                self:TweenVolume(s, 0)
-            end
+            continue
+        end
+        
+        print(n)
+        for _, s in i do
+            self:TweenVolume(s, 0)
         end
     end
+
+    return
 end
 
 function TerrorRadiusManager:_CheckAsKiller()
@@ -355,6 +331,8 @@ function TerrorRadiusManager:_CheckAsKiller()
 
             if self.InChase then
                 self:PlayLayer4(self.LocalPlayerProps.Char.Name)
+            else
+                self.Playing = false
             end
         end
     end
