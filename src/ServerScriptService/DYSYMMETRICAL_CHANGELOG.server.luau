@@ -35,6 +35,11 @@
     * Reminder to switch the scale type of the character renders in the player info window to `Crop` for them to show up correctly without caring about image aspect ratios.
     * Added Credits menu (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Credits` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------25/10/2025------
+    * Added Multi-Killer support in the same round (do what's said under here)
+        * Disable collision between the Killer collision group
+        * Add a workspace attribute called "KillersAllowed" and make it have a number value
+        * Remember that rounds that start without any survivors and don't have `CanSpawnKiller` set to false will end instantly
 ]]
 
 script:Destroy()
