@@ -17,17 +17,17 @@ local TimeManager = {
 --
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Utils = require(ReplicatedStorage.Modules.Utils)
 --
 local TimeValue: NumberValue = ReplicatedStorage.RoundInfo.TimeRemaining
 local State: StringValue = ReplicatedStorage.RoundInfo.CurrentState
 local EnoughPlayers: BoolValue = ReplicatedStorage.RoundInfo.EnoughPlayers
-local LoadedPlayers = ReplicatedStorage.LoadedPlayers
 --
 function TimeManager:Init()
     --print("FINISH TIMEMANAGER LATER >:(") --gotta save this line for memories lol
     
     RunService.Heartbeat:Connect(function(delta: number)
-        if self.Config.WaitForEnoughPlayers and State.Value == "Lobby" and self:_EnoughPlayers() then
+        if self.Config.WaitForEnoughPlayers and State.Value == "Lobby" and not self:_EnoughPlayers() then
             EnoughPlayers.Value = false
             if self.CurrentTime ~= self.Config.LobbyTime then
                 self:SetTime(self.Config.LobbyTime)
@@ -50,14 +50,7 @@ function TimeManager:Init()
 end
 
 function TimeManager:_EnoughPlayers()
-    local PlayersAvailable = LoadedPlayers:GetChildren()
-    for _, obj in PlayersAvailable do
-        if obj.Value.PlayerData.Settings.Game.AFK.Value then
-            table.remove(PlayersAvailable, table.find(PlayersAvailable, obj))
-        end
-    end
-
-    return #PlayersAvailable < self.Config.MinimumPlayerAmount
+    return #Utils:GetLoadedPlayers(false) >= self.Config.MinimumPlayerAmount
 end
 
 --- You can use this instead of changing the value directly. It works better.
