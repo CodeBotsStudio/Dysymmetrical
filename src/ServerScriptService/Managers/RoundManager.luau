@@ -286,7 +286,7 @@ end
 function RoundManager.Utils:CheckForKillerWin()
     local Count = Utils:GetCharactersWithRoles()
 
-    local Killers = Count.Killer and #Count.Killer or 2
+    local Killers = Count.Killer and #Count.Killer or 1
     local Survivors = Count.Survivor and #Count.Survivor or 2
 
     if RoundManager.CanSpawnKiller then

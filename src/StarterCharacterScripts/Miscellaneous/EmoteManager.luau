@@ -17,6 +17,8 @@ function EmoteManager:Init()
 
 	self.Char = Players.LocalPlayer.Character
 	self.Char:SetAttribute("Emoting", false)
+	self.Hum = Utils:FindFirstChild(self.Char, "Humanoid")
+	self.Head = Utils:FindFirstChild(self.Char, "Head")
 
 	self.Animator = self.Char:FindFirstChildOfClass("Humanoid"):FindFirstChildOfClass("Animator")
 
@@ -35,7 +37,12 @@ function EmoteManager:Init()
 	end
 
 	table.insert(self.Connections, require(LocalPlayer.PlayerScripts.InputManager).Miscellaneous.StopEmote.Pressed:Connect(function()
-		print(self.CurrentlyPlayingEmote)
+		if self.CurrentlyPlayingEmote then
+			self:StopEmote(self.CurrentlyPlayingEmote)
+		end
+	end))
+
+	table.insert(self.Connections, Utils:FindFirstChild(self.Char, "Humanoid").Died:Connect(function()
 		if self.CurrentlyPlayingEmote then
 			self:StopEmote(self.CurrentlyPlayingEmote)
 		end
@@ -55,7 +62,7 @@ function EmoteManager:Init()
 end
 
 function EmoteManager:PlayEmote(name: string)
-	if not self.EmotesAvailable[name] then return end
+	if not self.EmotesAvailable[name] or not self.Hum or self.Hum.Health <= 0 then return end
 
 	for _, i in self.EmotesAvailable do
 		self:StopEmote(i.Config.Name or i)
@@ -64,21 +71,30 @@ function EmoteManager:PlayEmote(name: string)
 	self.Char:SetAttribute("Emoting", true)
 
 	self.CurrentlyPlayingEmote = self.EmotesAvailable[name]
+	workspace.CurrentCamera.CameraSubject = self.Head
 	self.CurrentlyPlayingEmote:BaseBehaviour()
 end
 
 function EmoteManager:StopEmote(name: string | {})
+	if not self.Hum then
+		return
+	end
+
 	if typeof(name) == "string" then
-		if not self.EmotesAvailable[name] or not self.EmotesAvailable[name].TrackPlaying then return end
+		if not self.EmotesAvailable[name] or not self.EmotesAvailable[name].TrackPlaying then
+			return
+		end
 
 		Network:FireServerConnection("StopEmote", "REMOTE_EVENT", name)
-		if self.EmotesAvailable[name] == self.CurrentlyPlayingEmote then
-			self.CurrentlyPlayingEmote = nil
-		end
+		self.CurrentlyPlayingEmote = nil
 
 		self.Char:SetAttribute("Emoting", false)
 
 		return
+	end
+
+	if self.Hum.Health > 0 then
+		workspace.CurrentCamera.CameraSubject = self.Hum
 	end
 
 	Network:FireServerConnection("StopEmote", "REMOTE_EVENT", name.Config.Name)

@@ -87,7 +87,6 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
                     end
                 end))
                 table.insert(own.Connections, Network:SetConnection("StopEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string)
-					print(emoteName)
 					if plr == own.Owner and emoteName == own.Config.Name then
                         if own.Owner.Character:FindFirstChild("HumanoidRootPart") and own.Owner.Character.HumanoidRootPart:FindFirstChild("Emote") then
                             own.Owner.Character.HumanoidRootPart.Emote:Destroy()

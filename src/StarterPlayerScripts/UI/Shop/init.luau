@@ -382,6 +382,9 @@ function Shop:Toggle(toggle: boolean)
         if self.BuyWindow then
             self.BuyWindow:Hide(true)
         end
+        if workspace.Sounds:FindFirstChild("EmotePreview") then
+            workspace.Sounds.EmotePreview:Destroy()
+        end
         table.clear(self.ItemModules)
         self.LoadedItems = {
             Killers = {},
