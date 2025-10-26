@@ -40,6 +40,12 @@
         * Disable collision between the Killer collision group
         * Add a workspace attribute called "KillersAllowed" and make it have a number value
         * Remember that rounds that start without any survivors and don't have `CanSpawnKiller` set to false will end instantly
+    
+    ------26/10/2025------
+    * Added camera shaking when damaged (MAKE SURE TO GO INTO `ServerScriptService/Managers/SaveManager/PlayerData/Settings/Customization/ScreenShakeEnabled` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    * Added camera desaturation when low on health (MAKE SURE TO GO INTO `ServerScriptService/Managers/SaveManager/PlayerData/Settings/Customization/ScreenDesaturation` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    * Added camera fx when killing someone
+
 ]]
 
 script:Destroy()

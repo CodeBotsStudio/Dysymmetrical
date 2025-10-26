@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local Rand = Random.new()
 
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Effect = require(ReplicatedStorage.Classes.Effect)
@@ -76,6 +77,9 @@ function Utils:Init()
         Network:SetConnection("GetMousePosition", "REMOTE_FUNCTION", function(v)
             return self:_GetMousePosition(v)
         end)
+        Network:SetConnection("ShakeCamera", "REMOTE_EVENT", function(Magnitude: number, Duration: number)
+            return self:ShakeCamera(Magnitude, Duration)
+        end)
     end
 end
 
@@ -126,7 +130,7 @@ function Utils:ShuffleTable(t: {any} | {[any]: any}): {any} | {[any]: any}
     local j, temp
 
 	for i = #t, 1, -1 do
-		j = math.random(i)
+		j = Rand:NextInteger(1, i)
 		temp = t[i]
 		t[i] = t[j]
 		t[j] = temp
@@ -441,7 +445,11 @@ function Utils:GetPlayerStat(Player: Player, path: string, value: boolean?): Val
 end
 
 --- Retrieves a player's setting value through a string path.
-function Utils:GetPlayerSetting(Player: Player, path: string): any
+function Utils:GetPlayerSetting(Player: Player, path: string, value: boolean?): any
+    if value == nil then
+        value = true
+    end
+
     local splitPath = self:SplitStringPath(path)
     local PlayerSettings = self:FindFirstChild(Player, "PlayerData.Settings", false)
     if #splitPath == 1 then
@@ -455,7 +463,7 @@ function Utils:GetPlayerSetting(Player: Player, path: string): any
             end
             Setting = Setting:FindFirstChild(step)
         end
-        return Setting.Value
+        return value and Setting.Value or Setting
     end
 end
 
@@ -706,7 +714,7 @@ function Utils:LoadAnimationFromID(Rig: Model, ID: string | {string} | {[string]
 
     if typeof(ID) == "table" then
         ID = Utils:DictToTable(ID)
-        ID = ID[math.random(1, #ID)]
+        ID = ID[Rand:NextInteger(1, #ID)]
     end
 
     if YieldUntilLoad == nil then
@@ -980,6 +988,37 @@ function Utils:GetAchievementData(path: string): Achievements.Achievement
     end
 
     return Achievement
+end
+
+function Utils:ShakeCamera(Magnitude: number, Duration: number)
+    if RunService:IsServer() or not self:GetPlayerSetting(Players.LocalPlayer, "Customization.ScreenShakeEnabled") then
+        return
+    end
+
+    local Start = time()
+    local Conn
+    Conn = RunService.RenderStepped:Connect(function(_delta: number)
+        local Left = math.clamp((time() - Start) / Duration, 0, 1)
+        local mult = Magnitude * (1 - Left)
+        local AxisTable = {}
+        for _, Axis: string in {"X", "Y", "Z"} do
+            AxisTable[Axis] = (Rand:NextInteger(0, 1) - 0.5) * 2 * mult
+        end
+        local TargetPos = Vector3.new(AxisTable.X, AxisTable.Y, AxisTable.Z)
+        local Cam = workspace.CurrentCamera
+        Cam.CFrame *= CFrame.new(TargetPos)
+        if Left >= 1 then
+            Conn:Disconnect()
+        end
+    end)
+end
+
+function Utils:ShakeCameraOf(Player: Player | {Player}, Magnitude: number, Duration: number)
+    if not RunService:IsServer() then
+        return
+    end
+
+    Network:FireClientConnection(Player, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
 end
 
 return Utils
