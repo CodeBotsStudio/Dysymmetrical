@@ -1,3 +1,5 @@
+--!nocheck
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -7,6 +9,9 @@ return {
     Init = function(_self)
         local Player = Players.LocalPlayer
         local Character = Player.Character
+        if Utils:FindFirstChild(Character, "Role").Value == "Killer" then
+            return
+        end
         local Humanoid = Utils:FindFirstChild(Character, "Humanoid")
 
         local LastValue = Humanoid.Health
