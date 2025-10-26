@@ -445,11 +445,7 @@ function Utils:GetPlayerStat(Player: Player, path: string, value: boolean?): Val
 end
 
 --- Retrieves a player's setting value through a string path.
-function Utils:GetPlayerSetting(Player: Player, path: string, value: boolean?): any
-    if value == nil then
-        value = true
-    end
-
+function Utils:GetPlayerSetting(Player: Player, path: string): any
     local splitPath = self:SplitStringPath(path)
     local PlayerSettings = self:FindFirstChild(Player, "PlayerData.Settings", false)
     if #splitPath == 1 then
@@ -463,7 +459,7 @@ function Utils:GetPlayerSetting(Player: Player, path: string, value: boolean?): 
             end
             Setting = Setting:FindFirstChild(step)
         end
-        return value and Setting.Value or Setting
+        return Setting.Value
     end
 end
 

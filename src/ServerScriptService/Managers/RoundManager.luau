@@ -70,11 +70,9 @@ function RoundManager:StartRound()
             Player = P,
             Character = nil
         }
-        print(i)
     end
 
     for i, Player: Player in PlayersOrderedByMalice do
-        print(i, i <= workspace:GetAttribute("KillersAllowed"))
         RoundManager.Utils:SetupPlayer(Player, i <= workspace:GetAttribute("KillersAllowed") and i or nil)
     end
 

@@ -7,7 +7,7 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 return {
     Init = function(_)
         local Humanoid = Utils:FindFirstChild(Players.LocalPlayer.Character, "Humanoid")
-        local DesaturationSetting = Utils:GetPlayerSetting(Players.LocalPlayer, "Customization.ScreenDesaturation", false)
+        local DesaturationSetting = Utils:FindFirstChild(Players.LocalPlayer, "PlayerData.Settings.Customization.ScreenDesaturation")
 
         local Desat = Utils:FindFirstChild(Lighting, "HealthDesat", false)
         if not Desat then
