@@ -986,6 +986,7 @@ function Utils:GetAchievementData(path: string): Achievements.Achievement
     return Achievement
 end
 
+--- Shakes the local player's camera. Yeah, pretty intuitive, isn't it?
 function Utils:ShakeCamera(Magnitude: number, Duration: number)
     if RunService:IsServer() or not self:GetPlayerSetting(Players.LocalPlayer, "Customization.ScreenShakeEnabled") then
         return
@@ -1009,12 +1010,25 @@ function Utils:ShakeCamera(Magnitude: number, Duration: number)
     end)
 end
 
+--- SERVER FUNCTION: Shakes the camera of one or more players.
 function Utils:ShakeCameraOf(Player: Player | {Player}, Magnitude: number, Duration: number)
     if not RunService:IsServer() then
         return
     end
 
     Network:FireClientConnection(Player, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
+end
+
+--- Wraps a number between two values, meaning that if it's out of bounds, it turns to the contrary bound.
+--- For example, if the value is less than the minimum, it'll turn into the maximum and viceversa.
+function Utils:WrapNum(Value: number, Minimum: number, Maximum: number): number
+    if Value < Minimum then
+        Value = Maximum
+    elseif Value > Maximum then
+        Value = Minimum
+    end
+
+    return Value
 end
 
 return Utils

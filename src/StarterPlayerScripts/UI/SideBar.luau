@@ -70,6 +70,11 @@ function SideBar:Init()
             MenuModule = PlayerUIModules.StatsMenu,
             LayoutOrder = 3,
         },
+        Spectate = {
+            Render = "rbxassetid://108472274328332",
+            MenuModule = PlayerUIModules.Spectate,
+            LayoutOrder = 4,
+        },
         Settings = {
             Render = "rbxassetid://138518322199012",
             MenuModule = PlayerUIModules.Settings,
