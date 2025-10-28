@@ -19,7 +19,7 @@ export type HitboxSettings = {
     --- Offset for the assigned CFrame in the settings. Useful to e.g. move hitbox backwards or forwards for adjusting.
     CFrameOffset: CFrame?,
     --- Coordinate Frame of the hitbox. May also be a function to update it dynamically.
-    CFrame: CFrame?,
+    CFrame: CFrame? | () -> (CFrame)?,
     --- Damage inflicted to any hit humanoids.
     Damage: number?,
     --- Determines how long the hitbox will last.
@@ -54,9 +54,23 @@ export type HitboxSettings = {
 }
 
 --- Creates a new hitbox, assigning it to a specific player.
-function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings)
+function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
+    --- The humanoids the hitbox has already hit.
+    HumanoidsHit: {Humanoid}?,
+    --- The player that created this hitbox.
+    Creator: Player?,
+    --- The damage this hitbox deals.
+    Damage: number?,
+    --- The time that's passed since the creation of the hitbox.
+    TimePast: number?,
+    --- If the hitbox has been cancelled.
+    Cancelled: boolean?,
+    --- Cancels the hitbox and destroys it.
+    --- Call this with a `:`.
+    Cancel: (any) -> ()?,
+}
     if not RunService:IsServer() then
-        return
+        return {}
     end
 
     --initting it from here instead of outside due to it being server-sided
@@ -71,7 +85,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings)
     local Root = Char and Char.PrimaryPart
 
     if not Root then
-        return
+        return {}
     end
 
     Config = Config or {}
@@ -106,8 +120,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings)
         TimePast = 0,
         Cancelled = false,
     }
-    Props.Cancel = function(_)
-        Props.Cancelled = true
+    Props.Cancel = function(p)
+        p.Cancelled = true
     end
 
     task.defer(function()

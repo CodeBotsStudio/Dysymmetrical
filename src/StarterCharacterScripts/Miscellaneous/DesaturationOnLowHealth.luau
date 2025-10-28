@@ -9,13 +9,10 @@ return {
         local Humanoid = Utils:FindFirstChild(Players.LocalPlayer.Character, "Humanoid")
         local DesaturationSetting = Utils:FindFirstChild(Players.LocalPlayer, "PlayerData.Settings.Customization.ScreenDesaturation")
 
-        local Desat = Utils:FindFirstChild(Lighting, "HealthDesat", false)
-        if not Desat then
-            Desat = Instance.new("ColorCorrectionEffect")
-            Desat.Name = "HealthDesat"
-            Desat.Saturation = 0
-            Desat.Parent = Lighting
-        end
+        local Desat = Instance.new("ColorCorrectionEffect")
+        Desat.Name = "HealthDesat"
+        Desat.Saturation = 0
+        Desat.Parent = Lighting
 
         local function GetExistingDesat(): number
             local Amount = 0

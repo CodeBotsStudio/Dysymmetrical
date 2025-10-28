@@ -9,7 +9,10 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local LocalPlayer = Players.LocalPlayer
 local RoundState: StringValue = ReplicatedStorage.RoundInfo.CurrentState
 
-local RoundPlayerList = {}
+local RoundPlayerList = {
+    UI = nil,
+    Conns = {},
+}
 
 local TemplateFolder = Utils:FindFirstChild(script, "Templates")
 local Prefabs = {
@@ -20,6 +23,15 @@ local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "RoundPlayerList")
 
 function RoundPlayerList:Init()
     LocalPlayer.CharacterAdded:Connect(function(Char: Model)
+        if self.UI then
+            self.UI:Destroy()
+        end
+        for _, i in self.Conns do
+            for _, v in i do
+                v:Disconnect()
+            end
+        end
+        self.Conns = {}
         self:_InitUI(Char)
     end)
 end
@@ -30,6 +42,7 @@ function RoundPlayerList:_InitUI(Char: Model)
     end
 
     local UI = Prefabs.UI:Clone()
+    self.UI = UI
 
     if RoundState.Value ~= "InRound" then
         repeat task.wait()
@@ -58,27 +71,13 @@ function RoundPlayerList:_InitUI(Char: Model)
             Card.CharacterName.TextColor3 = Color3.fromRGB(255, 255, 127)
             Card.PortraitOutline.ImageColor3 = Color3.fromRGB(255, 255, 127)
             Card.PlayerName.Text = Character.Name.." (You)"
-
-            --stopping everything on own death
-            Conns[Character.Name] = LocalPlayer.CharacterAdded:Connect(function()
-                UI:Destroy()
-                for _, c in Conns do
-                    if typeof(c) == "table" then
-                        for _, i in c do
-                            i:Disconnect()
-                        end
-                        continue
-                    end
-                    c:Disconnect()
-                end
-            end)
         else
             Card.PlayerName.Text = Character.Name
 
             local PlayerConns = {}
             table.insert(PlayerConns, RunService.PreRender:Connect(function(_delta: number)
                 --stop checking when they die
-                if Humanoid.Health <= 0 then
+                if Humanoid.Health <= 0 and Card then
                     Card.Portrait.ImageColor3 = Color3.fromRGB(161, 0, 0)
                     Card.PortraitOutline.ImageColor3 = Color3.fromRGB(255, 0, 0)
 
@@ -130,6 +129,7 @@ function RoundPlayerList:_InitUI(Char: Model)
         Card.Parent = UI
     end
 
+    self.Conns = Conns
     UI.Parent = UIParent
 end
 

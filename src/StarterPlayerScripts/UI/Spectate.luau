@@ -107,7 +107,6 @@ function Spectate:ReloadPlayers()
                     return
                 end
 
-                self.PlayersAvailable[i.Name] = nil
                 table.remove(self.PlayersAvailable, Ind)
                 if self.SelectedPlayer.Index == Ind then
                     self:ChangeSelection()
@@ -142,6 +141,7 @@ end
 function Spectate:ChangeSelection(amount: number?)
     amount = amount or 0
 
+    print(self.PlayersAvailable)
     if #self.PlayersAvailable <= 0 then
         self.UIInstance.PlayerText.Username.Text = "Username"
         self.UIInstance.PlayerText.DisplayName.Text = "Player Name"
@@ -152,9 +152,11 @@ function Spectate:ChangeSelection(amount: number?)
         return
     end
 
+    print("enough")
     self.SelectedPlayer.Index = Utils:WrapNum(self.SelectedPlayer.Index + amount, 1, #self.PlayersAvailable)
 
     if self.PlayersAvailable[self.SelectedPlayer.Index] and workspace.Players:FindFirstChild(self.PlayersAvailable[self.SelectedPlayer.Index]) then
+        print("hm")
 
         self.SelectedPlayer.Name = self.PlayersAvailable[self.SelectedPlayer.Index]
 
