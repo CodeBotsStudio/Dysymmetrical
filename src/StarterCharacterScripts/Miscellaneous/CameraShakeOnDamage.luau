@@ -17,6 +17,7 @@ return {
         local LastValue = Humanoid.Health
         Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
             if Humanoid.Health >= LastValue or LastValue - Humanoid.Health < 10 then
+                LastValue = Humanoid.Health
                 return
             end
 
