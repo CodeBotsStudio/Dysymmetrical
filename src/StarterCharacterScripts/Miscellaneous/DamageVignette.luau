@@ -12,13 +12,12 @@ return {
         local Humanoid = Utils:FindFirstChild(Players.LocalPlayer.Character, "Humanoid")
 
         RunService.PreRender:Connect(function(delta: number)
-            print(Humanoid.Health / Humanoid.MaxHealth / 2)
             local Target = Humanoid.Health < Humanoid.MaxHealth * 0.45 and 
-                    math.clamp(
-                        Humanoid.Health / Humanoid.MaxHealth * 0.5,
-                        0.5,
-                        1
-                    ) or 1
+                math.clamp(
+                    Humanoid.Health / Humanoid.MaxHealth * 0.5,
+                    0.5,
+                    1
+                ) or 1
             Vignette.ImageTransparency = Utils:Lerp(
                 Vignette.ImageTransparency,
                 Target,
