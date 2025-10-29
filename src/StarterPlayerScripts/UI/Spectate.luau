@@ -59,50 +59,7 @@ function Spectate:Init()
     end)
 
     RunService.PreRender:Connect(function(_delta: number)
-        if not self.UIInstance.Visible then
-            return
-        end
-
-        if #self.PlayersAvailable <= 0 then
-            self.UIInstance.PlayerText.DisplayName.Text = "PlayerDisplayName"
-            self.UIInstance.PlayerText.Username.Text = "PlayerUsername"
-            self.UIInstance.PlayerText.CharacterName.Text = "CharacterName (SkinName)"
-
-            self.UIInstance.PlayerText.Health.Text = "100%"
-            self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(75, 255, 75)
-            
-            return
-        end
-
-        local Char = workspace.Players:FindFirstChild(self.PlayersAvailable[self.CurSelected])
-        if not Char then
-            return
-        end
-
-        local Role = Utils:FindFirstChild(Char, "Role")
-        if Role.Value == "Spectator" then
-            return
-        end
-
-        local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
-        workspace.CurrentCamera.CameraSubject = Humanoid
-
-        self.UIInstance.PlayerText.DisplayName.Text = Players:GetPlayerFromCharacter(Char).DisplayName
-        self.UIInstance.PlayerText.Username.Text = Char.Name
-
-        local CharText = Char:GetAttribute("CharacterName")
-        if Char:GetAttribute("CharacterSkinName") then
-            CharText = CharText.." ("..Char:GetAttribute("CharacterSkinName")..")"
-        end
-        self.UIInstance.PlayerText.CharacterName.Text = CharText
-
-        local HealthPercentageMagnitude = Humanoid.Health / Humanoid.MaxHealth
-        self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(
-            Utils:MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
-            HealthPercentageMagnitude * 180 + 75,
-            75
-        )
-        self.UIInstance.PlayerText.Health.Text = tostring(HealthPercentageMagnitude * 100).."%"
+        self:_Update()
     end)
 
     local function OnPlayerAdded(Player: Player)
@@ -153,6 +110,7 @@ function Spectate:Open()
     self.Opened = true
     self.UIInstance.Visible = true
     self:ChangeSelection()
+    self:_Update()
 end
 
 function Spectate:Close()
@@ -175,6 +133,53 @@ function Spectate:ChangeSelection(amount: number?)
     if #self.PlayersAvailable > 0 and not self.PlayersAvailable[self.CurSelected] then
         self:ChangeSelection(amount ~= 0 and amount or 1)
     end
+end
+
+function Spectate:_Update()
+    if not self.UIInstance.Visible then
+        return
+    end
+
+    if #self.PlayersAvailable <= 0 then
+        self.UIInstance.PlayerText.DisplayName.Text = "PlayerDisplayName"
+        self.UIInstance.PlayerText.Username.Text = "PlayerUsername"
+        self.UIInstance.PlayerText.CharacterName.Text = "CharacterName (SkinName)"
+
+        self.UIInstance.PlayerText.Health.Text = "100%"
+        self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(75, 255, 75)
+        
+        return
+    end
+
+    local Char = workspace.Players:FindFirstChild(self.PlayersAvailable[self.CurSelected])
+    if not Char then
+        return
+    end
+
+    local Role = Utils:FindFirstChild(Char, "Role")
+    if Role.Value == "Spectator" then
+        return
+    end
+
+    local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
+    workspace.CurrentCamera.CameraSubject = Humanoid
+
+    self.UIInstance.PlayerText.DisplayName.Text = Players:GetPlayerFromCharacter(Char).DisplayName
+    self.UIInstance.PlayerText.Username.Text = Char.Name
+
+    local CharText = Char:GetAttribute("CharacterName")
+    if Char:GetAttribute("CharacterSkinName") then
+        CharText = CharText.." ("..Char:GetAttribute("CharacterSkinName")..")"
+    end
+    self.UIInstance.PlayerText.CharacterName.Text = CharText
+
+    local HealthPercentageMagnitude = Humanoid.Health / Humanoid.MaxHealth
+    self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(
+        Utils:MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
+        HealthPercentageMagnitude * 180 + 75,
+        75
+    )
+    self.UIInstance.PlayerText.Health.Text = tostring(HealthPercentageMagnitude * 100).."%"
 end
 
 return Spectate
