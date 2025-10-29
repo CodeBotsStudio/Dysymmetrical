@@ -86,9 +86,13 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
 
         local Connections = {}
         if module.Config.Voicelines.LMS then
-            --TODO: implement unique LMS voicelines (USE THE KILL LINES AS AN EXAMPLE)
-            table.insert(Connections, Network:SetConnection("LMSVoiceline", "BINDABLE_EVENT", function()
-                Sounds:PlayVoiceline(Char, module.Config.Voicelines.LMS, {
+            table.insert(Connections, Network:SetConnection("LMSVoiceline", "BINDABLE_EVENT", function(LastMan: Player)
+                local Voiceline =
+                    module.Config.Voicelines.LMS[LastMan:GetAttribute("CharacterSkinName") and LastMan:GetAttribute("CharacterSkinName")..LastMan:GetAttribute("CharacterName") or LastMan:GetAttribute("CharacterName")]
+                    or module.Config.Voicelines.LMS["Default"]
+                    or module.Config.Voicelines.LMS
+                
+                Sounds:PlayVoiceline(Char, Voiceline, {
                     Priority = 999,
                 })
             end))

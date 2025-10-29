@@ -13,7 +13,6 @@ local lerpMult = 0.1
 
 local deltaVal = framerate / lerpMult
 
---TODO: finish this
 function GlobalTurnToMoveDirection:Init()
     local function SetupPlayer(Player: Player)
         Player.CharacterAdded:Connect(function(Char: Model)

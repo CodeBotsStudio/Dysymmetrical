@@ -28,10 +28,29 @@ export type Survivor = {
             WalkAnimation: string,
             --- The animation that'll play on a running state.
             RunAnimation: string,
+            --- TODO: The animation that'll play on stun.
+            Stunned: string?,
         },
 
-        --- Any voicelines this character might have. It's built with strings as keys, and either strings or string dictionaries as values for random voicelines.
-        Voicelines: {[string]: string | {[string]: string}},
+        --- Any voicelines this character might have. It's built with strings as keys, and either strings, string tables or string dictionaries as values for random voicelines.
+        --- * You can also name voicelines after abilities' code names (the ones that you define them with) so that they play when those abilities are used.
+        --- * For example, if I have an ability named `TestAbility` in code and I add a `TestAbility` field here, it'll play a voiceline from here when I use it.
+        Voicelines: {
+            --- The voiceline (s) that'll play at random times while the character isn't saying any other voiceline.
+            Idle: (string | {string} | {[string]: string | {string}})?,
+            --- The voiceline (s) that'll play when LMS starts.
+            --- If there's any character that you want this character to have a custom voiceline for, add its codename here.
+            --- * If there's a specific skin, add the skin's codename at the beginning and *then* add the character's codename (e.g. `[SkinName][CharacterName]`, without spaces).
+            LMS: {
+                --- The default voiceline (s).
+                Default: string | {string} | {[string]: string | {string}},
+                [string]: string | {string} | {[string]: string | {string}},
+            }?,
+            --- The voiceline (s) that'll play when the character gets stunned. Yes, you can do this with survivors.
+            Stunned: (string | {string} | {[string]: string | {string}})?,
+
+            [string]: string | {string} | {[string]: string | {string}},
+        },
     },
 
     --- Gameplay mechanics config that will affect how the character works.
@@ -49,7 +68,7 @@ export type Survivor = {
         },
 
         --- All of the initialized abilities the character has.
-        Abilities: {any},
+        Abilities: {[string]: any},
         --- Any temp objects or instances that might be created mid-match.
         Cache: {any},
     },
@@ -158,11 +177,28 @@ export type Killer = {
         --- You may set customs for skins and characters using `"[SkinName][CharacterName]"` format.
         --- Remove `[SkinName]` to make it for a survivor in general.
         Voicelines: {
+            --- The voiceline (s) that'll play when this character kills a survivor.
+            --- If there's any character that you want this character to have a custom voiceline for, add its codename here.
+            --- * If there's a specific skin, add the skin's codename at the beginning and *then* add the character's codename (e.g. `[SkinName][CharacterName]`, without spaces).
             Kill: {
+                --- The default voiceline (s).
                 Default: (string | {string}),
                 [string]: (string | {string}),
             }?,
-            [string]: (string | {string}),
+            --- The voiceline (s) that'll play at random times while the character isn't saying any other voiceline.
+            Idle: (string | {string} | {[string]: string | {string}})?,
+            --- The voiceline (s) that'll play when LMS starts.
+            --- If there's any character that you want this character to have a custom voiceline for, add its codename here.
+            --- * If there's a specific skin, add the skin's codename at the beginning and *then* add the character's codename (e.g. `[SkinName][CharacterName]`, without spaces).
+            LMS: {
+                --- The default voiceline (s).
+                Default: string | {string} | {[string]: string | {string}},
+                [string]: string | {string} | {[string]: string | {string}},
+            }?,
+            --- The voiceline (s) that'll play when the character gets stunned.
+            Stunned: (string | {string} | {[string]: string | {string}})?,
+
+            [string]: string | {string} | {[string]: string | {string}},
         },
 
         --- The chase theme of the character, separated in layers that depend on distance between the survivors and the killer.

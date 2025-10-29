@@ -246,7 +246,7 @@ function Sounds:StopTheme(ID: string, FadeOut: number?, UpdateThemes: boolean?)
 end
 
 --- Plays a voice line inside of a rig. Used instead of `Sounds:PlaySound()` since it has a priority system.
-function Sounds:PlayVoiceline(Rig: Model, ID: string | {[string]: string}, SoundSettings: {[string]: any}?)
+function Sounds:PlayVoiceline(Rig: Model, ID: string | {[string]: string | {string}}, SoundSettings: {[string]: any}?)
     local Primary = Rig.PrimaryPart or Rig:FindFirstChild("HumanoidRootPart")
     if not Primary then
         return
@@ -292,7 +292,7 @@ function Sounds:PlayVoiceline(Rig: Model, ID: string | {[string]: string}, Sound
     end
 
     if typeof(ID) == "table" then
-        ID = next(ID)
+        ID = ID[1] ~= nil and ID or next(ID)
     end
 
     local SoundInstance = self:PlaySound(ID, SoundSettings)

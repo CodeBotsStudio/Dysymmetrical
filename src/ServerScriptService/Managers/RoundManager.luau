@@ -153,7 +153,7 @@ function RoundManager.Callables:InitLMS(LastMan: Player)
         Utils:RevealPlayerAuraTo(LastMan, i.Player, 10)
     end
 
-    Network:FireConnection("LMSVoiceline")
+    Network:FireConnection("LMSVoiceline", LastMan)
 
     --plays the music
     --i'm sure that there's a better way to check special LMS's
