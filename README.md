@@ -33,17 +33,7 @@ NO CODE or ESSENTIAL UI is being stolen from Forsaken.
 There are certain assets from Forsaken used in this project's UI but they're nothing major and WILL be replaced soon.
 
 ## Getting Started
-First of all, install [Rojo](https://rojo.space/docs/v7/getting-started/installation/).
-
-It's essential for anyone to work properly with this project and even keep it up-to-date.
-It's not mandatory, but it's heavily recommended.
-
-It's also necessary that you know how to code. Yup, had to use that card.
-
-There's an example place included in the repository, which you can duplicate and rename to use for your own project.
-It is needed, though, to keep the place inside of the repository and never remove it so that merging with updates to the engine is a lot easier and faster.
-
-Make sure to replace the animations in the template characters.
+Read [Getting Started](https://github.com/CodeBotsStudio/Dysymmetrical/wiki/0.-Getting-Started) in the wiki.
 
 ## Bug reporting
 If you find a certain bug in the engine, it'd be really appreciated if you reported it in the GitHub Issues page for this repo.
