@@ -49,6 +49,7 @@
     ------29/10/2025------
     * Added spectating (MAKE SURE TO DISABLE `StreamingEnabled` IN `Workspace` OR ELSE THIS WON'T WORK; ALSO MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Spectate` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
     * Added a projectile class
+    * Added a red vignette when low on health (MAKE SURE TO ENABLE `IgnoreGuiInset` IN `StarterGui/TemporaryUI`)
 
 ]]
 
