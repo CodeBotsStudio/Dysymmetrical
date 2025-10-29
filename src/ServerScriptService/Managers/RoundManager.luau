@@ -284,11 +284,10 @@ end
 function RoundManager.Utils:CheckForKillerWin()
     local Count = Utils:GetCharactersWithRoles()
 
-    local Killers = Count.Killer ~= nil and #Count.Killer or 1
-    local Survivors = Count.Survivor ~= nil and #Count.Survivor or 2
+    local Survivors = #Count.Survivor
 
     if RoundManager.CanSpawnKiller then
-        if Killers <= 0 then
+        if #Count.Killer <= 0 then
             RoundManager.Callables:EndRound("Survivors")
         elseif Survivors == 1 then
             RoundManager.Callables:InitLMS(Count.Survivor[1])

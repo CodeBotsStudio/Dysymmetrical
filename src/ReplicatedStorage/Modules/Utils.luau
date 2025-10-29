@@ -895,6 +895,9 @@ function Utils:GetCharactersWithRoles(IncludeAFK: boolean?): {[string]: {Model}}
         end
     end
 
+    Characters.Killer = Characters.Killer or 0
+    Characters.Survivor = Characters.Survivor or 0
+
     return Characters
 end
 
