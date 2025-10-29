@@ -1,9 +1,13 @@
+--!nocheck
+
 local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Hitbox = require(script.Parent.Hitbox)
+
 local Projectile = {}
 
 export type Projectile = {
@@ -31,6 +35,11 @@ export type Projectile = {
     HitboxSettings: Hitbox.HitboxSettings,
     --- If `true`, the projectile will be destroyed whenever it collides with a part, including players.
     DestroyOnCollision: boolean,
+
+    --- Callback fired when the projectile is about to be destroyed by `Projectile:Destroy()` when it gets called from colliding with something when `DestroyOnCollision` is `true`.
+    OnHitDestroy: (self: any) -> ()?,
+    --- Callback fired when the projectile is about to be destroyed by `Projectile:Destroy()`.
+    OnDestroy: (self: any) -> ()?,
 }
 
 --- Creates a new projectile instance.
@@ -52,10 +61,10 @@ function Projectile.New(ProjectileSettings: Projectile): {
         Cancelled: boolean?,
         --- Cancels the hitbox and destroys it.
         --- Call this with a `:`.
-        Cancel: (any) -> ()?,
+        Cancel: (self: any) -> ()?,
     }?,
     --- Destroys this projectile by destroying the model and cancelling the hitbox.
-    Destroy: () -> ()?,
+    Destroy: (self: any) -> ()?,
 }
 
     if not RunService:IsServer() then
@@ -96,6 +105,9 @@ function Projectile.New(ProjectileSettings: Projectile): {
 
     local Cancel = false
     function ProjectileInstance:Destroy()
+        if ProjectileSettings.OnDestroy then
+            ProjectileSettings:OnDestroy()
+        end
         Cancel = true
         ProjectileInstance.Model:Destroy()
         ProjectileInstance.Hitbox:Cancel()
@@ -134,6 +146,9 @@ function Projectile.New(ProjectileSettings: Projectile): {
                         if (not ProjectileSettings.SourcePlayer.Character or not i:IsDescendantOf(ProjectileSettings.SourcePlayer.Character)) and i.CanCollide and i.CollisionGroup ~= "KillerPassthrough" then
                             found = true
                             task.delay(0.04, function()
+                                if ProjectileSettings.OnHitDestroy then
+                                    ProjectileSettings:OnHitDestroy()
+                                end
                                 ProjectileInstance:Destroy()
                             end)
                             break
