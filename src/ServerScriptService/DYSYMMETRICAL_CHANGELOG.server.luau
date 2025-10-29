@@ -46,6 +46,10 @@
     * Added camera desaturation when low on health (MAKE SURE TO GO INTO `ServerScriptService/Managers/SaveManager/PlayerData/Settings/Customization/ScreenDesaturation` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
     * Added camera fx when killing someone
 
+    ------29/10/2025------
+    * Added spectating (MAKE SURE TO DISABLE `StreamingEnabled` IN `Workspace` OR ELSE THIS WON'T WORK)
+    * Added a projectile class
+
 ]]
 
 script:Destroy()

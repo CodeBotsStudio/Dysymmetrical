@@ -1,5 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local SideBar = require(script.Parent.SideBar)
@@ -13,25 +15,17 @@ local Spectate = {
     UIInstance = nil,
 
     PlayersAvailable = {},
-    --{[string]: {RBXScriptConnection}}
-    PlayerConnections = {
-        Name = {},
-    },
-    SelectedPlayer = {
-        Name = "",
-        Index = 0,
-    },
+    CurSelected = 1,
 }
 
 local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local ButtonTweenInfo = TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
 
 function Spectate:Init()
     if self.UIInstance then
         self.UIInstance.Visible = false
         return
     end
-
-    self.PlayersAvailable = {}
 
     local UI = Utils:FindFirstChild(script, "SpectateUI")
     UI.Visible = false
@@ -40,15 +34,19 @@ function Spectate:Init()
 
     UI.Buttons.Left.MouseEnter:Connect(function()
         Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        TweenService:Create(UI.Buttons.Left, ButtonTweenInfo, {Size = UDim2.fromScale(0.14, 0.44)}):Play()
     end)
     UI.Buttons.Right.MouseEnter:Connect(function()
         Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        TweenService:Create(UI.Buttons.Right, ButtonTweenInfo, {Size = UDim2.fromScale(0.14, 0.44)}):Play()
     end)
     UI.Buttons.Left.MouseLeave:Connect(function()
         Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        TweenService:Create(UI.Buttons.Left, ButtonTweenInfo, {Size = UDim2.fromScale(0.12, 0.377)}):Play()
     end)
     UI.Buttons.Right.MouseLeave:Connect(function()
         Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        TweenService:Create(UI.Buttons.Right, ButtonTweenInfo, {Size = UDim2.fromScale(0.12, 0.377)}):Play()
     end)
 
     UI.Buttons.Left.MouseButton1Click:Connect(function()
@@ -60,7 +58,90 @@ function Spectate:Init()
         self:ChangeSelection(1)
     end)
 
-    self:ReloadPlayers()
+    RunService.PreRender:Connect(function(_delta: number)
+        if not self.UIInstance.Visible then
+            return
+        end
+
+        if #self.PlayersAvailable <= 0 then
+            self.UIInstance.PlayerText.DisplayName.Text = "PlayerDisplayName"
+            self.UIInstance.PlayerText.Username.Text = "PlayerUsername"
+            self.UIInstance.PlayerText.CharacterName.Text = "CharacterName (SkinName)"
+
+            self.UIInstance.PlayerText.Health.Text = "100%"
+            self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(75, 255, 75)
+            
+            return
+        end
+
+        local Char = workspace.Players:FindFirstChild(self.PlayersAvailable[self.CurSelected])
+        if not Char then
+            return
+        end
+
+        local Role = Utils:FindFirstChild(Char, "Role")
+        if Role.Value == "Spectator" then
+            return
+        end
+
+        local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
+        workspace.CurrentCamera.CameraSubject = Humanoid
+
+        self.UIInstance.PlayerText.DisplayName.Text = Players:GetPlayerFromCharacter(Char).DisplayName
+        self.UIInstance.PlayerText.Username.Text = Char.Name
+
+        local CharText = Char:GetAttribute("CharacterName")
+        if Char:GetAttribute("CharacterSkinName") then
+            CharText = CharText.." ("..Char:GetAttribute("CharacterSkinName")..")"
+        end
+        self.UIInstance.PlayerText.CharacterName.Text = CharText
+
+        local HealthPercentageMagnitude = Humanoid.Health / Humanoid.MaxHealth
+        self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(
+            Utils:MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
+            HealthPercentageMagnitude * 180 + 75,
+            75
+        )
+        self.UIInstance.PlayerText.Health.Text = tostring(HealthPercentageMagnitude * 100).."%"
+    end)
+
+    local function OnPlayerAdded(Player: Player)
+        local function OnCharacterAdded(Character: Model)
+            local Role = Utils:FindFirstChild(Character, "Role")
+
+            if Role.Value == "Spectator" then
+
+                local I = table.find(self.PlayersAvailable, Player.Name)
+                if I then
+
+                    table.remove(self.PlayersAvailable, I)
+
+                    if self.CurSelected <= I then
+                        self:ChangeSelection(-1)
+                    end
+
+                end
+
+            elseif not table.find(self.PlayersAvailable, Player.Name) then
+                
+                table.insert(self.PlayersAvailable, Player.Name)
+                self:ChangeSelection()
+            end
+        end
+
+        Player.CharacterAdded:Connect(OnCharacterAdded)
+        if Player.Character then
+            OnCharacterAdded(Player.Character)
+        end
+    end
+
+    Players.PlayerAdded:Connect(OnPlayerAdded)
+    for _, i in Players:GetPlayers() do
+        if i ~= Players.LocalPlayer then
+            OnPlayerAdded(i)
+        end
+    end
+
     self:ChangeSelection()
 end
 
@@ -71,7 +152,6 @@ function Spectate:Open()
 
     self.Opened = true
     self.UIInstance.Visible = true
-    self:ReloadPlayers()
     self:ChangeSelection()
 end
 
@@ -88,104 +168,12 @@ function Spectate:Toggle(toggle: boolean)
     self.Enabled = toggle
 end
 
-function Spectate:ReloadPlayers()
-    local PlayersInTable = {}
-    for _, i in workspace.Players:GetChildren() do
-        local Role = Utils:FindFirstChild(i, "Role")
-        Role = Role and Role.Value or "Spectator"
-
-        if Role ~= "Spectator" then
-            local Hum = Utils:FindFirstChild(i, "Humanoid")
-            
-            local Conns = {}
-
-            table.insert(Conns, Hum.Died:Connect(function()
-                task.wait(3)
-
-                local Ind = table.find(self.PlayersAvailable, i.Name)
-                if not Ind then
-                    return
-                end
-
-                table.remove(self.PlayersAvailable, Ind)
-                if self.SelectedPlayer.Index == Ind then
-                    self:ChangeSelection()
-                end
-            end))
-
-            table.insert(Conns, Hum:GetPropertyChangedSignal("Health"):Connect(function()
-                if self.SelectedPlayer == i.Name then
-                    local Magnitude = Hum.Health / Hum.MaxHealth
-                    self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(
-                        Utils:MapToRange(Magnitude, 0, 1, 1, 0) * 180 + 75,
-                        Magnitude * 180 + 75,
-                        75
-                    )
-                    self.UIInstance.PlayerText.Health.Text = tostring(Magnitude * 100).."%"
-                end
-            end))
-            
-            table.insert(Conns, Players:GetPlayerFromCharacter(i).CharacterAdded:Connect(function()
-                for _, i in Conns do
-                    i:Disconnect()
-                end
-            end))
-
-            PlayersInTable[i.Name] = Conns
-        end
-    end
-
-    self.PlayersAvailable = PlayersInTable
-end
-
 function Spectate:ChangeSelection(amount: number?)
     amount = amount or 0
-
-    print(self.PlayersAvailable)
-    if #self.PlayersAvailable <= 0 then
-        self.UIInstance.PlayerText.Username.Text = "Username"
-        self.UIInstance.PlayerText.DisplayName.Text = "Player Name"
-        self.UIInstance.PlayerText.CharacterName.Text = "Character"
-        self.UIInstance.PlayerText.Health.Text = "100%"
-        self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(75, 255, 75)
-
-        return
-    end
-
-    print("enough")
-    self.SelectedPlayer.Index = Utils:WrapNum(self.SelectedPlayer.Index + amount, 1, #self.PlayersAvailable)
-
-    if self.PlayersAvailable[self.SelectedPlayer.Index] and workspace.Players:FindFirstChild(self.PlayersAvailable[self.SelectedPlayer.Index]) then
-        print("hm")
-
-        self.SelectedPlayer.Name = self.PlayersAvailable[self.SelectedPlayer.Index]
-
-        local Char = workspace.Players[self.SelectedPlayer.Name]
-
-        self.UIInstance.PlayerText.DisplayName.Text = Players:GetPlayerFromCharacter(Char).DisplayName
-        self.UIInstance.PlayerText.Username.Text = self.SelectedPlayer.Name
-
-        self.UIInstance.PlayerText.CharacterName.Text = Char:GetAttribute("CharacterName")
-
-        if Char:GetAttribute("CharacterSkinName") then
-            self.UIInstance.PlayerText.CharacterName.Text = self.UIInstance.PlayerText.CharacterName.Text.." ("..Char:GetAttribute("CharacterSkinName")..")"
-        end
-
-        local Hum = Utils:FindFirstChild(Char, "Humanoid")
-        local Mag = Hum.Health / Hum.MaxHealth
-        self.UIInstance.PlayerText.Health.Text = tostring(Mag * 100).."%"
-        self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(
-            Utils:MapToRange(Mag, 0, 1, 1, 0) * 180 + 75,
-            Mag * 180 + 75,
-            75
-        )
-
-        if self.Opened then
-            workspace.CurrentCamera.CameraSubject = workspace.Players[self.SelectedPlayer.Name]:FindFirstChild("Humanoid")
-        end
-    else
-        --making a fallback for amount so that selene stops fucking crying
-        self:ChangeSelection(1 * (amount or 1))
+    
+    self.CurSelected = Utils:WrapNum(self.CurSelected + amount, 1, #self.PlayersAvailable)
+    if #self.PlayersAvailable > 0 and not self.PlayersAvailable[self.CurSelected] then
+        self:ChangeSelection(amount ~= 0 and amount or 1)
     end
 end
 

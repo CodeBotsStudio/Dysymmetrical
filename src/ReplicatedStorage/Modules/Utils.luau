@@ -126,7 +126,7 @@ function Utils:CopyTable<T>(CloneThis: T & {}) : T
 end
 
 --- Shuffles a table to make it have a random order.
-function Utils:ShuffleTable(t: {any} | {[any]: any}): {any} | {[any]: any}
+function Utils:ShuffleTable<T>(t: T & {}): T & {}
     local j, temp
 
 	for i = #t, 1, -1 do
@@ -1029,6 +1029,37 @@ function Utils:WrapNum(Value: number, Minimum: number, Maximum: number): number
     end
 
     return Value
+end
+
+--- Returns the amount of items there are in a dictionary.
+function Utils:GetCountOfDict(dictionary: {[any]: any}): number
+    local Count = 0
+
+    if dictionary then
+        for _, _ in dictionary do
+            Count += 1
+        end
+    end
+    
+    return Count
+end
+
+function Utils:FindInDictionary<T>(Dictionary: T & {}, Item: T, Type: "Key" | "Value"): (T, T)
+    if Type == "Key" then
+        for v, i in Dictionary do
+            if v == Item then
+                return v, i
+            end
+        end
+    elseif Type == "Value" then
+        for v, i in Dictionary do
+            if i == Item then
+                return v, i
+            end
+        end
+    end
+
+    return
 end
 
 return Utils

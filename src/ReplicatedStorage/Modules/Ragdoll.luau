@@ -161,7 +161,6 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 				Humanoid.Health = 1
 				Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
 				if RunService:IsClient() and Players.LocalPlayer.Character == Character then
-					Humanoid = Char:FindFirstChildOfClass("Humanoid")
 					if Humanoid and Humanoid.BreakJointsOnDeath then
 						workspace.CurrentCamera.CameraSubject = Char:FindFirstChild("Head") or Humanoid
 					else
