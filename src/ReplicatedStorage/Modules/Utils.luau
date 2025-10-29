@@ -259,9 +259,9 @@ end
 function Utils:GetPlayerMousePosition(Player: Player, LockToClosestPlayer: boolean): Vector3
     if RunService:IsServer() then
         return Network:FireClientConnection(Player, "GetMousePosition", "REMOTE_FUNCTION", LockToClosestPlayer)
-    else
-        return self:_GetMousePosition(Player)
     end
+
+    return self:_GetMousePosition(LockToClosestPlayer)
 end
 
 --- Gets the closest player from a specific group to a position in a radius.

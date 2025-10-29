@@ -1,6 +1,8 @@
 local Debris = game:GetService("Debris")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Hitbox = require(script.Parent.Hitbox)
 local Projectile = {}
 
@@ -98,6 +100,11 @@ function Projectile.New(ProjectileSettings: Projectile): {
         Cancel = true
         ProjectileInstance.Model:Destroy()
         ProjectileInstance.Hitbox:Cancel()
+    end
+
+    if ProjectileSettings.ThrowType == "Mouse" then
+        local Direction = (Utils:GetPlayerMousePosition(ProjectileSettings.SourcePlayer, false) - ProjectileSettings.StartingCFrame.Position).Unit
+        ProjectileSettings.StartingCFrame = CFrame.new(ProjectileSettings.StartingCFrame.Position) * CFrame.fromEulerAnglesXYZ(Direction.X, Direction.Y, Direction.Z)
     end
 
     if ProjectileInstance.Model:IsA("Model") then
