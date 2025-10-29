@@ -26,7 +26,6 @@ export type Projectile = {
     --- The behaviour of the throw.
     --- * If it's `Forward`, it'll be thrown relative to the `Forward` vector of `StartingCFrame`.
     --- * If it's `Mouse`, it'll be thrown towards where the mouse is pointing at.
-    --TODO: mouse thing
     ThrowType: "Forward" | "Mouse",
     --- The settings of the projectile's hitbox.
     HitboxSettings: Hitbox.HitboxSettings,

@@ -33,8 +33,6 @@ local Radiuses = {
 
 local TerrorRadiusManager = {
     AbleToInit = true,
-    Layers = {},
-    Killer = nil,
     LayerMagnitudes = {},
     Connections = {},
     InChase = false,
@@ -93,19 +91,6 @@ function TerrorRadiusManager:Init()
         until RoundState.Value == "InRound"
     end
 
-    --TODO: multi-killer support
-    for _, character in workspace.Players:GetChildren() do
-        local OtherRole = Utils:FindFirstChild(character, "Role").Value
-        if OtherRole == "Killer" then
-            self.Killer = character
-            break
-        end
-    end
-
-    if not self.Killer then
-        return
-    end
-
     for _, i in workspace.Players:GetChildren() do
         if not i:FindFirstChild("Role") or i.Role.Value ~= "Killer" then
             continue
@@ -143,7 +128,7 @@ function TerrorRadiusManager:Init()
         self:CheckInRadius()
     end))
 
-    table.insert(self.Connections, Utils:FindFirstChild(self.Killer, "Humanoid").Died:Connect(function()
+    table.insert(self.Connections, LocalPlayer.CharacterAdded:Connect(function()
         self:Destroy()
     end))
 end
