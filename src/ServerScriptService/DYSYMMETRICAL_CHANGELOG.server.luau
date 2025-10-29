@@ -50,6 +50,8 @@
     * Added spectating (MAKE SURE TO DISABLE `StreamingEnabled` IN `Workspace` OR ELSE THIS WON'T WORK; ALSO MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Spectate` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
     * Added a projectile class
     * Added a red vignette when low on health (MAKE SURE TO ENABLE `IgnoreGuiInset` IN `StarterGui/TemporaryUI`)
+    * Added custom LMS voicelines depending on the last man standing's character AND skin
+    * Added custom kill voicelines depending on the killed player's character AND skin
 
 ]]
 
