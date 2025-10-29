@@ -14,7 +14,7 @@ return {
         RunService.PreRender:Connect(function(delta: number)
             local Target = Humanoid.Health < Humanoid.MaxHealth * 0.45 and 
                 math.clamp(
-                    Humanoid.Health / Humanoid.MaxHealth * 0.5,
+                    Humanoid.Health / Humanoid.MaxHealth / 2 + 0.5,
                     0.5,
                     1
                 ) or 1
