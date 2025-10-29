@@ -14,7 +14,7 @@ return {
         RunService.PreRender:Connect(function(delta: number)
             local Target = Humanoid.Health < Humanoid.MaxHealth * 0.45 and 
                 math.clamp(
-                    Humanoid.Health / Humanoid.MaxHealth / 2 + 0.5,
+                    Humanoid.Health / Humanoid.MaxHealth / 2 + 0.65,
                     0.5,
                     1
                 ) or 1
@@ -33,10 +33,12 @@ return {
                     continue
                 end
 
+                local WaitTime = 0.15 + Humanoid.Health / Humanoid.MaxHealth / 2
+
                 Vignette.ImageTransparency *= 0.8
-                task.wait(0.3)
+                task.wait(WaitTime)
                 Vignette.ImageTransparency *= 0.8
-                task.wait(0.6)
+                task.wait(WaitTime * 2)
             end
         end)
     end,
