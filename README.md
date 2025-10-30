@@ -52,20 +52,9 @@ No one's stopping anyone from reading the code by themselves and changing it, th
 For animations, there are templates for Blender in `dysassets\Blend Files`.
 
 ## Contributing
-Contributing's such a simple topic that it isn't in its own separate file.
+Read [Contributing](https://github.com/CodeBotsStudio/Dysymmetrical/wiki/Contributing).
 
-You may create pull requests of anything you want changed from the engine as long as it benefits anyone (e.g. a QoL feature or a bug fix).
-
-They will be read and checked to see if they deserve to be merged.
-
-If you add utils to `ReplicatedStorage/Modules/CommonUtils` or `ServerScriptService/System/CommonFunctions`,
-it'd be greatly appreciated if you could add them to the engine's repo through a pull request.
-Credits would be given in the util's documentation.
-
-To-Do's are listed through comments as well, so you might want to install something like [Todo+](https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-todo-plus) in VSCode to see every `NOTE`, `FIXME`, `TODO`...
-
-If you *do* indeed make a pull request, it'll most probably be revised and merged without many questions or complaints.
-Though, if it's needed, the stuff in the pull requests will be changed if it doesn't comply with W.I.P. features or with the code style itself.
+Any (fairly big) contributions made to the engine will be credited.
 
 ## Licensing
 You may use this project for whatever you want, as long as you keep credit.
