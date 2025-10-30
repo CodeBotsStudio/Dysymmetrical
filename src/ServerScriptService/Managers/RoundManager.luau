@@ -1,5 +1,6 @@
 --!nocheck
 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Rand = Random.new()
@@ -121,11 +122,13 @@ function RoundManager.Callables:PlayIntro(RootName: string, SkinName: string?)
         table.insert(PlayerNames, i.Player.Name)
     end
 
-    Network:FireClientConnection(Utils:GetLoadedPlayers(), "PlayIntro", "REMOTE_EVENT",
-        RootName,
-        PlayerNames,
-        SkinName
-    )
+    for _, i in Utils:GetLoadedPlayers() do
+        Network:FireClientConnection(i, "PlayIntro", "REMOTE_EVENT",
+            RootName,
+            PlayerNames,
+            SkinName
+        )
+    end
 
     --whatever happens after since every intro lasts the same
     RoundManager.Threads["IntroEndingThread"] = task.delay(3, function()
@@ -155,6 +158,9 @@ function RoundManager.Callables:InitLMS(LastMan: Player)
 
     Network:FireConnection("LMSVoiceline", LastMan)
 
+    --duh
+    TimeManager:SetTime(TimeManager.Config.LastManStandingTime)
+
     --plays the music
     --i'm sure that there's a better way to check special LMS's
     local Mod = require(Utils:GetCharacterModule("Killer", RoundManager.CurrentRound.Killers[1].Character:GetAttribute("CharacterName"), RoundManager.CurrentRound.Killers[1].Character:GetAttribute("CharacterSkinName")))
@@ -163,9 +169,6 @@ function RoundManager.Callables:InitLMS(LastMan: Player)
     
     local Theme = Specials and (Specials[LastMan.Character:GetAttribute("CharacterSkinName")] or Specials["Default"] or Mod.Config.LastManStandingTheme) or Mod.Config.LastManStandingTheme
     Sounds:PlayTheme(Theme, {Name = "LMS", Priority = 999999, TweenTime = 0, Volume = 1, TimePosition = 0})
-
-    --duh
-    TimeManager:SetTime(TimeManager.Config.LastManStandingTime)
 end
 
 --- Ends the round. Whoever won is specified by the `winner` parameter.
@@ -290,7 +293,7 @@ function RoundManager.Utils:CheckForKillerWin()
         if #Count.Killer <= 0 then
             RoundManager.Callables:EndRound("Survivors")
         elseif Survivors == 1 then
-            RoundManager.Callables:InitLMS(Count.Survivor[1])
+            RoundManager.Callables:InitLMS(Players:GetPlayerFromCharacter(Count.Survivor[1]))
         elseif #RoundManager.CurrentRound.PlayersAccepted > 1 and Survivors <= 0 then
             RoundManager.Callables:EndRound("Killer")
         end
