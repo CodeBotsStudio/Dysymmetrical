@@ -140,7 +140,7 @@ end
 function RoundManager.Callables:InitLMS(LastMan: Player)
     local allowed = true
     --failsafe
-    if not allowed or RoundManager.CurrentRound.StartedLMS or not RoundManager.CurrentRound.Killers[0] or not RoundManager.CurrentRound.Killers[0].Character then
+    if not allowed or RoundManager.CurrentRound.StartedLMS or not RoundManager.CurrentRound.Killers[1] or not RoundManager.CurrentRound.Killers[1].Character then
         return
     end
 
