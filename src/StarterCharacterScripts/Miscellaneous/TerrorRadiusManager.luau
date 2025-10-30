@@ -288,7 +288,6 @@ function TerrorRadiusManager:_CheckAsSurvivor()
             continue
         end
         
-        print(n)
         for _, s in i do
             self:TweenVolume(s, 0)
         end
@@ -306,7 +305,7 @@ function TerrorRadiusManager:_CheckAsKiller()
             
             local Distance = (Utils:FindFirstChild(char, "HumanoidRootPart").Position - self.LocalPlayerProps.HRP.Position).Magnitude
             self.PlayerClose = Distance <= Radiuses.L1
-            self.InChase = Distance <= Radiuses.L4 or self.InChase and Distance <= Radiuses.L3
+            self.InChase = self.InChase and Distance <= Radiuses.L2 or Distance <= Radiuses.L4
 
             for r: number, s: Sound in self.LayerMagnitudes[self.LocalPlayerProps.Char.Name] do
                 if s.Name == "L4" then

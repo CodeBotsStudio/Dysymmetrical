@@ -46,29 +46,27 @@ function PlayerManager:Init()
 			
         	Utils:FindFirstChild(char, "Humanoid").BreakJointsOnDeath = false
 
-			task.delay(1, function()
-				if Role.Value ~= "Spectator" then
-					self:_SetupHitboxes(char)
+			if Role.Value ~= "Spectator" then
+				self:_SetupHitboxes(char)
 
-					local CollisionGroup = Role.Value
+				local CollisionGroup = Role.Value
 
-					for _, i in char:GetDescendants() do
-						if not i:IsA("BasePart") or i:IsDescendantOf(char.Hitboxes) then
-							continue
-						end
-						
-						i.CollisionGroup = CollisionGroup
+				for _, i in char:GetDescendants() do
+					if not i:IsA("BasePart") or i:IsDescendantOf(char.Hitboxes) then
+						continue
 					end
-				else
-					for _, i in char:GetDescendants() do
-						if not i:IsA("BasePart") then
-							continue
-						end
-						
-						i.CollisionGroup = "Spectator"
-					end
+					
+					i.CollisionGroup = CollisionGroup
 				end
-			end)
+			else
+				for _, i in char:GetDescendants() do
+					if not i:IsA("BasePart") then
+						continue
+					end
+					
+					i.CollisionGroup = "Spectator"
+				end
+			end
 
 			local KillerValue
 			if Role.Value == "Survivor" then

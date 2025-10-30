@@ -21,7 +21,7 @@ return {
             Vignette.ImageTransparency = Utils:Lerp(
                 Vignette.ImageTransparency,
                 Target,
-                delta * 9
+                delta * 9.8
             )
         end)
 
