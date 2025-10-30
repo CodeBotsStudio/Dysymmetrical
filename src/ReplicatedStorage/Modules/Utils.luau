@@ -766,12 +766,19 @@ function Utils:DictToTable<T>(Dictionary: {[any]: T}): {T}
     return NewTable
 end
 
---- Shows a black fade in/out in a player's UI.
+--- SERVER FUNCTION: Shows a black fade in/out in a player's UI.
 --- If it's called from server, the player(s) must be specified.
 --- If it's called from client, it can't be sent to other clients.
 function Utils:Fade(Target: Player | {Player}, FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
     if RunService:IsServer() then
-        Network:FireClientConnection(Target, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
+        if typeof(Target) == "table" then
+            for _, i in Target do
+                Network:FireClientConnection(i, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
+            end
+        else
+            Network:FireClientConnection(Target, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
+        end
+
         if Yield and Duration > 0 then
             task.wait(Duration)
         end
@@ -1019,6 +1026,12 @@ function Utils:ShakeCameraOf(Player: Player | {Player}, Magnitude: number, Durat
         return
     end
 
+    if typeof(Player) == "table" then
+        for _, i in Player do
+            Network:FireClientConnection(i, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
+        end
+        return
+    end
     Network:FireClientConnection(Player, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
 end
 
