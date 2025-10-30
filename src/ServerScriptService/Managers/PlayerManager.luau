@@ -102,7 +102,7 @@ function PlayerManager:Init()
                 		Network:FireConnection("KilledPlayer", KillerValue.Value, plr)
 
 						CommonFunctions:UpdatePlayerStat(KillerValue.Value, "KillerStats.Kills", 1)
-            	    	CommonFunctions:GrantRewardToPlayer(KillerValue.Value, 7, 20, "making a Survivor rage-quit")
+            	    	CommonFunctions:GrantRewardToPlayer(KillerValue.Value, 7, 20, "making a Survivor ragequit")
 
 						TimeManager:SetTime(TimeManager.CurrentTime + 35)
 					end

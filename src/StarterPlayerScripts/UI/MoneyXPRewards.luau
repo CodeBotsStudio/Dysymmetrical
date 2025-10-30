@@ -37,6 +37,8 @@ function MoneyXPRewards:Init()
         end
         Text = Text.."."
 
+        Notification.Text = Text
+
         Notification.Parent = UI
 
         TweenService:Create(Notification, TweenInfo.new(0.4), {Position = UDim2.fromScale(0.5, 0.034)}):Play()

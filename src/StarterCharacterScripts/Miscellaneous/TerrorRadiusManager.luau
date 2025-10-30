@@ -45,6 +45,7 @@ local TerrorRadiusManager = {
         Humanoid = nil,
         HRP = nil,
     },
+    MapAmbienceVolume = 0,
 }
 
 local function CalculateSound(Distance)
@@ -66,6 +67,8 @@ function TerrorRadiusManager:Init()
         Humanoid = Utils:FindFirstChild(Char, "Humanoid"),
         HRP = Utils:FindFirstChild(Char, "HumanoidRootPart"),
     }
+
+    self.MapAmbienceVolume = workspace.Themes:FindFirstChild("MapAmbience") and workspace.Themes.MapAmbience.Volume or 0
 
     local ThemeFolder = Instance.new("Folder")
     ThemeFolder.Name = "ChaseThemes"
