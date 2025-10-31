@@ -53,6 +53,9 @@
     * Added custom LMS voicelines depending on the last man standing's character AND skin
     * Added custom kill voicelines depending on the killed player's character AND skin
 
+    ------31/10/2025------
+    * Added stun protection (MAKE SURE TO GO INTO `ServerScriptService/Managers/PlayerManager` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    
 ]]
 
 script:Destroy()
