@@ -1004,7 +1004,7 @@ function Utils:ShakeCamera(Magnitude: number, Duration: number)
 
     local Start = time()
     local Conn
-    Conn = RunService.RenderStepped:Connect(function(_delta: number)
+    Conn = RunService.PreRender:Connect(function(_delta: number)
         local Left = math.clamp((time() - Start) / Duration, 0, 1)
         local mult = Magnitude * (1 - Left)
         local AxisTable = {}

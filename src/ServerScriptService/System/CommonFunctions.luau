@@ -129,8 +129,14 @@ end
 --- Applies an effect on a specific humanoid. It can be a player or an NPC, it doesn't matter.
 function CommonFunctions:ApplyEffect(hum: Humanoid, name: string, level: number?, duration: number?, subfolder: string?)
 	local char = hum.Parent
-	local EffectModule = Utils:GetEffectModule(name, subfolder)
 
+	if name == "Stunned" then
+		if Utils:FindFirstChild(char, "Effects"):FindFirstChild("SpawnProtection") then
+			return
+		end
+	end
+	
+	local EffectModule = Utils:GetEffectModule(name, subfolder)
 	local EffectValue = Instance.new("NumberValue")
 
 	EffectValue.Name = name

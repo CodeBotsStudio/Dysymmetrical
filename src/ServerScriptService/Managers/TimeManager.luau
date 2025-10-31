@@ -2,13 +2,13 @@
 local TimeManager = {
     CurrentTime = 0,
     Config = {
-        LobbyTime = 5, --0:45 / 45
-        RoundTime = 210, --3:30 / 210
+        LobbyTime = 45, --0:45 / 45
+        RoundTime = 240, --4:00 / 240
         LastManStandingTime = 90, --1:30 / 90
 
         --- If true, `TimeManager` will wait until `TimeManager.Config.MinimumPlayerAmount` players have loaded their game to tick down.
         WaitForEnoughPlayers = true,
-        MinimumPlayerAmount = 3, --change this to 1 to test rounds alone instead of using `WaitForEnoughPlayers`
+        MinimumPlayerAmount = 2, --change this to 1 to test rounds alone instead of using `WaitForEnoughPlayers`
     },
     --- Function that'll execute whenever the timer reaches 0.
     OnTimerEnd = function() end, --func

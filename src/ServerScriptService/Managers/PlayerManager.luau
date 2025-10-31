@@ -25,7 +25,11 @@ local CharFolder = ServerStorage.Assets.Characters
 local StarterCharacterScripts = game:GetService("StarterPlayer").StarterCharacterScripts
 local PlayerFolder = workspace.Players
 
+local StunSPPrefab = Utils:FindFirstChild(script, "StunSpawnProtection")
+
 function PlayerManager:Init()
+	local TimePlayedThreads = {}
+
 	Players.PlayerAdded:Connect(function(plr: Player)
 		plr.CharacterAdded:Connect(function(char)
 			AntiFly:_SetupCharacter(plr, char)
@@ -46,6 +50,7 @@ function PlayerManager:Init()
 			
         	Utils:FindFirstChild(char, "Humanoid").BreakJointsOnDeath = false
 
+			local KillerValue
 			if Role.Value ~= "Spectator" then
 				self:_SetupHitboxes(char)
 
@@ -58,6 +63,28 @@ function PlayerManager:Init()
 					
 					i.CollisionGroup = CollisionGroup
 				end
+
+				if Role.Value ~= "Killer" then
+					KillerValue = Instance.new("ObjectValue")
+					KillerValue.Name = "Killer"
+					KillerValue.Parent = char
+					local KillerValueThread
+					KillerValue.Changed:Connect(function(value: Instance?)
+						if KillerValueThread then
+							task.cancel(KillerValueThread)
+						end
+
+						if not value then
+							return
+						end
+
+						KillerValueThread = task.delay(15, function()
+							KillerValue.Value = nil
+						end)
+					end)
+				else
+					StunSPPrefab:Clone().Parent = Utils:FindFirstChild(char, "HumanoidRootPart")
+				end
 			else
 				for _, i in char:GetDescendants() do
 					if not i:IsA("BasePart") then
@@ -66,27 +93,6 @@ function PlayerManager:Init()
 					
 					i.CollisionGroup = "Spectator"
 				end
-			end
-
-			local KillerValue
-			if Role.Value == "Survivor" then
-				KillerValue = Instance.new("ObjectValue")
-				KillerValue.Name = "Killer"
-				KillerValue.Parent = char
-				local KillerValueThread
-				KillerValue.Changed:Connect(function(value: Instance?)
-					if KillerValueThread then
-						task.cancel(KillerValueThread)
-					end
-
-					if not value then
-						return
-					end
-
-					KillerValueThread = task.delay(15, function()
-						KillerValue.Value = nil
-					end)
-				end)
 			end
 
 			local LeaveConn
@@ -137,7 +143,7 @@ function PlayerManager:Init()
 		
 		task.spawn(function()
 			local TimePlayed = Utils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
-			RunService.Heartbeat:Connect(function(delta: number)
+			TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
 				TimePlayed.Value += delta
 			end)
 		end)
@@ -155,6 +161,10 @@ function PlayerManager:Init()
 	Players.PlayerRemoving:Connect(function(plr: Player)
 		if Folder:FindFirstChild(plr.Name) then
 			Folder[plr.Name]:Destroy()
+		end
+
+		if TimePlayedThreads[plr.UserId] then
+			TimePlayedThreads[plr.UserId]:Disconnect()
 		end
 	end)
 
