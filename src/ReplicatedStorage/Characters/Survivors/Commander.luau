@@ -12,6 +12,7 @@ local Hitbox = require(ReplicatedStorage.Classes.Hitbox)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local CommonFunctions = RunService:IsServer() and require(game:GetService("ServerScriptService").System.CommonFunctions) or nil
 
 --Character Definition
 local Commander: Character.Survivor = Character:GetDefaultSurvivorSettings()
@@ -74,6 +75,9 @@ Blindside.Behaviour = function(self)
                                 Level = 1,
                             },
                         },
+                        OnHit = function(Hum: Humanoid)
+                            CommonFunctions:GrantRewardToPlayer(self.Owner, 10, 20, "blinding the killer with Blindside")
+                        end,
                     })
                 end)
 
@@ -152,7 +156,7 @@ Justice.Behaviour = function(self)
         --Shot Sound & Hitbox
         table.insert(self.Connections, task.delay(1.17, function()
             task.spawn(function()
-                    Hitbox:New(self.Owner, {
+                Hitbox:New(self.Owner, {
                     CFrameOffset = CFrame.new(0, 0, -23),
                     Size = Vector3.new(3, 1.5, 45),
                     Time = self.Duration,
@@ -166,6 +170,9 @@ Justice.Behaviour = function(self)
                             Subfolder = "KillerSpecific"
                         },
                     },
+                    OnHit = function(Hum: Humanoid)
+                        CommonFunctions:GrantRewardToPlayer(self.Owner, 6, 14, "stunning the killer with Justice")
+                    end,
                 })
             end)
 
