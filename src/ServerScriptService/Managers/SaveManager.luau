@@ -112,12 +112,20 @@ function SaveManager:Load(Player: Player): Folder
         end
 
 		for v, i in GetAsync.Equipped.Emotes do
+            if not Utils:GetEmoteModule(v) then
+                continue
+            end
+
 			local Emote = Instance.new("StringValue")
 			Emote.Name = v
 			Emote.Value = i
 			Emote.Parent = ClonedData.Equipped.Emotes
 		end
         for v, i in GetAsync.Equipped.Skins do
+            if not Utils:GetCharacterModule("Killer", v, i) and not Utils:GetCharacterModule("Survivor", v, i) then
+                continue
+            end
+
             local V = Instance.new("StringValue")
             V.Name = v
             V.Value = i
@@ -129,11 +137,19 @@ function SaveManager:Load(Player: Player): Folder
 		ClonedData.Misc.LastSeenLog.Value = GetAsync.Misc.LastSeenLog
 
         for v, _ in GetAsync.Purchased.Emotes do
+            if not Utils:GetEmoteModule(v) then
+                continue
+            end
+
             local int = Instance.new("IntValue")
             int.Parent = ClonedData.Purchased.Emotes
             int.Name = v
         end
         for v, lvl in GetAsync.Purchased.Killers do
+            if not Utils:GetCharacterModule("Killer", v) then
+                continue
+            end
+
             local int = Instance.new("IntValue")
             int.Parent = ClonedData.Purchased.Killers
             if lvl then
@@ -142,6 +158,10 @@ function SaveManager:Load(Player: Player): Folder
             int.Name = v
         end
         for v, lvl in GetAsync.Purchased.Survivors do
+            if not Utils:GetCharacterModule("Survivor", v) then
+                continue
+            end
+
             local int = Instance.new("IntValue")
             int.Parent = ClonedData.Purchased.Survivors
             if lvl then
@@ -150,10 +170,21 @@ function SaveManager:Load(Player: Player): Folder
             int.Name = v
         end
 		for v, i in GetAsync.Purchased.Skins do
-			local Folder = Instance.new("Folder")
+            local IsSurvivor = Utils:GetCharacterModule("Survivor", v) ~= nil
+            if not IsSurvivor then
+                if not Utils:GetCharacterModule("Killer", v) then
+                    continue
+                end
+            end
+
+            local Folder = Instance.new("Folder")
 			Folder.Name = v
 			Folder.Parent = ClonedData.Purchased.Skins
 			for ve, ie in i do
+                if not Utils:GetCharacterModule(if IsSurvivor then "Survivor" else "Killer", v, ve) then
+                    continue
+                end
+
             	local int = Instance.new("IntValue")
             	int.Parent = Folder
 				int.Name = ve
