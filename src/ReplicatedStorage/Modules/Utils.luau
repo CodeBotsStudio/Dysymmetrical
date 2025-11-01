@@ -602,7 +602,7 @@ function Utils:GetCharacterModule(charType: "Survivor" | "Killer", charName: str
 
     --obv errors if there's none
     if not Module then
-        error("Can't find character module! ("..charType..", "..charName..", "..skinName..")")
+        warn("Can't find character module! ("..charType..", "..charName..", "..skinName..")")
         return
     end
 

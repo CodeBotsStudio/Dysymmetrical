@@ -83,6 +83,57 @@ function SaveManager:_SetupLeaderStats(DataFolder, parent) --just for display, w
     end
 end
 
+function SaveManager:_CheckSaveIntegrity(DataFolder, parent)
+    for _, i in DataFolder.Equipped.Emotes:GetChildren() do
+        if Utils:GetEmoteModule(i.Name) == nil then
+            i:Destroy()
+        end
+	end
+    for _, i in DataFolder.Equipped.Skins:GetChildren() do
+        if Utils:GetCharacterModule("Killer", i.Name, i.Value) == nil and Utils:GetCharacterModule("Survivor", i.Name, i.Value) == nil then
+            i:Destroy()
+        end
+    end
+
+    local EquippedKiller = DataFolder.Equipped.Killer
+    local EquippedSurvivor = DataFolder.Equipped.Survivor
+
+    if not Utils:GetCharacterModule("Killer", EquippedKiller.Value) then
+        EquippedKiller.Value = script.PlayerData.Equipped.Killer
+    end
+    if not Utils:GetCharacterModule("Survivor", EquippedSurvivor.Value) then
+        EquippedSurvivor.Value = script.PlayerData.Equipped.Survivor
+    end
+
+    for _, lvl in DataFolder.Purchased.Killers:GetChildren() do
+        if Utils:GetCharacterModule("Killer", lvl.Name) == nil then
+            lvl:Destroy()
+        end
+    end
+    for _, lvl in DataFolder.Purchased.Survivors:GetChildren() do
+        if Utils:GetCharacterModule("Survivor", lvl.Name) == nil then
+            lvl:Destroy()
+        end
+    end
+
+	for _, i in DataFolder.Purchased.Skins:GetChildren() do
+        local IsSurvivor = Utils:GetCharacterModule("Survivor", i.Name) ~= nil
+        if not IsSurvivor then
+            if Utils:GetCharacterModule("Killer", i.Name) == nil then
+                i:Destroy()
+                continue
+            end
+        end
+
+		for ve, ie in i:GetChildren() do
+            if Utils:GetCharacterModule(if IsSurvivor then "Survivor" else "Killer", i.Name, ie.Name) == nil then
+                ie:Destroy()
+                continue
+            end
+		end
+    end
+end
+
 --- Loads a player's saved data and returns its folder containing all `ValueBase`s instances with it.
 function SaveManager:Load(Player: Player): Folder
     local _, GetAsync = pcall(function()
@@ -95,6 +146,7 @@ function SaveManager:Load(Player: Player): Folder
 
 	if GetAsync then
         if not GetAsync.Achievements then
+            -- self:_CheckSaveIntegrity(ClonedData)
             ClonedData.Parent = Player
             self:_SetupLeaderStats(ClonedData, Leaderstats)
             Leaderstats.Parent = Player
@@ -112,7 +164,7 @@ function SaveManager:Load(Player: Player): Folder
         end
 
 		for v, i in GetAsync.Equipped.Emotes do
-            if not Utils:GetEmoteModule(v) then
+            if Utils:GetEmoteModule(v) == nil then
                 continue
             end
 
@@ -122,7 +174,7 @@ function SaveManager:Load(Player: Player): Folder
 			Emote.Parent = ClonedData.Equipped.Emotes
 		end
         for v, i in GetAsync.Equipped.Skins do
-            if not Utils:GetCharacterModule("Killer", v, i) and not Utils:GetCharacterModule("Survivor", v, i) then
+            if Utils:GetCharacterModule("Killer", v, i) == nil and Utils:GetCharacterModule("Survivor", v, i) == nil then
                 continue
             end
 
@@ -131,8 +183,8 @@ function SaveManager:Load(Player: Player): Folder
             V.Value = i
             V.Parent = ClonedData.Equipped.Skins
         end
-		ClonedData.Equipped.Killer.Value = GetAsync.Equipped.Killer
-		ClonedData.Equipped.Survivor.Value = GetAsync.Equipped.Survivor
+		ClonedData.Equipped.Killer.Value = Utils:GetCharacterModule("Killer", GetAsync.Equipped.Killer) ~= nil and GetAsync.Equipped.Killer or ""
+		ClonedData.Equipped.Survivor.Value = Utils:GetCharacterModule("Survivor", GetAsync.Equipped.Survivor) ~= nil and GetAsync.Equipped.Survivor or ""
 
 		ClonedData.Misc.LastSeenLog.Value = GetAsync.Misc.LastSeenLog
 
@@ -146,7 +198,7 @@ function SaveManager:Load(Player: Player): Folder
             int.Name = v
         end
         for v, lvl in GetAsync.Purchased.Killers do
-            if not Utils:GetCharacterModule("Killer", v) then
+            if Utils:GetCharacterModule("Killer", v) == nil then
                 continue
             end
 
@@ -158,7 +210,7 @@ function SaveManager:Load(Player: Player): Folder
             int.Name = v
         end
         for v, lvl in GetAsync.Purchased.Survivors do
-            if not Utils:GetCharacterModule("Survivor", v) then
+            if Utils:GetCharacterModule("Survivor", v) == nil then
                 continue
             end
 
@@ -172,7 +224,7 @@ function SaveManager:Load(Player: Player): Folder
 		for v, i in GetAsync.Purchased.Skins do
             local IsSurvivor = Utils:GetCharacterModule("Survivor", v) ~= nil
             if not IsSurvivor then
-                if not Utils:GetCharacterModule("Killer", v) then
+                if Utils:GetCharacterModule("Killer", v) == nil then
                     continue
                 end
             end
@@ -181,7 +233,7 @@ function SaveManager:Load(Player: Player): Folder
 			Folder.Name = v
 			Folder.Parent = ClonedData.Purchased.Skins
 			for ve, ie in i do
-                if not Utils:GetCharacterModule(if IsSurvivor then "Survivor" else "Killer", v, ve) then
+                if Utils:GetCharacterModule(if IsSurvivor then "Survivor" else "Killer", v, ve) == nil then
                     continue
                 end
 
@@ -209,6 +261,7 @@ function SaveManager:Load(Player: Player): Folder
 			end
         end
     end
+    -- self:_CheckCheckSaveIntegrity(ClonedData)
     ClonedData.Parent = Player
     self:_SetupLeaderStats(ClonedData, Leaderstats)
     Leaderstats.Parent = Player
