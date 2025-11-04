@@ -75,6 +75,9 @@ export type Survivor = {
 
     --- An empty function that you can replace to execute custom behaviour when this character initializes.
     OnInit: (self: Survivor, charModel: Model) -> ()?,
+    --- SERVER FUNCTION: An empty function that you can replace to execute custom behaviour when this character gets hit.
+    --- * If you want the character to not get affected by the hit, you can return `"Ignored"`.
+    OnHit: (self: Survivor, hitbox: any, damage: number) -> (string?)?,
 }
 
 --- Survivor preset for customization.
@@ -113,6 +116,7 @@ function CharTypes:GetDefaultSurvivorSettings(): Survivor
         },
 
         OnInit = nil,
+        OnHit = nil,
     }
 end
 
@@ -239,9 +243,6 @@ export type Killer = {
         ExecutionSurvivorCFrameOffset: CFrame?,
     },
 
-    --- An empty function that you can replace to execute custom behaviour when this character initializes.
-    OnInit: (self: Killer, charModel: Model) -> ()?,
-
     --- Gameplay mechanics config that will affect how the character works.
     GameplayConfig: {
         --- Amount of health.
@@ -268,6 +269,12 @@ export type Killer = {
         --- Any temp objects or instances that might be created mid-match.
         Cache: {any},
     },
+
+    --- An empty function that you can replace to execute custom behaviour when this character initializes.
+    OnInit: (self: Killer, charModel: Model) -> ()?,
+    --- SERVER FUNCTION: An empty function that you can replace to execute custom behaviour when this character gets hit.
+    --- * If you want the character to not get affected by the hit, you can return `"Ignored"`.
+    OnHit: (self: Survivor, hitbox: any, damage: number) -> (string?)?,
 }
 
 --- Killer preset for customization.
@@ -324,6 +331,7 @@ function CharTypes:GetDefaultKillerSettings(): Killer
         },
 
         OnInit = nil,
+        OnHit = nil,
     }
 end
 
