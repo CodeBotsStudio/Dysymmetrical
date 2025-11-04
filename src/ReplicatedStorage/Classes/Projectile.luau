@@ -72,11 +72,13 @@ function Projectile.New(ProjectileSettings: Projectile): {
     end
 
     if not ProjectileSettings then
-        error("No projectile settings specified!")
+        warn("No projectile settings specified!")
+        warn(debug.traceback())
         return {}
     end
     if not ProjectileSettings.SourcePlayer or not ProjectileSettings.Model or not ProjectileSettings.StartingCFrame or not ProjectileSettings.HitboxSettings then
-        error("Projectile settings missing crucial fields!")
+        warn("Projectile settings missing crucial fields!")
+        warn(debug.traceback())
         return {}
     end
 
@@ -88,9 +90,10 @@ function Projectile.New(ProjectileSettings: Projectile): {
         FinalRotation = ProjectileSettings.FinalRotation or CFrame.new(),
         Lifetime = ProjectileSettings.Lifetime or 5,
         ThrowType = ProjectileSettings.ThrowType or "Forward",
-        HitboxSettings = ProjectileSettings.HitboxSettings,
+        HitboxSettings = ProjectileSettings.HitboxSettings or {},
         DestroyOnCollision = ProjectileSettings.DestroyOnCollision or false,
     }
+    ProjectileSettings.HitboxSettings.IsProjectile = true
 
     local ProjectileInstance = {}
 

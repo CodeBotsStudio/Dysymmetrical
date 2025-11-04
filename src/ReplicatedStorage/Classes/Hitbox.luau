@@ -31,7 +31,9 @@ export type HitboxSettings = {
     --- If true, will try to predict the player's velocity & ping to be more accurate.
     PredictVelocity: boolean?,
     --- If true, will play an execution animation, killing the hit humanoid afterwards. Should be used with `HitMultiple` being false and only in slashes.
-    ExecuteOnKill: boolean?, --implement later
+    ExecuteOnKill: boolean?,
+    --- Info boolean that indicates if this hitbox is originated from a projectile.
+    IsProjectile: boolean?,
     --- If true, the hitbox will be able to hit anyone.
     FriendlyFire: boolean?,
     --- Reason ID for custom behaviours on hit. Please assign this.
@@ -99,6 +101,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
         HitMultiple = Config.HitMultiple or false,
         PredictVelocity = Config.PredictVelocity == nil or Config.PredictVelocity,
         ExecuteOnKill = Config.ExecuteOnKill or false,
+        IsProjectile = Config.IsProjectile or false,
         FriendlyFire = Config.FriendlyFire or false,
         Reason = Config.Reason or "Slash Attack",
         EffectsToApply = Config.EffectsToApply or {},
