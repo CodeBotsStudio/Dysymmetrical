@@ -65,14 +65,18 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	--correction: the hitboxes in Forsaken are FULLY server-handled, but it doesn't lag because THEIR GAME SOMEHOW DOESN'T LAG AT ALL. WHAT????
 	--quick thing: hitboxes are now fully server-sided. yup. i had to. :(
 
+	if Utils:FindFirstChild(Char, "Effects.StunSpawnProtection", false) and not sourcePlayer.Character:GetAttribute("BypassStunProtection") then
+		return
+	end
+
 	if Utils:FindFirstChild(Char, "Role") and Char.Role.Value == "Survivor" then
 		Char.Killer.Value = sourcePlayer
 	end
 	
 	reason = reason or "HAHAHA https://www.youtube.com/watch?v=L8XbI9aJOXk" --OnlyIvo
 
-	if Utils:FindFirstChild(Char, "PlayerAttributes.Effects.Resistance", false) then
-		inflictedDamage /= Char.PlayerAttributes.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
+	if Utils:FindFirstChild(Char, "Effects.Resistance", false) then
+		inflictedDamage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
 
 	if not Utils:FindFirstChild(Char, "Effects.Blocking", false) then
@@ -137,7 +141,7 @@ function CommonFunctions:ApplyEffect(hum: Humanoid, name: string, level: number?
 	end
 	
 	local EffectModule = Utils:GetEffectModule(name, subfolder)
-	local EffectValue = Instance.new("NumberValue")
+	local EffectValue = Utils:FindFirstChild(char, "Effects."..name, false) or Instance.new("NumberValue")
 
 	EffectValue.Name = name
 	EffectValue.Value = level or EffectModule.Level
