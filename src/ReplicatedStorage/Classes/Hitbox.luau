@@ -122,6 +122,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
         Damage = Config.Damage,
         TimePast = 0,
         Cancelled = false,
+        IsProjectile = Config.IsProjectile,
     }
     Props.Cancel = function(p)
         p.Cancelled = true
