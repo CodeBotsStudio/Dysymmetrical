@@ -297,9 +297,6 @@ function CharTypes:GetDefaultKillerSettings(): Killer
                 WalkAnimation = "rbxassetid://96779101755387",
                 RunAnimation = "rbxassetid://139221510401164",
                 SlashAnimation = "rbxassetid://133504250023139",
-                Execution = {
-
-                },
             },
 
             Voicelines = {},
