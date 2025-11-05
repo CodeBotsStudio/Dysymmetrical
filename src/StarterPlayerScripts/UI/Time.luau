@@ -3,10 +3,6 @@ local RunService = game:GetService("RunService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
-local function toMS(s: number): string
-	return string.format("%02i:%02i", s/60, s%60)
-end
-
 return {
     Init = function(_)
         local TimeStats = ReplicatedStorage.RoundInfo
@@ -27,11 +23,11 @@ return {
         	NotEnough = "Waiting for players...",
         }
 
-        TimeLabel.Text = toMS(TimeRemaining.Value)
+        TimeLabel.Text = Utils:ConvertToMinSec(TimeRemaining.Value)
         Label.Text = LabelTexts[State.Value]
 
         TimeRemaining.Changed:Connect(function(value: number)
-        	TimeLabel.Text = toMS(value)
+        	TimeLabel.Text = Utils:ConvertToMinSec(value)
         end)
         State.Changed:Connect(function(value: string)
         	if LabelTexts[value] then

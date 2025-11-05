@@ -24,6 +24,8 @@ local RoundState: StringValue = ReplicatedStorage.RoundInfo.CurrentState
                 * If it's close enough, play its chase theme
 ]]
 
+--TODO: mute map ambience while > Full L1 is fully playing
+
 local Radiuses = {
 	["L4Upcoming"] = -1e10, ["L4"] = 15,
 	["L3Upcoming"] = 15, ["L3"] = 30,
@@ -74,10 +76,6 @@ function TerrorRadiusManager:Init()
     ThemeFolder.Name = "ChaseThemes"
     ThemeFolder.Parent = SoundService
     self.ThemeFolder = ThemeFolder
-
-    table.insert(self.Connections, LocalPlayer.CharacterAdded:Connect(function()
-        self:Destroy()
-    end))
 
     --slow down on death fx
     table.insert(self.Connections, self.LocalPlayerProps.Humanoid.Died:Connect(function()

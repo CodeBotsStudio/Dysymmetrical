@@ -56,6 +56,9 @@
     ------31/10/2025------
     * Added stun protection (MAKE SURE TO GO INTO `ServerScriptService/Managers/PlayerManager` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
     
+    ------05/11/2025------
+    * Added original sidebar icons & remade some code for them (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Sidebar` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()

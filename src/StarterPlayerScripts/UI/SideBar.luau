@@ -17,8 +17,11 @@ local SideBar = {
 
 type Button = {
     Render: string,
+    InvertedRender: string?,
     MenuModule: any,
     LayoutOrder: number,
+    CloseOnOtherOpen: boolean,
+    CloseOthersOnOpen: boolean,
 }
 
 local UI
@@ -31,9 +34,13 @@ end
 
 function SideBar:CloseAll(Remaining: any)
     for _, menu in self.MenuModules do
-        if menu == Remaining then continue end
+        if menu == Remaining or not menu.CloseOnOtherOpen then continue end
         if menu.Opened then
             menu:Close(self.ToggleDuration)
+            TweenService:Create(menu.Button.InvertedIcon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
+            TweenService:Create(menu.Button.Inverted, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
+            TweenService:Create(menu.Button.Button, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
+            TweenService:Create(menu.Button.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
         end
     end
 end
@@ -56,34 +63,52 @@ function SideBar:Init()
 
     local Buttons: {[string]: Button} = {
         Shop = {
-            Render = "rbxassetid://115748427612108",
+            Render = "rbxassetid://140391842164127",
+            InvertedRender = "rbxassetid://106935872381429",
             MenuModule = PlayerUIModules.Shop,
             LayoutOrder = 0,
+            CloseOnOtherOpen = true,
+            CloseOthersOnOpen = true,
         },
         Inventory = {
-            Render = "rbxassetid://121848294238586",
+            Render = "rbxassetid://124486892591913",
+            InvertedRender = "rbxassetid://97795375278271",
             MenuModule = PlayerUIModules.Inventory,
-            LayoutOrder = 2,
+            LayoutOrder = 1,
+            CloseOnOtherOpen = true,
+            CloseOthersOnOpen = true,
         },
         Stats = {
-            Render = "rbxassetid://86407971397188",
+            Render = "rbxassetid://130488549713780",
+            InvertedRender = "rbxassetid://72911514685580",
             MenuModule = PlayerUIModules.StatsMenu,
             LayoutOrder = 3,
+            CloseOnOtherOpen = true,
+            CloseOthersOnOpen = true,
         },
         Spectate = {
-            Render = "rbxassetid://108472274328332",
+            Render = "rbxassetid://89862280432932",
+            InvertedRender = "rbxassetid://134398825115015",
             MenuModule = PlayerUIModules.Spectate,
             LayoutOrder = 4,
+            CloseOnOtherOpen = false,
+            CloseOthersOnOpen = false,
         },
         Settings = {
-            Render = "rbxassetid://138518322199012",
+            Render = "rbxassetid://95524701319726",
+            InvertedRender = "rbxassetid://113951492478970",
             MenuModule = PlayerUIModules.Settings,
             LayoutOrder = 5,
+            CloseOnOtherOpen = true,
+            CloseOthersOnOpen = true,
         },
         Credits = {
-            Render = "rbxassetid://86407971397188",
+            Render = "rbxassetid://82434587437333",
+            InvertedRender = "rbxassetid://113410904986274",
             MenuModule = PlayerUIModules.Credits,
             LayoutOrder = 6,
+            CloseOnOtherOpen = true,
+            CloseOthersOnOpen = true,
         },
     }
 
@@ -91,16 +116,32 @@ function SideBar:Init()
         local BarButton = BarButtonPrefab:Clone()
         BarButton.Name = name
         BarButton.Icon.Image = button.Render
+        BarButton.Button.Image = button.Render
+        BarButton.InvertedIcon.Image = button.InvertedRender or BarButton.InvertedIcon.Image
+        BarButton.Inverted.Image = button.InvertedRender or BarButton.Inverted.Image
         BarButton.LayoutOrder = button.LayoutOrder
         local Menu = require(button.MenuModule)
+        Menu.CloseOnOtherOpen = button.CloseOnOtherOpen
         BarButton.Button.MouseButton1Click:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
             if not Menu.Opened then
                 Menu:Open(self.ToggleDuration)
+                TweenService:Create(BarButton.InvertedIcon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
+                TweenService:Create(BarButton.Inverted, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
+                TweenService:Create(BarButton.Button, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
+                TweenService:Create(BarButton.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
+                if button.CloseOthersOnOpen then
+                    self:CloseAll(Menu)
+                end
             else
                 Menu:Close(self.ToggleDuration)
+                TweenService:Create(BarButton.InvertedIcon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
+                TweenService:Create(BarButton.Inverted, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
+                TweenService:Create(BarButton.Button, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
+                TweenService:Create(BarButton.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
             end
         end)
+        Menu.Button = BarButton
 
         local OriginalSize = BarButton.Size
         local HoverSize = UDim2.fromScale(OriginalSize.X.Scale * 1.2, OriginalSize.Y.Scale * 1.2)

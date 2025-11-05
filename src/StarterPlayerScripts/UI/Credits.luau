@@ -88,9 +88,6 @@ function CreditsMenu:Open(Time: number)
     if not self.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
         return
     end
-    task.spawn(function()
-        SideBar:CloseAll(self)
-    end)
 
     TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.475, 0.599)}):Play()
     self.Opened = true
