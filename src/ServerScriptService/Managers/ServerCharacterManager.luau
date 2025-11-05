@@ -47,6 +47,7 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
     --Abilities
     local Char = player.Character
     local CharacterAbilities = require(Char.PlayerAbilities.CharacterAbilities)
+    CharacterAbilities.CharacterModule = module
 
     local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
     Humanoid.MaxHealth = module.GameplayConfig.Health

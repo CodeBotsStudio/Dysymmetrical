@@ -103,13 +103,15 @@ function PlayerManager:Init()
 					end
 
 					LeaveConn:Disconnect()
-					if KillerValue.Value then
-                		Network:FireClientConnection(KillerValue.Value, "KilledPlayer", "REMOTE_EVENT", plr)
-                		Network:FireConnection("KilledPlayer", KillerValue.Value, plr)
+					if KillerValue and KillerValue.Value then
+						if not char:GetAttribute("Dead") then
+                			Network:FireClientConnection(KillerValue.Value, "KilledPlayer", "REMOTE_EVENT", plr)
+                			Network:FireConnection("KilledPlayer", KillerValue.Value, plr)
+						end
 
-						CommonFunctions:UpdatePlayerStat(KillerValue.Value, "KillerStats.Kills", 1)
             	    	CommonFunctions:GrantRewardToPlayer(KillerValue.Value, 7, 20, "making a Survivor ragequit")
 
+						--i'm leaving this because it's funny to have double the extra time when someone ragequits lol -Dyscarn
 						TimeManager:SetTime(TimeManager.CurrentTime + 35)
 					end
 				end)
@@ -123,9 +125,11 @@ function PlayerManager:Init()
 				end
 
 				if KillerValue and KillerValue.Value then
+                	Network:FireClientConnection(KillerValue.Value, "KilledPlayer", "REMOTE_EVENT", plr)
+                	Network:FireConnection("KilledPlayer", KillerValue.Value, plr)
+
 					CommonFunctions:UpdatePlayerStat(KillerValue.Value, "KillerStats.Kills", 1)
                 	CommonFunctions:GrantRewardToPlayer(KillerValue.Value, 20, 60, "killing a Survivor")
-					KillerValue.Value = nil
 
 					TimeManager:SetTime(TimeManager.CurrentTime + 35)
 				end

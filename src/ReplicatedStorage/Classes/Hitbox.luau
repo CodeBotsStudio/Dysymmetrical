@@ -204,7 +204,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
                         P:SetAttribute("TimesHit", (P:GetAttribute("TimesHit") or 0) + 1)
 
                         if P:GetAttribute("CharacterName") ~= nil then
-                            local CharacterModule = require(Utils:GetCharacterModule(P.Role.Value, P:GetAttribute("CharacterName")))
+                            local CharacterModule = require(P.PlayerAbilities.CharacterAbilities).CharacterModule
                             if CharacterModule and CharacterModule.OnHit then
                                 if CharacterModule:OnHit(Props, Damage) ~= "Ignored" then
                                     if Props.TimePast >= Config.Time then
