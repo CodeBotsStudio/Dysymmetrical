@@ -172,6 +172,7 @@ function SideBar:Init()
         BarButton.MouseEnter:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
             TweenService:Create(BarButton, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = HoverSize}):Play()
+            -- Why does `TextLabel.AutomaticSize` not fucking work with `TextLabel.TextScaled`? No idea! I'm mentally insane! :D
             local Size = TextService:GetTextSize(BarButton.Title.Holder.Label.Text, BarButton.Title.Holder.Label.TextSize, BarButton.Title.Holder.Label.Font, BarButton.Title.Holder.Label.AbsoluteSize)
             TweenService:Create(BarButton.Title.Holder, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                 Position = UDim2.new(0, Size.X + 16, 0.5, 0)
