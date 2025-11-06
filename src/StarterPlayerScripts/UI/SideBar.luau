@@ -2,6 +2,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -24,8 +25,38 @@ type Button = {
     CloseOthersOnOpen: boolean,
 }
 
+local InvertedInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+
 local UI
 local BarButtonPrefab = Utils:FindFirstChild(script, "Button")
+
+local function TweenInverted(BarButton, Inverted: boolean)
+    for _, i in BarButton:GetChildren() do
+        if #i:GetChildren() > 0 then
+            TweenInverted(i, Inverted)
+            continue
+        end
+
+        if i:IsA("TextLabel") then
+            local Value = Inverted and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
+            TweenService:Create(i, InvertedInfo, {TextColor3 = Value}):Play()
+
+            continue
+        elseif i:IsA("ImageLabel") or i:IsA("ImageButton") then
+            local Value = not Inverted and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
+            local Transp = 0
+            if i.Name:lower():find("inverted") then
+                Transp = Inverted and 0 or 1
+            else
+                Transp = Inverted and 1 or 0
+            end
+
+            TweenService:Create(i, InvertedInfo, {ImageTransparency = Transp, BackgroundColor3 = Value}):Play()
+        else
+            continue
+        end
+    end
+end
 
 function SideBar:Toggle(visible: boolean)
     UI.Visible = visible
@@ -37,10 +68,7 @@ function SideBar:CloseAll(Remaining: any)
         if menu == Remaining or not menu.CloseOnOtherOpen then continue end
         if menu.Opened then
             menu:Close(self.ToggleDuration)
-            TweenService:Create(menu.Button.InvertedIcon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
-            TweenService:Create(menu.Button.Inverted, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
-            TweenService:Create(menu.Button.Button, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
-            TweenService:Create(menu.Button.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
+            TweenInverted(menu.Button, false)
         end
     end
 end
@@ -119,6 +147,7 @@ function SideBar:Init()
         BarButton.Button.Image = button.Render
         BarButton.InvertedIcon.Image = button.InvertedRender or BarButton.InvertedIcon.Image
         BarButton.Inverted.Image = button.InvertedRender or BarButton.Inverted.Image
+        BarButton.Title.Holder.Label.Text = name
         BarButton.LayoutOrder = button.LayoutOrder
         local Menu = require(button.MenuModule)
         Menu.CloseOnOtherOpen = button.CloseOnOtherOpen
@@ -126,19 +155,13 @@ function SideBar:Init()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
             if not Menu.Opened then
                 Menu:Open(self.ToggleDuration)
-                TweenService:Create(BarButton.InvertedIcon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
-                TweenService:Create(BarButton.Inverted, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
-                TweenService:Create(BarButton.Button, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
-                TweenService:Create(BarButton.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
+                TweenInverted(BarButton, true)
                 if button.CloseOthersOnOpen then
                     self:CloseAll(Menu)
                 end
             else
                 Menu:Close(self.ToggleDuration)
-                TweenService:Create(BarButton.InvertedIcon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
-                TweenService:Create(BarButton.Inverted, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 1}):Play()
-                TweenService:Create(BarButton.Button, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
-                TweenService:Create(BarButton.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageTransparency = 0}):Play()
+                TweenInverted(BarButton, false)
             end
         end)
         Menu.Button = BarButton
@@ -149,10 +172,17 @@ function SideBar:Init()
         BarButton.MouseEnter:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
             TweenService:Create(BarButton, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = HoverSize}):Play()
+            local Size = TextService:GetTextSize(BarButton.Title.Holder.Label.Text, BarButton.Title.Holder.Label.TextSize, BarButton.Title.Holder.Label.Font, BarButton.Title.Holder.Label.AbsoluteSize)
+            TweenService:Create(BarButton.Title.Holder, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0, Size.X + 16, 0.5, 0)
+            }):Play()
         end)
         BarButton.MouseLeave:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
             TweenService:Create(BarButton, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = OriginalSize}):Play()
+            TweenService:Create(BarButton.Title.Holder, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0, 0, 0.5, 0)
+            }):Play()
         end)
 
         LocalPlayer.CharacterAdded:Connect(function(char: Model)

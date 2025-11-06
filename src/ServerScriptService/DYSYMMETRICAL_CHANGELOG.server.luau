@@ -59,6 +59,9 @@
     ------05/11/2025------
     * Added original sidebar icons & remade some code for them (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Sidebar` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------06/11/2025------
+    * Added new sidebar labels and inverted icon support (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Sidebar` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()
