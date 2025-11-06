@@ -169,13 +169,18 @@ function SideBar:Init()
         local OriginalSize = BarButton.Size
         local HoverSize = UDim2.fromScale(OriginalSize.X.Scale * 1.2, OriginalSize.Y.Scale * 1.2)
 
+        self.MenuModules[name] = Menu
+        BarButton.Parent = ButtonContainer
+
+        local OriginalYLabelBound = BarButton.Title.Holder.Label.AbsoluteSize.Y
         BarButton.MouseEnter:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
             TweenService:Create(BarButton, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = HoverSize}):Play()
             -- Why does `TextLabel.AutomaticSize` not fucking work with `TextLabel.TextScaled`? No idea! I'm mentally insane! :D
-            local Size = TextService:GetTextSize(BarButton.Title.Holder.Label.Text, BarButton.Title.Holder.Label.TextSize, BarButton.Title.Holder.Label.Font, BarButton.Title.Holder.Label.AbsoluteSize)
+            -- `TextLabel.TextSize` doesn't either. What world are we living in?
+            local Size = TextService:GetTextSize(BarButton.Title.Holder.Label.Text, OriginalYLabelBound, BarButton.Title.Holder.Label.Font, BarButton.Title.Holder.Label.AbsoluteSize)
             TweenService:Create(BarButton.Title.Holder, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Position = UDim2.new(0, Size.X + 16, 0.5, 0)
+                Position = UDim2.new(0.15, Size.X + 16, 0.5, 0)
             }):Play()
         end)
         BarButton.MouseLeave:Connect(function()
@@ -189,9 +194,6 @@ function SideBar:Init()
         LocalPlayer.CharacterAdded:Connect(function(char: Model)
             Menu:Toggle(Utils:FindFirstChild(char, "Role").Value == "Spectator")
         end)
-
-        self.MenuModules[name] = Menu
-        BarButton.Parent = ButtonContainer
     end
 
     LocalPlayer.CharacterAdded:Connect(function(char: Model)

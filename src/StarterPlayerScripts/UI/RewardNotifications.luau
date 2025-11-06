@@ -11,7 +11,7 @@ local RewardNotifications = {}
 
 function RewardNotifications:Init()
     local Container = Utils:FindFirstChild(script, "RewardNotificationContainer")
-    Container.Parent = Players.LocalPlayer.PlayerGui.RewardNotifications
+    Container.Parent = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "RewardNotifications")
 
     local Prefab = Utils:FindFirstChild(script, "RewardNotification")
     local AchievementPrefab = Utils:FindFirstChild(script, "AchievementNotification")

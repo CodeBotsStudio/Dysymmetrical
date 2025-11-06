@@ -115,20 +115,20 @@ function RoundManager:StartRound()
 end
 
 --- Plays the intro to everyone (whose game has loaded).
-function RoundManager.Callables:PlayIntro(RootName: string, SkinName: string?)
-    local PlayerNames = {}
+function RoundManager.Callables:PlayIntro(_RootName: string, _SkinName: string?)
+    -- local PlayerNames = {}
 
-    for _, i in ipairs(RoundManager.CurrentRound.Killers) do
-        table.insert(PlayerNames, i.Player.Name)
-    end
+    -- for _, i in ipairs(RoundManager.CurrentRound.Killers) do
+    --     table.insert(PlayerNames, i.Player.Name)
+    -- end
 
-    for _, i in Utils:GetLoadedPlayers() do
-        Network:FireClientConnection(i, "PlayIntro", "REMOTE_EVENT",
-            RootName,
-            PlayerNames,
-            SkinName
-        )
-    end
+    -- for _, i in Utils:GetLoadedPlayers() do
+    --     Network:FireClientConnection(i, "PlayIntro", "REMOTE_EVENT",
+    --         RootName,
+    --         PlayerNames,
+    --         SkinName
+    --     )
+    -- end
 
     --whatever happens after since every intro lasts the same
     RoundManager.Threads["IntroEndingThread"] = task.delay(3, function()
