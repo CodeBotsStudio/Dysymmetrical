@@ -29,6 +29,12 @@ local Credits: {{ Name: string, Credits: {Credit} }} = {
                 Username = "@LrgeAlvaro8882",
                 Description = "Made the engine used in this game: Dysymmetrical.",
             },
+            {
+                Render = "rbxassetid://74795618506491",
+                DisplayName = "heromax149807",
+                Username = "@heromax149807",
+                Description = "Made the original engine art like the sidebar icons, the buttons, etc.",
+            },
         },
     },
 }

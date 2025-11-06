@@ -10,6 +10,8 @@ local MoneyXPRewards = {}
 
 function MoneyXPRewards:Init()
     local UI = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "MoneyXPRewards")
+    local Container = Utils:FindFirstChild(script, "MoneyXPRewardsContainer")
+    Container.Parent = UI
     local Prefab = Utils:FindFirstChild(script, "Reward")
 
     Network:SetConnection("GrantReward", "REMOTE_EVENT", function(Money: number?, EXP: number?, Reason: string?)
@@ -18,7 +20,8 @@ function MoneyXPRewards:Init()
         end
 
         local Notification = Prefab:Clone()
-        Notification.Position = UDim2.fromScale(0.5, -0.11)
+        local Size = Notification.Size
+        Notification.Size = Utils.UDim.Zero
 
         local Text = "Granted "
         if Money and EXP then
@@ -39,11 +42,11 @@ function MoneyXPRewards:Init()
 
         Notification.Text = Text
 
-        Notification.Parent = UI
+        Notification.Parent = Container
 
-        TweenService:Create(Notification, TweenInfo.new(0.4), {Position = UDim2.fromScale(0.5, 0.034)}):Play()
+        TweenService:Create(Notification, TweenInfo.new(0.4), {Size = Size}):Play()
         task.wait(5.4)
-        TweenService:Create(Notification, TweenInfo.new(0.4), {Position = UDim2.fromScale(0.5, -0.11)}):Play()
+        TweenService:Create(Notification, TweenInfo.new(0.4), {Size = Utils.UDim.Zero}):Play()
         Debris:AddItem(Notification, 1)
     end)
 end

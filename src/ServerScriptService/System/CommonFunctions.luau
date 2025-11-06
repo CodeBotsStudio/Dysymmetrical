@@ -171,7 +171,7 @@ function CommonFunctions:GrantRewardToPlayer(Player: Player, Money: number?, EXP
 	end
 
 	local MoneyGranted = Money ~= nil and Money > 0 and Money or 0
-	local EXPGranted = EXP ~= EXP and EXP > 0 and EXP or 0
+	local EXPGranted = EXP ~= nil and EXP > 0 and EXP or 0
 	
 	--if none are granted somehow
 	if MoneyGranted <= 0 and EXPGranted <= 0 then
