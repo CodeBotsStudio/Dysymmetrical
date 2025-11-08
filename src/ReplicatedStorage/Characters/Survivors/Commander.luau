@@ -22,6 +22,12 @@ Commander.Config.Render = "rbxassetid://108440668883002"
 
 --Abilities Definition
 
+--Body Armor
+local BodyArmor = Ability:GetDefaultAbilitySettings()
+BodyArmor.Name = "Body Armor"
+BodyArmor.Description = "Every time Commander gets damaged, he receives Resistance V for 1 second, acting as invincibility frames."
+BodyArmor.Passive = true
+
 --Flashpoint // Blindside
 local Blindside: Ability.Ability = Ability:GetDefaultAbilitySettings()
 Blindside.Name = "Blindside"
@@ -102,7 +108,7 @@ end
 local Reload: Ability.Ability = Ability:GetDefaultAbilitySettings()
 Reload.Name = "Reload"
 Reload.InputName = "SecondAbility"
-Reload.SlownessLevel = 2
+Reload.SlownessLevel = 3
 Reload.Description = "Commander reloads his gun. He takes "..tostring(Reload.Duration).." seconds to do so and gets Slowness"..Utils:IntToRoman(Reload.SlownessLevel).." while reloading."
 Reload.Duration = 5
 Reload.Cooldown = 40
@@ -135,6 +141,7 @@ Justice.ShotSound = "rbxassetid://4485644082"
 Justice.Cooldown = 45
 Justice.InputName = "ThirdAbility"
 Justice.Duration = 1/22 * 3
+Justice.HitboxLength = 45
 
 Justice.UseSettings = {
     InitialUses = 0,
@@ -157,8 +164,8 @@ Justice.Behaviour = function(self)
         table.insert(self.Connections, task.delay(1.17, function()
             task.spawn(function()
                 Hitbox:New(self.Owner, {
-                    CFrameOffset = CFrame.new(0, 0, -23),
-                    Size = Vector3.new(3, 1.5, 45),
+                    CFrameOffset = CFrame.new(0, 0, -(self.HitboxLength / 2)),
+                    Size = Vector3.new(3, 1.5, self.HitboxLength),
                     Time = self.Duration,
                     Reason = "The Gun Shot",
                     Damage = self.Damage,
@@ -210,6 +217,105 @@ Justice.Behaviour = function(self)
         end))
     end
 end
+
+--Body Armor
+Commander.OnHit = function(self, _hitbox, _damage)
+    CommonFunctions:ApplyEffect(self.Owner.Character:FindFirstChildOfClass("Humanoid"), "Resistance", 5, 1)
+
+    return
+end
+
+--Description Definition
+
+Commander.Config.Description = {
+    {
+        Type = "Separator",
+        Text = "GENERAL INFO",
+    },
+    {
+        Type = "Header",
+        Text = "COMMANDER",
+    },
+    {
+        Type = "Quote",
+        Text = "\""..Commander.Config.Quote.."\""
+    },
+    {
+        Type = "Text",
+        Text = "Initially a simple soldier that managed to turn the military upside-down with his leadership. "
+            .."After some altercations in a company he got hired in as a guard against anomalies, he managed to survive a fatal accident and become one of the peak soldiers in the army. "
+            .."He's been intensely trained for years and has experience with handguns and flash grenades, using them as efficiently as possible and purchasing the tools with most quality.",
+    },
+    {
+        Type = "Header",
+        Text = "STATS",
+    },
+    {
+        Type = "Text",
+        Text = {
+            "Difficulty: ★★★☆☆",
+            -- "Difficulty: 6 7",
+            "Health: "..tostring(Commander.GameplayConfig.Health),
+            "Base Speed: "..tostring(Commander.GameplayConfig.BaseSpeed),
+            "Sprint Speed: "..tostring(math.round(Commander.GameplayConfig.BaseSpeed * Commander.GameplayConfig.SprintSpeedMultiplier * 10) / 10),
+            "Max Stamina: "..tostring(Commander.GameplayConfig.StaminaProperties.MaxStamina),
+            "Stamina Loss per second: "..tostring(Commander.GameplayConfig.StaminaProperties.StaminaDrain),
+            "Stamina Gain per second: "..tostring(Commander.GameplayConfig.StaminaProperties.StaminaGain),
+        },
+    },
+    {
+        Type = "Separator",
+        Text = "PASSIVES",
+    },
+    {
+        Type = "Header",
+        Text = "BODY ARMOR",
+    },
+    {
+        Type = "Quote",
+        Text = "\"Diamond armor, full set!\" -Minecraft Steve",
+    },
+    {
+        Type = "Text",
+        Text = "Every time Commander gets hit, he gets <b>Resistance V</b> for 1 second, acting as invincibility frames.",
+        Image = "http://www.roblox.com/asset/?id=113412520",
+    },
+    {
+        Type = "Separator",
+        Text = "ABILITIES",
+    },
+    {
+        Type = "Header",
+        Text = "BLINDSIDE",
+    },
+    {
+        Type = "Text",
+        Text = "Commander picks up a flashbang grenade and throws it after "..tostring(Blindside.ThrowDelay)..
+            " seconds, triggering it after "..tostring(Blindside.TriggerDelay)..
+            " seconds and inflicting the killer <b>Blindness</b> for "..tostring(Blindside.FlashTime)..
+            " seconds if they're in a "..tostring(Blindside.FlashRadius)..
+            " stud radius.",
+    },
+    {
+        Type = "Header",
+        Text = "RELOAD",
+    },
+    {
+        Type = "Text",
+        Text = "Commander reloads his gun, getting <b>Slowness "..Utils:IntToRoman(Reload.SlownessLevel).."</b> for "..tostring(Reload.Duration).." seconds.",
+    },
+    {
+        Type = "Header",
+        Text = "JUSTICE",
+    },
+    {
+        Type = "Text",
+        Text = {
+            "Commander shoots forward "..tostring(Justice.HitboxLength).." studs. If it hits the killer, they get stunned for "..tostring(Justice.StunTime).." seconds and receive "..tostring(Justice.Damage).." damage.",
+            "This ability's charge is obtained through <b>Reload</b>."
+        },
+    },
+}
 
 --Ability Table for usage
 Commander.GameplayConfig.Abilities = {

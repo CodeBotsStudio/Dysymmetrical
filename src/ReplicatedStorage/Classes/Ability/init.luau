@@ -62,6 +62,12 @@ export type Ability = {
     --- The duration of the ability. Mainly used to disable input until it finishes. Doesn't need to be the literal length.
     Duration: number,
 
+    --- If `true`, when using this ability, it'll disable every ability for `Duration` time.
+    DisableOtherAbilitiesOnPerform: boolean,
+    --- If `true`, when using this ability, it'll disable the Slash ability for `Duration` time.
+    --- Only works if the character is a killer and if `DisableOtherAbilitiesOnPerform` is `true`.
+    DisableSlashOnPerform: boolean,
+
     --- The uses / charges left for this ability. Won't matter if uses aren't limited.
     UsesLeft: number,
 
@@ -219,12 +225,14 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             table.insert(own.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(abilityName: string)
                 if abilityName == own.Name then
                     --disables ability keys for preventing the usage of a different ability while using it
-                    for _, input in own.OwnerProperties.InputManager.DefaultActions do
-                        if input.Name:find("Ability") then
-                            input.Enabled = false
-                            table.insert(own.Connections, task.delay(if own.UseAnimationTrack then own.UseAnimationTrack.Length else own.Duration, function()
-                                input.Enabled = true
-                            end))
+                    if own.DisableOtherAbilitiesOnPerform then
+                        for _, input in own.OwnerProperties.InputManager.DefaultActions do
+                            if input.Name:lower():find("ability") or (input.Name:lower():find("slash") and own.DisableSlashOnPerform) then
+                                input.Enabled = false
+                                table.insert(own.Connections, task.delay(if own.UseAnimationTrack then own.UseAnimationTrack.Length else own.Duration, function()
+                                    input.Enabled = true
+                                end))
+                            end
                         end
                     end
                     --cooldown stuffs
@@ -359,6 +367,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         end,
         
         Duration = 0.4,
+
+        DisableOtherAbilitiesOnPerform = true,
+        DisableSlashOnPerform = true,
 
         UsesLeft = 1,
 

@@ -21,6 +21,10 @@ local Shop = {
         Open = false,
         ShowingCharacter = "",
     },
+    InfoMenu = {
+        Open = false,
+        ShowingCharacter = "",
+    },
     LoadedItems = {
         Killers = {},
         Survivors = {},
@@ -63,6 +67,8 @@ local Templates = {
     Header = nil,
     Text = nil,
     Quote = nil,
+    Separator = nil,
+    InfoSection = nil,
 }
 
 local UI
@@ -73,6 +79,7 @@ local EmoteContainer
 
 local SideContainer
 local SkinContainer
+local InfoContainer
 local PreviewContainer
 local ButtonsContainer
 
@@ -131,6 +138,10 @@ end
 function Shop:ToggleSkinsMenu(Open: boolean?)
     if Open == nil then
         Open = not self.SkinMenu.Open
+    end
+
+    if Open then
+        self:ToggleInfoMenu(false)
     end
     
     if Open then
@@ -194,15 +205,90 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
         self:ReorderSkins()
 
-        TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0, 1)}):Play()
+        TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
         TweenService:Create(SkinContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
 
         self.SkinMenu.Open = true
     else
         TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
-        TweenService:Create(SkinContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0, 1)}):Play()
+        TweenService:Create(SkinContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
 
         self.SkinMenu.Open = false
+    end
+
+    TweenService:Create(InfoContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
+end
+
+function Shop:ToggleInfoMenu(Open: boolean?)
+    if Open == nil then
+        Open = not self.InfoMenu.Open
+    end
+
+    if Open then
+        self:ToggleSkinsMenu(false)
+    end
+
+    if Open then
+        for _, i in InfoContainer:GetChildren() do
+            if not i:IsA("UIComponent") then
+                i:Destroy()
+            end
+        end
+
+        local CharacterInfo = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name))
+
+        if not CharacterInfo.Config.Description then
+            return
+        end
+
+        --TODO: effect descriptions on mouse hover
+        for SectionIndex: number, Section: {
+            Type: "Text" | "Header" | "Separator" | "Quote",
+            Text: string | {string},
+            Image: string?,
+        } in CharacterInfo.Config.Description do
+            local SectionContainer = Templates.InfoSection:Clone()
+            SectionContainer.LayoutOrder = SectionIndex
+            SectionContainer.Parent = InfoContainer
+
+            local Text = ""
+            if typeof(Section.Text) == "table" then
+                for i, v in ipairs(Section.Text) do
+                    if i > 1 then
+                        Text = Text.."\n"
+                    end
+                    Text = Text..v
+                end
+            else
+                Text = Section.Text
+            end
+
+            if Section.Type ~= "Text" then
+                local Pref = Templates[Section.Type]:Clone(); --using semicolon because selene is bullshit
+                (Section.Type == "Separator" and Pref.Title or Pref).Text = Section.Text
+                Pref.Parent = SectionContainer
+            else
+                local Pref = Templates.Text:Clone()
+                Pref.Title.Text = Text
+                Pref.Title.MaxVisibleGraphemes = 0
+                if Section.Image then
+                    Pref.Image.Image = Section.Image
+                    Pref.Image.Visible = true
+                end
+                Pref.Parent = SectionContainer
+                TweenService:Create(Pref.Title, TweenInfo.new(0.03 * #Text, Enum.EasingStyle.Linear), {MaxVisibleGraphemes = #Text}):Play()
+            end
+        end
+
+        TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
+        TweenService:Create(InfoContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
+
+        self.InfoMenu.Open = true
+    else
+        TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
+        TweenService:Create(InfoContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
+
+        self.InfoMenu.Open = false
     end
 end
 
@@ -235,6 +321,7 @@ function Shop:Init()
     SurvivorContainer = ShopContainer.Survivors
     EmoteContainer = ShopContainer.Emotes
     SkinContainer = Container.SkinsContainer.Content
+    InfoContainer = Container.InfoContainer.Contents
 
     Sections = {
         KillerContainer,
@@ -262,6 +349,8 @@ function Shop:Init()
     Templates.Header = Templates.Header or templates.Header
     Templates.Text = Templates.Text or templates.TextContainer
     Templates.Quote = Templates.Quote or templates.Quote
+    Templates.Separator = Templates.Separator or templates.Separator
+    Templates.InfoSection = Templates.InfoSection or templates.InfoSection
 
     SideContainer = Container.SideContainer
     PreviewContainer = SideContainer.PreviewContainer
@@ -276,6 +365,7 @@ function Shop:Init()
 
     Buttons.Purchase = ButtonsContainer.Purchase
     Buttons.Skins = ButtonsContainer.Skins
+    Buttons.Info = ButtonsContainer.MoreInfo
 
     local Conns = {}
 
@@ -311,6 +401,20 @@ function Shop:Init()
         self:ToggleSkinsMenu()
     end))
 
+    table.insert(Conns, Buttons.Info.MouseEnter:Connect(function()
+        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+    end))
+    table.insert(Conns, Buttons.Info.MouseLeave:Connect(function()
+        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+    end))
+    table.insert(Conns, Buttons.Info.MouseButton1Click:Connect(function()
+        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+
+        TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play() --assuring the sidebar is open
+
+        self:ToggleInfoMenu()
+    end))
+
     table.insert(Conns, RunService.PreRender:Connect(function()
         self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
     end))
@@ -330,10 +434,12 @@ function Shop:Open(Time: number)
     end
 
     self:ToggleSkinsMenu(false)
+    self:ToggleInfoMenu(false)
     PreviewInstances.Render.Image = ""
     PreviewInstances.Render.ImageTransparency = 0
     PreviewInstances.EmotePreview.Visible = false
     ButtonsContainer.Skins.Visible = true
+    ButtonsContainer.MoreInfo.Visible = true
     for _, v in LoadedEmoteTracks do
         if v.Animation ~= nil then
             v.Animation:Stop(0)
@@ -347,6 +453,7 @@ function Shop:Open(Time: number)
         workspace.Sounds.EmotePreview:Destroy()
     end
     SkinContainer.Parent.Size = Utils.UDim.FullY
+    InfoContainer.Parent.Size = Utils.UDim.FullY
     SideContainer.Size = Utils.UDim.FullY
     ShopContainer.Parent.Size = UDim2.fromScale(0.7, 1)
     self.SkinMenu.Open = false
@@ -429,6 +536,7 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
         PreviewInstances.EmotePreview.Visible = true
         PreviewInstances.Render.ImageTransparency = 1
         ButtonsContainer.Skins.Visible = false
+        ButtonsContainer.MoreInfo.Visible = false
         
         if workspace.Sounds:FindFirstChild("EmotePreview") then
             workspace.Sounds.EmotePreview:Destroy()
@@ -493,6 +601,7 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
         PreviewInstances.EmotePreview.Visible = false
         PreviewInstances.Render.ImageTransparency = 0
         ButtonsContainer.Skins.Visible = true
+        ButtonsContainer.MoreInfo.Visible = true
     end
 end
 

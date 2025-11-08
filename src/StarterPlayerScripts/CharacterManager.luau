@@ -50,7 +50,9 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     Animate.idle.IdleAnim.AnimationId = CharModule.Config.AnimationIDs.IdleAnimation
     Animate.walk.WalkAnim.AnimationId = CharModule.Config.AnimationIDs.WalkAnimation
     Animate.run.RunAnim.AnimationId = CharModule.Config.AnimationIDs.RunAnimation
-    require(Char.PlayerAbilities.Default.Sprinting):ReloadAnimation(CharModule.Config.AnimationIDs.RunAnimation)
+    local Sprinting = require(Char.PlayerAbilities.Default.Sprinting)
+    Sprinting:ReloadAnimation(CharModule.Config.AnimationIDs.RunAnimation)
+    Sprinting.SprintMultiplier = CharModule.GameplayConfig.SprintSpeedMultiplier
 
     self:_InitCharacterAbilities(CharModule)
 

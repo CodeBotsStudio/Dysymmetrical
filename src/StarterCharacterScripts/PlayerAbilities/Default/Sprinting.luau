@@ -9,6 +9,7 @@ local Sprinting = {
 	Stamina = 100,
 	TweenSpeed = true,
 	SpeedApplied = true,
+	SprintMultiplier = 2.66666,
 }
 --
 local RunService = game:GetService("RunService")
@@ -38,7 +39,6 @@ local FootstepPlayer = require(LocalPlayer.PlayerScripts.Miscellaneous.FootstepP
 local SprintValue = char.PlayerAttributes.Sprinting
 --
 local FactorName = "Sprint"
-local SprintMultiplier = 2.66666
 --
 local MaxStamina = char.PlayerAttributes.MaxStamina
 local StaminaDrainRate = char.PlayerAttributes.StaminaDrain --10
@@ -176,11 +176,11 @@ function Sprinting:Init()
 		end
 
 		if self.TweenSpeed then
-			local ValueToTweenTo = self.SpeedApplied and SprintMultiplier or 1
+			local ValueToTweenTo = self.SpeedApplied and self.SprintMultiplier or 1
 			
 			SpeedManager.SpeedFactors[FactorName] = Utils:Lerp(SpeedManager.SpeedFactors[FactorName], ValueToTweenTo, delta * 5.5)
 		else
-			SpeedManager.SpeedFactors[FactorName] = self.SpeedApplied and SprintMultiplier or 1
+			SpeedManager.SpeedFactors[FactorName] = self.SpeedApplied and self.SprintMultiplier or 1
 		end
 
 		if StaminaValue.Value ~= self.Stamina then

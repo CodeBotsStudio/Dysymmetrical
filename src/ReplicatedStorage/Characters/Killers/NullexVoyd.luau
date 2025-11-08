@@ -4,8 +4,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
 local RunService = game:GetService("RunService")
+local ServerScriptService = game:GetService("ServerScriptService")
 local SoundService = game:GetService("SoundService")
 
+local CommonFunctions = RunService:IsServer() and require(ServerScriptService.System.CommonFunctions) or nil
 local Character = require(ReplicatedStorage.Classes.Character)
 local Ability = require(ReplicatedStorage.Classes.Ability)
 
@@ -15,6 +17,7 @@ local Sounds = require(ReplicatedStorage.Modules.Sounds)
 --Character Definition
 local NullexVoyd: Character.Killer = Character:GetDefaultKillerSettings()
 NullexVoyd.Config.Name = "Nullex Voyd"
+NullexVoyd.Config.Quote = "Order was the first lie."
 NullexVoyd.Config.Render = "rbxassetid://139883756028491"
 NullexVoyd.Config.Price = 1308
 
@@ -165,29 +168,105 @@ local Overcharge: Ability.Ability = Ability:GetDefaultAbilitySettings()
 Overcharge.Name = "Overcharge"
 Overcharge.Description = "Increases walk speed for a very short time but removes the ability to use any ability apart from the slash. When it ends, it lowers his walk speed under default and prevents him from using his abilities for a very very short time (stun)."
 Overcharge.Cooldown = 45
-Overcharge.Duration = 4.7
 Overcharge.InputName = "FourthAbility"
+Overcharge.SpeedDuration = 3.2
+Overcharge.SpeedLevel = 3
+Overcharge.SlownessDuration = 1.5
+Overcharge.SlownessLevel = 3
+Overcharge.Duration = Overcharge.SpeedDuration + Overcharge.SlownessDuration
 
 Overcharge.Behaviour = function(self)
     if RunService:IsServer() then
+        CommonFunctions:ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Speed", self.SpeedLevel, self.SpeedDuration)
+
+        table.insert(self.Connections, task.delay(self.SpeedDuration, function()
+            CommonFunctions:ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", self.SlownessLevel, self.SlownessDuration)
+        end))
+
         return
     end
-
-    self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name.."Begin", 1.4)
-
-    table.insert(self.Connections, task.delay(3.2, function()
-        self.OwnerProperties.Character:SetAttribute("PreventSlash", true)
-
-        self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name.."Begin")
-        self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name.."End", 0.2)
-        
-        table.insert(self.Connections, task.delay(1.5, function()
-            self.OwnerProperties.Character:SetAttribute("PreventSlash", false)
-            
-            self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name.."End")
-        end))
-    end))
 end
+
+local NullexVoydNameLabel = "<font color=\"rgb(180, 180, 180)\">"..NullexVoyd.Config.Name.."</font>"
+NullexVoyd.Config.Description = {
+    {
+        Type = "Separator",
+        Text = "GENERAL INFO",
+    },
+    {
+        Type = "Header",
+        Text = "NULLEX VOYD",
+    },
+    {
+        Type = "Quote",
+        Text = "\""..NullexVoyd.Config.Quote.."\"",
+    },
+    {
+        Type = "Text",
+        Text = "Once a law enforcement automaton built to enforce order, now a void-born executioner of silence. "..
+            NullexVoydNameLabel.." hunts those who trespass forbidden truths, warping space to pursue them through shadows. "..
+            "With a surge of corrupted energy, he blinks across distance, accelerates beyond human reach, and rends with anomalous force. "..
+            "None can hide — his gaze pierces walls, his touch unravels existence itself.",
+    },
+    {
+        Type = "Header",
+        Text = "STATS",
+    },
+    {
+        Type = "Text",
+        Text = {
+            "Difficulty: ★★★☆☆",
+            -- "Difficulty: 6 7",
+            "Health: "..tostring(NullexVoyd.GameplayConfig.Health),
+            "Base Speed: "..tostring(NullexVoyd.GameplayConfig.BaseSpeed),
+            "Sprint Speed: "..tostring(math.round(NullexVoyd.GameplayConfig.BaseSpeed * NullexVoyd.GameplayConfig.SprintSpeedMultiplier * 10) / 10),
+            "Max Stamina: "..tostring(NullexVoyd.GameplayConfig.StaminaProperties.MaxStamina),
+            "Stamina Loss per second: "..tostring(NullexVoyd.GameplayConfig.StaminaProperties.StaminaDrain),
+            "Stamina Gain per second: "..tostring(NullexVoyd.GameplayConfig.StaminaProperties.StaminaGain),
+        },
+    },
+    {
+        Type = "Separator",
+        Text = "ABILITIES",
+    },
+    {
+        Type = "Header",
+        Text = "SLASH",
+    },
+    {
+        Type = "Text",
+        Text = NullexVoydNameLabel.." performs a basic slash, dealing "..tostring(Slash.Damage).." damage.",
+        Image = "rbxassetid://9759886280",
+    },
+    {
+        Type = "Header",
+        Text = "CALLBACK PING",
+    },
+    {
+        Type = "Text",
+        Text = NullexVoydNameLabel.." slows down for "..tostring(CallbackPing.Duration).." seconds, revealing to him the aura of every single visible & alive survivor in the match that doesn't have <b>Undetectable</b>.",
+    },
+    {
+        Type = "Header",
+        Text = "DATA ANCHOR",
+    },
+    {
+        Type = "Text",
+        Text = {
+            NullexVoydNameLabel.." places a device on the floor, visible to everyone clearly but undestructible.",
+            "If this ability is used a second time, "..NullexVoydNameLabel.." will be teleported to this device instantly, destroying it in the process.",
+        },
+    },
+    {
+        Type = "Header",
+        Text = "OVERCHARGE",
+    },
+    {
+        Type = "Text",
+        Text = NullexVoydNameLabel.." overloads his systems with electricity, giving him <b>Speed "..Utils:IntToRoman(Overcharge.SpeedLevel).."</b> for "..tostring(Overcharge.SpeedDuration).." seconds. "..
+        "When the effect wears off, his systems will exhaust briefly, inflicting him with <b>Slowness "..Utils:IntToRoman(Overcharge.SlownessLevel).."</b> for "..tostring(Overcharge.SlownessDuration).." seconds.",
+    },
+}
 
 NullexVoyd.GameplayConfig.Abilities = {
     Slash = Slash,

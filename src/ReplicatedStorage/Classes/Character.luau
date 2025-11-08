@@ -11,7 +11,18 @@ export type Survivor = {
         --- The display name of the character.
         Name: string,
         --- The character's `More Info` page content.
-        Description: string,
+        --- To know how to write this, check the example characters's modules.
+        Description: {
+            --- A section of the `More Info` page of this character.
+            {
+                --- The type of text this section will be.
+                Type: "Text" | "Header" | "Separator" | "Quote",
+                --- The text displayed in this section.
+                Text: string,
+                --- The displayed image in this section. Used for ability descriptions. Only usable in the `Text` type.
+                Image: string?,
+            }
+        },
         --- A possible quote from the character that'll show up when you buy it.
         Quote: string,
 
@@ -57,6 +68,10 @@ export type Survivor = {
     GameplayConfig: {
         --- Amount of health.
         Health: number,
+        --- The base number of the speed of this character (the walking speed).
+        BaseSpeed: number,
+        --- The number that the base speed will be multiplied by when sprinting.
+        SprintSpeedMultiplier: number,
         --- Useful stamina properties that you can change.
         StaminaProperties: {
             --- The maximum amount of stamina.
@@ -86,7 +101,12 @@ function CharTypes:GetDefaultSurvivorSettings(): Survivor
         Owner = nil,
         Config = {
             Name = "Survivor",
-            Description = "PLACEHOLDER",
+            Description = {
+                {
+                    Type = "Text",
+                    Text = "PLACEHOLDER",
+                },
+            },
             Quote = "hello",
 
             Price = 0,
@@ -103,6 +123,8 @@ function CharTypes:GetDefaultSurvivorSettings(): Survivor
 
         GameplayConfig = {
             Health = 100,
+            BaseSpeed = 10.5,
+            SprintSpeedMultiplier = 2.66666,
             StaminaProperties = {
                 MaxStamina = 100,
                 StaminaDrain = 10,
@@ -129,7 +151,18 @@ export type Killer = {
         --- The display name of the character.
         Name: string,
         --- The character's `More Info` page content.
-        Description: string,
+        --- To know how to write this, check the example characters's modules.
+        Description: {
+            --- A section of the `More Info` page of this character.
+            {
+                --- The type of text this section will be.
+                Type: "Text" | "Header" | "Separator" | "Quote",
+                --- The text displayed in this section.
+                Text: string | {string},
+                --- The displayed image in this section. Used for ability descriptions. Only usable in the `Text` type.
+                Image: string?,
+            }
+        },
         --- A possible quote from the character that'll show up when you buy it.
         Quote: string,
 
@@ -247,6 +280,10 @@ export type Killer = {
     GameplayConfig: {
         --- Amount of health.
         Health: number,
+        --- The base number of the speed of this character (the walking speed).
+        BaseSpeed: number,
+        --- The number that the base speed will be multiplied by when sprinting.
+        SprintSpeedMultiplier: number,
         --- Useful stamina properties that you can change.
         StaminaProperties: {
             --- The maximum amount of stamina.
@@ -283,7 +320,12 @@ function CharTypes:GetDefaultKillerSettings(): Killer
         Owner = nil,
         Config = {
             Name = "Killer",
-            Description = "PLACEHOLDER",
+            Description = {
+                {
+                    Type = "Text",
+                    Text = "PLACEHOLDER",
+                },
+            },
             Quote = "hello",
 
             Price = 0,
@@ -310,11 +352,13 @@ function CharTypes:GetDefaultKillerSettings(): Killer
         },
 
         GameplayConfig = {
-            Health = 800,
+            Health = 1200,
+            BaseSpeed = 10.5,
+            SprintSpeedMultiplier = 2.66666,
             StaminaProperties = {
                 MaxStamina = 110,
                 StaminaDrain = 8,
-                StaminaGain = 27,
+                StaminaGain = 32,
             },
 
             SlashDamage = 20,
