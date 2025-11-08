@@ -62,6 +62,9 @@
     ------06/11/2025------
     * Added new sidebar labels and inverted icon support (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Sidebar` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------08/11/2025------
+    * Added `More Info` to Shop and Inventory (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Shop` & `StarterPlayer/StarterPlayerScripts/UI/Inventory` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()
