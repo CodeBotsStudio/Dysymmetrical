@@ -206,11 +206,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
                         if P:GetAttribute("CharacterName") ~= nil then
                             local CharacterModule = require(P.PlayerAbilities.CharacterAbilities).CharacterModule
                             if CharacterModule and CharacterModule.OnHit ~= nil then
-                                if CharacterModule:OnHit(Props, Damage) ~= "Ignored" then
-                                    if Props.TimePast >= Config.Time then
-                                        break
-                                    end
-                                else
+                                if CharacterModule:OnHit(Props, Damage) == "Ignored" then
                                     continue
                                 end
                             end
