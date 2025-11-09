@@ -8,6 +8,7 @@ local SideBar = require(script.Parent.SideBar)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local LocalPlayer = Players.LocalPlayer
+local RoundState = ReplicatedStorage.RoundInfo.CurrentState
 
 local Spectate = {
     Opened = false,
@@ -103,14 +104,16 @@ function Spectate:Init()
 end
 
 function Spectate:Open()
-    if not self.Enabled or not SideBar.Enabled then
-        return
+    if not self.Enabled or not SideBar.Enabled or RoundState.Value == "Lobby" then
+        return "Prevented"
     end
 
     self.Opened = true
     self.UIInstance.Visible = true
     self:ChangeSelection()
     self:_Update()
+
+    return
 end
 
 function Spectate:Close()

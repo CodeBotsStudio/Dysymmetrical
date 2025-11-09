@@ -78,10 +78,11 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
                 --NOTE: i just noticed that forsaken uses a whole data array to store everything from a player and get the index of it instead of checking it for everyone.
                 --it makes more sense.
                 table.insert(own.Connections, Network:SetConnection("PlayEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string, soundId: string)
-                    if plr == own.Owner and emoteName == own.Config.Name then
+                    if plr == own.Owner and emoteName == own.Config.Name and not own.Owner.Character:GetAttribute("Emoting") then
                         if soundId and #soundId > 0 then
                             Sounds:PlaySound(soundId, {Name = "Emote", Parent = own.Owner.Character:FindFirstChild("HumanoidRootPart"), Looped = true})
                         end
+                        own.Owner.Character:SetAttribute("Emoting", true)
 
                         Network:FireClientConnection(plr, "PlayEmote", "REMOTE_EVENT", emoteName)
                     end
@@ -91,6 +92,7 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
                         if own.Owner.Character:FindFirstChild("HumanoidRootPart") and own.Owner.Character.HumanoidRootPart:FindFirstChild("Emote") then
                             own.Owner.Character.HumanoidRootPart.Emote:Destroy()
                         end
+                        own.Owner.Character:SetAttribute("Emoting", false)
 
                         Network:FireClientConnection(plr, "StopEmote", "REMOTE_EVENT", emoteName)
                     end

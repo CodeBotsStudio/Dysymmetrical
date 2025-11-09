@@ -34,26 +34,21 @@ local function TweenInverted(BarButton, Inverted: boolean)
     for _, i in BarButton:GetChildren() do
         if #i:GetChildren() > 0 then
             TweenInverted(i, Inverted)
-            continue
         end
 
         if i:IsA("TextLabel") then
             local Value = Inverted and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
             TweenService:Create(i, InvertedInfo, {TextColor3 = Value}):Play()
-
-            continue
         elseif i:IsA("ImageLabel") or i:IsA("ImageButton") then
             local Value = not Inverted and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
             local Transp = 0
             if i.Name:lower():find("inverted") then
                 Transp = Inverted and 0 or 1
-            else
-                Transp = Inverted and 1 or 0
+            elseif i.Parent.Name ~= "Holder" then
+                continue
             end
 
             TweenService:Create(i, InvertedInfo, {ImageTransparency = Transp, BackgroundColor3 = Value}):Play()
-        else
-            continue
         end
     end
 end
@@ -61,6 +56,25 @@ end
 function SideBar:Toggle(visible: boolean)
     UI.Visible = visible
     self.Enabled = visible
+
+    local function ResetChild(i)
+        if #i:GetChildren() > 0 then
+            ResetChild(i)
+        end
+
+        if i:IsA("TextLabel") then
+            i.TextColor3 = Color3.fromRGB(0, 0, 0)
+        elseif i:IsA("ImageLabel") or i:IsA("ImageButton") then
+            i.ImageTransparency = i.Name:lower():find("inverted") and 1 or 0
+            i.ImageColor3 = Color3.fromRGB(0, 0, 0)
+        end
+    end
+
+    for _, m in self.MenuModules do
+        for _, i in m.Button:GetChildren() do
+            ResetChild(i)
+        end
+    end
 end
 
 function SideBar:CloseAll(Remaining: any)
@@ -154,7 +168,9 @@ function SideBar:Init()
         BarButton.Button.MouseButton1Click:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
             if not Menu.Opened then
-                Menu:Open(self.ToggleDuration)
+                if Menu:Open(self.ToggleDuration) == "Prevented" then
+                    return
+                end
                 TweenInverted(BarButton, true)
                 if button.CloseOthersOnOpen then
                     self:CloseAll(Menu)
@@ -180,7 +196,7 @@ function SideBar:Init()
             -- `TextLabel.TextSize` doesn't either. What world are we living in?
             local Size = TextService:GetTextSize(BarButton.Title.Holder.Label.Text, OriginalYLabelBound, BarButton.Title.Holder.Label.Font, BarButton.Title.Holder.Label.AbsoluteSize)
             TweenService:Create(BarButton.Title.Holder, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Position = UDim2.new(0.15, Size.X + 16, 0.5, 0)
+                Position = UDim2.new(0.15, Size.X + 56, 0.5, 0)
             }):Play()
         end)
         BarButton.MouseLeave:Connect(function()

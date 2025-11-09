@@ -68,8 +68,6 @@ function EmoteManager:PlayEmote(name: string)
 		self:StopEmote(i.Config.Name or i)
 	end
 
-	self.Char:SetAttribute("Emoting", true)
-
 	self.CurrentlyPlayingEmote = self.EmotesAvailable[name]
 	workspace.CurrentCamera.CameraSubject = self.Head
 	self.CurrentlyPlayingEmote:BaseBehaviour()
@@ -87,8 +85,6 @@ function EmoteManager:StopEmote(name: string | {})
 
 		Network:FireServerConnection("StopEmote", "REMOTE_EVENT", name)
 		self.CurrentlyPlayingEmote = nil
-
-		self.Char:SetAttribute("Emoting", false)
 
 		return
 	end

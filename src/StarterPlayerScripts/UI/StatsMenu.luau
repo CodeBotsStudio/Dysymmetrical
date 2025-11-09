@@ -100,11 +100,12 @@ end
 
 function StatsMenu:Open(Time: number)
     if not self.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
-        return
+        return "Prevented"
     end
 
     TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
     self.Opened = true
+    return
 end
 
 function StatsMenu:Close(Time: number)

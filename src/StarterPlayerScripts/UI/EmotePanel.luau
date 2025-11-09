@@ -19,7 +19,7 @@ local EmotePanel = {
 }
 
 local UI
-local UISize = UDim2.fromScale(0.407, 0.723)
+local UISize = UDim2.fromScale(0.3, 0.533)
 
 function EmotePanel:Init()
     local ScreenGui = Utils:FindFirstChild(LocalPlayer.PlayerGui, "EmotePanel")
@@ -40,7 +40,11 @@ function EmotePanel:Init()
 
         local EmoteToPlay = EmoteButtonContainer[SelectedEmote]:GetAttribute("Name")
         if LocalPlayer.Character and EmoteToPlay and #EmoteToPlay > 0 then
-            local EmoteManager = require(Utils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager"))
+            local E = Utils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", false)
+            if not E then
+                return
+            end
+            local EmoteManager = require(E)
             if EmoteManager.CurrentlyPlayingEmote and EmoteManager.CurrentlyPlayingEmote.Name == EmoteToPlay then return end
             EmoteManager:PlayEmote(EmoteToPlay)
         end
@@ -83,11 +87,9 @@ function EmotePanel:Init()
         local CenterOfScreen = ScreenGui.AbsoluteSize / 2
         local MousePosition = Vector2.new(Mouse.X, Mouse.Y) - CenterOfScreen
 
-        local CurrentRotation = math.deg(math.atan2(MousePosition.Y, MousePosition.X))
+        local CurrentRotation = math.deg(math.atan2(MousePosition.Y, MousePosition.X)) + 180
 
-        Selector.Rotation = CurrentRotation + 90
-
-        CurrentRotation += 180 --for selecting an emote properly
+        Selector.Rotation = CurrentRotation - 90
 
         SelectedEmote = "Emote"..tostring(math.clamp(math.floor((CurrentRotation) / 45) + 1, 1, 8))
         UI.Selected.Text = EmoteButtonContainer[SelectedEmote]:GetAttribute("DisplayName")
@@ -124,7 +126,11 @@ function EmotePanel:Init()
                     return
                 end
 
-                local EmoteManager = require(Utils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager"))
+                local E = Utils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", false)
+                if not E then
+                    return
+                end
+                local EmoteManager = require(E)
                 
                 if EmoteManager.CurrentlyPlayingEmote then
                     EmoteManager:StopEmote(EmoteManager.CurrentlyPlayingEmote)

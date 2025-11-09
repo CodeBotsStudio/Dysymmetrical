@@ -298,6 +298,8 @@ function TerrorRadiusManager:_CheckAsSurvivor()
 end
 
 function TerrorRadiusManager:_CheckAsKiller()
+    local ClosestDistance = 1e999
+
     for _, char in workspace.Players:GetChildren() do
         if char ~= self.LocalPlayerProps.Char
         and char:FindFirstChild("Role") and char.Role.Value == "Survivor"
@@ -305,21 +307,25 @@ function TerrorRadiusManager:_CheckAsKiller()
         and not Utils:FindFirstChild(char, "Effects.Undetectable", false) then
             
             local Distance = (Utils:FindFirstChild(char, "HumanoidRootPart").Position - self.LocalPlayerProps.HRP.Position).Magnitude
-            self.PlayerClose = Distance <= Radiuses.L1
-            self.InChase = self.InChase and Distance <= Radiuses.L2 or Distance <= Radiuses.L4
-
-            for r: number, s: Sound in self.LayerMagnitudes[self.LocalPlayerProps.Char.Name] do
-                if s.Name == "L4" then
-                    self:TweenVolume(s, (self.PlayerClose and self.InChase) and 0.5 or 0)
-                end
-            end
-
-            if self.InChase then
-                self:PlayLayer4(self.LocalPlayerProps.Char.Name)
-            else
-                self.Playing = false
+            if ClosestDistance > Distance then
+                ClosestDistance = Distance
             end
         end
+    end
+
+    self.PlayerClose = ClosestDistance <= Radiuses.L1
+    self.InChase = self.InChase and ClosestDistance <= Radiuses.L2 or ClosestDistance <= Radiuses.L4
+
+    for r: number, s: Sound in self.LayerMagnitudes[self.LocalPlayerProps.Char.Name] do
+        if s.Name == "L4" then
+            self:TweenVolume(s, (self.PlayerClose and self.InChase) and 0.5 or 0)
+        end
+    end
+
+    if self.InChase then
+        self:PlayLayer4(self.LocalPlayerProps.Char.Name)
+    else
+        self.Playing = false
     end
 end
 
