@@ -57,23 +57,8 @@ function SideBar:Toggle(visible: boolean)
     UI.Visible = visible
     self.Enabled = visible
 
-    local function ResetChild(i)
-        if #i:GetChildren() > 0 then
-            ResetChild(i)
-        end
-
-        if i:IsA("TextLabel") then
-            i.TextColor3 = Color3.fromRGB(0, 0, 0)
-        elseif i:IsA("ImageLabel") or i:IsA("ImageButton") then
-            i.ImageTransparency = i.Name:lower():find("inverted") and 1 or 0
-            i.ImageColor3 = Color3.fromRGB(0, 0, 0)
-        end
-    end
-
     for _, m in self.MenuModules do
-        for _, i in m.Button:GetChildren() do
-            ResetChild(i)
-        end
+        TweenInverted(m.Button, false)
     end
 end
 
