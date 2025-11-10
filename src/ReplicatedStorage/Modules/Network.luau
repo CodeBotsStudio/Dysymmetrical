@@ -41,6 +41,7 @@
 	That's it! :>
 ]]
 
+local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
 --- Class used to connect the server and the clients more efficiently by encapsulating everything in a single place.
@@ -59,6 +60,7 @@ local Network = {
     },
     InstanceCreator = nil,
     ServiceLive = false,
+    SerializeParams = false,
 }
 
 --- Initializes the networking system in the current environment.
@@ -82,6 +84,25 @@ function Network:Init()
         self.InstanceCreator.OnServerInvoke = function(_player: Player, name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION" | "BINDABLE_EVENT")
             return self:_CreateInstance(name, Type)
         end
+
+        self.ServiceLive = true
+
+        local Time = 0
+        local Completed = false
+        
+        self:SetConnection("Test", "REMOTE_EVENT", function(Player, ...)
+            Completed = true
+            print(Time)
+        end)
+
+        task.delay(3, function()
+            self:FireAllClientConnection("Test", "REMOTE_EVENT", 1, 6, 4, 2 + 3)
+            task.spawn(function()
+                while not Completed do
+                    Time += task.wait()
+                end
+            end)
+        end)
     else
         for _, name in self._FolderNames do
             self.Folders[name] = script:FindFirstChild(name) or script:WaitForChild(name)
@@ -93,9 +114,13 @@ function Network:Init()
         end
 
         self.InstanceCreator = script.InstanceCreator
-    end
 
-    self.ServiceLive = true
+        self.ServiceLive = true
+        
+        self:SetConnection("Test", "REMOTE_EVENT", function(Player, ...)
+            self:FireServerConnection("Test", "REMOTE_EVENT", ...)
+        end)
+    end
 end
 
 --- Creates an instance of a specific type for later usage.
@@ -129,16 +154,44 @@ function Network:_SetupConnection(instance: RemoteEvent | UnreliableRemoteEvent 
     else
         if RunService:IsServer() then
             if instance:IsA("RemoteEvent") or instance:IsA("UnreliableRemoteEvent") then
-                return instance.OnServerEvent:Connect(Callback)
+                if self.SerializeParams then
+                    return instance.OnServerEvent:Connect(function(SourcePlayer: Player, Buffer: buffer)
+                        local SerializedParams = buffer.tostring(Buffer)
+                        Callback(SourcePlayer, table.unpack(HttpService:JSONDecode(SerializedParams)))
+                    end)
+                else
+                    return instance.OnServerEvent:Connect(Callback)
+                end
             elseif instance:IsA("RemoteFunction") then
-                instance.OnServerInvoke = Callback
+                if self.SerializeParams then
+                    instance.OnServerInvoke = function(SourcePlayer: Player, Buffer: buffer)
+                        local SerializedParams = buffer.tostring(Buffer)
+                        return Callback(SourcePlayer, table.unpack(HttpService:JSONDecode(SerializedParams)))
+                    end
+                else
+                    instance.OnServerInvoke = Callback
+                end
             end
             return
         else
             if instance:IsA("RemoteEvent") or instance:IsA("UnreliableRemoteEvent") then
-                return instance.OnClientEvent:Connect(Callback)
+                if self.SerializeParams then
+                    return instance.OnClientEvent:Connect(function(Buffer: buffer)
+                        local SerializedParams = buffer.tostring(Buffer)
+                        Callback(table.unpack(HttpService:JSONDecode(SerializedParams)))
+                    end)
+                else
+                    return instance.OnClientEvent:Connect(Callback)
+                end
             elseif instance:IsA("RemoteFunction") then
-                instance.OnClientInvoke = Callback
+                if self.SerializeParams then
+                    instance.OnClientInvoke = function(Buffer: buffer)
+                        local SerializedParams = buffer.tostring(Buffer)
+                        return Callback(table.unpack(HttpService:JSONDecode(SerializedParams)))
+                    end
+                else
+                    instance.OnClientInvoke = Callback
+                end
             end
             return
         end
@@ -203,14 +256,22 @@ function Network:FireClientConnection(target: Player | {Player}, name: string, T
         return
     end
 
+    local Params
+    local Buffer
+
+    if self.SerializeParams then
+        Params = HttpService:JSONEncode(table.pack(...))
+        Buffer = buffer.fromstring(Params)
+    end
+
     if typeof(target) == "table" then
         local results = {}
         for _, player: Player in target do
-            results[player.UserId] = Fire(player, ...)
+            results[player.UserId] = Fire(player, self.SerializeParams and Buffer or ...)
         end
         return results
     else
-        return Fire(target, ...)
+        return Fire(target, self.SerializeParams and Buffer or ...)
     end
 end
 
@@ -225,7 +286,16 @@ function Network:FireAllClientConnection(name: string, Type: "REMOTE_EVENT" | "U
     end
     if not RunService:IsServer() or Type == "REMOTE_FUNCTION" or not self.Folders[Type]:FindFirstChild(name) then return end
 
-    self.Folders[Type]:FindFirstChild(name):FireAllClients(...)
+
+    local Params
+    local Buffer
+
+    if self.SerializeParams then
+        Params = HttpService:JSONEncode(table.pack(...))
+        Buffer = buffer.fromstring(Params)
+    end
+
+    self.Folders[Type]:FindFirstChild(name):FireAllClients(self.SerializeParams and Buffer or ...)
 end
 
 --- Fires a server's event / function connections.
@@ -239,11 +309,20 @@ function Network:FireServerConnection(name: string, Type: "REMOTE_EVENT" | "UREM
     end
     if not RunService:IsClient() or not self.Folders[Type]:FindFirstChild(name) then return end
 
+
+    local Params
+    local Buffer
+
+    if self.SerializeParams then
+        Params = HttpService:JSONEncode(table.pack(...))
+        Buffer = buffer.fromstring(Params)
+    end
+
     local instance = self.Folders[Type]:FindFirstChild(name)
     if instance:IsA("RemoteFunction") then
-        return instance:InvokeServer(...)
+        return instance:InvokeServer(self.SerializeParams and Buffer or ...)
     else
-        instance:FireServer(...)
+        instance:FireServer(self.SerializeParams and Buffer or ...)
     end
     return
 end
