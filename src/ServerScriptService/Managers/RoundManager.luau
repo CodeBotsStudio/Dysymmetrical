@@ -52,8 +52,6 @@ function RoundManager:StartRound()
     --shuffling so that if there's a tie it chooses a truly random one
     RoundManager.CurrentRound.PlayersAccepted = Utils:ShuffleTable(LoadedPlayers)
 
-    local HighestMalice
-
     local PlayersOrderedByMalice = RoundManager.CurrentRound.PlayersAccepted
     table.sort(PlayersOrderedByMalice, function(a, b)
         return Utils:GetPlayerStat(a, "General.Malice") > Utils:GetPlayerStat(b, "General.Malice")
@@ -62,13 +60,8 @@ function RoundManager:StartRound()
     MapManager:GetRandomMap()
     
     for i = 1, workspace:GetAttribute("KillersAllowed") do
-        local P = PlayersOrderedByMalice[i]
-        if i == 1 then
-            HighestMalice = P
-        end
-
         RoundManager.CurrentRound.Killers[i] = {
-            Player = P,
+            Player = PlayersOrderedByMalice[i],
             Character = nil
         }
     end
@@ -109,27 +102,11 @@ function RoundManager:StartRound()
         end
     end)
 
-    RoundManager.Callables:PlayIntro(Utils:GetPlayerEquipped(HighestMalice, "Killer"),
-        Utils:GetPlayerEquipped(HighestMalice, "Skins."..Utils:GetPlayerEquipped(HighestMalice, "Killer"))
-    )
+    RoundManager.Callables:PlayIntro()
 end
 
 --- Plays the intro to everyone (whose game has loaded).
-function RoundManager.Callables:PlayIntro(_RootName: string, _SkinName: string?)
-    -- local PlayerNames = {}
-
-    -- for _, i in ipairs(RoundManager.CurrentRound.Killers) do
-    --     table.insert(PlayerNames, i.Player.Name)
-    -- end
-
-    -- for _, i in Utils:GetLoadedPlayers() do
-    --     Network:FireClientConnection(i, "PlayIntro", "REMOTE_EVENT",
-    --         RootName,
-    --         PlayerNames,
-    --         SkinName
-    --     )
-    -- end
-
+function RoundManager.Callables:PlayIntro()
     --whatever happens after since every intro lasts the same
     RoundManager.Threads["IntroEndingThread"] = task.delay(3, function()
         TimeManager.CanDecreaseTime = true

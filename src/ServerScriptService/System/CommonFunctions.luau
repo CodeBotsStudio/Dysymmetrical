@@ -42,8 +42,6 @@ local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
-local DominoEffectModule = require(ReplicatedStorage.Effects.SurvivorSpecific.DominoEffect)
-
 function Utils:Init()
 	Network:SetConnection("GetPermRank", "REMOTE_FUNCTION", function(Player: Player): number
 		return self:GetPlayerPermissionRank(Player)
@@ -84,13 +82,6 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	else
 		self:ApplyEffect(sourcePlayer.Character:FindFirstChildOfClass("Humanoid"), "Slowness", 6, 2, "KillerSpecific")
 		self:ApplyEffect(sourcePlayer.Character:FindFirstChildOfClass("Humanoid"), "Helpless", 1, 2, "KillerSpecific")
-	end
-	
-	--NOTE: this is from Driftwood and you can use it as an example.
-	if Utils:FindFirstChild(Char, "Effects.Domino Effect", false) and table.find(DominoEffectModule.Attacks, reason) then
-		Network:FireClientConnection(sourcePlayer, "ExecuteReplicatedModule", "REMOTE_EVENT", ReplicatedStorage.Effects.SurvivorSpecific.DominoEffect.ApplyInk:GetFullName())
-		Char.Effects["Domino Effect"]:Destroy()
-		Utils:GetEffectModule("Domino Effect", "SurvivorSpecific"):Remove(Char)
 	end
 
 	Network:FireClientConnection(sourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, inflictedDamage)
