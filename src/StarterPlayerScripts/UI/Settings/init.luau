@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
@@ -107,7 +106,7 @@ function Settings:Init()
         SettingSection.Parent = Content
     end
 
-    RunService.PreRender:Connect(function()
+    self.UIInstance:GetPropertyChangedSignal("Size"):Connect(function()
         self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
     end)
 end

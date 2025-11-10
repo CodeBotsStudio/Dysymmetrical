@@ -2,7 +2,6 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local EmoteEquipWindow = require(script.EmoteEquipWindow)
@@ -457,7 +456,7 @@ function Inventory:Init()
         self:ToggleInfoMenu()
     end))
 
-    table.insert(Conns, RunService.PreRender:Connect(function()
+    table.insert(Conns, self.UIInstance:GetPropertyChangedSignal("Size"):Connect(function()
         self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
     end))
 

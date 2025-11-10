@@ -1,6 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+-- local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Signal = require(ReplicatedStorage.Utils.Signal)
@@ -192,9 +192,9 @@ function InputManager:Init()
         ChangePreferred(input.UserInputType)
     end)
 
-    RunService.PreRender:Connect(function(_delta: number)
-        ChangePreferred(UserInputService:GetLastInputType())
-    end)
+    -- RunService.PreRender:Connect(function(_delta: number)
+    --     ChangePreferred(UserInputService:GetLastInputType())
+    -- end)
 
     ChangePreferred(UserInputService:GetLastInputType())
 

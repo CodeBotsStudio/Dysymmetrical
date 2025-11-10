@@ -85,7 +85,7 @@ function CreditsMenu:Init()
         end
     end
 
-    RunService.PreRender:Connect(function()
+    self.UIInstance:GetPropertyChangedSignal("Size"):Connect(function()
         self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
     end)
 end

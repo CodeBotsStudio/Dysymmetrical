@@ -63,15 +63,24 @@ function AbilityGUI:InitGUI()
         table.insert(Abilities, self:_SetupAbilityFrame(AbilityT))
     end
 
-    local Conn = RunService.PreRender:Connect(function(_delta: number)
-        for _, Ability: Ability in Abilities do
-            self:_UpdateAbilityFrame(Ability, InputManager)
-        end
-    end)
+    local Conns = {
+        RunService.PreRender:Connect(function(_delta: number)
+            for _, Ability: Ability in Abilities do
+                self:_UpdateAbilityFrame(Ability, InputManager)
+            end
+        end),
+        InputManager.SchemeChanged:Connect(function(CurrentScheme: string)
+            for _, Ability: Ability in Abilities do
+                self:_UpdateAbilityFrameInput(Ability, InputManager, CurrentScheme)
+            end
+        end),
+    }
 
     --kids, remember to disconnect your useless crap!
     Container.Destroying:Connect(function()
-        Conn:Disconnect()
+        for _, Conn in Conns do
+            Conn:Disconnect()
+        end
     end)
 end
 
@@ -132,27 +141,29 @@ function AbilityGUI:_UpdateAbilityFrame(Ability: Ability, InputManager)
         Ability.Timer.TextTransparency = 1
     end
 
+    --it would be stupid to not add this (again). -Dyscarn
+    if Ability.Uses and Ability.ModuleCode.UseSettings.Limited then
+        Ability.Uses.Text = Ability.ModuleCode.UsesLeft
+    end
+end
+
+function AbilityGUI:_UpdateAbilityFrameInput(Ability: Ability, InputManager, CurrentScheme: string)
     --I HATE MOBILE SUPPORT GNMDKIMBKBMSPMBPJBSG
-    if InputManager.CurrentControlScheme ~= "Touch" then
+    if CurrentScheme ~= "Touch" then
         Ability.Keybind.TextTransparency = 0
 
         --slash isn't built different now nvm :(
         local Input = InputManager["DefaultActions"][Ability.ModuleCode.InputName]
-        local Key = Input[InputManager.CurrentControlScheme.."Key"] or Input["InputType"]
+        local Key = Input[CurrentScheme.."Key"] or Input["InputType"]
 
         --WOW THANKS DYSCARN FOR MAKING A COOL INPUT MANAGER THAT ACTUALLY WORKS AND SHOWS YOUR `preferred input device` // you're welcome Dyscarn
         Ability.Keybind.Text = Key.Name
-        if InputManager.CurrentControlScheme == "Gamepad" then
+        if CurrentScheme == "Gamepad" then
             Ability.Keybind.Text = Ability.Keybind.Text:gsub("Button", "")
         end
     else
         --NEVER SHOW UP ON MY FACE AGAIN!!!!
         Ability.Keybind.TextTransparency = 1
-    end
-
-    --it would be stupid to not add this (again). -Dyscarn
-    if Ability.Uses and Ability.ModuleCode.UseSettings.Limited then
-        Ability.Uses.Text = Ability.ModuleCode.UsesLeft
     end
 end
 

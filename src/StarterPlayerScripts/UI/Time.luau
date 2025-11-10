@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
@@ -30,19 +29,12 @@ return {
         	TimeLabel.Text = Utils:ConvertToMinSec(value)
         end)
         State.Changed:Connect(function(value: string)
-        	if LabelTexts[value] then
+            if value == "Lobby" and not EnoughPlayers.Value then
+                Label.Text = LabelTexts.NotEnough
+        	elseif LabelTexts[value] then
         		Label.Text = LabelTexts[value]
         	else
-
         		Label.Text = "PLACEHOLDER"
-        	end
-        end)
-
-        RunService.PreRender:Connect(function()
-        	if State.Value == "Lobby" and not EnoughPlayers.Value then
-        		Label.Text = LabelTexts.NotEnough
-        	else
-        		Label.Text = LabelTexts[State.Value]
         	end
         end)
     end,

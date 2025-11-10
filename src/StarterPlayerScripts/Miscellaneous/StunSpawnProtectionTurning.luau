@@ -6,20 +6,21 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 return {
     Init = function(_self)
-        local Conns: {[string]: RBXScriptConnection} = {}
+        local Instances: {[string]: ImageLabel} = {}
         
         local function SetupCharacter(Player: Player, Char: Model)
-            if Conns[Player.Name] then
-                Conns[Player.Name]:Disconnect()
+            if Instances[Player.Name] then
+                Instances[Player.Name] = nil
             end
 
             local Role = Utils:FindFirstChild(Char, "Role")
             if Role.Value == "Killer" then
                 local Label = Utils:FindFirstChild(Char, "HumanoidRootPart.StunSpawnProtection.ImageLabel")
+                if not Label then
+                    return
+                end
 
-                Conns[Player.Name] = RunService.PreRender:Connect(function(delta: number)
-                    Label.Rotation += delta * 24
-                end)
+                Instances[Player.Name] = Label
             end
         end
 
@@ -38,8 +39,18 @@ return {
         end
 
         Players.PlayerRemoving:Connect(function(Player: Player)
-            if Conns[Player.Name] then
-                Conns[Player.Name]:Disconnect()
+            if Instances[Player.Name] then
+                Instances[Player.Name] = nil
+            end
+        end)
+
+        RunService.PreRender:Connect(function(delta: number)
+            for _, Label in Instances do
+                if not Label then
+                    continue
+                end
+
+                Label.Rotation += delta * 24
             end
         end)
     end,
