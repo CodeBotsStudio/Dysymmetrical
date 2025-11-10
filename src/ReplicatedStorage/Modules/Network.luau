@@ -84,25 +84,6 @@ function Network:Init()
         self.InstanceCreator.OnServerInvoke = function(_player: Player, name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION" | "BINDABLE_EVENT")
             return self:_CreateInstance(name, Type)
         end
-
-        self.ServiceLive = true
-
-        local Time = 0
-        local Completed = false
-        
-        self:SetConnection("Test", "REMOTE_EVENT", function(Player, ...)
-            Completed = true
-            print(Time)
-        end)
-
-        task.delay(3, function()
-            self:FireAllClientConnection("Test", "REMOTE_EVENT", 1, 6, 4, 2 + 3)
-            task.spawn(function()
-                while not Completed do
-                    Time += task.wait()
-                end
-            end)
-        end)
     else
         for _, name in self._FolderNames do
             self.Folders[name] = script:FindFirstChild(name) or script:WaitForChild(name)
@@ -114,13 +95,9 @@ function Network:Init()
         end
 
         self.InstanceCreator = script.InstanceCreator
-
-        self.ServiceLive = true
-        
-        self:SetConnection("Test", "REMOTE_EVENT", function(Player, ...)
-            self:FireServerConnection("Test", "REMOTE_EVENT", ...)
-        end)
     end
+
+    self.ServiceLive = true
 end
 
 --- Creates an instance of a specific type for later usage.
