@@ -152,7 +152,6 @@ function CommonFunctions:ApplyEffect(hum: Humanoid, name: string, level: number?
 	EffectModule:Apply(level, char, duration or EffectModule.Duration)
 end
 
---TODO: make a UI for this
 --- Grants money and/or EXP to a player and displays a notification showing it.
 --- The `Reason` parameter is the source of the reward to display in the UI locally.
 function CommonFunctions:GrantRewardToPlayer(Player: Player, Money: number?, EXP: number?, Reason: string?)

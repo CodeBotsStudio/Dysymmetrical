@@ -47,7 +47,9 @@ local TerrorRadiusManager = {
         Humanoid = nil,
         HRP = nil,
     },
+    MapAmbience = nil,
     MapAmbienceVolume = 0,
+    MapAmbienceTweenState = "Play",
 }
 
 local function CalculateSound(Distance)
@@ -70,7 +72,8 @@ function TerrorRadiusManager:Init()
         HRP = Utils:FindFirstChild(Char, "HumanoidRootPart"),
     }
 
-    self.MapAmbienceVolume = workspace.Themes:FindFirstChild("MapAmbience") and workspace.Themes.MapAmbience.Volume or 0
+    self.MapAmbience = workspace.Themes:FindFirstChild("MapAmbience")
+    self.MapAmbienceVolume = self.MapAmbience and self.MapAmbience.Volume or 0
 
     local ThemeFolder = Instance.new("Folder")
     ThemeFolder.Name = "ChaseThemes"
@@ -125,8 +128,8 @@ function TerrorRadiusManager:Init()
         end
     end
 
-    table.insert(self.Connections, RunService.PreRender:Connect(function()
-        self:CheckInRadius()
+    table.insert(self.Connections, RunService.PreRender:Connect(function(delta: number)
+        self:CheckInRadius(delta)
     end))
 
     table.insert(self.Connections, LocalPlayer.CharacterAdded:Connect(function()
@@ -150,21 +153,21 @@ function TerrorRadiusManager:SetLayerMagnitude(SoundInstance: Sound, Parent: str
     self.LayerMagnitudes[Parent][Radius] = SoundInstance
 end
 
-function TerrorRadiusManager:CheckInRadius()
+function TerrorRadiusManager:CheckInRadius(delta: number)
     if self.LocalPlayerProps.Role == "Survivor" then
-        self:_CheckAsSurvivor()
+        self:_CheckAsSurvivor(delta)
     elseif self.LocalPlayerProps.Role == "Killer" then
-        self:_CheckAsKiller()
+        self:_CheckAsKiller(delta)
     end
 end
 
-function TerrorRadiusManager:TweenVolume(Sound: Sound, TargetVolume: number)
+function TerrorRadiusManager:TweenVolume(Sound: Sound, TargetVolume: number, delta: number)
     if math.abs(Sound.Volume - TargetVolume) > 0.01 then
-        TweenService:Create(Sound, TweenInfo.new(0.2), {Volume = TargetVolume}):Play()
+        Sound.Volume = Utils:Lerp(Sound.Volume, TargetVolume, delta * 14)
     end
 end
 
-function TerrorRadiusManager:PlayLayer4(Subfolder: string)
+function TerrorRadiusManager:PlayLayer4(Subfolder: string, delta: number)
     if self.Playing then
         return
     end
@@ -173,7 +176,7 @@ function TerrorRadiusManager:PlayLayer4(Subfolder: string)
     for _, s: Sound in self.LayerMagnitudes[Subfolder] do
         if s.Name == "L4" then
             s:Play()
-            self:TweenVolume(s, 0.5)
+            self:TweenVolume(s, 0.5, delta)
             local conn
             conn = s.Changed:Connect(function()
                 if s.Volume <= 0 then
@@ -182,12 +185,12 @@ function TerrorRadiusManager:PlayLayer4(Subfolder: string)
             end)
             table.insert(self.Connections, conn)
         else
-            self:TweenVolume(s, 0)
+            self:TweenVolume(s, 0, delta)
         end
     end
 end
 
-function TerrorRadiusManager:_CheckAsSurvivor()
+function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
     local PlayersFound = {}
     for _, i in workspace.Players:GetChildren() do
         if not self.ThemeFolder:FindFirstChild(i.Name) and i:FindFirstChild("Role") and i.Role.Value == "Killer" then
@@ -254,6 +257,7 @@ function TerrorRadiusManager:_CheckAsSurvivor()
 
     local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 1e999
 
+    local Playing = false
     for n, i in self.LayerMagnitudes do
         if tostring(n) == tostring(CurrentKillerChosen) then
             for r, s in i do
@@ -262,27 +266,30 @@ function TerrorRadiusManager:_CheckAsSurvivor()
                 if self.InChase then
                     if Distance < Radiuses["L1"] and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
                         if s.Name == "L4" then
-                            self:TweenVolume(s, Distance < 55 and 0.5 or CalculateSound(Distance))
+                            Playing = true
+                            self:TweenVolume(s, Distance < 55 and 0.5 or CalculateSound(Distance), delta)
                         else
-                            self:TweenVolume(s, 0)
+                            self:TweenVolume(s, 0, delta)
                         end
                     else
                         self.InChase = false
                         if s.Name == "L4" then
                             self.Playing = false
-                            self:TweenVolume(s, 0)
+                            self:TweenVolume(s, 0, delta)
                         end
                     end
                 else
                     if Distance <= r and Distance > Upcoming and not Utils:FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
                         if s.Name == "L4" then
+                            Playing = true
                             self.InChase = true
-                            self:PlayLayer4(tostring(CurrentKillerChosen))
+                            self:PlayLayer4(tostring(CurrentKillerChosen), delta)
                         else
-                            self:TweenVolume(s, CalculateSound(Distance))
+                            Playing = true
+                            self:TweenVolume(s, CalculateSound(Distance), delta)
                         end
                     else
-                        self:TweenVolume(s, 0)
+                        self:TweenVolume(s, 0, delta)
                     end
                 end
             end
@@ -290,14 +297,28 @@ function TerrorRadiusManager:_CheckAsSurvivor()
         end
         
         for _, s in i do
-            self:TweenVolume(s, 0)
+            self:TweenVolume(s, 0, delta)
+        end
+    end
+
+    if self.MapAmbience then
+        if Playing then
+            if self.MapAmbienceTweenState ~= "Stop" then
+                self.MapAmbienceTweenState = "Stop"
+                TweenService:Create(self.MapAmbience, TweenInfo.new(0.4), {Volume = 0}):Play()
+            end
+        else
+            if self.MapAmbienceTweenState ~= "Play" then
+                self.MapAmbienceTweenState = "Play"
+                TweenService:Create(self.MapAmbience, TweenInfo.new(0.4), {Volume = self.MapAmbienceVolume}):Play()
+            end
         end
     end
 
     return
 end
 
-function TerrorRadiusManager:_CheckAsKiller()
+function TerrorRadiusManager:_CheckAsKiller(delta: number)
     local ClosestDistance = 1e999
 
     for _, char in workspace.Players:GetChildren() do
@@ -318,12 +339,12 @@ function TerrorRadiusManager:_CheckAsKiller()
 
     for r: number, s: Sound in self.LayerMagnitudes[self.LocalPlayerProps.Char.Name] do
         if s.Name == "L4" then
-            self:TweenVolume(s, (self.PlayerClose and self.InChase) and 0.5 or 0)
+            self:TweenVolume(s, (self.PlayerClose and self.InChase) and 0.5 or 0, delta)
         end
     end
 
     if self.InChase then
-        self:PlayLayer4(self.LocalPlayerProps.Char.Name)
+        self:PlayLayer4(self.LocalPlayerProps.Char.Name, delta)
     else
         self.Playing = false
     end
