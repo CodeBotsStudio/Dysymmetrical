@@ -52,7 +52,7 @@ function Utils:Init()
 end
 
 --- Function that should be used to damage a player from another player's attack.
---- Handles blocking, resistance, weakness...
+--- Handles resistance, weakness...
 function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Humanoid, inflictedDamage: number, reason: string?, knockbackDirection: Vector3?, knockbackMagnitude: number?)
     local Char = targetHumanoid.Parent
 	local HRP: BasePart = Char.HumanoidRootPart
@@ -77,12 +77,7 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 		inflictedDamage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
 
-	if not Utils:FindFirstChild(Char, "Effects.Blocking", false) then
-		targetHumanoid:TakeDamage(inflictedDamage)
-	else
-		self:ApplyEffect(sourcePlayer.Character:FindFirstChildOfClass("Humanoid"), "Slowness", 6, 2, "KillerSpecific")
-		self:ApplyEffect(sourcePlayer.Character:FindFirstChildOfClass("Humanoid"), "Helpless", 1, 2, "KillerSpecific")
-	end
+	targetHumanoid:TakeDamage(inflictedDamage)
 
 	Network:FireClientConnection(sourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, inflictedDamage)
 	if Utils:GetPlayerSetting(sourcePlayer, "Miscellaneous.ImageFlashOnHit") then

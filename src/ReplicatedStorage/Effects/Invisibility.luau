@@ -6,7 +6,7 @@ local Effect = require(ReplicatedStorage.Classes.Effect)
 
 local Invisibility = Effect:GetDefaultEffect()
 Invisibility.Name = "Invisibility"
-Invisibility.Description = "Makes the player fairly transparent (but never fully invisible)."
+Invisibility.Description = "Makes the player fairly transparent (but never fully invisible) the higher the level."
 Invisibility.Duration = 10
 Invisibility.TransparentInstances = {}
 

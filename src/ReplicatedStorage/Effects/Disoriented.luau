@@ -10,7 +10,7 @@ local PlayerModule: ModuleScript
 
 local Disoriented: Effect.Effect = Effect:GetDefaultEffect()
 Disoriented.Name = "Disoriented"
-Disoriented.Description = "Inverts the player's controls for 4 seconds."
+Disoriented.Description = "Inverts the player's controls for the duration of the effect."
 Disoriented.Duration = 4.2
 Disoriented.ShowInGUI = false
 

@@ -7,6 +7,7 @@ local Effect = require(ReplicatedStorage.Classes.Effect)
 
 local Slowness: Effect.Effect = Effect:GetDefaultEffect()
 Slowness.Name = "Slowness"
+Slowness.Description = "Makes the player slower the higher the level."
 
 Slowness.ApplyEffect = function(_own: Effect.Effect, level: number)
     if RunService:IsServer() then

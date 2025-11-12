@@ -8,7 +8,7 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local Blindness = Effect:GetDefaultEffect()
 Blindness.Name = "Blindness"
-Blindness.Description = "Blinds the affected player for some time."
+Blindness.Description = "Blinds the affected player for a set time. This effect will flash white if the Photosensitive setting is off, and black if it's on."
 
 local DisappearThread
 
