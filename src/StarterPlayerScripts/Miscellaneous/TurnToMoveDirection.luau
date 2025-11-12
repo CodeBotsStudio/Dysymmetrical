@@ -14,20 +14,13 @@ local lerpMult = 0.1
 local deltaVal = framerate / lerpMult
 
 function GlobalTurnToMoveDirection:Init()
-    local function SetupPlayer(Player: Player)
-        Player.CharacterAdded:Connect(function(Char: Model)
-            self:SetupPlayer(Player)
-        end)
-        if Player.Character then
-            task.defer(self.SetupPlayer, self, Player)
-        end
-    end
-
-    Players.PlayerAdded:Connect(SetupPlayer)
+    Players.PlayerAdded:Connect(function(plr: Player)
+		self:SetupPlayer(plr)
+	end)
     for _, Player: Player in Players:GetPlayers() do
-        if Player.Character then
-            task.defer(self.SetupPlayer, self, Player)
-        end
+        task.spawn(function()
+			self:SetupPlayer(Player)
+		end)
     end
 end
 
