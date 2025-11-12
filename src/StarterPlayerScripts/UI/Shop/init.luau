@@ -1,12 +1,16 @@
 --!nocheck
 
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local SideBar = require(script.Parent.SideBar)
 local Types = require(ReplicatedStorage.Classes.Character)
 local Emote = require(ReplicatedStorage.Classes.Emote)
+local Tooltip = require(ReplicatedStorage.Classes.Tooltip)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
@@ -240,6 +244,10 @@ function Shop:ToggleInfoMenu(Open: boolean?)
             return
         end
 
+        self.InfoMenu.Open = true
+
+        local TextsToCheck = {}
+
         --TODO: effect descriptions on mouse hover
         for SectionIndex: number, Section: {
             Type: "Text" | "Header" | "Separator" | "Quote",
@@ -262,27 +270,137 @@ function Shop:ToggleInfoMenu(Open: boolean?)
                 Text = Section.Text
             end
 
+            local Pref = Templates[Section.Type]:Clone()
             if Section.Type ~= "Text" then
-                local Pref = Templates[Section.Type]:Clone(); --using semicolon because selene is bullshit
                 (Section.Type == "Separator" and Pref.Title or Pref).Text = Section.Text
-                Pref.Parent = SectionContainer
             else
-                local Pref = Templates.Text:Clone()
                 Pref.Title.Text = Text
                 Pref.Title.MaxVisibleGraphemes = 0
                 if Section.Image then
                     Pref.Image.Image = Section.Image
                     Pref.Image.Visible = true
                 end
-                Pref.Parent = SectionContainer
+                table.insert(TextsToCheck, Pref)
                 TweenService:Create(Pref.Title, TweenInfo.new(0.03 * #Text, Enum.EasingStyle.Linear), {MaxVisibleGraphemes = #Text}):Play()
             end
+            Pref.Parent = SectionContainer
         end
+
+        task.spawn(function()
+            local PossibleEffects = {}
+
+            local function AddEffectToList(Inst: ModuleScript | Folder)
+                for _, i in Inst:GetChildren() do
+                    if i:IsA("Folder") then
+                        AddEffectToList(i)
+                        continue
+                    end
+
+                    if not i:IsA("ModuleScript") then
+                        continue
+                    end
+
+                    PossibleEffects[i.Name] = require(i).Description or "UNKNOWN"
+                end
+            end
+        
+            AddEffectToList(ReplicatedStorage.Effects)
+        
+            local LocalPlayer = Players.LocalPlayer
+            local CurrentTooltip
+        
+            local function GetSpaceWidth(font, textSize, maxX)
+                return TextService:GetTextSize(" ", textSize, font, Vector2.new(maxX, 1e9)).X
+            end
+        
+            while task.wait() and self.InfoMenu.Open do
+                local ui = self.UIInstance
+                local char = LocalPlayer.Character
+                local role = char and char:FindFirstChild("Role")
+            
+                if not (ui and ui.Visible and role and role.Value == "Spectator") then
+                    if CurrentTooltip then
+                        CurrentTooltip = Tooltip.New()
+                    end
+                    continue
+                end
+            
+                local mousePos = UserInputService:GetMouseLocation() - GuiService:GetGuiInset()
+                local foundEffect = false
+            
+                for _, textLabel in TextsToCheck do
+                    if foundEffect then break end
+                
+                    local text = textLabel.Title
+                    local absPos, absSize = text.AbsolutePosition, text.AbsoluteSize
+                    local font, textSize = text.Font, text.TextSize
+                    local maxWidth = absSize.X
+                    local spaceWidth = GetSpaceWidth(font, textSize, maxWidth)
+                
+                    -- bound check
+                    if not (mousePos.X >= absPos.X and mousePos.X <= absPos.X + absSize.X and
+                            mousePos.Y >= absPos.Y and mousePos.Y <= absPos.Y + absSize.Y) then
+                        continue
+                    end
+                
+                    local lineHeight = TextService:GetTextSize("A", textSize, font, Vector2.new(maxWidth, 1e9)).Y
+                    local totalY = 0
+                
+                    for _, rawLine in ipairs(text.Text:gsub("<.->", ""):split("\n")) do
+                        local currentLine = {}
+                        local currentWidth = 0
+                    
+                        local wrappedLines = {}
+                        for _, word in ipairs(rawLine:split(" ")) do
+                            local wordSize = TextService:GetTextSize(word, textSize, font, Vector2.new(maxWidth, 1e9)).X
+                            if currentWidth + wordSize > maxWidth then
+                                table.insert(wrappedLines, currentLine)
+                                currentLine = {}
+                                currentWidth = 0
+                            end
+                            table.insert(currentLine, word)
+                            currentWidth += wordSize + spaceWidth
+                        end
+                        if #currentLine > 0 then
+                            table.insert(wrappedLines, currentLine)
+                        end
+                    
+                        for _, lineWords in ipairs(wrappedLines) do
+                            if foundEffect then break end
+                        
+                            local minY = absPos.Y + totalY
+                            local maxY = minY + lineHeight
+                            if mousePos.Y >= minY and mousePos.Y <= maxY then
+                                local lineX = absPos.X
+                            
+                                for _, word in ipairs(lineWords) do
+                                    local wSize = TextService:GetTextSize(word, textSize, font, Vector2.new(maxWidth, 1e9)).X
+                                    local minX, maxX = lineX, lineX + wSize
+                                
+                                    if mousePos.X >= minX and mousePos.X <= maxX then
+                                        local desc = PossibleEffects[word]
+                                        if desc then
+                                            CurrentTooltip = Tooltip.New(desc)
+                                            foundEffect = true
+                                            break
+                                        end
+                                    end
+                                    lineX += wSize + spaceWidth
+                                end
+                            end
+                            totalY += lineHeight
+                        end
+                    end
+                end
+            
+                if not foundEffect then
+                    CurrentTooltip = Tooltip.New()
+                end
+            end
+        end)
 
         TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
         TweenService:Create(InfoContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
-
-        self.InfoMenu.Open = true
     else
         TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
         TweenService:Create(InfoContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()

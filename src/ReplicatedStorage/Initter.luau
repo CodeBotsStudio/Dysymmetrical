@@ -11,6 +11,7 @@ function Initter:Init()
             continue
         end
         if i:IsA("ModuleScript") and not i:HasTag("PreventInit") then
+            self.CurrentlyInitting = i.Name
             require(i):Init()
         end
     end

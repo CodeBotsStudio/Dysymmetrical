@@ -11,21 +11,6 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local LocalPlayer = Players.LocalPlayer
 local RoundState: StringValue = ReplicatedStorage.RoundInfo.CurrentState
 
---[[
-    NOTE: procedure to follow
-    * Get all initial characters and instantiate their chase themes
-    * Every frame:
-        * Check for all killers
-            * If a killer is gone, remove its chase themes
-            * If a new killer appears, instantiate its chase themes
-        * Check if any sound is above 0 volume
-            * If there is one, choose the sound's parent as the selected killer
-            * If not, check which killer is closest
-                * If it's close enough, play its chase theme
-]]
-
---TODO: mute map ambience while > Full L1 is fully playing
-
 local Radiuses = {
 	["L4Upcoming"] = -1e10, ["L4"] = 15,
 	["L3Upcoming"] = 15, ["L3"] = 30,

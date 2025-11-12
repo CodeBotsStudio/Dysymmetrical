@@ -20,11 +20,11 @@ function PlayerInitter:Init()
 
     for _, i in script.Parent:GetDescendants() do
         if i:IsA("ModuleScript") and i ~= PlayerModule and not i:IsDescendantOf(PlayerModule) and not i:IsDescendantOf(ServerScripts) then
+            if i.Name ~= "ModPanel" then
+                self.CurrentlyInitting = i.Name
+            end
     		local Scr = require(i)
     		if type(Scr) == "table" and Scr.Init and type(Scr.Init) == "function" then
-                if i.Name ~= "ModPanel" then
-                    self.CurrentlyInitting = i.Name
-                end
     			Scr:Init()
     		end
     	end

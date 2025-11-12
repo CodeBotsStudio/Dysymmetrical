@@ -65,6 +65,9 @@
     ------08/11/2025------
     * Added `More Info` to Shop and Inventory (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Shop` & `StarterPlayer/StarterPlayerScripts/UI/Inventory` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------12/11/2025------
+    * Added effect tooltips when checking a `More Info` page (MAKE SURE TO GO INTO `ReplicatedStorage/Classes/Tooltip` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()
