@@ -164,7 +164,7 @@ function SaveManager:Load(Player: Player): Folder
         end
 
 		for v, i in GetAsync.Equipped.Emotes do
-            if Utils:GetEmoteModule(v) == nil then
+            if Utils:GetEmoteModule(i) == nil then
                 continue
             end
 
