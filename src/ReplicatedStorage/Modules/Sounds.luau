@@ -18,7 +18,6 @@ local Sounds = {
         ButtonPress = "rbxassetid://112754501285226",
     },
 }
--- Sounds.__index = Sounds
 
 function Sounds:Init()
     if not RunService:IsServer() then

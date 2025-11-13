@@ -16,8 +16,8 @@ return {
                 math.clamp(
                     Humanoid.Health / Humanoid.MaxHealth / 2 + 0.65,
                     0.5,
-                    1
-                ) or 1
+                    0.999
+                ) or 0.999
             Vignette.ImageTransparency = Utils:Lerp(
                 Vignette.ImageTransparency,
                 Target,

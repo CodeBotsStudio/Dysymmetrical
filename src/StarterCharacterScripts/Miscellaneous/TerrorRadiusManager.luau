@@ -269,6 +269,7 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
                             Playing = true
                             self.InChase = true
                             self:PlayLayer4(tostring(CurrentKillerChosen), delta)
+                            self:TweenVolume(s, 0.5, delta)
                         else
                             Playing = true
                             self:TweenVolume(s, CalculateSound(Distance), delta)
