@@ -75,6 +75,9 @@ function AbilityGUI:InitGUI()
             end
         end),
     }
+    for _, Ability: Ability in Abilities do
+        self:_UpdateAbilityFrameInput(Ability, InputManager, InputManager.CurrentControlScheme)
+    end
 
     --kids, remember to disconnect your useless crap!
     Container.Destroying:Connect(function()

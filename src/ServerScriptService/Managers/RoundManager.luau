@@ -107,6 +107,9 @@ end
 
 --- Plays the intro to everyone (whose game has loaded).
 function RoundManager.Callables:PlayIntro()
+    if not RoundManager.CanSpawnKiller then
+        Utils:Fade(Utils:GetLoadedPlayers(false), "Out", 0.6, false)
+    end
     --whatever happens after since every intro lasts the same
     RoundManager.Threads["IntroEndingThread"] = task.delay(3, function()
         TimeManager.CanDecreaseTime = true
