@@ -248,7 +248,6 @@ function Shop:ToggleInfoMenu(Open: boolean?)
 
         local TextsToCheck = {}
 
-        --TODO: effect descriptions on mouse hover
         for SectionIndex: number, Section: {
             Type: "Text" | "Header" | "Separator" | "Quote",
             Text: string | {string},

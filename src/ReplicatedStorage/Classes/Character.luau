@@ -41,6 +41,8 @@ export type Survivor = {
             RunAnimation: string,
             --- TODO: The animation that'll play on stun.
             Stunned: string?,
+            --- TODO: The animation that'll play before a stun ends.
+            StunnedEnd: string?,
         },
 
         --- Any voicelines this character might have. It's built with strings as keys, and either strings, string tables or string dictionaries as values for random voicelines.
