@@ -18,6 +18,7 @@ local SideBar = {
 
 type Button = {
     Render: string,
+    Type: "Button" | "SmallButton",
     InvertedRender: string?,
     MenuModule: any,
     LayoutOrder: number,
@@ -28,7 +29,10 @@ type Button = {
 local InvertedInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 
 local UI
-local BarButtonPrefab = Utils:FindFirstChild(script, "Button")
+local BarButtonPrefabs = {
+    Button = Utils:FindFirstChild(script, "Button"),
+    SmallButton = Utils:FindFirstChild(script, "SmallButton"),
+}
 
 local function TweenInverted(BarButton, Inverted: boolean)
     for _, i in BarButton:GetChildren() do
@@ -72,6 +76,22 @@ function SideBar:CloseAll(Remaining: any)
     end
 end
 
+function SideBar:OpenMenu(Menu)
+    Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+    if not Menu.Opened then
+        if Menu:Open(self.ToggleDuration) == "Prevented" then
+            return
+        end
+        TweenInverted(Menu.Button, true)
+        if Menu.CloseOthersOnOpen then
+            self:CloseAll(Menu)
+        end
+    else
+        Menu:Close(self.ToggleDuration)
+        TweenInverted(Menu.Button, false)
+    end
+end
+
 function SideBar:Init()
     UI = Utils:FindFirstChild(script, "SideBarUI"):Clone()
     UI.Parent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "SideBar")
@@ -91,6 +111,7 @@ function SideBar:Init()
     local Buttons: {[string]: Button} = {
         Shop = {
             Render = "rbxassetid://140391842164127",
+            Type = "Button",
             InvertedRender = "rbxassetid://106935872381429",
             MenuModule = PlayerUIModules.Shop,
             LayoutOrder = 0,
@@ -99,6 +120,7 @@ function SideBar:Init()
         },
         Inventory = {
             Render = "rbxassetid://124486892591913",
+            Type = "Button",
             InvertedRender = "rbxassetid://97795375278271",
             MenuModule = PlayerUIModules.Inventory,
             LayoutOrder = 1,
@@ -107,6 +129,7 @@ function SideBar:Init()
         },
         Stats = {
             Render = "rbxassetid://130488549713780",
+            Type = "Button",
             InvertedRender = "rbxassetid://72911514685580",
             MenuModule = PlayerUIModules.StatsMenu,
             LayoutOrder = 3,
@@ -115,6 +138,7 @@ function SideBar:Init()
         },
         Spectate = {
             Render = "rbxassetid://89862280432932",
+            Type = "Button",
             InvertedRender = "rbxassetid://134398825115015",
             MenuModule = PlayerUIModules.Spectate,
             LayoutOrder = 4,
@@ -123,6 +147,7 @@ function SideBar:Init()
         },
         Settings = {
             Render = "rbxassetid://95524701319726",
+            Type = "Button",
             InvertedRender = "rbxassetid://113951492478970",
             MenuModule = PlayerUIModules.Settings,
             LayoutOrder = 5,
@@ -131,16 +156,35 @@ function SideBar:Init()
         },
         Credits = {
             Render = "rbxassetid://82434587437333",
+            Type = "Button",
             InvertedRender = "rbxassetid://113410904986274",
             MenuModule = PlayerUIModules.Credits,
             LayoutOrder = 6,
             CloseOnOtherOpen = true,
             CloseOthersOnOpen = true,
         },
+        Rules = {
+            Render = "rbxassetid://83147016587963",
+            Type = "SmallButton",
+            InvertedRender = "rbxassetid://90249013398230",
+            MenuModule = PlayerUIModules.RulesMenu,
+            LayoutOrder = 7,
+            CloseOnOtherOpen = true,
+            CloseOthersOnOpen = true,
+        },
+        Changelog = {
+            Render = "rbxassetid://82434587437333",
+            Type = "SmallButton",
+            InvertedRender = "rbxassetid://113410904986274",
+            MenuModule = PlayerUIModules.Changelog,
+            LayoutOrder = 8,
+            CloseOnOtherOpen = true,
+            CloseOthersOnOpen = true,
+        },
     }
 
     for name, button: Button in Buttons do
-        local BarButton = BarButtonPrefab:Clone()
+        local BarButton = BarButtonPrefabs[button.Type]:Clone()
         BarButton.Name = name
         BarButton.Icon.Image = button.Render
         BarButton.Button.Image = button.Render
@@ -150,20 +194,9 @@ function SideBar:Init()
         BarButton.LayoutOrder = button.LayoutOrder
         local Menu = require(button.MenuModule)
         Menu.CloseOnOtherOpen = button.CloseOnOtherOpen
+        Menu.CloseOthersOnOpen = button.CloseOthersOnOpen
         BarButton.Button.MouseButton1Click:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-            if not Menu.Opened then
-                if Menu:Open(self.ToggleDuration) == "Prevented" then
-                    return
-                end
-                TweenInverted(BarButton, true)
-                if button.CloseOthersOnOpen then
-                    self:CloseAll(Menu)
-                end
-            else
-                Menu:Close(self.ToggleDuration)
-                TweenInverted(BarButton, false)
-            end
+            self:OpenMenu(Menu)
         end)
         Menu.Button = BarButton
 

@@ -30,6 +30,8 @@ local StunSPPrefab = Utils:FindFirstChild(script, "StunSpawnProtection")
 function PlayerManager:Init()
 	local TimePlayedThreads = {}
 
+	ReplicatedStorage.PlaceVersion.Value = game.PlaceVersion
+
 	Players.PlayerAdded:Connect(function(plr: Player)
 		plr.CharacterAdded:Connect(function(char)
 			AntiFly:_SetupCharacter(plr, char)

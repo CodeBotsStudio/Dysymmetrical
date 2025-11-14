@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
@@ -11,6 +10,7 @@ local LocalPlayer = Players.LocalPlayer
 local CreditsMenu = {
     Enabled = true,
     UIInstance = nil,
+    Opened = false,
 }
 
 type Credit = {
@@ -24,13 +24,13 @@ local Credits: {{ Name: string, Credits: {Credit} }} = {
         Name = "Dysymmetrical",
         Credits = {
             {
-                Render = "rbxassetid://74795618506491",
+                Render = "rbxassetid://112215528635901",
                 DisplayName = "Dyscarn",
                 Username = "@LrgeAlvaro8882",
                 Description = "Made the engine used in this game: Dysymmetrical.",
             },
             {
-                Render = "rbxassetid://74795618506491",
+                Render = "",
                 DisplayName = "heromax149807",
                 Username = "@heromax149807",
                 Description = "Made the original engine art like the sidebar icons, the buttons, etc.",

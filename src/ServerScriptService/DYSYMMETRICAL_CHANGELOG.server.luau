@@ -68,6 +68,11 @@
     ------12/11/2025------
     * Added effect tooltips when checking a `More Info` page (MAKE SURE TO GO INTO `ReplicatedStorage/Classes/Tooltip` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------14/11/2025------
+    * Added game changelog (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Changelog`, `ServerScriptService/Managers/SaveManager/PlayerData/Misc/LastSeenLog` & `ReplicatedStorage/PlaceVersion` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    * Added rules menu (TBF) (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Rules` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    * Added smaller sidebar icons (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/SideBar` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()
