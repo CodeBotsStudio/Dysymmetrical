@@ -188,6 +188,10 @@ export type Killer = {
             WalkAnimation: string,
             --- The animation that'll play on a running state.
             RunAnimation: string,
+            --- TODO: The animation that'll play on stun.
+            Stunned: string?,
+            --- TODO: The animation that'll play before a stun ends.
+            StunnedEnd: string?,
             --- The animation that'll play when slashing.
             SlashAnimation: string?,
             --- The animation that the killer will have in the intro animation.
