@@ -117,7 +117,7 @@ function Changelog:Init()
 
     local Content = UI.Content
     local Top = Content.Top
-    Top.Title.Text = CurrentChangelog.MenuTitle
+    Top.Title.Text = CurrentChangelog.UpdateTitle
     Top.Thumbnail.Image = CurrentChangelog.UpdateThumbnailID
     Top.Date.Text = CurrentChangelog.UpdateDate
 
