@@ -11,6 +11,13 @@ local LocalPlayer = Players.LocalPlayer
 local AbilityGUI = require(ReplicatedStorage.Classes.Ability.AbilityGUI)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
+local AnimLoadPrevented = {
+    "IdleAnimation",
+    "WalkAnimation",
+    "RunAnimation",
+    "SlashAnimation",
+}
+
 function CharManager:Init()
     LocalPlayer.CharacterAdded:Connect(function(Char: Model)
         if Utils:FindFirstChild(Char, "Role").Value ~= "Spectator" then
@@ -30,7 +37,19 @@ function CharManager:_InitCharacterAbilities(Module)
             Ability:Init(Module, LocalPlayer)
         end
     end
-    Utils:Print(CharacterAbilities.Abilities)
+    -- Utils:Print(CharacterAbilities.Abilities)
+
+    CharacterAbilities.Animations = {}
+
+    for name, anim in Module.Config.AnimationIDs do
+        if table.find(AnimLoadPrevented, name) then
+            continue
+        end
+
+        CharacterAbilities.Animations[name] = Utils:LoadAnimationFromID(LocalPlayer.Character, anim, false)
+    end
+
+    return CharacterAbilities
 end
 
 --- Loads a specific character's client stuff. The character itself is spawned in in `ServerScriptService.Managers.ServerCharacterManager`.
@@ -54,7 +73,7 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     Sprinting:ReloadAnimation(CharModule.Config.AnimationIDs.RunAnimation)
     Sprinting.SprintMultiplier = CharModule.GameplayConfig.SprintSpeedMultiplier
 
-    self:_InitCharacterAbilities(CharModule)
+    local CharacterAbilities = self:_InitCharacterAbilities(CharModule)
 
     if charType == "Killer" then
         local Slash = require(Char.PlayerAbilities.CharacterAbilities).Abilities.Slash
@@ -65,6 +84,20 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
         LocalPlayer:Kick("https://www.youtube.com/watch?v=L8XbI9aJOXk")
         return
     end
+
+    Char.Effects.ChildAdded:Connect(function(newChild)
+        if newChild.Name == "Stunned" then
+            if CharacterAbilities.Animations.Stunned then
+                CharacterAbilities.Animations.Stunned:Play(0)
+            end
+            task.wait(0.2)
+            if CharacterAbilities.Animations.StunnedEnd then
+                task.delay(newChild:GetAttribute("Duration") - 0.2 - CharacterAbilities.Animations.StunnedEnd.Length, function()
+                    CharacterAbilities.Animations.StunnedEnd:Play(0)
+                end)
+            end
+        end
+    end)
 
     AbilityGUI:InitGUI()
 
