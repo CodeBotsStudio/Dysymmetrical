@@ -94,6 +94,12 @@ function MapManager:GetRandomMap(): Model | Folder
         Lighting:SetCustomLighting(MapInstance.Lighting)
     end
 
+    if not MapInstance:FindFirstChild("Ingame") then
+        local Ingame = Instance.new("Folder")
+        Ingame.Name = "Ingame"
+        Ingame.Parent = MapInstance
+    end
+
     if MapInstance:FindFirstChild("Behaviour") then
         task.spawn(function()
             Network:FireAllClientConnection("SetupMapBehaviour", "REMOTE_EVENT")

@@ -100,11 +100,11 @@ function Projectile.New(ProjectileSettings: Projectile): {
     ProjectileInstance.Model = ProjectileSettings.Model:Clone()
     ProjectileInstance.Model.Parent = workspace.Map and workspace.Map.Ingame or workspace.TempObjectFolders
 
-    ProjectileInstance.Hitbox = Hitbox:New(ProjectileSettings.SourcePlayer, ProjectileSettings.HitboxSettings)
-
     ProjectileSettings.HitboxSettings.CFrame = ProjectileSettings.HitboxSettings.CFrame or function(): CFrame
         return ProjectileInstance.Model.CFrame or ProjectileInstance.Model.WorldPivot
     end
+
+    ProjectileInstance.Hitbox = Hitbox:New(ProjectileSettings.SourcePlayer, ProjectileSettings.HitboxSettings)
 
     local Cancel = false
     function ProjectileInstance:Destroy()
@@ -117,8 +117,8 @@ function Projectile.New(ProjectileSettings: Projectile): {
     end
 
     if ProjectileSettings.ThrowType == "Mouse" then
-        local Direction = (Utils:GetPlayerMousePosition(ProjectileSettings.SourcePlayer, false) - ProjectileSettings.StartingCFrame.Position).Unit
-        ProjectileSettings.StartingCFrame = CFrame.new(ProjectileSettings.StartingCFrame.Position) * CFrame.fromEulerAnglesXYZ(Direction.X, Direction.Y, Direction.Z)
+        local Direction = Utils:GetPlayerMousePosition(ProjectileSettings.SourcePlayer, false)
+        ProjectileSettings.StartingCFrame = CFrame.lookAt(ProjectileSettings.StartingCFrame.Position, Direction)
     end
 
     if ProjectileInstance.Model:IsA("Model") then
@@ -134,35 +134,32 @@ function Projectile.New(ProjectileSettings: Projectile): {
         CFrame = Goal,
     }):Play()
 
+    local DestroyParams = RaycastParams.new()
+    DestroyParams.FilterType = Enum.RaycastFilterType.Exclude
+    DestroyParams.FilterDescendantsInstances = {ProjectileSettings.SourcePlayer.Character}
+    DestroyParams.CollisionGroup = "KillerPassthrough"
+    DestroyParams.RespectCanCollide = true
+
     if ProjectileSettings.DestroyOnCollision then
         task.spawn(function()
             for _ = 0, ProjectileSettings.Lifetime, 0.1 do
-                if Cancel or not ProjectileInstance.Model then
+                if Cancel or not ProjectileInstance.Model or not ProjectileInstance.Model:FindFirstChild("CollisionBox") then
                     break
                 end
 
-                local TouchingParts = workspace:GetPartsInPart(ProjectileInstance.Model.CollisionBox)
-                if #TouchingParts > 0 then
-                    local found = false
-
-                    for _, i in TouchingParts do
-                        if (not ProjectileSettings.SourcePlayer.Character or not i:IsDescendantOf(ProjectileSettings.SourcePlayer.Character)) and i.CanCollide and i.CollisionGroup ~= "KillerPassthrough" then
-                            found = true
-                            task.delay(0.04, function()
-                                if ProjectileSettings.OnHitDestroy then
-                                    ProjectileSettings:OnHitDestroy()
-                                end
-                                ProjectileInstance:Destroy()
-                            end)
-                            break
+                local Touching = workspace:Shapecast(ProjectileInstance.Model.CollisionBox, ProjectileInstance.Model.CollisionBox.CFrame.LookVector, DestroyParams)
+                if Touching and Touching.Instance then
+                    task.delay(0.04, function()
+                        if ProjectileSettings.OnHitDestroy then
+                            ProjectileSettings:OnHitDestroy()
                         end
-                    end
-                    if found then
-                        break
-                    end
+                        ProjectileInstance:Destroy()
+                    end)
+                    
+                    break
                 end
 
-                task.wait(0.1)
+                task.wait()
             end
         end)
     end

@@ -147,7 +147,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
 
                 Debris:AddItem(Part, 0.75)
 
-                if Config.PredictVelocity then
+                if Config.PredictVelocity and not Config.IsProjectile then
                     Utils:Print(SourcePlayer:GetNetworkPing())
                     local PingDivider = 6.5 - math.clamp(SourcePlayer:GetNetworkPing(), 0, 3)
                     local PingOffset = Part.CFrame:VectorToObjectSpace(Root.AssemblyLinearVelocity) / PingDivider
