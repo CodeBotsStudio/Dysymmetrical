@@ -382,4 +382,13 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
     }
 end
 
+--- Creates an ability with the settings specified in `Props`.
+--- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
+function AbilityType:CreateAbility(Props: Ability): Ability
+    local Ability = self:GetDefaultAbilitySettings()
+    Utils:DeepTableOverwrite(Ability, Props)
+
+    return Ability
+end
+
 return AbilityType

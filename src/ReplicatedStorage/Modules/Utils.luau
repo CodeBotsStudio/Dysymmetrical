@@ -8,8 +8,6 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Rand = Random.new()
 
-local Achievements = require(ReplicatedStorage.Assets.Achievements)
-local Effect = require(ReplicatedStorage.Classes.Effect)
 local Network = require(ReplicatedStorage.Modules.Network)
 
 local Utils = {
@@ -657,7 +655,7 @@ end
 
 --- Gets an effect's module.
 --- Also supports subfolders in `ReplicatedStorage.Effects`.
-function Utils:GetEffectModule(name: string, subfolder: string?, module: boolean?): Effect.Effect
+function Utils:GetEffectModule(name: string, subfolder: string?, module: boolean?)
     if module == nil then
         module = false
     end
@@ -985,10 +983,10 @@ function Utils:MapToRange(t: number, a: number, b: number, c: number, d: number)
 end
 
 --- Returns an achievement's data table through an `AchievementGroup.AchievementName` path.
-function Utils:GetAchievementData(path: string): Achievements.Achievement
+function Utils:GetAchievementData(path: string)
     local steps = self:SplitStringPath(path)
     
-    local Achievement = Achievements
+    local Achievement = require(ReplicatedStorage.Assets.Achievements)
     for _, step in steps do
         Achievement = Achievement[step]
     end
@@ -1076,6 +1074,25 @@ function Utils:FindInDictionary<T>(Dictionary: T & {}, Item: T, Type: "Key" | "V
     end
 
     return
+end
+
+--- Replaces or creates any values from `Source` into `Target`.
+--- If you pass in a table variable, you don't have to get anything as it'll be replaced in that variable directly.
+function Utils:DeepTableOverwrite<T, B>(Target: (T | B) & {}, Source: (T | B) & {})
+    if not Target or not Source then
+        return
+    end
+
+	for key, value in Source do
+		if typeof(value) == "table" then
+			if typeof(Target[key]) ~= "table" then
+				Target[key] = {}
+			end
+			self:DeepTableOverwrite(Target[key], value)
+            continue
+		end
+		Target[key] = value
+	end
 end
 
 return Utils

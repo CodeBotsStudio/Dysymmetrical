@@ -1,5 +1,10 @@
 --!nocheck
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local KillerIntro = require(script.Parent.KillerIntro)
+
 local CharTypes = {}
 
 --- Type used for survivor characters.
@@ -142,6 +147,15 @@ function CharTypes:GetDefaultSurvivorSettings(): Survivor
         OnInit = nil,
         OnHit = nil,
     }
+end
+
+--- Creates a survivor with the settings specified in `Props`.
+--- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
+function CharTypes:CreateSurvivor(Props: Survivor): Survivor
+    local Survivor: Survivor = self:GetDefaultSurvivorSettings()
+    Utils:DeepTableOverwrite(Survivor, Props)
+
+    return Survivor
 end
 
 --- Type used for killer characters.
@@ -380,6 +394,15 @@ function CharTypes:GetDefaultKillerSettings(): Killer
         OnInit = nil,
         OnHit = nil,
     }
+end
+
+--- Creates a killer with the settings specified in `Props`.
+--- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
+function CharTypes:CreateKiller(Props: Killer): Killer
+    local Killer: Killer = self:GetDefaultKillerSettings()
+    Utils:DeepTableOverwrite(Killer, Props)
+
+    return Killer
 end
 
 return CharTypes
