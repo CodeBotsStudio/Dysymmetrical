@@ -2,12 +2,12 @@ local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Number = require("../../StarterPlayerScripts/UI/Settings/Number")
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local SaveManager = {
 	PlayerDatas = {},
+	PlayerLeaderstatConns = {},
 }
 
 local Storage
@@ -22,9 +22,7 @@ repeat
     end)
 until Storage or Attempt > 50
 
-
 local StoreKey = "driftwooding77" -- PLACE YOUR DATASTORE KEY HERE
-
 
 --- Organizes a hiearchy of instances and valueobjects into a table
 local function ConvertInstanceTreeToTable(TargetInstance: Instance, Depth: number?): ({[string]: {any}}) -- Can return a table of string-value pairs which can be arbitrarily deep, dont quite know how to define that for the typechecker, so just do your best (as always!).
@@ -57,7 +55,6 @@ local function ConvertInstanceTreeToTable(TargetInstance: Instance, Depth: numbe
 	return tree
 end
 
-
 --- Sets up save data handlers, listens for players joining and leaving to read, write, retrieve, and store save data.
 function SaveManager:Init()
 
@@ -67,7 +64,6 @@ function SaveManager:Init()
         -- Grab the player's data from the datastore, place it into a table for later use 
 		self.PlayerDatas[Player.UserId] = self:Load(Player)
         local ThisPlayerData = self.PlayerDatas[Player.UserId] -- Gets its own variable to make things easier to read. Done in this way so this variable points to the entry in the table and not to the data itself.
-
 
         -- Go through all achievements, set them up in folders for the player in question.
 		for AchievementGroupCodeName, AchievementGroup in Achievements do
@@ -99,7 +95,6 @@ function SaveManager:Init()
 		end
 	end
 
-
     -- Load a player's data when they join, and additionally retrieve and load all players that may have been in the game before this runs. Feels like that'd be rare, but I suppose one never knows...
 	Players.PlayerAdded:Connect(LoadPlayer)
 	for _, i in Players:GetPlayers() do
@@ -108,6 +103,9 @@ function SaveManager:Init()
 
     -- Save a player's data when they leave the game.
 	Players.PlayerRemoving:Connect(function(Player: Player)
+		if self.PlayerLeaderstatConns[Player.UserId] then
+			self.PlayerLeaderstatConns[Player.UserId]:Disconnect()
+		end
 		self:Save(Player, self.PlayerDatas[Player.UserId])
 	end)
 
@@ -120,36 +118,27 @@ function SaveManager:Init()
 
 end
 
-
 --- Sets up a display leaderstat folder for any data that has the `DisplayInLeaderstats` attribute.
 function SaveManager:_SetupLeaderStats(DataFolder, parent) --just for display, won't save
-
 	for _, data in DataFolder:GetDescendants() do
-
-		if data:IsA("ValueBase") and data:GetAttribute("DisplayInLeaderstats") == true then
-
+		if data:IsA("ValueBase") and data:GetAttribute("DisplayInLeaderstats") then
 			local LeaderStat = Instance.new("IntValue")
 			LeaderStat.Name = data.Name
 			LeaderStat.Value = data.Value
 			LeaderStat.Parent = parent
 
-			data.Changed:Connect(function()
+			self.PlayerLeaderstatConns[DataFolder.Parent.UserId] = data.Changed:Connect(function()
 				if LeaderStat then
 					LeaderStat.Value = data.Value
 				end
 			end)
-
-            -- TODO: DISCONNECT THESE CHANGED LISTENERS WHEN THE ASSOCIATED PLAYER LEAVES, OTHERWISE BECOMES A MASSIVE MEM LEAK
-
 		end
 
 	end
 end
 
-
 --- Attempt to validate save data and/or salvage it if needed.
 function SaveManager:_CheckSaveIntegrity(DataFolder, parent)
-
     -- If the player has an emote that doesn't exist, destroy it.
 	for _index, emote in DataFolder.Equipped.Emotes:GetChildren() do
 		if Utils:GetEmoteModule(emote.Name) == nil then
@@ -215,10 +204,8 @@ function SaveManager:_CheckSaveIntegrity(DataFolder, parent)
 	end
 end
 
-
 --- Loads a player's savedata and generates a heirarchy of folders and valuebase objects for storing, reading, and writing to and from it in-game.
 function SaveManager:Load(Player: Player): Folder
-
     -- Retrieve playerdata
     local PlayerData
     if Storage then
@@ -234,9 +221,8 @@ function SaveManager:Load(Player: Player): Folder
         until PlayerData or Attempt > 50 
 
     else    
-        warn("ServerScriptService/Managers/SaveManager: WARNING – ENTIRE DATASTORE failed to load. Handling playerdata from here is extremely hazardous. Here be dragons!")
+        warn("[ServerScriptService/Managers/SaveManager:Load()]: WARNING – ENTIRE DATASTORE failed to load. Handling player data from here is extremely hazardous. Here be dragons!")
     end
-
 
 	local ClonedData = script.PlayerData:Clone()
 
@@ -436,7 +422,7 @@ function SaveManager:Save(Player: Player, Data: Folder)
 	end
 
     -- Give a readout if needed.
-	if workspace:GetAttribute("DebugAllowed") == true then
+	if workspace:GetAttribute("DebugAllowed") then
 		print("Saving data for: " .. Player.Name, SaveFile)
 	end
 
@@ -454,7 +440,8 @@ function SaveManager:Save(Player: Player, Data: Folder)
     
     until success or Attempt > 99
 
-    -- TODO: Some kind of handling for if the player's data cant be saved, to prevent total corruption of savedata. Attempt cap is high to try and mitigate this, but it'd still be good practice.
+    -- Some kind of handling for if the player's data cant be saved would be epic, to prevent total corruption of savedata. Attempt cap is high to try and mitigate this, but it'd still be good practice.
+	-- i believe that if it fails, the previous data remains so it doesn't get corrupted; i'll be unmarking this as a todo but correct me if i'm wrong
 
 end
 

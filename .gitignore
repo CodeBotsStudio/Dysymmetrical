@@ -7,6 +7,7 @@ sourcemap.json
 *.lock
 .stylua.toml
 selene.toml
+roblox.yml
 
 .VSCodeCounter/
 .vscode
