@@ -6,11 +6,7 @@
 
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
-      "$path": "src/ReplicatedStorage",
-
-      "Packages": {
-        "$path": "Packages"
-      }
+      "$path": "src/ReplicatedStorage"
     },
 
     "ReplicatedFirst": {
