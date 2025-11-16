@@ -304,14 +304,25 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                                         if not ExecutionAnim then
 
-                                            if Config.Knockback >= 15 then
-                                                HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                            elseif Config.Knockback > 0 then
-                                                local BodyVel = Instance.new("BodyVelocity")
-                                                BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
-                                                BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                                BodyVel.Parent = HRoot
-                                                Debris:AddItem(BodyVel, 0.05)
+                                            if Config.Knockback then
+                                                if Config.Knockback >= 15 then
+                                                    HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
+                                                elseif Config.Knockback > 0 then
+                                                    local Att = Instance.new("Attachment")
+                                                    Att.Name = "LVAtt"
+                                                    Att.Parent = HRoot
+
+                                                    local LinearVel = Instance.new("LinearVelocity")
+                                                    LinearVel.MaxForce = 16000
+                                                    LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
+                                                    LinearVel.LineVelocity = Config.Knockback * 10
+                                                    LinearVel.LineDirection = CheckPart.CFrame.LookVector
+                                                    LinearVel.Attachment0 = Att
+                                                    LinearVel.Parent = HRoot
+
+                                                    Debris:AddItem(Att, 0.05)
+                                                    Debris:AddItem(LinearVel, 0.05)
+                                                end
                                             end
                                             Hum.Health = 0
 
@@ -368,14 +379,25 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         end
                                     end)
                                 else
-                                    if Config.Knockback >= 15 then
-                                        HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                    elseif Config.Knockback > 0 then
-                                        local BodyVel = Instance.new("BodyVelocity")
-                                        BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
-                                        BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                        BodyVel.Parent = HRoot
-                                        Debris:AddItem(BodyVel, 0.05)
+                                    if Config.Knockback then
+                                        if Config.Knockback >= 15 then
+                                            HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
+                                        elseif Config.Knockback > 0 then
+                                            local Att = Instance.new("Attachment")
+                                            Att.Name = "LVAtt"
+                                            Att.Parent = HRoot
+
+                                            local LinearVel = Instance.new("LinearVelocity")
+                                            LinearVel.MaxForce = 16000
+                                            LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
+                                            LinearVel.LineVelocity = Config.Knockback * 10
+                                            LinearVel.LineDirection = CheckPart.CFrame.LookVector
+                                            LinearVel.Attachment0 = Att
+                                            LinearVel.Parent = HRoot
+
+                                            Debris:AddItem(Att, 0.05)
+                                            Debris:AddItem(LinearVel, 0.05)
+                                        end
                                     end
                                     Hum.Health = 0
                                 end
@@ -385,15 +407,25 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                         end
 
-                        -- TODO: Replace this with something not as unstable as BodyVelocity. -itrid
-                        if Config.Knockback >= 15 then
-                            HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                        elseif Config.Knockback > 0 then
-                            local BodyVel = Instance.new("BodyVelocity")
-                            BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
-                            BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                            BodyVel.Parent = HRoot
-                            Debris:AddItem(BodyVel, 0.05)
+                        if Config.Knockback then
+                            if Config.Knockback >= 15 then
+                                HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
+                            elseif Config.Knockback > 0 then
+                                local Att = Instance.new("Attachment")
+                                Att.Name = "LVAtt"
+                                Att.Parent = HRoot
+
+                                local LinearVel = Instance.new("LinearVelocity")
+                                LinearVel.MaxForce = 16000
+                                LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
+                                LinearVel.LineVelocity = Config.Knockback * 10
+                                LinearVel.LineDirection = CheckPart.CFrame.LookVector
+                                LinearVel.Attachment0 = Att
+                                LinearVel.Parent = HRoot
+
+                                Debris:AddItem(Att, 0.05)
+                                Debris:AddItem(LinearVel, 0.05)
+                            end
                         end
 
                         if Damage > 0 then

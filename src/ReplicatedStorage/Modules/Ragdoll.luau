@@ -144,7 +144,6 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
             end
 		end
 		for index, i in pairs({
-			"BodyVelocity",
 			"LinearVelocity",
 			"Highlight"
 		}) do

@@ -90,14 +90,22 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 		if knockbackMagnitude >= 15 then
 			HRP.AssemblyLinearVelocity = knockbackDirection * knockbackMagnitude * 10
 			
-		--using bodyvel generally works better with less than 15 magnitude
+		--using linearvel generally works better with less than 15 magnitude
 		elseif knockbackMagnitude > 0 then
-			local BodyVel = Instance.new("BodyVelocity")
-			BodyVel.Name = "Knockback"
-			BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
-			BodyVel.Velocity = knockbackDirection * knockbackMagnitude * 10
-			BodyVel.Parent = HRP
-			Debris:AddItem(BodyVel, 0.05)
+			local Att = Instance.new("Attachment")
+            Att.Name = "LVAtt"
+            Att.Parent = HRP
+
+            local LinearVel = Instance.new("LinearVelocity")
+            LinearVel.MaxForce = 16000
+            LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
+            LinearVel.LineVelocity = knockbackMagnitude * 10
+            LinearVel.LineDirection = knockbackDirection
+            LinearVel.Attachment0 = Att
+            LinearVel.Parent = HRP
+
+            Debris:AddItem(Att, 0.05)
+            Debris:AddItem(LinearVel, 0.05)
 		end
 	end
 

@@ -44,9 +44,9 @@ export type Survivor = {
             WalkAnimation: string,
             --- The animation that'll play on a running state.
             RunAnimation: string,
-            --- TODO: The animation that'll play on stun.
+            --- The animation that'll play on stun.
             Stunned: string?,
-            --- TODO: The animation that'll play before a stun ends.
+            --- The animation that'll play before a stun ends.
             StunnedEnd: string?,
         },
 
@@ -201,9 +201,9 @@ export type Killer = {
             WalkAnimation: string,
             --- The animation that'll play on a running state.
             RunAnimation: string,
-            --- TODO: The animation that'll play on stun.
+            --- The animation that'll play on stun.
             Stunned: string?,
-            --- TODO: The animation that'll play before a stun ends.
+            --- The animation that'll play before a stun ends.
             StunnedEnd: string?,
             --- The animation that'll play when slashing.
             SlashAnimation: string?,
