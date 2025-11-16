@@ -118,6 +118,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
     RayParams.FilterType = Enum.RaycastFilterType.Exclude
     RayParams.FilterDescendantsInstances = {Char}
 
+    local Conns
+
     local Props = {
         HumanoidsHit = {},
         Creator = SourcePlayer,
@@ -125,37 +127,53 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
         TimePast = 0,
         Cancelled = false,
         IsProjectile = Config.IsProjectile,
+        Cancel = function(p)
+            if p.Cancelled then
+                return
+            end
+
+            p.Cancelled = true
+            for _, Conn in Conns do
+                Conn:Disconnect()
+            end
+        end,
     }
-    Props.Cancel = function(p)
-        p.Cancelled = true
-    end
 
     local Effects = Char.Effects
-    local function CanContinue()
-        if not Char or not Char.Parent then
-            return false
-        end
 
-        if not Root then
-            return false
-        end
+    Conns = {
+        Effects.ChildAdded:Connect(function(newChild)
+            if newChild.Name == "Stunned" then
+                Props:Cancel()
+            end
+        end),
 
-        if Props.TimePast >= Config.Time then
-            return false
-        end
+        Char.AncestryChanged:Connect(function(_, newParent)
+            if newParent == nil then
+                Props:Cancel()
+            end
+        end),
 
-        if Props.Cancelled then
-            return false
-        end
+        Char.Destroying:Connect(function()
+            Props:Cancel()
+        end),
 
-        if Effects:FindFirstChild("Stunned") then
-            return false
-        end
+        Root.AncestryChanged:Connect(function(_, newParent)
+            if newParent == nil then
+                Props:Cancel()
+            end
+        end),
 
-        return true
-    end
+        Root.Destroying:Connect(function()
+            Props:Cancel()
+        end)
+    }
 
     task.defer(function()
+        if Effects:FindFirstChild("Stunned") then
+            return
+        end
+
         -- caching part and cloning it instead of creating it every time
         local Part = Instance.new("Part")
         Part.Name = SourcePlayer.Name.."Hitbox"
@@ -167,7 +185,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
         Part.Anchored = true
         Part.Size = Config.Size
 
-        while CanContinue() do
+        while not Props.Cancelled and Props.TimePast < Config.Time do
             local Damaged = Props.HumanoidsHit
 
             if #Damaged <= 0 or Config.HitMultiple then
@@ -395,6 +413,9 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
         end
 
         Part:Destroy()
+        for _, Conn in Conns do
+            Conn:Disconnect()
+        end
         
         self:_RunCallback(Config.Connections, "Ended")
     end)
