@@ -141,7 +141,7 @@ function Projectile.New(ProjectileSettings: Projectile): {
     DestroyParams.RespectCanCollide = true
 
     if ProjectileSettings.DestroyOnCollision then
-        task.spawn(function()
+        task.defer(function() -- Use task.defer here to avoid conflicts with wedging things into the task scheduler -itrid
             for _ = 0, ProjectileSettings.Lifetime, 0.1 do
                 if Cancel or not ProjectileInstance.Model or not ProjectileInstance.Model:FindFirstChild("CollisionBox") then
                     break

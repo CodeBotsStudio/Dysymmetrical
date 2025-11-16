@@ -87,6 +87,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
     local Root = Char and Char.PrimaryPart
 
     if not Root then
+        -- Figured some feedback on this would be nice, I can see this accidentally being tripped with custom player models for a killer (maybe???) -itrid
+        warn("[ReplicatedStorage/Classes/Hitbox:New]: Notice – Hitbox creation halted, due to no primarypart being present in the character of player '"..SourcePlayer.Name.."'.")
         return {}
     end
 
@@ -128,33 +130,61 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
         p.Cancelled = true
     end
 
+    local Effects = Char.Effects
+    local function CanContinue()
+        if not Char or not Char.Parent then
+            return false
+        end
+
+        if not Root then
+            return false
+        end
+
+        if Props.TimePast >= Config.Time then
+            return false
+        end
+
+        if Props.Cancelled then
+            return false
+        end
+
+        if Effects:FindFirstChild("Stunned") then
+            return false
+        end
+
+        return true
+    end
+
     task.defer(function()
-        while Char and Char.Parent and Root and Props.TimePast < Config.Time and not Props.Cancelled and not Char.Effects:FindFirstChild("Stunned") do
+        -- caching part and cloning it instead of creating it every time
+        local Part = Instance.new("Part")
+        Part.Name = SourcePlayer.Name.."Hitbox"
+        Part.Transparency = 1
+        Part.CanCollide = false
+        Part.CanQuery = false
+        Part.CanTouch = false
+        Part.CastShadow = false
+        Part.Anchored = true
+        Part.Size = Config.Size
+
+        while CanContinue() do
             local Damaged = Props.HumanoidsHit
 
             if #Damaged <= 0 or Config.HitMultiple then
-                local Part = Instance.new("Part")
-                Part.Name = SourcePlayer.Name.."Hitbox"
-                Part.Transparency = 1
-                Part.CanCollide = false
-                Part.CanQuery = false
-                Part.CanTouch = false
-                Part.CastShadow = false
-                Part.Anchored = true
-                Part.Size = Config.Size
-                Part.CFrame = (Config.CFrame and (typeof(Config.CFrame) == "function" and Config.CFrame() or Config.CFrame) or Root.CFrame) * Config.CFrameOffset
-                Part.Parent = HitboxFolder
+                local CheckPart = Part:Clone()
+                CheckPart.CFrame = (Config.CFrame and (typeof(Config.CFrame) == "function" and Config.CFrame() or Config.CFrame) or Root.CFrame) * Config.CFrameOffset
+                CheckPart.Parent = HitboxFolder
 
-                Debris:AddItem(Part, 0.75)
+                Debris:AddItem(CheckPart, 0.75)
 
                 if Config.PredictVelocity and not Config.IsProjectile then
-                    Utils:Print(SourcePlayer:GetNetworkPing())
+                    -- Utils:Print(SourcePlayer:GetNetworkPing())
                     local PingDivider = 6.5 - math.clamp(SourcePlayer:GetNetworkPing(), 0, 3)
-                    local PingOffset = Part.CFrame:VectorToObjectSpace(Root.AssemblyLinearVelocity) / PingDivider
-                    Part.CFrame *= CFrame.new(PingOffset)
+                    local PingOffset = CheckPart.CFrame:VectorToObjectSpace(Root.AssemblyLinearVelocity) / PingDivider
+                    CheckPart.CFrame *= CFrame.new(PingOffset)
                 end
 
-                Damaged = workspace:GetPartsInPart(Part, Over)
+                Damaged = workspace:GetPartsInPart(CheckPart, Over)
 
                 table.sort(Damaged, function(a, b)
                     return (a.Parent:GetAttribute("HitboxPriority") or 1) > (b.Parent:GetAttribute("HitboxPriority") or 1)
@@ -171,7 +201,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
                                 Root.CFrame.LookVector,
                                 CFrame.lookAt(Root.Position, i.Position).LookVector,
                             } do
-                                local cast = workspace:Raycast(Root.Position, o * Part.Size.Z, RayParams)
+                                local cast = workspace:Raycast(Root.Position, o * CheckPart.Size.Z, RayParams)
                                 local Inst = cast and cast.Instance
                                 if Inst and not Inst.Parent:FindFirstChildOfClass("Humanoid") and Inst.Transparency ~= 1 and not Inst:GetAttribute("Hitbox") then
                                     index += 1
@@ -191,7 +221,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
                     end
                 end
 
-                Part.Color = #Hit > 0 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+                CheckPart.Color = #Hit > 0 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 
                 for Index, Hum in Hit do
                     local P = Hum.Parent
@@ -245,7 +275,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
                                 local ExecutionAnimsAvailable = KillerModule.GameplayConfig.Cache.Animations.Execution
 
                                 if ExecutionAnimsAvailable then
-                                    task.spawn(function()
+                                    task.defer(function()
                                         local ExecutionAnim = KilledSurvivor.Skin and ExecutionAnimsAvailable[KilledSurvivor.Skin..KilledSurvivor.Name] or ExecutionAnimsAvailable[KilledSurvivor.Name]
                                         if not ExecutionAnim then
                                             ExecutionAnim = ExecutionAnimsAvailable["Default"]
@@ -254,11 +284,11 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
                                         if not ExecutionAnim then
 
                                             if Config.Knockback >= 15 then
-                                                HRoot.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                                                HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                                             elseif Config.Knockback > 0 then
                                                 local BodyVel = Instance.new("BodyVelocity")
-                                                BodyVel.MaxForce = Vector3.new(1e999, 1e999, 1e999)
-                                                BodyVel.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                                                BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
+                                                BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                                                 BodyVel.Parent = HRoot
                                                 Debris:AddItem(BodyVel, 0.05)
                                             end
@@ -318,11 +348,11 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
                                     end)
                                 else
                                     if Config.Knockback >= 15 then
-                                        HRoot.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                                        HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                                     elseif Config.Knockback > 0 then
                                         local BodyVel = Instance.new("BodyVelocity")
-                                        BodyVel.MaxForce = Vector3.new(1e999, 1e999, 1e999)
-                                        BodyVel.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                                        BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
+                                        BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                                         BodyVel.Parent = HRoot
                                         Debris:AddItem(BodyVel, 0.05)
                                     end
@@ -334,12 +364,13 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
 
                         end
 
+                        -- TODO: Replace this with something not as unstable as BodyVelocity. -itrid
                         if Config.Knockback >= 15 then
-                            HRoot.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                            HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                         elseif Config.Knockback > 0 then
                             local BodyVel = Instance.new("BodyVelocity")
-                            BodyVel.MaxForce = Vector3.new(1e999, 1e999, 1e999)
-                            BodyVel.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                            BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
+                            BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                             BodyVel.Parent = HRoot
                             Debris:AddItem(BodyVel, 0.05)
                         end
@@ -362,6 +393,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
                 break
             end
         end
+
+        Part:Destroy()
         
         self:_RunCallback(Config.Connections, "Ended")
     end)

@@ -94,7 +94,7 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 		elseif knockbackMagnitude > 0 then
 			local BodyVel = Instance.new("BodyVelocity")
 			BodyVel.Name = "Knockback"
-			BodyVel.MaxForce = Vector3.new(1e999, 1e999, 1e999)
+			BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
 			BodyVel.Velocity = knockbackDirection * knockbackMagnitude * 10
 			BodyVel.Parent = HRP
 			Debris:AddItem(BodyVel, 0.05)
