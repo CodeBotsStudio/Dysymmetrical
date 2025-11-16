@@ -42,9 +42,7 @@ export type Projectile = {
     OnDestroy: (self: any) -> ()?,
 }
 
---- Creates a new projectile instance.
---- Remember to call this function with a `.` instead of a `:`.
-function Projectile.New(ProjectileSettings: Projectile): {
+export type ProjectileDetails = {
     --- The model of the projectile.
     Model: Model?,
     --- The hitbox associated to this projectile.
@@ -67,6 +65,10 @@ function Projectile.New(ProjectileSettings: Projectile): {
     Destroy: (self: any) -> ()?,
 }
 
+--- Creates a new projectile instance.
+--- Remember to call this function with a `.` instead of a `:`.
+function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
+    --i love writing server shit and putting it in ReplicatedStorage :]
     if not RunService:IsServer() then
         return {}
     end

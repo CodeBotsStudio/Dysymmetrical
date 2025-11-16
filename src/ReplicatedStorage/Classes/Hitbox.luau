@@ -55,8 +55,7 @@ export type HitboxSettings = {
     OnHit: (hum: Humanoid) -> ()?,
 }
 
---- Creates a new hitbox, assigning it to a specific player.
-function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
+export type HitboxDetails = {
     --- The humanoids the hitbox has already hit.
     HumanoidsHit: {Humanoid}?,
     --- The player that created this hitbox.
@@ -71,6 +70,10 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): {
     --- Call this with a `:`.
     Cancel: (any) -> ()?,
 }
+
+--- Creates a new hitbox, assigning it to a specific player.
+function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
+    --i love writing server shit and putting it in ReplicatedStorage :]
     if not RunService:IsServer() then
         return {}
     end
