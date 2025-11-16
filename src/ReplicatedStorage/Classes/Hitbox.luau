@@ -124,6 +124,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
     local Over = OverlapParams.new()
     Over.FilterType = Enum.RaycastFilterType.Exclude
     Over.FilterDescendantsInstances = {Char}
+    Over.CollisionGroup = "Attackable"
 
     -- Make a new raycast filter
     local RayParams = RaycastParams.new()
