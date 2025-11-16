@@ -212,7 +212,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         -- and if they're either not on the same team as the user, or if the hitbox has friendly fire enabled.
                     if Humanoid and Humanoid.Health > 0 and not Humanoid.Parent:GetAttribute("Invincible") and not Humanoid.Parent:GetAttribute("Executing") and not Damaged[Humanoid] and (workspace:GetAttribute("FriendlyFire") or Config.FriendlyFire or collidedpart.Parent.Role.Value) ~= Char.Role.Value then
                        
-                        -- If no CFrame has been set for the hitbox, perform (what I assume to be) a check for walls/map collision (from what I can guess, likely for explosion-based hitboxes?).
+                        -- If the hitbox has no preset anchor, the anchor its using is the HumanoidRootPart of the user– perform some sanity checks to ensure the target isn't getting hit through a wall or similar.
                         if not Config.CFrame then
 
                             local index = 0
@@ -225,13 +225,13 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                 local cast = workspace:Raycast(Root.Position, o * Part.Size.Z, RayParams)
                                 local Inst = cast and cast.Instance
 
-                                -- If the object hit is not a character (has no humanoid sibling), is not fully transparent, and is not a hitbox, then add one to an index counter.
+                                -- If the object hit is not a character (has no humanoid sibling), is not fully transparent, and is not a hitbox, then its a wall or something map-related– add one to an index counter.
                                 if Inst and not Inst.Parent:FindFirstChildOfClass("Humanoid") and Inst.Transparency ~= 1 and not Inst:GetAttribute("Hitbox") then
                                     index += 1
                                 end
                             end
 
-                            -- If both of the above checks hit something assumedly map-related, skip hitting this player.
+                            -- Only if both of the above checks hit something assumedly map-related, skip hitting this player.
                             if index >= 2 then
                                 continue
                             end
