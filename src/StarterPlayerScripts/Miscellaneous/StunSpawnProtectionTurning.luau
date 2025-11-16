@@ -4,6 +4,7 @@ local RunService = game:GetService("RunService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
+-- TODO: make the stun protection vfx a ParticleEmitter to not have to do this
 return {
     Init = function(_self)
         local Instances: {[string]: ImageLabel} = {}
