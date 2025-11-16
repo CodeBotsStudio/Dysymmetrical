@@ -263,7 +263,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                     -- Configure damage to be affected by the Resistance effect.
                     local Damage = Config.Damage * (1 - Resistance / 5)
 
-                    -- If the HumanoidRootPart exists as a sibling to the humanoid object, proceed with registering a hit.
+                    -- If a HumanoidRootPart exists as a sibling to the humanoid object, proceed with registering a hit.
                     if HRoot then
                         -- Find out how many times this character has been hit so far(?).
                         TargetCharacter:SetAttribute("TimesHit", (TargetCharacter:GetAttribute("TimesHit") or 0) + 1)
