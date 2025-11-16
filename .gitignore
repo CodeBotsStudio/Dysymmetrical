@@ -15,3 +15,5 @@ roblox.yml
 commitdraft.txt
 
 aftman.toml
+
+*.DS_Store
