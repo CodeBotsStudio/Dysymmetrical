@@ -1,4 +1,6 @@
 {
     "className": "StringValue",
-    "Value": "Lobby"
+    "properties": {
+        "Value": "Lobby"
+    }
 }
