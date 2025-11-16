@@ -12,7 +12,7 @@ local SlashModule = {}
 
 --- Creates a new Slash ability instance. Use this in every killer that you want to have a slash ability in.
 function SlashModule.New(Props: Ability): Ability
-	local Slash = Ability:CreateAbility({
+	local DefaultSlash = Ability:CreateAbility({
 		Name = "Slash",
 		InputName = "Slash",
 		Cooldown = 2,
@@ -49,9 +49,9 @@ function SlashModule.New(Props: Ability): Ability
 			self.Damage += amount
 		end,
 	})
-	Utils:DeepTableOverwrite(Slash, Props)
+	Utils:DeepTableWrite(Props, DefaultSlash)
 
-	return Slash
+	return Props
 end
 
 return SlashModule
