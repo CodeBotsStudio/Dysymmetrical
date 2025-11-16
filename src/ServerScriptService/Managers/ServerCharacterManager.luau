@@ -33,7 +33,6 @@ function ServerCharacterManager:SetupCharacter(player: Player, charName: string,
         return Char
     end
 
-    print("sending to "..player.Name)
     self:_InitCharacter(player, Utils:GetCharacterModule(charType, charName, skinName))
 
     return Char

@@ -371,26 +371,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                                         -- If there are no execution animations to use, for one reason or another, resort to just flinging the target really far.
                                         if not ExecutionAnim then
-
                                             if Config.Knockback then
-                                                if Config.Knockback >= 15 then
-                                                    HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                                elseif Config.Knockback > 0 then
-                                                    local Att = Instance.new("Attachment")
-                                                    Att.Name = "LVAtt"
-                                                    Att.Parent = HRoot
-
-                                                    local LinearVel = Instance.new("LinearVelocity")
-                                                    LinearVel.MaxForce = 16000
-                                                    LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
-                                                    LinearVel.LineVelocity = Config.Knockback * 10
-                                                    LinearVel.LineDirection = CheckPart.CFrame.LookVector
-                                                    LinearVel.Attachment0 = Att
-                                                    LinearVel.Parent = HRoot
-
-                                                    Debris:AddItem(Att, 0.05)
-                                                    Debris:AddItem(LinearVel, 0.05)
-                                                end
+                                                CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                                             end
 
                                             -- Kill the target after flinging them.
@@ -461,27 +443,10 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                     end)
                                 else
                                     -- If no execution animations are availible, resort to 'ol reliable– flinging the target. 
-
                                     if Config.Knockback then
-                                        if Config.Knockback >= 15 then
-                                            HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                        elseif Config.Knockback > 0 then
-                                            local Att = Instance.new("Attachment")
-                                            Att.Name = "LVAtt"
-                                            Att.Parent = HRoot
-
-                                            local LinearVel = Instance.new("LinearVelocity")
-                                            LinearVel.MaxForce = 16000
-                                            LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
-                                            LinearVel.LineVelocity = Config.Knockback * 10
-                                            LinearVel.LineDirection = CheckPart.CFrame.LookVector
-                                            LinearVel.Attachment0 = Att
-                                            LinearVel.Parent = HRoot
-
-                                            Debris:AddItem(Att, 0.05)
-                                            Debris:AddItem(LinearVel, 0.05)
-                                        end
+                                        CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                                     end
+
                                     Humanoid.Health = 0
                                 end
 
@@ -491,29 +456,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         end
 
                         -- If the Target doesn't die to the hitbox, do some knockback:
-
-                        -- If the knockback property of the hitbox is greater than 15, fling the target(?)
                         if Config.Knockback then
-                            if Config.Knockback >= 15 then
-                                HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-
-                            -- Otherwise, lightly push the target instead.
-                            elseif Config.Knockback > 0 then
-                                local Att = Instance.new("Attachment")
-                                Att.Name = "LVAtt"
-                                Att.Parent = HRoot
-
-                                local LinearVel = Instance.new("LinearVelocity")
-                                LinearVel.MaxForce = 16000
-                                LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
-                                LinearVel.LineVelocity = Config.Knockback * 10
-                                LinearVel.LineDirection = CheckPart.CFrame.LookVector
-                                LinearVel.Attachment0 = Att
-                                LinearVel.Parent = HRoot
-
-                                Debris:AddItem(Att, 0.05)
-                                Debris:AddItem(LinearVel, 0.05)
-                            end
+                            CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                         end
 
                         -- If the hitbox deals damage, inflict it.

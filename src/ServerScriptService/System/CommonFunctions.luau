@@ -85,29 +85,8 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	end
 
 	knockbackDirection = knockbackDirection or Vector3.zero
-	if knockbackDirection ~= Vector3.zero then
-		knockbackMagnitude = knockbackMagnitude or 1
-		if knockbackMagnitude >= 15 then
-			HRP.AssemblyLinearVelocity = knockbackDirection * knockbackMagnitude * 10
-			
-		--using linearvel generally works better with less than 15 magnitude
-		elseif knockbackMagnitude > 0 then
-			local Att = Instance.new("Attachment")
-            Att.Name = "LVAtt"
-            Att.Parent = HRP
-
-            local LinearVel = Instance.new("LinearVelocity")
-            LinearVel.MaxForce = 16000
-            LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
-            LinearVel.LineVelocity = knockbackMagnitude * 10
-            LinearVel.LineDirection = knockbackDirection
-            LinearVel.Attachment0 = Att
-            LinearVel.Parent = HRP
-
-            Debris:AddItem(Att, 0.05)
-            Debris:AddItem(LinearVel, 0.05)
-		end
-	end
+	knockbackMagnitude = knockbackMagnitude or 1
+	self:RigImpulse(HRP, knockbackMagnitude, knockbackDirection)
 
 	--printing
 	local targetName = Char.Name or "Dummy"
@@ -309,6 +288,38 @@ end
 function CommonFunctions:PlayerHasPermissionRank(Player: Player, MandatoryRank: string | number): (boolean, number)
 	local Rank = self:GetPlayerRank(Player)
 	return Rank < (typeof(MandatoryRank) == "string" and self.Ranks[MandatoryRank] or MandatoryRank), Rank
+end
+
+function CommonFunctions:RigImpulse(Rig: Model | BasePart, magnitude: number, direction: Vector3)
+	if magnitude <= 0 or direction == Vector3.zero then
+		return
+	end
+
+	local HRP = Rig:IsA("Model") and Rig:FindFirstChild("HumanoidRootPart") or Rig
+
+	-- If the knockback property of the hitbox is greater than 15, fling the target(?) -itrid
+	-- FLINGING GO BOOM -dys
+	if magnitude >= 15 then
+		HRP.AssemblyLinearVelocity = direction * magnitude * 10
+	
+	-- Otherwise, lightly push the target instead. -itrid
+	--using linearvel generally works better with less than 15 magnitude -dys
+	elseif magnitude > 0 then
+		local Att = Instance.new("Attachment")
+        Att.Name = "LVAtt"
+        Att.Parent = HRP
+
+        local LinearVel = Instance.new("LinearVelocity")
+        LinearVel.MaxForce = 16000
+        LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
+        LinearVel.LineVelocity = magnitude * 10
+        LinearVel.LineDirection = direction
+        LinearVel.Attachment0 = Att
+        LinearVel.Parent = HRP
+
+        Debris:AddItem(Att, 0.05)
+        Debris:AddItem(LinearVel, 0.05)
+	end
 end
 
 return CommonFunctions
