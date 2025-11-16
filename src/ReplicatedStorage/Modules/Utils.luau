@@ -1076,7 +1076,7 @@ function Utils:FindInDictionary<T>(Dictionary: T & {}, Item: T, Type: "Key" | "V
     return
 end
 
---- Replaces or creates any values from `Source` into `Target`.
+--- Replaces or copies any values from `Source` into `Target`.
 --- If you pass in a table variable, you don't have to get anything as it'll be replaced in that variable directly.
 function Utils:DeepTableOverwrite(Target: {any}, Source: {any})
     if not Target or not Source then
@@ -1095,7 +1095,7 @@ function Utils:DeepTableOverwrite(Target: {any}, Source: {any})
 	end
 end
 
---- Creates any values from `Source` into `Target`.
+--- Copies any values from `Source` into `Target`.
 --- If you pass in a table variable, you don't have to get anything as it'll be replaced in that variable directly.
 --- Differs from `Utils:DeepTableOverwrite` in that it doesn't overwrite existing values.
 function Utils:DeepTableWrite(Target: {any}, Source: {any})
