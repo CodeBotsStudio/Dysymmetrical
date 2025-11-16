@@ -34,6 +34,7 @@ local RoundManager = {
     },
     StopLoop = false,
     CanSpawnKiller = true, --for debugging purposes
+    CanInitLMS = true, --for debugging purposes
 }
 
 function RoundManager:Init()
@@ -52,13 +53,16 @@ function RoundManager:StartRound()
     --shuffling so that if there's a tie it chooses a truly random one
     RoundManager.CurrentRound.PlayersAccepted = Utils:ShuffleTable(LoadedPlayers)
 
+    --orders players by malice to choose later
     local PlayersOrderedByMalice = RoundManager.CurrentRound.PlayersAccepted
     table.sort(PlayersOrderedByMalice, function(a, b)
         return Utils:GetPlayerStat(a, "General.Malice") > Utils:GetPlayerStat(b, "General.Malice")
     end)
 
+    --spawns in the map
     MapManager:GetRandomMap()
     
+    --gets the killers for the round
     for i = 1, workspace:GetAttribute("KillersAllowed") do
         RoundManager.CurrentRound.Killers[i] = {
             Player = PlayersOrderedByMalice[i],
@@ -66,15 +70,17 @@ function RoundManager:StartRound()
         }
     end
 
+    --sets up every player
     for i, Player: Player in PlayersOrderedByMalice do
-        RoundManager.Utils:SetupPlayer(Player, i <= workspace:GetAttribute("KillersAllowed") and i or nil)
-    end
+        local IsKiller = i <= workspace:GetAttribute("KillersAllowed")
+        RoundManager.Utils:SetupPlayer(Player, IsKiller and i or nil)
 
-    for i, plr in ipairs(PlayersOrderedByMalice) do
-        if RoundManager.CanSpawnKiller and i <= workspace:GetAttribute("KillersAllowed") then
+        --if it's a survivor then add it to the PlayersRemaining list
+        if RoundManager.CanSpawnKiller and IsKiller then
             continue
         end
-        RoundManager.CurrentRound.PlayersRemaining[plr.UserId] = plr
+
+        RoundManager.CurrentRound.PlayersRemaining[Player.UserId] = Player
     end
 
     if RoundManager.CanSpawnKiller then --if one is testing survivor then the round'll never end
@@ -84,6 +90,7 @@ function RoundManager:StartRound()
     end
     Utils:Print(RoundManager.CurrentRound.PlayersRemaining)
 
+    --round vars setup
     RoundState.Value = "InRound"
     TimeManager:SetTime(TimeManager.Config.RoundTime)
     TimeManager.OnTimerEnd = function()
@@ -91,7 +98,8 @@ function RoundManager:StartRound()
     end
     workspace:SetAttribute("LMS", false)
     
-    task.spawn(function()
+    --state loop check
+    task.defer(function()
         while task.wait(1) do
             if RoundManager.StopLoop then
                 RoundManager.StopLoop = false
@@ -102,10 +110,12 @@ function RoundManager:StartRound()
         end
     end)
 
+    --final call to begin the round
     RoundManager.Callables:PlayIntro()
 end
 
---- Plays the intro to everyone (whose game has loaded).
+--- Function called right when starting a round to unanchor every player after the default intro duration.
+--- Also removes the black fade from all players if there's no killer.
 function RoundManager.Callables:PlayIntro()
     if not RoundManager.CanSpawnKiller then
         Utils:Fade(Utils:GetLoadedPlayers(false), "Out", 0.6, false)
@@ -121,9 +131,8 @@ end
 
 --- Initiates the Last Man Standing sequence (1v1). The Last Man (survivor) must be specified.
 function RoundManager.Callables:InitLMS(LastMan: Player)
-    local allowed = true
     --failsafe
-    if not allowed or RoundManager.CurrentRound.StartedLMS or not RoundManager.CurrentRound.Killers[1] or not RoundManager.CurrentRound.Killers[1].Character then
+    if not RoundManager.CanInitLMS or RoundManager.CurrentRound.StartedLMS or not RoundManager.CurrentRound.Killers[1] or not RoundManager.CurrentRound.Killers[1].Character then
         return
     end
 
@@ -232,11 +241,14 @@ end
 function RoundManager.Callables:_OnPlayerDeath(dead: Player, wasKiller: boolean?)
     wasKiller = wasKiller or false
 
+    --disconnect all connections related to this player
     for _, i in RoundManager.PlayerConnections[dead.UserId] do
         i:Disconnect()
     end
     RoundManager.PlayerConnections[dead.UserId] = nil
+    --if it was a killer, remove killer from table and resort it
     if wasKiller then
+        --TODO: remove this for and make it only remove the dead killer instead of checking every single one
         for i, v in RoundManager.CurrentRound.Killers do
             if v.Player == dead then
                 RoundManager.CurrentRound.Killers[i] = nil
@@ -270,13 +282,17 @@ function RoundManager.Utils:CheckForKillerWin()
     local Survivors = #Count.Survivor
 
     if RoundManager.CanSpawnKiller then
+        -- if the killer leaves or dies
         if #Count.Killer <= 0 then
             RoundManager.Callables:EndRound("Survivors")
+        -- lms
         elseif Survivors == 1 then
             RoundManager.Callables:InitLMS(Players:GetPlayerFromCharacter(Count.Survivor[1]))
+        -- if every surv is dead
         elseif #RoundManager.CurrentRound.PlayersAccepted > 1 and Survivors <= 0 then
             RoundManager.Callables:EndRound("Killer")
         end
+    -- never check anything killer-related if there's no killer
     elseif Survivors <= 0 then
         RoundManager.Callables:EndRound("Killer")
     end
@@ -324,7 +340,6 @@ function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
             end)
         }
 
-        print(KillerIndex)
         RoundManager.CurrentRound.Killers[KillerIndex].Character = Char
     else
         CommonFunctions:UpdatePlayerStat(Player, "General.Malice", 1) --adds 1 malice
@@ -347,7 +362,6 @@ function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
             --should count as a death when it gets removed just in case the player leaves
             Player.CharacterRemoving:Connect(function()
                 RoundManager.Callables:_OnPlayerDeath(Player)
-                -- RoundManager.PlayerConnections[Player.UserId] = nil
             end),
 
             --checks for death to count kills n shit
@@ -355,14 +369,13 @@ function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
                 --if the survivor dies they lose duh
                 CommonFunctions:UpdatePlayerStat(Player, "SurvivorStats.SurvivorLosses", 1) --increasing loss stat
                 RoundManager.Callables:_OnPlayerDeath(Player)
-                -- RoundManager.PlayerConnections[Player.UserId] = nil
-                -- RoundManager.Utils:CheckForKillerWin()
             end)
         }
     end
 
+    --anchoring at beginning of round to unanchor later
     task.wait()
-    Player.Character.HumanoidRootPart.Anchored = true
+    Char.HumanoidRootPart.Anchored = true
 end
 
 return RoundManager

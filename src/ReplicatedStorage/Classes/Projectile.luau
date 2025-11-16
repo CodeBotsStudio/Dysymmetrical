@@ -74,6 +74,7 @@ export type ProjectileDetails = {
 function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
 
     ---Stop this from running on the client (technically, a stubborn exploiter could remove this line and run it anyways, but it'll do nothing regardless.)
+    -- "i love writing server shit and putting it in ReplicatedStorage :]" – Dyscarn
     if not RunService:IsServer() then
         return {}
     end

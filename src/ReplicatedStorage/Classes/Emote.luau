@@ -208,10 +208,9 @@ end
 --- Creates an emote with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function EmoteClass:CreateEmote(Props: Emote): Emote
-    local Emote: Emote = self:GetDefaultEmoteSettings()
-    Utils:DeepTableOverwrite(Emote, Props)
+    Utils:DeepTableWrite(Props, self:GetDefaultEmoteSettings())
 
-    return Emote
+    return Props
 end
 
 return EmoteClass

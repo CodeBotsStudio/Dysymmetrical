@@ -77,6 +77,7 @@ export type HitboxDetails = {
 function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
     -- Prevent this from normally running on the client
+    --i love writing server shit and putting it in ReplicatedStorage :]
     if not RunService:IsServer() then
         return {}
     end
@@ -95,7 +96,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
     -- Prevent the hitbox from running if such is not found.
     if not Root then
-        -- Figured some feedback on this would be nice, I can see this accidentally being tripped with custom player models for a killer (maybe???)
+        -- "Figured some feedback on this would be nice, I can see this accidentally being tripped with custom player models for a killer (maybe???)" – Itred
         warn("ReplicatedStorage/Classes/Hitbox: Notice – Hitbox creation halted, due to no primarypart being present in the character of player '"..SourcePlayer.Name.."'.")
         return {}
     end
@@ -129,6 +130,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
     RayParams.FilterType = Enum.RaycastFilterType.Exclude
     RayParams.FilterDescendantsInstances = {Char}
 
+    local Conns
+
     -- Initialize a property table for storing some important details about the hitbox that we'll want to fetch later; additionally, make a useful cancelling function, also for later.
     local Props = {
         HumanoidsHit = {},
@@ -137,53 +140,82 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
         TimePast = 0,
         Cancelled = false,
         IsProjectile = Config.IsProjectile,
+        Cancel = function(p)
+            if p.Cancelled then
+                return
+            end
+
+            p.Cancelled = true
+            for _, Conn in Conns do
+                Conn:Disconnect()
+            end
+        end,
     }
-    Props.Cancel = function(p)
-        p.Cancelled = true
-    end
+
+    local Effects = Char.Effects
+
+    Conns = {
+        Effects.ChildAdded:Connect(function(newChild)
+            if newChild.Name == "Stunned" then
+                Props:Cancel()
+            end
+        end),
+
+        Char.AncestryChanged:Connect(function(_, newParent)
+            if newParent == nil then
+                Props:Cancel()
+            end
+        end),
+
+        Char.Destroying:Connect(function()
+            Props:Cancel()
+        end),
+
+        Root.AncestryChanged:Connect(function(_, newParent)
+            if newParent == nil then
+                Props:Cancel()
+            end
+        end),
+
+        Root.Destroying:Connect(function()
+            Props:Cancel()
+        end)
+    }
 
     -- Start the process of looking for anything that collides with the hitbox.
     task.defer(function()
+        if Effects:FindFirstChild("Stunned") then
+            return
+        end
 
-        -- Only proceed with the loop if:
-            -- the character exists, 
-            -- the player exists, 
-            -- the rootpart exists, 
-            -- the hitbox is below its maximum lifetime, 
-            -- the hitbox has not been cancelled, 
-            -- and the player's character has not been stunned. 
-        -- If any of these checks fail, stop all hit detection and end the hitbox.
-        -- "Given how vast this is, maybe it'd be wise to split into a few modules/outside functions itself??" – Itred
-        while Char and Char.Parent and Root and Props.TimePast < Config.Time and not Props.Cancelled and not Char.Effects:FindFirstChild("Stunned") do -- "Thats a lot to be checking, once every 40th of a second..." – Itred
-            
-            -- Read how many players have been hit so far.
+        -- caching part and cloning it instead of creating it every time
+        local Part = Instance.new("Part")
+        Part.Name = SourcePlayer.Name.."Hitbox"
+        Part.Transparency = 1
+        Part.CanCollide = false
+        Part.CanQuery = false
+        Part.CanTouch = false
+        Part.CastShadow = false
+        Part.Anchored = true
+        Part.Size = Config.Size
+
+        while not Props.Cancelled and Props.TimePast < Config.Time do
             local Damaged = Props.HumanoidsHit
 
-            -- Proceed if no players have been hit, or if the hitbox is configured to hit multiple players.
             if #Damaged <= 0 or Config.HitMultiple then
-
-                -- Make the hitbox part itself, initialize many properties.
-                local Part = Instance.new("Part")
-                Part.Name = SourcePlayer.Name.."Hitbox"
-                Part.Transparency = 1
-                Part.CanCollide = false
-                Part.CanQuery = false
-                Part.CanTouch = false
-                Part.CastShadow = false
-                Part.Anchored = true
-                Part.Size = Config.Size
-                Part.CFrame = (Config.CFrame and (typeof(Config.CFrame) == "function" and Config.CFrame() or Config.CFrame) or Root.CFrame) * Config.CFrameOffset
-                Part.Parent = HitboxFolder
+                local CheckPart = Part:Clone()
+                CheckPart.CFrame = (Config.CFrame and (typeof(Config.CFrame) == "function" and Config.CFrame() or Config.CFrame) or Root.CFrame) * Config.CFrameOffset
+                CheckPart.Parent = HitboxFolder
 
                 -- The hitbox itself lingers for a little while, even after parsing it, so it can be seen for those who have hitboxes enabled in their client settings(?).
                 Debris:AddItem(Part, 0.75)
 
                 -- Some amount of ping compensation for placing the hitbox.
                 if Config.PredictVelocity and not Config.IsProjectile then
-                    Utils:Print(SourcePlayer:GetNetworkPing())
+                    -- Utils:Print(SourcePlayer:GetNetworkPing())
                     local PingDivider = 6.5 - math.clamp(SourcePlayer:GetNetworkPing(), 0, 3)
-                    local PingOffset = Part.CFrame:VectorToObjectSpace(Root.AssemblyLinearVelocity) / PingDivider
-                    Part.CFrame *= CFrame.new(PingOffset)
+                    local PingOffset = CheckPart.CFrame:VectorToObjectSpace(Root.AssemblyLinearVelocity) / PingDivider
+                    CheckPart.CFrame *= CFrame.new(PingOffset)
                 end
 
                 -- Finally parse through the hitbox itself.
@@ -222,7 +254,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                 CFrame.lookAt(Root.Position, collidedpart.Position).LookVector,
                             } do
                                 -- Check in front of both of these starting points, moving out by the hitbox's length.
-                                local cast = workspace:Raycast(Root.Position, o * Part.Size.Z, RayParams)
+                                local cast = workspace:Raycast(Root.Position, o * CheckPart.Size.Z, RayParams)
                                 local Inst = cast and cast.Instance
 
                                 -- If the object hit is not a character (has no humanoid sibling), is not fully transparent, and is not a hitbox, then its a wall or something map-related– add one to an index counter.
@@ -249,7 +281,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                 end
 
                 -- Change the hitbox part's color depending on whether or not it hit any targets.
-                Part.Color = #Hit > 0 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+                CheckPart.Color = #Hit > 0 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 
 
                 -- Register a hit in every player detected in the previous step.
@@ -339,13 +371,13 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         -- If there are no execution animations to use, for one reason or another, resort to just flinging the target really far.
                                         if not ExecutionAnim then
 
-                                            -- TODO: Replace this with something not as unstable as BodyVelocity. Pro tip: use 16,000 force, not 1e999. Computers dont handle big numbers well, and for some reason 16k just works perfectly. Don't ask, I don't know.
+                                            -- TODO: "Replace this with something not as unstable as BodyVelocity. Pro tip: use 16,000 force, not 1e999. Computers dont handle big numbers well, and for some reason 16k just works perfectly. Don't ask, I don't know." – Itred
                                             if Config.Knockback >= 15 then
-                                                HRoot.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                                                HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                                             elseif Config.Knockback > 0 then
                                                 local BodyVel = Instance.new("BodyVelocity")
-                                                BodyVel.MaxForce = Vector3.new(1e999, 1e999, 1e999) -- "*Deep inhale*, Not a fan of this." – Itred
-                                                BodyVel.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                                                BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
+                                                BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                                                 BodyVel.Parent = HRoot
                                                 Debris:AddItem(BodyVel, 0.05)
                                             end
@@ -421,11 +453,11 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                     -- If no execution animations are availible, resort to 'ol reliable– flinging the target. 
 
                                     if Config.Knockback >= 15 then
-                                        HRoot.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                                        HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                                     elseif Config.Knockback > 0 then
                                         local BodyVel = Instance.new("BodyVelocity")
-                                        BodyVel.MaxForce = Vector3.new(1e999, 1e999, 1e999) -- "Once again, not a fan of this..." – Itred
-                                        BodyVel.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                                        BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
+                                        BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                                         BodyVel.Parent = HRoot
                                         Debris:AddItem(BodyVel, 0.05)
                                     end
@@ -442,14 +474,14 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                         -- If the knockback property of the hitbox is greater than 15, fling the target(?)
                         if Config.Knockback >= 15 then
-                            HRoot.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                            HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
 
                         -- Otherwise, lightly push the target instead.
                         elseif Config.Knockback > 0 then
                             
                             local BodyVel = Instance.new("BodyVelocity")
-                            BodyVel.MaxForce = Vector3.new(1e999, 1e999, 1e999)
-                            BodyVel.Velocity = Part.CFrame.LookVector * Config.Knockback * 10
+                            BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
+                            BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
                             BodyVel.Parent = HRoot
                             Debris:AddItem(BodyVel, 0.05)
                         end

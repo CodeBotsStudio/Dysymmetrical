@@ -152,10 +152,9 @@ end
 --- Creates a survivor with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function CharTypes:CreateSurvivor(Props: Survivor): Survivor
-    local Survivor: Survivor = self:GetDefaultSurvivorSettings()
-    Utils:DeepTableOverwrite(Survivor, Props)
+    Utils:DeepTableWrite(Props, self:GetDefaultSurvivorSettings())
 
-    return Survivor
+    return Props
 end
 
 --- Type used for killer characters.
@@ -399,10 +398,9 @@ end
 --- Creates a killer with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function CharTypes:CreateKiller(Props: Killer): Killer
-    local Killer: Killer = self:GetDefaultKillerSettings()
-    Utils:DeepTableOverwrite(Killer, Props)
+    Utils:DeepTableWrite(Props, self:GetDefaultKillerSettings())
 
-    return Killer
+    return Props
 end
 
 return CharTypes

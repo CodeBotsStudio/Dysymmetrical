@@ -221,7 +221,7 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
                 continue
             end
 
-            local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - i:FindFirstChild("HumanoidRootPart").Position).Magnitude or 1e999
+            local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - i:FindFirstChild("HumanoidRootPart").Position).Magnitude or 50000
             if Distance <= Radiuses["L1"] and (not CurrentKillerChosen or Distance <= CurrentKillerChosen.Distance) then
                 CurrentKillerChosen = {
                     Player = i,
@@ -240,7 +240,7 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
 
     local KillerHRP = CurrentKillerChosen:FindFirstChild("HumanoidRootPart")
 
-    local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 1e999
+    local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 50000
 
     local Playing = false
     for n, i in self.LayerMagnitudes do
@@ -305,7 +305,7 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
 end
 
 function TerrorRadiusManager:_CheckAsKiller(delta: number)
-    local ClosestDistance = 1e999
+    local ClosestDistance = 50000
 
     for _, char in workspace.Players:GetChildren() do
         if char ~= self.LocalPlayerProps.Char
