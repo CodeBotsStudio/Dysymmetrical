@@ -113,9 +113,6 @@ export type Ability = {
 
 --- Ability preset for customization.
 function AbilityType:GetDefaultAbilitySettings(): Ability
-    --instantiates a new `Animation` instance for loading the use animation (CLIENT ONLY)
-    local Animation = not RunService:IsServer() and Instance.new("Animation") or nil
-
     return {
         Name = "Ability",
         Description = "Does something",
@@ -194,8 +191,6 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
             own.UsesLeft = own.UseSettings.InitialUses
             if #own.UseAnimation > 0 then
-                Animation.AnimationId = own.UseAnimation
-
                 --nesting in pcall so that if there's nothing it doesn't matter
                 pcall(function()
                     local AnimName = own.Name:gsub(" ", "").."UseAnim"
@@ -278,7 +273,6 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         OnRemove = nil,
 
         ReloadAnimation = function(own: Ability, id: string)
-            Animation.AnimationId = id
             pcall(function()
                 own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
             end)
@@ -298,9 +292,6 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 end
             end
             table.clear(own.Connections)
-            if Animation then
-                Animation:Destroy()
-            end
         end,
 
         AttemptUse = function(own: Ability)
