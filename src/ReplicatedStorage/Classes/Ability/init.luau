@@ -273,9 +273,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         OnRemove = nil,
 
         ReloadAnimation = function(own: Ability, id: string)
-            pcall(function()
-                own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
-            end)
+            own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
         end,
 
         PlayUseAnimation = nil,
