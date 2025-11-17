@@ -272,8 +272,8 @@ function RoundManager.Callables:_OnPlayerDeath(dead: Player, wasKiller: boolean?
     end
 
     --info
-    if PlayersRemaining:FindFirstChild(dead.UserId) then
-        PlayersRemaining:FindFirstChild(dead.UserId):Destroy()
+    if PlayersRemaining:FindFirstChild(tostring(dead.UserId)) then
+        PlayersRemaining[tostring(dead.UserId)]:Destroy()
     end
 
     RoundManager.Utils:CheckForKillerWin() --also checks for lms

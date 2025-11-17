@@ -209,7 +209,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                 CheckPart.Parent = HitboxFolder
 
                 -- The hitbox itself lingers for a little while, even after parsing it, so it can be seen for those who have hitboxes enabled in their client settings(?).
-                Debris:AddItem(Part, 0.75)
+                Debris:AddItem(CheckPart, 0.75)
 
                 -- Some amount of ping compensation for placing the hitbox.
                 if Config.PredictVelocity and not Config.IsProjectile then

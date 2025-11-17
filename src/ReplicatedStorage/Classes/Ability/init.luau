@@ -149,7 +149,8 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
                         --cooldown stuffs
                         own.OnCooldown = true
-                        own.CooldownTimer = (own.Cooldown - 0.1) / 2
+                        -- divide timer by two to make sure that it's fair when it ends in client
+                        own.CooldownTimer = (own.Cooldown - 0.1)
                         task.spawn(function()
                             for _ = 0.1, own.CooldownTimer * 10 + 1 do
                                 task.wait(0.1)
