@@ -305,8 +305,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 return
             end
 
-            print(own.CooldownTimer)
-
+            --NOTE: this is handled this way (by making separate cooldowns in both server and client) so that it's possible to prevent network calls if it's impossible to use the ability in client
             if own:CanUse() then
                 Network:FireServerConnection("UsePlayerAbility", "REMOTE_EVENT", own.Name) --i know this is insecure but sue me lol
             end
