@@ -152,14 +152,12 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                         -- divide timer by two to make sure that it's fair when it ends in client
                         own.CooldownTimer = (own.Cooldown - 0.1)
                         task.spawn(function()
-                            for _ = 0.1, own.CooldownTimer * 10 + 1 do
+                            --TODO: replace with a method that isn't network stability dependant
+                            while own.CooldownTimer > 0 do
                                 task.wait(0.1)
                                 own.CooldownTimer -= 0.1
-                                if own.CooldownTimer <= 0 then
-                                    own.CooldownTimer = 0
-                                    break
-                                end
                             end
+                            own.CooldownTimer = 0
                             own.OnCooldown = false
                         end)
 
@@ -240,14 +238,12 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                     own.OnCooldown = true
                     own.CooldownTimer = own.Cooldown - 0.1
                     task.spawn(function()
-                        for _ = 0.1, own.CooldownTimer * 10 + 1 do
+                        --TODO: replace with a method that isn't network stability dependant
+                        while own.CooldownTimer > 0 do
                             task.wait(0.1)
                             own.CooldownTimer -= 0.1
-                            if own.CooldownTimer <= 0 then
-                                own.CooldownTimer = 0
-                                break
-                            end
                         end
+                        own.CooldownTimer = 0
                         own.OnCooldown = false
                     end)
                     --decreasing uses left if it's supposed to be limited
