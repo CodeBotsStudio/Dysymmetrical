@@ -191,7 +191,7 @@ end
 --[[ STATIC METHODS ]]--
 function Path.GetNearestCharacter(fromPosition)
 	local character, dist = nil, 50000
-	for _, player in ipairs(Players:GetPlayers()) do
+	for _, player in Players:GetPlayers() do
 		if player.Character and (player.Character.PrimaryPart.Position - fromPosition).Magnitude < dist then
 			character, dist = player.Character, (player.Character.PrimaryPart.Position - fromPosition).Magnitude
 		end
@@ -235,7 +235,7 @@ function Path.new(agent: Model, agentParameters: {[string]: any}, override: Path
     end
 
 	--Configure settings
-	for setting, value in pairs(DEFAULT_SETTINGS) do
+	for setting, value in DEFAULT_SETTINGS do
 		self._settings[setting] = self._settings[setting] == nil and value or self._settings[setting]
 	end
 
@@ -253,7 +253,7 @@ end
 
 --[[ NON-STATIC METHODS ]]--
 function Path:Destroy()
-	for _, event in ipairs(self._events) do
+	for _, event in self._events do
 		event:DisconnectAll()
 	end
 	self._events = nil
@@ -262,7 +262,7 @@ function Path:Destroy()
 	end
 	self._path:Destroy()
 	setmetatable(self, nil)
-	for k, _ in pairs(self) do
+	for k, _ in self do
 		self[k] = nil
 	end
 end
