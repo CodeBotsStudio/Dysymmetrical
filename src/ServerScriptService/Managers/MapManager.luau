@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local Lighting = require(ReplicatedStorage.Modules.Lighting)
-local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local MapManager = {
@@ -101,10 +100,6 @@ function MapManager:GetRandomMap(): Model | Folder
     end
 
     if MapInstance:FindFirstChild("Behaviour") then
-        task.spawn(function()
-            Network:FireAllClientConnection("SetupMapBehaviour", "REMOTE_EVENT")
-        end)
-
         require(MapInstance.Behaviour):Init()
     end
 
