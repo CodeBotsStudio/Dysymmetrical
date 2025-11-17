@@ -12,14 +12,21 @@
 --------------------------------------------------------------------------------
 
 export type Connection = {
+	--- Disconnects this connection.
 	Disconnect: (self: Connection) -> (),
 }
 
 export type Signal = {
+	--- Connects a function to this signal so that, when it's fired, it executes.
 	Connect: (self: Signal, funcToConnect: (...any) -> (...any)) -> (Connection),
+	--- Disconnects all of the connections to this signal.
 	DisconnectAll: (self: Signal) -> (),
+	--- Fires this signal and executes all connections.
 	Fire: (self: Signal, ...any) -> (),
+	--- Yields the current thread until this connection is fired.
 	Wait: (self: Signal) -> (),
+	--- Connects a function to this signal so that, when it's fired, it executes.
+	--- The difference with `Signal:Connect()` is that, when it executes once, it disconnects itself.
 	Once: (self: Signal, funcToConnect: (...any) -> (...any)) -> (Connection),
 }
 

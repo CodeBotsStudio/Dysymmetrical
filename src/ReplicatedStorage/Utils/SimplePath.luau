@@ -27,6 +27,7 @@ local DEFAULT_SETTINGS: PathSettings = {
 
 local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
+local Signal = require(script.Parent.Signal)
 local function output(func, msg)
 	func(((func == error and "SimplePath Error: ") or "SimplePath: ")..msg)
 end
@@ -207,11 +208,11 @@ function Path.new(agent: Model, agentParameters: {[string]: any}, override: Path
 	local self = setmetatable({
 		_settings = override or DEFAULT_SETTINGS,
 		_events = {
-			Reached = Instance.new("BindableEvent"),
-			WaypointReached = Instance.new("BindableEvent"),
-			Blocked = Instance.new("BindableEvent"),
-			Error = Instance.new("BindableEvent"),
-			Stopped = Instance.new("BindableEvent"),
+			Reached = Signal.new(),
+			WaypointReached = Signal.new(),
+			Blocked = Signal.new(),
+			Error = Signal.new(),
+			Stopped = Signal.new(),
 		},
 		_agent = agent,
 		_humanoid = agent:FindFirstChildOfClass("Humanoid"),
@@ -253,7 +254,7 @@ end
 --[[ NON-STATIC METHODS ]]--
 function Path:Destroy()
 	for _, event in ipairs(self._events) do
-		event:Destroy()
+		event:DisconnectAll()
 	end
 	self._events = nil
 	if rawget(self, "_visualWaypoints") then
