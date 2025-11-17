@@ -1,3 +1,5 @@
+--!nocheck
+
 --------------------------------------------------------------------------------
 -- API:                                                                       --
 --   local Signal = require(THIS MODULE)                                      --
@@ -8,6 +10,18 @@
 --   sig:DisconnectAll()                                                      --
 --   local arg1, arg2, ... = sig:Wait()                                       --
 --------------------------------------------------------------------------------
+
+export type Connection = {
+	Disconnect: (self: Connection) -> (),
+}
+
+export type Signal = {
+	Connect: (self: Signal, funcToConnect: (...any) -> (...any)) -> (Connection),
+	DisconnectAll: (self: Signal) -> (),
+	Fire: (self: Signal, ...any) -> (),
+	Wait: (self: Signal) -> (),
+	Once: (self: Signal, funcToConnect: (...any) -> (...any)) -> (Connection),
+}
 
 -- The currently idle thread to run the next handler on
 local freeRunnerThread = nil
@@ -43,7 +57,7 @@ end
 local Connection = {}
 Connection.__index = Connection
 
-function Connection.new(signal, fn)
+function Connection.new(signal, fn): Connection
 	return setmetatable({
 		_connected = true,
 		_signal = signal,
