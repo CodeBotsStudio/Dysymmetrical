@@ -298,6 +298,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 end
             end
             table.clear(own.Connections)
+            if Animation then
+                Animation:Destroy()
+            end
         end,
 
         AttemptUse = function(own: Ability)
