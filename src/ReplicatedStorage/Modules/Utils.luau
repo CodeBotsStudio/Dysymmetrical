@@ -52,7 +52,7 @@ function Utils:Init()
                 self.TransparentParts[i] = true
             end
         end
-        task.spawn(function()
+        task.defer(function()
             for _, i in workspace:GetDescendants() do
                 AddToR(i)
             end

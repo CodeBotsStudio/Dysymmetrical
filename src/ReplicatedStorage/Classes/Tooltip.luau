@@ -41,8 +41,10 @@ function TooltipClass.New(Text: string)
         return
     end
 
-    if Tooltip and Text and Text ~= Tooltip.Title.Text then
-        Tooltip.Title.Text = Text
+    if Tooltip and Text then
+        if Text ~= Tooltip.Title.Text then
+            Tooltip.Title.Text = Text
+        end
         return Tooltip
     end
 

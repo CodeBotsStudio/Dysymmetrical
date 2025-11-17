@@ -30,6 +30,7 @@ local RoundManager = {
                 Character = nil,
             },
         },
+        KillerIndex = {},
         StartedLMS = false,
     },
     StopLoop = false,
@@ -68,6 +69,7 @@ function RoundManager:StartRound()
             Player = PlayersOrderedByMalice[i],
             Character = nil
         }
+        RoundManager.CurrentRound.KillerIndex[PlayersOrderedByMalice[i]] = i
     end
 
     --sets up every player
@@ -216,6 +218,7 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
     --restarting variables
     RoundManager.CurrentRound = {
         Killers = {},
+        KillerIndex = {},
         PlayersAccepted = {},
         PlayersRemaining = {},
         StartedLMS = false,
@@ -248,18 +251,20 @@ function RoundManager.Callables:_OnPlayerDeath(dead: Player, wasKiller: boolean?
     RoundManager.PlayerConnections[dead.UserId] = nil
     --if it was a killer, remove killer from table and resort it
     if wasKiller then
-        --TODO: remove this for and make it only remove the dead killer instead of checking every single one
-        for i, v in RoundManager.CurrentRound.Killers do
-            if v.Player == dead then
-                RoundManager.CurrentRound.Killers[i] = nil
-                break
-            end
-        end
+        --removes killer from table using table index
+        RoundManager.CurrentRound.Killers[RoundManager.CurrentRound.KillerIndex[dead]] = nil
+        RoundManager.CurrentRound.KillerIndex[dead] = nil
         --resorts to maintain the minimum indexes possible
+        table.clear(RoundManager.CurrentRound.KillerIndex)
         table.sort(RoundManager.CurrentRound.Killers)
         local NewTable = {}
+        --resets indexes in order
         for _, v in ipairs(RoundManager.CurrentRound.Killers) do
             table.insert(NewTable, v)
+        end
+        --sets the indexes in KillerIndex for the next killer removal
+        for i, v in ipairs(NewTable) do
+            RoundManager.CurrentRound.KillerIndex[v.Player] = i
         end
         RoundManager.CurrentRound.Killers = NewTable
     else

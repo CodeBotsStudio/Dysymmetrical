@@ -141,7 +141,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
                 table.insert(own.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
                     if player == plr and abilityName == own.Name and own:CanUse() then
-                        task.spawn(function()
+                        task.defer(function()
                             if own.CharModule.Config.Voicelines and own.CharModule.Config.Voicelines[own.Name] then
                                 Sounds:PlayVoiceline(own.Owner.Character, own.CharModule.Config.Voicelines[own.Name])
                             end

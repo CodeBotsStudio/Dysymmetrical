@@ -154,11 +154,9 @@ function PlayerManager:Init()
 			plr:LoadCharacter()
 		end)
 		
-		task.spawn(function()
-			local TimePlayed = Utils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
-			TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
-				TimePlayed.Value += delta
-			end)
+		local TimePlayed = Utils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
+		TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
+			TimePlayed.Value += delta
 		end)
 	end)
 

@@ -366,7 +366,7 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
             local CurrentTooltip
         
             local function GetSpaceWidth(font, textSize, maxX)
-                return TextService:GetTextSize(" ", textSize, font, Vector2.new(maxX, 1e9)).X
+                return TextService:GetTextSize(" ", textSize, font, Vector2.new(maxX, 1e5)).X
             end
         
             while task.wait() and self.InfoMenu.Open do
@@ -399,7 +399,7 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
                         continue
                     end
                 
-                    local lineHeight = TextService:GetTextSize("A", textSize, font, Vector2.new(maxWidth, 1e9)).Y
+                    local lineHeight = TextService:GetTextSize("A", textSize, font, Vector2.new(maxWidth, 1e5)).Y
                     local totalY = 0
                 
                     for _, rawLine in ipairs(text.Text:gsub("<.->", ""):split("\n")) do
@@ -408,7 +408,7 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
                     
                         local wrappedLines = {}
                         for _, word in ipairs(rawLine:split(" ")) do
-                            local wordSize = TextService:GetTextSize(word, textSize, font, Vector2.new(maxWidth, 1e9)).X
+                            local wordSize = TextService:GetTextSize(word, textSize, font, Vector2.new(maxWidth, 1e5)).X
                             if currentWidth + wordSize > maxWidth then
                                 table.insert(wrappedLines, currentLine)
                                 currentLine = {}
@@ -430,7 +430,7 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
                                 local lineX = absPos.X
                             
                                 for _, word in ipairs(lineWords) do
-                                    local wSize = TextService:GetTextSize(word, textSize, font, Vector2.new(maxWidth, 1e9)).X
+                                    local wSize = TextService:GetTextSize(word, textSize, font, Vector2.new(maxWidth, 1e5)).X
                                     local minX, maxX = lineX, lineX + wSize
                                 
                                     if mousePos.X >= minX and mousePos.X <= maxX then
