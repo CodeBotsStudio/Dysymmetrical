@@ -76,6 +76,9 @@
     ------16/11/2025------
     * Turned the Stun Protection VFX into a ParticleEmitter (MAKE SURE TO GO INTO `ServerScriptService/Managers/PlayerManager/StunSpawnProtection` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------17/11/2025------
+    * Added support for multi-killer intro toasts (MAKE SURE TO GO INTO `ReplicatedStorage/Assets/KillerIntros/KillerNameToast` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()
