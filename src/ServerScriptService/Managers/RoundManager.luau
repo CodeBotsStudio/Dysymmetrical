@@ -251,6 +251,8 @@ function RoundManager.Callables:_OnPlayerDeath(dead: Player, wasKiller: boolean?
     RoundManager.PlayerConnections[dead.UserId] = nil
     --if it was a killer, remove killer from table and resort it
     if wasKiller then
+        --updates killer losses
+        CommonFunctions:UpdatePlayerStat(dead, "KillerStats.KillerLosses", 1)
         --removes killer from table using table index
         RoundManager.CurrentRound.Killers[RoundManager.CurrentRound.KillerIndex[dead]] = nil
         RoundManager.CurrentRound.KillerIndex[dead] = nil
