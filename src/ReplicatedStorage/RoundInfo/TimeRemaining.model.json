@@ -1,4 +1,6 @@
 {
     "className": "NumberValue",
-    "Value": 50
+    "properties": {
+        "Value": 50
+    }
 }

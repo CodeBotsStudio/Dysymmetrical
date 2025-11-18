@@ -85,7 +85,14 @@ function PlayerManager:Init()
 						end)
 					end)
 				else
-					StunSPPrefab:Clone().Parent = Utils:FindFirstChild(char, "HumanoidRootPart")
+					local HRP = Utils:FindFirstChild(char, "HumanoidRootPart")
+					local StunSP = StunSPPrefab:Clone()
+					StunSP.Parent = HRP
+					local Weld = Instance.new("Weld")
+					Weld.Name = "StunProtectionWeld"
+					Weld.Parent = HRP
+					Weld.Part0 = HRP
+					Weld.Part1 = StunSP
 				end
 			else
 				for _, i in char:GetDescendants() do
@@ -147,11 +154,9 @@ function PlayerManager:Init()
 			plr:LoadCharacter()
 		end)
 		
-		task.spawn(function()
-			local TimePlayed = Utils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
-			TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
-				TimePlayed.Value += delta
-			end)
+		local TimePlayed = Utils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
+		TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
+			TimePlayed.Value += delta
 		end)
 	end)
 

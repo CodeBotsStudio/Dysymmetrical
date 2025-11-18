@@ -27,6 +27,7 @@ local DEFAULT_SETTINGS: PathSettings = {
 
 local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
+local Signal = require(script.Parent.Signal)
 local function output(func, msg)
 	func(((func == error and "SimplePath Error: ") or "SimplePath: ")..msg)
 end
@@ -190,7 +191,7 @@ end
 --[[ STATIC METHODS ]]--
 function Path.GetNearestCharacter(fromPosition)
 	local character, dist = nil, 50000
-	for _, player in ipairs(Players:GetPlayers()) do
+	for _, player in Players:GetPlayers() do
 		if player.Character and (player.Character.PrimaryPart.Position - fromPosition).Magnitude < dist then
 			character, dist = player.Character, (player.Character.PrimaryPart.Position - fromPosition).Magnitude
 		end
@@ -207,11 +208,11 @@ function Path.new(agent: Model, agentParameters: {[string]: any}, override: Path
 	local self = setmetatable({
 		_settings = override or DEFAULT_SETTINGS,
 		_events = {
-			Reached = Instance.new("BindableEvent"),
-			WaypointReached = Instance.new("BindableEvent"),
-			Blocked = Instance.new("BindableEvent"),
-			Error = Instance.new("BindableEvent"),
-			Stopped = Instance.new("BindableEvent"),
+			Reached = Signal.new(),
+			WaypointReached = Signal.new(),
+			Blocked = Signal.new(),
+			Error = Signal.new(),
+			Stopped = Signal.new(),
 		},
 		_agent = agent,
 		_humanoid = agent:FindFirstChildOfClass("Humanoid"),
@@ -234,7 +235,7 @@ function Path.new(agent: Model, agentParameters: {[string]: any}, override: Path
     end
 
 	--Configure settings
-	for setting, value in pairs(DEFAULT_SETTINGS) do
+	for setting, value in DEFAULT_SETTINGS do
 		self._settings[setting] = self._settings[setting] == nil and value or self._settings[setting]
 	end
 
@@ -252,8 +253,8 @@ end
 
 --[[ NON-STATIC METHODS ]]--
 function Path:Destroy()
-	for _, event in ipairs(self._events) do
-		event:Destroy()
+	for _, event in self._events do
+		event:DisconnectAll()
 	end
 	self._events = nil
 	if rawget(self, "_visualWaypoints") then
@@ -261,7 +262,7 @@ function Path:Destroy()
 	end
 	self._path:Destroy()
 	setmetatable(self, nil)
-	for k, _ in pairs(self) do
+	for k, _ in self do
 		self[k] = nil
 	end
 end

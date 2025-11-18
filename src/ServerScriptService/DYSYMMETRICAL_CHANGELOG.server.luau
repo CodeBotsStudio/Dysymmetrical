@@ -73,6 +73,9 @@
     * Added rules menu (TBF) (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Rules` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
     * Added smaller sidebar icons (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/SideBar` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------16/11/2025------
+    * Turned the Stun Protection VFX into a ParticleEmitter (MAKE SURE TO GO INTO `ServerScriptService/Managers/PlayerManager/StunSpawnProtection` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()

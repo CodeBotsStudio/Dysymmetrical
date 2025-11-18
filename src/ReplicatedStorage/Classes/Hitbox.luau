@@ -124,6 +124,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
     local Over = OverlapParams.new()
     Over.FilterType = Enum.RaycastFilterType.Exclude
     Over.FilterDescendantsInstances = {Char}
+    Over.CollisionGroup = "Attackable"
 
     -- Make a new raycast filter
     local RayParams = RaycastParams.new()
@@ -208,7 +209,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                 CheckPart.Parent = HitboxFolder
 
                 -- The hitbox itself lingers for a little while, even after parsing it, so it can be seen for those who have hitboxes enabled in their client settings(?).
-                Debris:AddItem(Part, 0.75)
+                Debris:AddItem(CheckPart, 0.75)
 
                 -- Some amount of ping compensation for placing the hitbox.
                 if Config.PredictVelocity and not Config.IsProjectile then
@@ -370,16 +371,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                                         -- If there are no execution animations to use, for one reason or another, resort to just flinging the target really far.
                                         if not ExecutionAnim then
-
-                                            -- TODO: "Replace this with something not as unstable as BodyVelocity. Pro tip: use 16,000 force, not 1e999. Computers dont handle big numbers well, and for some reason 16k just works perfectly. Don't ask, I don't know." – Itred
-                                            if Config.Knockback >= 15 then
-                                                HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                            elseif Config.Knockback > 0 then
-                                                local BodyVel = Instance.new("BodyVelocity")
-                                                BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
-                                                BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                                BodyVel.Parent = HRoot
-                                                Debris:AddItem(BodyVel, 0.05)
+                                            if Config.Knockback then
+                                                CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                                             end
 
                                             -- Kill the target after flinging them.
@@ -449,18 +442,11 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                                     end)
                                 else
-
                                     -- If no execution animations are availible, resort to 'ol reliable– flinging the target. 
-
-                                    if Config.Knockback >= 15 then
-                                        HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                    elseif Config.Knockback > 0 then
-                                        local BodyVel = Instance.new("BodyVelocity")
-                                        BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
-                                        BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                                        BodyVel.Parent = HRoot
-                                        Debris:AddItem(BodyVel, 0.05)
+                                    if Config.Knockback then
+                                        CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                                     end
+
                                     Humanoid.Health = 0
                                 end
 
@@ -469,21 +455,9 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                         end
 
-
                         -- If the Target doesn't die to the hitbox, do some knockback:
-
-                        -- If the knockback property of the hitbox is greater than 15, fling the target(?)
-                        if Config.Knockback >= 15 then
-                            HRoot.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-
-                        -- Otherwise, lightly push the target instead.
-                        elseif Config.Knockback > 0 then
-                            
-                            local BodyVel = Instance.new("BodyVelocity")
-                            BodyVel.MaxForce = Vector3.new(16000, 16000, 16000)
-                            BodyVel.Velocity = CheckPart.CFrame.LookVector * Config.Knockback * 10
-                            BodyVel.Parent = HRoot
-                            Debris:AddItem(BodyVel, 0.05)
+                        if Config.Knockback then
+                            CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                         end
 
                         -- If the hitbox deals damage, inflict it.

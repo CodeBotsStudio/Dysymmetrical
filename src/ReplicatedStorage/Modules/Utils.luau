@@ -52,7 +52,7 @@ function Utils:Init()
                 self.TransparentParts[i] = true
             end
         end
-        task.spawn(function()
+        task.defer(function()
             for _, i in workspace:GetDescendants() do
                 AddToR(i)
             end
@@ -737,14 +737,14 @@ function Utils:LoadAnimationFromID(Rig: Model, ID: string | {string} | {[string]
         AnimInstances.Parent = Rig
     end
 
-    local Animation: Animation = Rig.AnimationInstances:FindFirstChild(ID)
+    local Animation: Animation = AnimInstances:FindFirstChild(ID)
     if Animation then
         return Animator:LoadAnimation(Animation)
     else
         Animation = Instance.new("Animation")
         Animation.Name = ID
         Animation.AnimationId = ID
-        Animation.Parent = Rig.AnimationInstances
+        Animation.Parent = AnimInstances
         
         local Track = Animator:LoadAnimation(Animation)
 

@@ -2,7 +2,7 @@
 local TimeManager = {
     CurrentTime = 0,
     Config = {
-        LobbyTime = 3, --0:45 / 45
+        LobbyTime = 5, --0:45 / 45
         RoundTime = 240, --4:00 / 240
         LastManStandingTime = 90, --1:30 / 90
 

@@ -113,9 +113,6 @@ export type Ability = {
 
 --- Ability preset for customization.
 function AbilityType:GetDefaultAbilitySettings(): Ability
-    --instantiates a new `Animation` instance for loading the use animation (CLIENT ONLY)
-    local Animation = not RunService:IsServer() and Instance.new("Animation") or nil
-
     return {
         Name = "Ability",
         Description = "Does something",
@@ -141,7 +138,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
                 table.insert(own.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
                     if player == plr and abilityName == own.Name and own:CanUse() then
-                        task.spawn(function()
+                        task.defer(function()
                             if own.CharModule.Config.Voicelines and own.CharModule.Config.Voicelines[own.Name] then
                                 Sounds:PlayVoiceline(own.Owner.Character, own.CharModule.Config.Voicelines[own.Name])
                             end
@@ -149,16 +146,15 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
                         --cooldown stuffs
                         own.OnCooldown = true
-                        own.CooldownTimer = (own.Cooldown - 0.1) / 2
+                        -- divide timer by two to make sure that it's fair when it ends in client
+                        own.CooldownTimer = (own.Cooldown - 0.1)
                         task.spawn(function()
-                            for _ = 0.1, own.CooldownTimer * 10 + 1 do
+                            --TODO: replace with a method that isn't network stability dependant
+                            while own.CooldownTimer > 0 do
                                 task.wait(0.1)
                                 own.CooldownTimer -= 0.1
-                                if own.CooldownTimer <= 0 then
-                                    own.CooldownTimer = 0
-                                    break
-                                end
                             end
+                            own.CooldownTimer = 0
                             own.OnCooldown = false
                         end)
 
@@ -195,8 +191,6 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
             own.UsesLeft = own.UseSettings.InitialUses
             if #own.UseAnimation > 0 then
-                Animation.AnimationId = own.UseAnimation
-
                 --nesting in pcall so that if there's nothing it doesn't matter
                 pcall(function()
                     local AnimName = own.Name:gsub(" ", "").."UseAnim"
@@ -239,14 +233,12 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                     own.OnCooldown = true
                     own.CooldownTimer = own.Cooldown - 0.1
                     task.spawn(function()
-                        for _ = 0.1, own.CooldownTimer * 10 + 1 do
+                        --TODO: replace with a method that isn't network stability dependant
+                        while own.CooldownTimer > 0 do
                             task.wait(0.1)
                             own.CooldownTimer -= 0.1
-                            if own.CooldownTimer <= 0 then
-                                own.CooldownTimer = 0
-                                break
-                            end
                         end
+                        own.CooldownTimer = 0
                         own.OnCooldown = false
                     end)
                     --decreasing uses left if it's supposed to be limited
@@ -281,10 +273,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         OnRemove = nil,
 
         ReloadAnimation = function(own: Ability, id: string)
-            Animation.AnimationId = id
-            pcall(function()
-                own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
-            end)
+            own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
         end,
 
         PlayUseAnimation = nil,
@@ -308,8 +297,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 return
             end
 
-            print(own.CooldownTimer)
-
+            --NOTE: this is handled this way (by making separate cooldowns in both server and client) so that it's possible to prevent network calls if it's impossible to use the ability in client
             if own:CanUse() then
                 Network:FireServerConnection("UsePlayerAbility", "REMOTE_EVENT", own.Name) --i know this is insecure but sue me lol
             end

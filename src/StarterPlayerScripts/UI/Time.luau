@@ -22,19 +22,17 @@ return {
         	NotEnough = "Waiting for players...",
         }
 
-        TimeLabel.Text = Utils:ConvertToMinSec(TimeRemaining.Value)
+        TimeLabel.Text = Utils:ConvertToMinSec(math.ceil(TimeRemaining.Value))
         Label.Text = LabelTexts[State.Value]
 
         TimeRemaining.Changed:Connect(function(value: number)
-        	TimeLabel.Text = Utils:ConvertToMinSec(value)
+        	TimeLabel.Text = Utils:ConvertToMinSec(math.ceil(value))
         end)
         State.Changed:Connect(function(value: string)
             if value == "Lobby" and not EnoughPlayers.Value then
                 Label.Text = LabelTexts.NotEnough
-        	elseif LabelTexts[value] then
-        		Label.Text = LabelTexts[value]
         	else
-        		Label.Text = "PLACEHOLDER"
+        		Label.Text = LabelTexts[value] or "PLACEHOLDER"
         	end
         end)
     end,
