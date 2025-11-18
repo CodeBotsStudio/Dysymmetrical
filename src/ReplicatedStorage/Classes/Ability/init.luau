@@ -37,6 +37,9 @@ export type Ability = {
 
     --- CLIENT FUNCTION: Attempts to use the ability by checking if it's possible in the first place.
     AttemptUse: (self: Ability) -> (),
+    --- Modifies the `UsesLeft` property in both client and server.
+    --- SHOULD ONLY BE USED IN SERVER.
+    ChangeAbilityCharges: (self: Ability, Type: "Set" | "Add" | "Take", amount: number) -> (),
 
     --- The name of the input used for the ability, set up in `InputManager`.
     InputName: string,
@@ -123,6 +126,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         Init = function(own: Ability, charModule: any, plr: Player)
             own.Owner = plr
             own.CharModule = charModule
+            own.UsesLeft = own.UseSettings.InitialUses
             if RunService:IsServer() then
                 Utils:Print("Initting "..own.Name.." ability for "..plr.Name)
 
@@ -146,8 +150,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
                         --cooldown stuffs
                         own.OnCooldown = true
-                        -- divide timer by two to make sure that it's fair when it ends in client
-                        own.CooldownTimer = (own.Cooldown - 0.1)
+                        own.CooldownTimer = own.Cooldown
                         task.spawn(function()
                             --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
                             while own.CooldownTimer > 0 do
@@ -161,6 +164,11 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                             own.CooldownTimer = 0
                             own.OnCooldown = false
                         end)
+
+                        --decreasing uses left if it's supposed to be limited
+                        if own.UseSettings.Limited then
+                            own.UsesLeft -= 1
+                        end
 
                         Network:FireClientConnection(own.Owner, "UsePlayerAbility", "REMOTE_EVENT", own.Name)
                         if own.Behaviour then
@@ -193,7 +201,6 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 TurnToMoveDirection = require(own.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
             }
 
-            own.UsesLeft = own.UseSettings.InitialUses
             if #own.UseAnimation > 0 then
                 --nesting in pcall so that if there's nothing it doesn't matter
                 pcall(function()
@@ -235,7 +242,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                     end
                     --cooldown stuffs
                     own.OnCooldown = true
-                    own.CooldownTimer = own.Cooldown - 0.1
+                    own.CooldownTimer = own.Cooldown
                     task.spawn(function()
                         --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
                         while own.CooldownTimer > 0 do
@@ -266,6 +273,12 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 end
             end))
 
+            table.insert(own.Connections, Network:SetConnection("ChangeAbilityCharges", "REMOTE_EVENT", function(abilityName: string, Type: "Set" | "Add" | "Take", amount: number)
+                if abilityName == own.Name then
+                    own:ChangeAbilityCharges(Type, amount)
+                end
+            end))
+
             --clearing ability connections to dispose of this code when the player gets readded
             table.insert(own.Connections, own.Owner.CharacterAdded:Connect(function()
                 own:Destroy()
@@ -282,6 +295,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
         ReloadAnimation = function(own: Ability, id: string)
             own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
+            local AnimName = own.Name:gsub(" ", "").."UseAnim"
+            own.charModule.GameplayConfig.Cache.Animations[AnimName] = Utils:LoadAnimationFromID(own.Owner.Character, id)
+            own.UseAnimationTrack = own.charModule.GameplayConfig.Cache.Animations[AnimName]
         end,
 
         PlayUseAnimation = nil,
@@ -308,6 +324,20 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             --NOTE: this is handled this way (by making separate cooldowns in both server and client) so that it's possible to prevent network calls if it's impossible to use the ability in client
             if own:CanUse() then
                 Network:FireServerConnection("UsePlayerAbility", "REMOTE_EVENT", own.Name) --i know this is insecure but sue me lol
+            end
+        end,
+
+        ChangeAbilityCharges = function(own: Ability, Type:"Add" | "Set" | "Take", amount: number)
+            if Type == "Set" then
+                own.UsesLeft = amount
+            elseif Type == "Add" then
+                own.UsesLeft += amount
+            elseif Type == "Take" then
+                own.UsesLeft -= amount
+            end
+
+            if RunService:IsServer() then
+                Network:FireClientConnection(own.Owner, "ChangeAbilityCharges", "REMOTE_EVENT", own.Name, Type, amount)
             end
         end,
 
@@ -349,10 +379,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             end
 
             --if the player isn't emoting
-            local Emoting = false
-            if not RunService:IsServer() then
-                Emoting = own.OwnerProperties.EmoteManager.CurrentlyPlayingEmote
-            end
+            local Emoting = RunService:IsServer() and own.OwnerProperties.Character:GetAttribute("Emoting") or own.OwnerProperties.EmoteManager.CurrentlyPlayingEmote
 
             return EnoughUses
             and own.Owner.Character:FindFirstChildOfClass("Humanoid").Health > 0 --if the player's alive

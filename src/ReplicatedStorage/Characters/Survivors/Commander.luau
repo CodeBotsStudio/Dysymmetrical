@@ -9,7 +9,6 @@ local Character = require(ReplicatedStorage.Classes.Character)
 local Ability = require(ReplicatedStorage.Classes.Ability)
 local Hitbox = require(ReplicatedStorage.Classes.Hitbox)
 local Utils = require(ReplicatedStorage.Modules.Utils)
-local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local CommonFunctions = RunService:IsServer() and require(game:GetService("ServerScriptService").System.CommonFunctions) or nil
 
@@ -111,6 +110,10 @@ local Commander = Character:CreateSurvivor({
                 Description = "Commander reloads his gun. He takes 5 seconds to do so and gets Slowness III while reloading.",
                 Behaviour = function(self)
                     if RunService:IsServer() then
+                        table.insert(self.Connections, task.delay(self.Duration, function()
+                            self:ChangeAbilityCharges("Set", 1)
+                        end))
+
                         return
                     end
                 
@@ -120,7 +123,6 @@ local Commander = Character:CreateSurvivor({
                 
                     table.insert(self.Connections, task.delay(self.Duration, function()
                         self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
-                        Network:FireConnection("ReloadCommanderJustice")
                     end))
                 
                     self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0.35)
@@ -145,13 +147,7 @@ local Commander = Character:CreateSurvivor({
                 },
 
                 ExtraInit = function(self)
-                    if not RunService:IsServer() then
-                        table.insert(self.Connections, Network:SetConnection("ReloadCommanderJustice", "BINDABLE_EVENT", function()
-                            self.UsesLeft = 1
-                        end))
-                    else
-                        self.JusticeModel = Utils:FindFirstChild(self.OwnerProperties.Character, "Deagle")
-                    end
+                    self.JusticeModel = Utils:FindFirstChild(self.OwnerProperties.Character, "Deagle")
                 end,
 
                 Behaviour = function(self)
