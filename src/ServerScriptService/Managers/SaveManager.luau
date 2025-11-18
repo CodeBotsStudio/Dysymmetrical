@@ -158,7 +158,7 @@ function SaveManager:Init()
 			
 			local AllSurvivors = ReplicatedStorage:FindFirstChild("Characters"):FindFirstChild("Survivors"):GetChildren()
 
-			-- Set the default equipped killer to the first killer found in this list as a temporary, non-error-prone solution. This can be changed by the user to another killer, and the game wont try to do this again unless the killer this value points to doesn't exist again.
+			-- Similarly, set the default equipped survivor to the first survivor found in this list as a temporary, non-error-prone solution. This can be changed by the user to another survivor, and the game wont try to do this again unless the survivor this value points to doesn't exist again.
 			EquippedFolder.Survivor.Value = AllSurvivors[1].Name
 
 			-- "This, too, could technically error if no survivors are found, but if such is the case, what are you even doing." – Itred
