@@ -249,76 +249,6 @@ function SaveManager:_SetupLeaderStats(DataFolder, parent) --just for display, w
 	end
 end
 
-
---- Attempt to validate save data and/or salvage it if needed.
-function SaveManager:_CheckSaveIntegrity(DataFolder, parent)
-
-	-- If the player has an emote that doesn't exist, destroy it.
-	for _index, emote in DataFolder.Equipped.Emotes:GetChildren() do
-		if Utils:GetEmoteModule(emote.Name) == nil then
-			emote:Destroy()
-		end
-	end
-
-	-- If the player has a skin that doesn't exist for neither killers nor survivors, wipe it.
-	for _index, skin in DataFolder.Equipped.Skins:GetChildren() do
-		if Utils:GetCharacterModule("Killer", skin.Name, skin.Value) == nil and Utils:GetCharacterModule("Survivor", skin.Name, skin.Value) == nil then
-			skin:Destroy()
-		end
-	end
-
-	-- Retrieve currently equipped killer and survivor
-	local EquippedKiller = DataFolder.Equipped.Killer
-	local EquippedSurvivor = DataFolder.Equipped.Survivor
-
-	-- If the player has an invalid killer equipped, restore it to a default(?).
-	if not Utils:GetCharacterModule("Killer", EquippedKiller.Value) then
-		EquippedKiller.Value = script.PlayerData.Equipped.Killer
-	end
-
-	-- If the player has an invalid survivor equipped, restore it to a default(?).
-	if not Utils:GetCharacterModule("Survivor", EquippedSurvivor.Value) then
-		EquippedSurvivor.Value = script.PlayerData.Equipped.Survivor
-	end
-
-	-- If the player somehow has an invalid survivor or killer level for their purchased survivors or killers, wipe it.
-	for _killer, level in DataFolder.Purchased.Killers:GetChildren() do
-		if Utils:GetCharacterModule("Killer", level.Name) == nil then
-			level:Destroy()
-		end
-	end
-	for _survivor, level in DataFolder.Purchased.Survivors:GetChildren() do
-		if Utils:GetCharacterModule("Survivor", level.Name) == nil then
-			level:Destroy()
-		end
-	end
-
-	-- If the player has invalid skins, destroy them.
-	for index, skin in DataFolder.Purchased.Skins:GetChildren() do
-
-		-- Check if the skin is for survivors or killers.
-		local IsSurvivor = Utils:GetCharacterModule("Survivor", skin.Name) ~= nil
-
-		if not IsSurvivor then
-			-- If its a killer skin that doesn't exist, destroy it and go to the next one in line.
-			if Utils:GetCharacterModule("Killer", skin.Name) == nil then
-				skin:Destroy()
-				continue
-			end
-		end
-
-		-- Otherwise do a broader search(?); if it still doesn't exist, destroy it and go to the next one in line.
-		for index, value in skin:GetChildren() do
-			if Utils:GetCharacterModule(if IsSurvivor then "Survivor" else "Killer", skin.Name, value.Name) == nil then -- "I didn't even know you could do that with conditions. Wow." – Itred
-				value:Destroy()
-				continue
-			end
-		end
-
-	end
-end
-
-
 --- Loads a player's savedata and generates a heirarchy of folders and valuebase objects for storing, reading, and writing to and from it in-game.
 function SaveManager:Load(Player: Player): Folder
 
@@ -350,7 +280,6 @@ function SaveManager:Load(Player: Player): Folder
 	if PlayerData then
 
 		if not PlayerData.Achievements then
-			-- self:_CheckSaveIntegrity(ClonedData)
 			ClonedData.Parent = Player
 			self:_SetupLeaderStats(ClonedData, Leaderstats)
 			Leaderstats.Parent = Player
