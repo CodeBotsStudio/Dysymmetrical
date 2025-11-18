@@ -20,6 +20,7 @@ return {
         	Lobby = "Round begins in...",
         	InRound = "Round ends in...",
         	NotEnough = "Waiting for players...",
+            Frozen = "Time frozen!",
         }
 
         TimeLabel.Text = Utils:ConvertToMinSec(math.ceil(TimeRemaining.Value))
@@ -29,7 +30,9 @@ return {
         	TimeLabel.Text = Utils:ConvertToMinSec(math.ceil(value))
         end)
         State.Changed:Connect(function(value: string)
-            if value == "Lobby" and not EnoughPlayers.Value then
+            if workspace:GetAttribute("FreezeTime") then
+                Label.Text = LabelTexts.Frozen
+            elseif value == "Lobby" and not EnoughPlayers.Value then
                 Label.Text = LabelTexts.NotEnough
         	else
         		Label.Text = LabelTexts[value] or "PLACEHOLDER"
