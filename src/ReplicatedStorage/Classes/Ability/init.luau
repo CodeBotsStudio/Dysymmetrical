@@ -6,6 +6,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local Signal = require(ReplicatedStorage.Utils.Signal)
 
 local AbilityType = {}
 
@@ -80,6 +81,11 @@ export type Ability = {
         Limited: boolean,
         --- Initial uses / charges for an ability when starting a round.
         InitialUses: number,
+    },
+
+    Signals: {
+        ChargesChanged: Signal.Signal,
+        Used: Signal.Signal,
     },
 
     --- Connections and threads that make the ability work. Add any `task.delay()`s or `RBXScriptConnection`s here.
@@ -170,6 +176,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                             own:ChangeAbilityCharges("Set", own.UsesLeft - 1)
                         end
 
+                        task.spawn(function()
+                            own.Signals.Used:Fire()
+                        end)
                         Network:FireClientConnection(own.Owner, "UsePlayerAbility", "REMOTE_EVENT", own.Name)
                         if own.Behaviour then
                             own:Behaviour()
@@ -292,8 +301,8 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         ReloadAnimation = function(own: Ability, id: string)
             own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
             local AnimName = own.Name:gsub(" ", "").."UseAnim"
-            own.charModule.GameplayConfig.Cache.Animations[AnimName] = Utils:LoadAnimationFromID(own.Owner.Character, id)
-            own.UseAnimationTrack = own.charModule.GameplayConfig.Cache.Animations[AnimName]
+            own.CharModule.GameplayConfig.Cache.Animations[AnimName] = Utils:LoadAnimationFromID(own.Owner.Character, id)
+            own.UseAnimationTrack = own.CharModule.GameplayConfig.Cache.Animations[AnimName]
         end,
 
         PlayUseAnimation = nil,
@@ -310,6 +319,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 end
             end
             table.clear(own.Connections)
+
+            own.CooldownTimer = 0
+            own.OnCooldown = false
         end,
 
         AttemptUse = function(own: Ability)
@@ -375,7 +387,12 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             end
 
             --if the player isn't emoting
-            local Emoting = RunService:IsServer() and own.OwnerProperties.Character:GetAttribute("Emoting") or own.OwnerProperties.EmoteManager.CurrentlyPlayingEmote
+            local Emoting
+            if RunService:IsServer() then
+                Emoting = own.OwnerProperties.Character:GetAttribute("Emoting") == true
+            else
+                Emoting = own.OwnerProperties.EmoteManager.CurrentlyPlayingEmote ~= nil
+            end
 
             return EnoughUses
             and own.Owner.Character:FindFirstChildOfClass("Humanoid").Health > 0 --if the player's alive
@@ -395,6 +412,11 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         UseSettings = {
             Limited = false,
             InitialUses = 1,
+        },
+
+        Signals = {
+            ChargesChanged = Signal.new(),
+            Used = Signal.new(),
         },
 
         Connections = {},
