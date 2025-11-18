@@ -121,6 +121,50 @@ function SaveManager:Init()
 		end
 	end)
 
+	-- Ensure default values for playerdata doing point to killers/survivors that exist. First, check to make sure the valueobjects which these would be stored in exist.
+	if script.PlayerData and script.PlayerData.Equipped and script.PlayerData.Equipped.Killer and script.PlayerData.Equipped.Survivor then
+		
+		-- Check the default killer
+		local DefaultKiller = script.PlayerData.Equipped.Killer.Value
+		local KillerModule = Utils:GetCharacterModule("Killer", DefaultKiller)
+
+		-- If the default killer points to a killer who doesn't exist anymore, grab the first one the game can find and use that as the default instead.
+		if not KillerModule then
+			
+			local AllKillers = ReplicatedStorage:FindFirstChild("Characters"):FindFirstChild("Killers"):GetChildren()
+
+			-- Set the default equipped killer to the first killer found in this list as a temporary, non-error-prone solution. This can be changed by the user to another killer, and the game wont try to do this again unless the killer this value points to doesn't exist again.
+			script.PlayerData.Equipped.Killer.Value = AllKillers[1].Name
+
+			-- "This could technically error if no killers are found, but if such is the case, I think the developer has bigger errors to worry about, so I think its fine to leave it as-is" – Itred
+
+			print("INFO – Default (template) playerdata points to a killer which no longer exists. Substituting with '"..AllKillers[1].Name.."' for now. \nModify the in value 'ServerScriptService/Managers/SaveManager/PlayerData/Equipped/Killer' if you wish to set a different default killer.")
+
+		end
+
+
+		-- Check the default survivor
+		local DefaultSurvivor = script.PlayerData.Equipped.Survivor.Value
+		local SurvivorModule = Utils:GetCharacterModule("Survivor", DefaultSurvivor)
+
+		-- Same deal for survivors– If the default survivor points to one whom doesn't exist anymore, grab the first one the game can find and use that as the default instead.
+		if not SurvivorModule then
+			
+			local AllSurvivors = ReplicatedStorage:FindFirstChild("Characters"):FindFirstChild("Survivors"):GetChildren()
+
+			-- Set the default equipped killer to the first killer found in this list as a temporary, non-error-prone solution. This can be changed by the user to another killer, and the game wont try to do this again unless the killer this value points to doesn't exist again.
+			script.PlayerData.Equipped.Survivor.Value = AllSurvivors[1].Name
+
+			-- "This, too, could technically error if no survivors are found, but if such is the case, what are you even doing." – Itred
+
+			print("INFO – Default (template) playerdata points to a killer which no longer exists. Substituting with '"..AllSurvivors[1].Name.."' for now. \nModify the in value 'ServerScriptService/Managers/SaveManager/PlayerData/Equipped/Killer' if you wish to set a different default killer.")
+
+		end
+
+
+	else
+		warn("WARNING – Default playerdata may be missing important pieces, or entirely absent! Check for a folder in ServerScriptService/Managers/SaveManager/PlayerData. If you know what you're doing, you can ignore or silence this message.")
+	end
 end
 
 
