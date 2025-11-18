@@ -167,7 +167,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
                         --decreasing uses left if it's supposed to be limited
                         if own.UseSettings.Limited then
-                            own.UsesLeft -= 1
+                            own:ChangeAbilityCharges("Set", own.UsesLeft - 1)
                         end
 
                         Network:FireClientConnection(own.Owner, "UsePlayerAbility", "REMOTE_EVENT", own.Name)
@@ -256,10 +256,6 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                         own.CooldownTimer = 0
                         own.OnCooldown = false
                     end)
-                    --decreasing uses left if it's supposed to be limited
-                    if own.UseSettings.Limited then
-                        own.UsesLeft -= 1
-                    end
                     --plays any existant use animation
                     if own.PlayUseAnimationOnUse then
                         own:PlayUseAnimation()
