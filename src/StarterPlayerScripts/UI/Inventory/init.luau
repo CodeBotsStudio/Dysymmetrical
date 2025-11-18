@@ -723,31 +723,42 @@ function Inventory:ReloadContent()
             return
         end
 
-        local KillerInfo: Types.Killer = require(Utils:GetCharacterModule("Killer", name))
+        if Utils:GetCharacterModule("Killer", name) then
 
-        local Card = Templates.CardTemplate:Clone()
-        local Container = Card.Container
-        Card.Name = name
-        Card.LayoutOrder = LO
-        Card.Parent = KillerContainer
-        Container.Title.Text = KillerInfo.Config.Name
-        Container.CharacterRender.Image = KillerInfo.Config.Render
+			local KillerInfo: Types.Killer = require(Utils:GetCharacterModule("Killer", name))
 
-        self.LoadedItems.Killers[name] = Card
-        self.ItemModules[name] = KillerInfo
-        Container.Interact.MouseEnter:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
-        end)
-        Container.Interact.MouseLeave:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
-        end)
-        Container.Interact.MouseButton1Click:Connect(function()
-            if self.SkinMenu.Open then
-                return
-            end
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-            self:OnCharButtonPress(name, KillerInfo, "Killer")
-        end)
+			local Card = Templates.CardTemplate:Clone()
+			local Container = Card.Container
+			Card.Name = name
+			Card.LayoutOrder = LO
+			Card.Parent = KillerContainer
+			Container.Title.Text = KillerInfo.Config.Name
+			Container.CharacterRender.Image = KillerInfo.Config.Render
+
+			self.LoadedItems.Killers[name] = Card
+			self.ItemModules[name] = KillerInfo
+
+			Container.Interact.MouseEnter:Connect(function()
+				Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, { Volume = 0.2 })
+			end)
+
+			Container.Interact.MouseLeave:Connect(function()
+				Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, { Volume = 0.2 })
+			end)
+
+            Container.Interact.MouseButton1Click:Connect(function()
+				if self.SkinMenu.Open then
+					return
+				end
+				Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, { Volume = 0.8 })
+				self:OnCharButtonPress(name, KillerInfo, "Killer")
+            end)
+
+        else
+            warn(`Error: Couldn't display card for killer "{name}", as their module doesn't exist! Ignoring for now...`)
+        end
+
+        
     end
 
     for _, module in Ordered do
