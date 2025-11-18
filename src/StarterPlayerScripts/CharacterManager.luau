@@ -37,16 +37,13 @@ function CharManager:_InitCharacterAbilities(Module)
             Ability:Init(Module, LocalPlayer)
         end
     end
-    -- Utils:Print(CharacterAbilities.Abilities)
-
-    CharacterAbilities.Animations = {}
 
     for name, anim in Module.Config.AnimationIDs do
         if table.find(AnimLoadPrevented, name) then
             continue
         end
 
-        CharacterAbilities.Animations[name] = Utils:LoadAnimationFromID(LocalPlayer.Character, anim, false)
+        Module.GameplayConfig.Cache.Animations[name] = Utils:LoadAnimationFromID(LocalPlayer.Character, anim, false)
     end
 
     return CharacterAbilities
