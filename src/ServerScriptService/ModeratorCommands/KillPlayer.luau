@@ -1,12 +1,3 @@
---!nocheck
-
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
-
-local Utils = require(ReplicatedStorage.Modules.Utils)
-local ServerCharacterManager = require(ServerScriptService.Managers.ServerCharacterManager)
-
 return {
     Name = "Turn Player Into Killer/Survivor",
     Executable = true,
@@ -38,15 +29,20 @@ return {
         end
 
         if Player:lower() == "all" then
-            for _, i in Players:GetPlayers() do
-                task.spawn(function()
-                    ServerCharacterManager:SetupCharacter(i, Utils:GetPlayerEquipped(i, Type), Type)
-                end)
+            for _, i in workspace.Players:GetChildren() do
+                if not i:FindFirstChildOfClass("Humanoid") then
+                    continue
+                end
+
+                i.Humanoid.Health = 0
             end
             return
         end
 
-        Player = Players:FindFirstChild(Player)
-        ServerCharacterManager:SetupCharacter(Players:FindFirstChild(Player), Utils:GetPlayerEquipped(Player, Type), Type)
+        if not workspace.Players:FindFirstChild(Player) or not workspace.Players[Player]:FindFirstChildOfClass("Humanoid") then
+            return
+        end
+
+        workspace.Players[Player].Humanoid.Health = 0
     end,
 }
