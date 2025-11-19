@@ -71,3 +71,4 @@ Credits to [@grayzcale](https://github.com/grayzcale/simplepath) for the `Simple
 ## Pull Request credits
 
 [@shroomii](https://github.com/shroomiii) in [#1](https://github.com/CodeBotsStudio/Dysymmetrical/pull/1) (clean .gitignore & GitHub Actions)
+[@itred12](https://github.com/itred12) in multiple pulls that help to stabilize and optimize the engine a lot
