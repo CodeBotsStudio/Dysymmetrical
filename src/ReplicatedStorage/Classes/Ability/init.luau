@@ -269,6 +269,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                     if own.PlayUseAnimationOnUse then
                         own:PlayUseAnimation()
                     end
+                    task.spawn(function()
+                        own.Signals.Used:Fire()
+                    end)
                     --ability stuffs
                     if own.Behaviour then
                         task.spawn(function()
@@ -344,6 +347,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 own.UsesLeft -= amount
             end
 
+            own.Signals.ChargesChanged:Fire(own.UsesLeft)
             if RunService:IsServer() then
                 Network:FireClientConnection(own.Owner, "ChangeAbilityCharges", "REMOTE_EVENT", own.Name, Type, amount)
             end
