@@ -214,6 +214,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
                 task.defer(function()
                     local SkinModel = Utils:FindFirstChild(CharacterFolder, "Skins."..self.SelectedItem.Type.."."..self.SelectedItem.Name.."."..name, false)
                     if not SkinModel then
+                        warn("[Shop:ToggleSkinsMenu]: Item preview model can't be found! Make sure it's located in ReplicatedStorage/Characters/Skins/"..self.SelectedItem.Type.."/"..self.SelectedItem.Name.."s! ("..name..")")
                         return
                     end
 
@@ -878,6 +879,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
             task.defer(function()
                 local Model = Utils:FindFirstChild(CharacterFolder, Type.."."..name, false)
                 if not Model then
+                    warn("[Shop:ReloadContent]: Item preview model can't be found! Make sure it's located in ReplicatedStorage/Characters/"..Type.."! ("..name..")")
                     return
                 end
 
