@@ -21,7 +21,6 @@ local threads: {thread} = {}
 local Folder = ReplicatedStorage.LoadedPlayers
 local Hitboxes = ServerStorage.Assets.Hitboxes
 
-local CharFolder = ServerStorage.Assets.Characters
 local StarterCharacterScripts = game:GetService("StarterPlayer").StarterCharacterScripts
 local PlayerFolder = workspace.Players
 
@@ -234,19 +233,34 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: "K
 
 	local char
 
-	--gets the skin if queued to
-	if skinName ~= nil and #skinName > 0 then
-		char = Utils:FindFirstChild(CharFolder.Skins[RigType], RigName.."."..skinName, false)
-	end
+	local function FindChar(Service: "ServerStorage" | "ReplicatedStorage", Name: string, Type: ("Killer" | "Survivor")?, Skin: string?)
+		--gets the skin if queued to
+		if Skin ~= nil and #Skin > 0 then
+			char = Utils:FindFirstChild(game:GetService(Service).Assets.Characters.Skins[RigType], RigName.."."..Skin, false)
+		end
 
-	--if there's a skin then it gets cloned and used
-	if char then
-		char = char:Clone()
-		char:SetAttribute("CharacterSkinName", skinName)
-	--if not it just gets the default one for the character
-	else
-		char = CharFolder[RigType][RigName]:Clone()
+		--if there's a skin then it gets cloned and used
+		if char then
+			char = char:Clone()
+			char:SetAttribute("CharacterSkinName", Skin)
+		--if not it just gets the default one for the character
+		else
+			char = game:GetService(Service).Assets.Characters[RigType][RigName]:Clone()
+		end
+
+		if not char and Service == "ServerStorage" then
+			FindChar("ReplicatedStorage", Name, Type, Skin)
+		end
 	end
+	FindChar("ServerStorage", RigName, RigType, skinName)
+
+	if not char then
+		warn("[PlayerManager:_RespawnPlayer()]: Can't find character rig! Loading player character instead...")
+		warn(debug.traceback())
+		plr:LoadCharacter()
+		return
+	end
+	
 	char:SetAttribute("CharacterName", RigName)
 
 	char.Name = plr.Name

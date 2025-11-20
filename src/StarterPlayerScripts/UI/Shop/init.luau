@@ -16,6 +16,8 @@ local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local BuyWindow = require(script.BuyWindow)
 
+local CharacterFolder = ReplicatedStorage.Assets.Characters
+
 local Shop = {
     Opened = false,
     Enabled = true,
@@ -188,14 +190,20 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             Container.CharacterRender.Image = Info.Config.Render
             Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).."$" or "FREE"
 
-            -- if CanMakePreviews then
+            local SkinPreview = Container.Preview.ViewportFrame
+            if CanMakePreviews then
+                task.defer(function()
+                    local SkinModel = Utils:FindFirstChild(CharacterFolder, "Skins."..self.SelectedItem.Type.."."..self.SelectedItem.Name)
+                    if not SkinModel then
+                        return
+                    end
 
-            -- end
+                    
+                end)
+            end
 
             self.LoadedItems.Skins[name] = Card
             self.ItemModules.Skins[name] = Info
-
-            local SkinPreview = Container.Preview.ViewportFrame
 
             -- reminder that these connections disconnect automatically when the parent is destroyed! -dys
             Container.Interact.MouseEnter:Connect(function()
