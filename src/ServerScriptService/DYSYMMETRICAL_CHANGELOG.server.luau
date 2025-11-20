@@ -81,6 +81,7 @@
 
     ------20/11/2025------
     * Added skin previews on card hover (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Shop/ShopUI/Container/SkinsContainer/Content/SkinPreviewCache` & `StarterPlayer/StarterPlayerScripts/UI/Shop/Templates/CardTemplate` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    Also make sure to add the UIPaddings in the shop and inventory's scrolling frames!
 
 ]]
 

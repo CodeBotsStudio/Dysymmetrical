@@ -984,7 +984,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
         LO = 0
 
         for _, module in ReplicatedStorage[Type == "Emote" and "Assets" or "Characters"][Type.."s"]:GetChildren() do
-            table.insert(Ordered[Utils:GetPlayerOwned(LocalPlayer, "Killers."..module.Name) and "Owned" or "Unowned"], module)
+            table.insert(Ordered[Utils:GetPlayerOwned(LocalPlayer, Type.."s."..module.Name) and "Owned" or "Unowned"], module)
         end
 
         SortTableByPriceAndName(Ordered.Owned)

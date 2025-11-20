@@ -238,9 +238,15 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
             self.ItemModules.Skins[name] = Info
 
             Container.Interact.MouseEnter:Connect(function()
+                TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                    Size = UDim2.fromScale(1.065, 1.065)
+                }):Play()
                 Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
             end)
             Container.Interact.MouseLeave:Connect(function()
+                TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                    Size = Utils.UDim.Full
+                }):Play()
                 Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
             end)
             Container.Interact.MouseButton1Click:Connect(function()
@@ -701,54 +707,49 @@ function Inventory:ReloadContent()
 
     --Killer frame reloading
 
-    local Ordered = BoughtItems.Killers:GetChildren()
+    local Ordered = {}
     local LO = 0
 
-    table.sort(Ordered, function(a, b)
-        local Modules = {
-            A = require(Utils:GetCharacterModule("Killer", a.Name)),
-            B = require(Utils:GetCharacterModule("Killer", b.Name)),
-        }
-
-        return
-            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
-            or Modules.A.Config.Price < Modules.B.Config.Price
-    end)
-
-    local function SetupKillerCard(module)
+    local function SetupCard(module, Type: "Killer" | "Survivor")
         local name = module.Name
 
-        if self.LoadedItems.Killers[name] then
-            self.LoadedItems.Killers[name].LayoutOrder = LO
+        if self.LoadedItems[Type.."s"][name] then
+            self.LoadedItems[Type.."s"][name].LayoutOrder = LO
+            return
+        end
+        
+        local Module = Utils:GetCharacterModule(Type, name)
+        if not Module then
+            warn(`[Inventory:ReloadContent()]: Couldn't display card for {Type:lower()} "{name}", as their module doesn't exist! Ignoring for now...`)
             return
         end
 
-        local KillerModule = Utils:GetCharacterModule("Killer", name)
-
-        -- try to encapsulate as little if, while and for statements when possible! -dys
-        if not KillerModule then
-            warn(`[Inventory:ReloadContent()]: Couldn't display card for killer "{name}", as their module doesn't exist! Ignoring for now...`)
-            return
-        end
-
-		local KillerInfo: Types.Killer = require(KillerModule)
+        local Info = require(Module)
 
 		local Card = Templates.CardTemplate:Clone()
 		local Container = Card.Container
 		Card.Name = name
 		Card.LayoutOrder = LO
-		Card.Parent = KillerContainer
-		Container.Title.Text = KillerInfo.Config.Name
-		Container.CharacterRender.Image = KillerInfo.Config.Render
+		Card.Parent = Type == "Killer" and KillerContainer or SurvivorContainer
+		Container.Title.Text = Info.Config.Name
+		Container.CharacterRender.Image = Info.Config.Render
 
-		self.LoadedItems.Killers[name] = Card
-		self.ItemModules[name] = KillerInfo
+        self.ItemModules[Type.."s"] = self.ItemModules[Type.."s"] or {}
+
+		self.LoadedItems[Type.."s"][name] = Card
+		self.ItemModules[Type.."s"][name] = Info
 
 		Container.Interact.MouseEnter:Connect(function()
+            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Size = UDim2.fromScale(1.065, 1.065)
+            }):Play()
 			Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, { Volume = 0.2 })
 		end)
 
 		Container.Interact.MouseLeave:Connect(function()
+            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Size = Utils.UDim.Full
+            }):Play()
 			Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, { Volume = 0.2 })
 		end)
 
@@ -757,78 +758,40 @@ function Inventory:ReloadContent()
 				return
 			end
 			Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, { Volume = 0.8 })
-			self:OnCharButtonPress(name, KillerInfo, "Killer")
+			self:OnCharButtonPress(name, Info, Type)
         end)
     end
 
-    for _, module in Ordered do
-        SetupKillerCard(module)
-    end
-    
-    --Survivor frame reloading
-
-    Ordered = BoughtItems.Survivors:GetChildren()
-    LO = 0
-
-    table.sort(Ordered, function(a, b)
-        local Modules = {
-            A = require(Utils:GetCharacterModule("Survivor", a.Name)),
-            B = require(Utils:GetCharacterModule("Survivor", b.Name)),
-        }
-
-        return
-            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
-            or Modules.A.Config.Price < Modules.B.Config.Price
-    end)
-
-    local function SetupSurvivorCard(module)
-        local name = module.Name
-        LO += 1
-
-        if self.LoadedItems.Survivors[name] then
-            self.LoadedItems.Survivors[name].LayoutOrder = LO
-            return
-        end
-
-        local SurvivorModule = Utils:GetCharacterModule("Survivor", name)
-
-        -- try to encapsulate as little if, while and for statements when possible! -dys
-        if not SurvivorModule then
-            warn(`[Inventory:ReloadContent()]: Couldn't display card for survivor "{name}", as their module doesn't exist! Ignoring for now...`)
+    local function SortTableByPriceAndName(TableToSort)
+        table.sort(TableToSort, function(a, b)
+            local Modules = {
+                A = require(a),
+                B = require(b),
+            }
 
             return
+                Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+                or Modules.A.Config.Price < Modules.B.Config.Price
+        end)
+    end
+
+    local function SetupBatch(Type: "Killer" | "Survivor")
+        Ordered = {}
+        LO = 0
+
+        for _, module in BoughtItems[Type.."s"]:GetChildren() do
+            table.insert(Ordered, Utils:GetCharacterModule(Type, module.Name))
         end
 
-        local SurvivorInfo: Types.Survivor = require(SurvivorModule)
+        SortTableByPriceAndName(Ordered)
 
-        local Card = Templates.CardTemplate:Clone()
-        local Container = Card.Container
-        Card.Name = name
-        Card.LayoutOrder = LO
-        Card.Parent = SurvivorContainer
-        Container.Title.Text = SurvivorInfo.Config.Name
-        Container.CharacterRender.Image = SurvivorInfo.Config.Render
+        for _, module in ipairs(Ordered) do
+            SetupCard(module, Type)
+        end
+    end
 
-        self.LoadedItems.Survivors[name] = Card
-        self.ItemModules[name] = SurvivorInfo
-        Container.Interact.MouseEnter:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
-        end)
-        Container.Interact.MouseLeave:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
-        end)
-        Container.Interact.MouseButton1Click:Connect(function()
-            if self.SkinMenu.Open then
-                return
-            end
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-            self:OnCharButtonPress(name, SurvivorInfo, "Survivor")
-        end)
-    end
-    
-    for _, module in Ordered do
-        SetupSurvivorCard(module)
-    end
+    SetupBatch("Survivor")
+    SetupBatch("Killer")
 
     self:CheckEquipLabels()
 end
