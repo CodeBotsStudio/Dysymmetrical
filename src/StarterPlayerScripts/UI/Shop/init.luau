@@ -44,6 +44,8 @@ local Shop = {
     },
     UIInstance = nil,
     BuyWindow = nil,
+
+    PreviewsEnabled = true,
 }
 
 local LocalPlayer = Players.LocalPlayer
@@ -149,7 +151,21 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
         self:ToggleInfoMenu(false)
 
         local Skins = ReplicatedStorage.Characters.Skins[self.SelectedItem.Type.."s"]:FindFirstChild(self.SelectedItem.Name)
-        if not Skins then return end
+        if not Skins then
+            return
+        end
+
+        --if there are no visible skins, return
+        local VisibleSkins = Skins:GetChildren()
+        for _, i in VisibleSkins do
+            if i:HasTag("Dev") or i:HasTag("Milestone") then
+                table.remove(VisibleSkins, table.find(VisibleSkins, i))
+            end
+        end
+
+        if #VisibleSkins <= 0 then
+            return
+        end
 
         for _, i in self.LoadedItems.Skins do
             if SkinContainer.SkinPreviewCache:FindFirstChild(i.Name) then
@@ -174,8 +190,8 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
         SkinContainer.Parent.Label.TextLabel.Text = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name)).Config.Name.." Skins"
 
-        local CanMakePreviews = Utils:GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
-        for _, i in Skins:GetChildren() do
+        local CanMakePreviews = self.PreviewsEnabled and Utils:GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
+        for _, i in VisibleSkins do
             local Module = Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
 
             if Module:HasTag("Dev") or Module:HasTag("Milestone") then
@@ -193,10 +209,10 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             Container.CharacterRender.Image = Info.Config.Render
             Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).."$" or "FREE"
 
-            local SkinPreview: ViewportFrame = Container.Preview.ViewportFrame
+            local SkinPreview = Container.Preview.ViewportFrame
             if CanMakePreviews then
                 task.defer(function()
-                    local SkinModel: Model = Utils:FindFirstChild(CharacterFolder, "Skins."..self.SelectedItem.Type.."."..self.SelectedItem.Name.."."..name)
+                    local SkinModel = Utils:FindFirstChild(CharacterFolder, "Skins."..self.SelectedItem.Type.."."..self.SelectedItem.Name.."."..name, false)
                     if not SkinModel then
                         return
                     end
@@ -216,11 +232,11 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
                     SkinModel.HumanoidRootPart.Anchored = true
                     SkinModel:PivotTo(CFrame.new(0, 10000, 0) * CFrame.fromEulerAnglesXYZ(0, math.rad(180), 0))
 
-                    Camera.CFrame = CFrame.new(0, 10000, 5 + 7.5 * SkinModel:GetExtentsSize().Y)
+                    Camera.CFrame = CFrame.new(0, 10000, 6 * SkinModel:GetExtentsSize().Y)
 
                     SkinModel.Parent = SkinContainer.SkinPreviewCache
 
-                    Utils:LoadAnimationFromID(SkinModel, Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
+                    Utils:LoadAnimationFromID(SkinModel, Info.Config.AnimationIDs.PreviewAnimation or Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
 
                     SkinPreview:GetPropertyChangedSignal("ImageTransparency"):Connect(function()
                         if SkinPreview.ImageTransparency < 1 then
@@ -234,8 +250,12 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
                 end)
             end
 
+            --create tables if not there
+            self.ItemModules.Skins = self.ItemModules.Skins or {}
+            self.ItemModules.Skins[self.SelectedItem.Name] = self.ItemModules.Skins[self.SelectedItem.Name] or {}
+
             self.LoadedItems.Skins[name] = Card
-            self.ItemModules.Skins[name] = Info
+            self.ItemModules.Skins[self.SelectedItem.Name][name] = Info
 
             -- reminder that these connections disconnect automatically when the parent is destroyed! -dys
             Container.Interact.MouseEnter:Connect(function()
@@ -606,19 +626,19 @@ function Shop:Init()
     table.insert(Conns, self.UIInstance:GetPropertyChangedSignal("Size"):Connect(function()
         self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
     end))
-    table.insert(Conns, InfoContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
-        InfoContainer.Parent.Visible = InfoContainer.Parent.Size ~= Utils.UDim.FullY
-    end))
-    table.insert(Conns, ShopContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
-        ShopContainer.Parent.Visible = ShopContainer.Parent.Size ~= Utils.UDim.FullY
-    end))
-    table.insert(Conns, SkinContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
-        SkinContainer.Parent.Visible = SkinContainer.Parent.Size ~= Utils.UDim.FullY
-    end))
+    -- table.insert(Conns, InfoContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
+    --     InfoContainer.Parent.Visible = InfoContainer.Parent.Size ~= Utils.UDim.FullY
+    -- end))
+    -- table.insert(Conns, ShopContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
+    --     ShopContainer.Parent.Visible = ShopContainer.Parent.Size ~= Utils.UDim.FullY
+    -- end))
+    -- table.insert(Conns, SkinContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
+    --     SkinContainer.Parent.Visible = SkinContainer.Parent.Size ~= Utils.UDim.FullY
+    -- end))
     
-    InfoContainer.Parent.Visible = InfoContainer.Parent.Size ~= Utils.UDim.FullY
-    ShopContainer.Parent.Visible = ShopContainer.Parent.Size ~= Utils.UDim.FullY
-    SkinContainer.Parent.Visible = SkinContainer.Parent.Size ~= Utils.UDim.FullY
+    -- InfoContainer.Parent.Visible = InfoContainer.Parent.Size ~= Utils.UDim.FullY
+    -- ShopContainer.Parent.Visible = ShopContainer.Parent.Size ~= Utils.UDim.FullY
+    -- SkinContainer.Parent.Visible = SkinContainer.Parent.Size ~= Utils.UDim.FullY
 
     table.insert(Conns, UI.Destroying:Connect(function()
         for _, i in Conns do
@@ -819,79 +839,114 @@ function Shop:ReloadContent(CreateCards: boolean?)
     }
     local LO = 0
 
-    for _, module in ReplicatedStorage.Characters.Killers:GetChildren() do
-        if Utils:GetPlayerOwned(LocalPlayer, "Killers."..module.Name) then
-            table.insert(Ordered.Owned, module)
-        else
-            table.insert(Ordered.Unowned, module)
-        end
-    end
+    local CanMakePreviews = self.PreviewsEnabled and Utils:GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
 
-    table.sort(Ordered.Owned, function(a, b)
-        local Modules = {
-            A = require(a),
-            B = require(b),
-        }
-
-        return
-            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
-            or Modules.A.Config.Price < Modules.B.Config.Price
-    end)
-    table.sort(Ordered.Unowned, function(a, b)
-        local Modules = {
-            A = require(a),
-            B = require(b),
-        }
-
-        return
-            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
-            or Modules.A.Config.Price < Modules.B.Config.Price
-    end)
-
-    local function SetupKillerCard(module)
+    local function SetupCard(module, Type: "Survivor" | "Killer" | "Emote")
         if module:HasTag("Dev") then
             return
         end
 
         LO += 1
 
+        local Parent = if Type == "Killer" then KillerContainer elseif Type == "Survivor" then SurvivorContainer else EmoteContainer
+
         if not CreateCards then
-            KillerContainer:FindFirstChild(module.Name).LayoutOrder = LO
+            Parent:FindFirstChild(module.Name).LayoutOrder = LO
             return
         end
 
         local name = module.Name
 
-        if self.LoadedItems.Killers[name] then
+        if self.LoadedItems[Type.."s"][name] then
             return
         end
 
-        local Module = Utils:GetCharacterModule("Killer", name)
-        local KillerInfo: Types.Killer = require(Module)
+        local Module = Type == "Emote" and Utils:GetEmoteModule(name) or Utils:GetCharacterModule(Type, name)
+        local Info = require(Module)
 
         local Card = Templates.CardTemplate:Clone()
         local Container = Card.Container
         Card.Name = name
         Card.LayoutOrder = LO
-        Card.Parent = KillerContainer
-        Container.Title.Text = KillerInfo.Config.Name
-        Container.CharacterRender.Image = KillerInfo.Config.Render
-        Container.Price.Text = KillerInfo.Config.Price > 0 and tostring(KillerInfo.Config.Price).."$" or "FREE"
+        Card.Parent = Parent
+        Container.Title.Text = Info.Config.Name
+        Container.CharacterRender.Image = Info.Config.Render
+        Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).."$" or "FREE"
 
-        if Utils:GetPlayerOwned(LocalPlayer, "Killers."..name) then
+        local Preview = Container.Preview.ViewportFrame
+        if CanMakePreviews and Type ~= "Emote" then
+            task.defer(function()
+                local Model = Utils:FindFirstChild(CharacterFolder, Type.."."..name, false)
+                if not Model then
+                    return
+                end
+
+                -- i'm going fucking insane. -dys
+                local Camera = Instance.new("Camera")
+                Camera.FieldOfView = 10
+                Camera.Parent = Preview
+                local WorldModel = Instance.new("WorldModel")
+                WorldModel.Parent = Camera
+                Preview.CurrentCamera = Camera
+
+                Model = Model:Clone()
+                if not Model.Humanoid:FindFirstChildOfClass("Animator") then
+                    Instance.new("Animator").Parent = Model.Humanoid
+                end
+                Model.HumanoidRootPart.Anchored = true
+                Model:PivotTo(CFrame.new(0, 10000, 0) * CFrame.fromEulerAnglesXYZ(0, math.rad(180), 0))
+
+                Camera.CFrame = CFrame.new(0, 10000, 6 * Model:GetExtentsSize().Y)
+
+                Model.Parent = ShopContainer.PreviewCache
+
+                Utils:LoadAnimationFromID(Model, Info.Config.AnimationIDs.PreviewAnimation or Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
+
+                Preview:GetPropertyChangedSignal("ImageTransparency"):Connect(function()
+                    if Preview.ImageTransparency < 1 then
+                        if Model.Parent ~= WorldModel then
+                            Model.Parent = WorldModel
+                        end
+                    elseif Model.Parent ~= ShopContainer.PreviewCache then
+                        Model.Parent = ShopContainer.PreviewCache
+                    end
+                end)
+            end)
+        end
+
+        if Utils:GetPlayerOwned(LocalPlayer, Type.."s."..name) then
             Container.Owned.BackgroundTransparency = 0.55
             Container.Owned.TextLabel.TextTransparency = 0
         end
 
-        self.LoadedItems.Killers[name] = Card
-        self.ItemModules[name] = KillerInfo
+        --create table if not there
+        self.ItemModules[Type.."s"] = self.ItemModules[Type.."s"] or {}
+
+        self.LoadedItems[Type.."s"][name] = Card
+        self.ItemModules[Type.."s"][name] = Info
         Container.Interact.MouseEnter:Connect(function()
+            if CanMakePreviews then
+                TweenService:Create(Preview, TweenInfo.new(0.25), {
+                    ImageTransparency = 0
+                }):Play()
+                TweenService:Create(Preview.Parent, TweenInfo.new(0.25), {
+                    BackgroundTransparency = 0
+                }):Play()
+            end
             TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                 Size = UDim2.fromScale(1.065, 1.065)
             }):Play()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end)
         Container.Interact.MouseLeave:Connect(function()
+            if CanMakePreviews then
+                TweenService:Create(Preview, TweenInfo.new(0.25), {
+                    ImageTransparency = 1
+                }):Play()
+                TweenService:Create(Preview.Parent, TweenInfo.new(0.25), {
+                    BackgroundTransparency = 1
+                }):Play()
+            end
             TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                 Size = Utils.UDim.Full
             }):Play()
@@ -902,211 +957,48 @@ function Shop:ReloadContent(CreateCards: boolean?)
                 return
             end
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-            self:OnCharButtonPress(name, KillerInfo, Module, "Killer", Card)
+            self:OnCharButtonPress(name, Info, Module, Type, Card)
         end)
     end
 
-    for _, module in ipairs(Ordered.Unowned) do
-        SetupKillerCard(module)
-    end
-    for _, module in ipairs(Ordered.Owned) do
-        SetupKillerCard(module)
-    end
+    local function SortTableByPriceAndName(TableToSort)
+        table.sort(TableToSort, function(a, b)
+            local Modules = {
+                A = require(a),
+                B = require(b),
+            }
 
-    Ordered = {
-        Owned = {},
-        Unowned = {},
-    }
-    LO = 0
-
-    for _, module in ReplicatedStorage.Characters.Survivors:GetChildren() do
-        if Utils:GetPlayerOwned(LocalPlayer, "Survivors."..module.Name) then
-            table.insert(Ordered.Owned, module)
-        else
-            table.insert(Ordered.Unowned, module)
-        end
+            return
+                Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
+                or Modules.A.Config.Price < Modules.B.Config.Price
+        end)
     end
 
-    table.sort(Ordered.Owned, function(a, b)
-        local Modules = {
-            A = require(a),
-            B = require(b),
+    local function SetupBatch(Type: "Killer" | "Survivor" | "Emote")
+        Ordered = {
+            Owned = {},
+            Unowned = {},
         }
+        LO = 0
 
-        return
-            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
-            or Modules.A.Config.Price < Modules.B.Config.Price
-    end)
-    table.sort(Ordered.Unowned, function(a, b)
-        local Modules = {
-            A = require(a),
-            B = require(b),
-        }
-
-        return
-            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
-            or Modules.A.Config.Price < Modules.B.Config.Price
-    end)
-
-    local function SetupSurvivorCard(module)
-        if module:HasTag("Dev") then
-            return
-        end
-        
-        local name = module.Name
-        LO += 1
-
-        if not CreateCards then
-            SurvivorContainer:FindFirstChild(name).LayoutOrder = LO
-            return
+        for _, module in ReplicatedStorage[Type == "Emote" and "Assets" or "Characters"][Type.."s"]:GetChildren() do
+            table.insert(Ordered[Utils:GetPlayerOwned(LocalPlayer, "Killers."..module.Name) and "Owned" or "Unowned"], module)
         end
 
-        if self.LoadedItems.Survivors[name] then
-            return
+        SortTableByPriceAndName(Ordered.Owned)
+        SortTableByPriceAndName(Ordered.Unowned)
+
+        for _, module in ipairs(Ordered.Unowned) do
+            SetupCard(module, Type)
         end
-
-        local Module = Utils:GetCharacterModule("Survivor", name)
-        local SurvivorInfo: Types.Killer = require(Module)
-
-        local Card = Templates.CardTemplate:Clone()
-        local Container = Card.Container
-        Card.Name = name
-        Card.LayoutOrder = LO
-        Card.Parent = SurvivorContainer
-        Container.Title.Text = SurvivorInfo.Config.Name
-        Container.CharacterRender.Image = SurvivorInfo.Config.Render
-        Container.Price.Text = SurvivorInfo.Config.Price > 0 and tostring(SurvivorInfo.Config.Price).."$" or "FREE"
-
-        if Utils:GetPlayerOwned(LocalPlayer, "Survivors."..name) then
-            Container.Owned.BackgroundTransparency = 0.55
-            Container.Owned.TextLabel.TextTransparency = 0
-        end
-
-        self.LoadedItems.Survivors[name] = Card
-        self.ItemModules[name] = SurvivorInfo
-        Container.Interact.MouseEnter:Connect(function()
-            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Size = UDim2.fromScale(1.065, 1.065)
-            }):Play()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
-        end)
-        Container.Interact.MouseLeave:Connect(function()
-            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Size = Utils.UDim.Full
-            }):Play()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
-        end)
-        Container.Interact.MouseButton1Click:Connect(function()
-            if self.SkinMenu.Open then
-                return
-            end
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-            self:OnCharButtonPress(name, SurvivorInfo, Module, "Survivor", Card)
-        end)
-    end
-    
-    for _, module in ipairs(Ordered.Unowned) do
-        SetupSurvivorCard(module)
-    end
-    for _, module in Ordered.Owned do
-        SetupSurvivorCard(module)
-    end
-
-    Ordered = {
-        Owned = {},
-        Unowned = {},
-    }
-    LO = 0
-
-    for _, module in ReplicatedStorage.Assets.Emotes:GetChildren() do
-        if Utils:GetPlayerOwned(LocalPlayer, "Emotes."..module.Name) then
-            table.insert(Ordered.Owned, module)
-        else
-            table.insert(Ordered.Unowned, module)
+        for _, module in ipairs(Ordered.Owned) do
+            SetupCard(module, Type)
         end
     end
 
-    table.sort(Ordered.Owned, function(a, b)
-        local Modules = {
-            A = require(a),
-            B = require(b),
-        }
-
-        return
-            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
-            or Modules.A.Config.Price < Modules.B.Config.Price
-    end)
-    table.sort(Ordered.Unowned, function(a, b)
-        local Modules = {
-            A = require(a),
-            B = require(b),
-        }
-
-        return
-            Modules.A.Config.Price == Modules.B.Config.Price and a.Name < b.Name
-            or Modules.A.Config.Price < Modules.B.Config.Price
-    end)
-
-    local function SetupEmoteCard(module)
-        if module:HasTag("Dev") then
-            return
-        end
-        
-        local name = module.Name
-        LO += 1
-
-        if not CreateCards then
-            EmoteContainer:FindFirstChild(name).LayoutOrder = LO
-            return
-        end
-
-        if self.LoadedItems.Emotes[name] then
-            return
-        end
-
-        local Module = Utils:GetEmoteModule(name)
-        local EmoteInfo: Emote.Emote = require(Module)
-
-        local Card = Templates.CardTemplate:Clone()
-        local Container = Card.Container
-        Card.Name = name
-        Card.LayoutOrder = LO
-        Card.Parent = EmoteContainer
-        Container.Title.Text = EmoteInfo.Config.Name
-        Container.CharacterRender.Image = EmoteInfo.Config.Render
-        Container.Price.Text = EmoteInfo.Config.Price > 0 and tostring(EmoteInfo.Config.Price).."$" or "FREE"
-
-        if Utils:GetPlayerOwned(LocalPlayer, "Emotes."..name) then
-            Container.Owned.BackgroundTransparency = 0.55
-            Container.Owned.TextLabel.TextTransparency = 0
-        end
-
-        self.LoadedItems.Emotes[name] = Card
-        self.ItemModules[name] = EmoteInfo
-        Container.Interact.MouseEnter:Connect(function()
-            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Size = UDim2.fromScale(1.065, 1.065)
-            }):Play()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
-        end)
-        Container.Interact.MouseLeave:Connect(function()
-            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Size = Utils.UDim.Full
-            }):Play()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
-        end)
-        Container.Interact.MouseButton1Click:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-            self:OnCharButtonPress(name, EmoteInfo, Module, "Emote", Card)
-        end)
-    end
-    
-    for _, module in ipairs(Ordered.Unowned) do
-        SetupEmoteCard(module)
-    end
-    for _, module in ipairs(Ordered.Owned) do
-        SetupEmoteCard(module)
-    end
+    SetupBatch("Killer")
+    SetupBatch("Survivor")
+    SetupBatch("Emote")
 end
 
 function Shop:CreateBuyWindow(Module: ModuleScript, skin: boolean?, Parent: Frame, Card: Frame)

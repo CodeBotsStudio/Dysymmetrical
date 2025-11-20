@@ -48,6 +48,9 @@ export type Survivor = {
             Stunned: string?,
             --- The animation that'll play before a stun ends.
             StunnedEnd: string?,
+            --- The animation that'll play in the character model's preview in the shop.
+            --- If none is provided, `IdleAnimation` will play instead.
+            PreviewAnimation: string?,
         },
 
         --- Any voicelines this character might have. It's built with strings as keys, and either strings, string tables or string dictionaries as values for random voicelines.
@@ -207,6 +210,9 @@ export type Killer = {
             Stunned: string?,
             --- The animation that'll play before a stun ends.
             StunnedEnd: string?,
+            --- The animation that'll play in the character model's preview in the shop.
+            --- If none is provided, `IdleAnimation` will play instead.
+            PreviewAnimation: string?,
             --- The animation that'll play when slashing.
             SlashAnimation: string?,
             --- The animation that the killer will have in the intro animation.
