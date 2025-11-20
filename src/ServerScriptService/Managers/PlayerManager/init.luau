@@ -248,14 +248,23 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 		if char then
 			char = char:Clone()
 			char:SetAttribute("CharacterSkinName", Skin)
-		--if not it just gets the default one for the character
-		else
-			char = game:GetService(Service).Assets.Characters[RigType][RigName]:Clone()
+			return
 		end
 
-		if not char and Service == "ServerStorage" then
-			FindChar("ReplicatedStorage", Name, Type, Skin)
+		--if not it just gets the default one for the character
+		char = game:GetService(Service).Assets.Characters[RigType][RigName]:Clone()
+
+		if not char then
+			if Service == "ServerStorage" then
+				FindChar("ReplicatedStorage", Name, Type, Skin)
+				return
+			end
+			
+			plr:LoadCharacter()
+			return
 		end
+
+		char = char:Clone()
 	end
 	FindChar("ServerStorage", RigName, RigType, skinName)
 
