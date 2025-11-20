@@ -167,6 +167,9 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             end
         end
 
+        SkinContainer.Parent.Label.TextLabel.Text = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name)).Config.Name.." Skins"
+
+        local CanMakePreviews = Utils:GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
         for _, i in Skins:GetChildren() do
             local Module = Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
 
@@ -185,13 +188,42 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             Container.CharacterRender.Image = Info.Config.Render
             Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).."$" or "FREE"
 
+            -- if CanMakePreviews then
+
+            -- end
+
             self.LoadedItems.Skins[name] = Card
             self.ItemModules.Skins[name] = Info
 
+            local SkinPreview = Container.Preview.ViewportFrame
+
+            -- reminder that these connections disconnect automatically when the parent is destroyed! -dys
             Container.Interact.MouseEnter:Connect(function()
+                if CanMakePreviews then
+                    TweenService:Create(SkinPreview, TweenInfo.new(0.25), {
+                        ImageTransparency = 0
+                    }):Play()
+                    TweenService:Create(SkinPreview.Parent, TweenInfo.new(0.25), {
+                        BackgroundTransparency = 0
+                    }):Play()
+                end
+                TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                    Size = UDim2.fromScale(1.065, 1.065)
+                }):Play()
                 Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
             end)
             Container.Interact.MouseLeave:Connect(function()
+                if CanMakePreviews then
+                    TweenService:Create(SkinPreview, TweenInfo.new(0.25), {
+                        ImageTransparency = 1
+                    }):Play()
+                    TweenService:Create(SkinPreview.Parent, TweenInfo.new(0.25), {
+                        BackgroundTransparency = 1
+                    }):Play()
+                end
+                TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                    Size = Utils.UDim.Full
+                }):Play()
                 Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
             end)
             Container.Interact.MouseButton1Click:Connect(function()
@@ -534,6 +566,19 @@ function Shop:Init()
     table.insert(Conns, self.UIInstance:GetPropertyChangedSignal("Size"):Connect(function()
         self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
     end))
+    table.insert(Conns, InfoContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
+        InfoContainer.Parent.Visible = InfoContainer.Parent.Size ~= Utils.UDim.FullY
+    end))
+    table.insert(Conns, ShopContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
+        ShopContainer.Parent.Visible = ShopContainer.Parent.Size ~= Utils.UDim.FullY
+    end))
+    table.insert(Conns, SkinContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
+        SkinContainer.Parent.Visible = SkinContainer.Parent.Size ~= Utils.UDim.FullY
+    end))
+    
+    InfoContainer.Parent.Visible = InfoContainer.Parent.Size ~= Utils.UDim.FullY
+    ShopContainer.Parent.Visible = ShopContainer.Parent.Size ~= Utils.UDim.FullY
+    SkinContainer.Parent.Visible = SkinContainer.Parent.Size ~= Utils.UDim.FullY
 
     table.insert(Conns, UI.Destroying:Connect(function()
         for _, i in Conns do
@@ -801,9 +846,15 @@ function Shop:ReloadContent(CreateCards: boolean?)
         self.LoadedItems.Killers[name] = Card
         self.ItemModules[name] = KillerInfo
         Container.Interact.MouseEnter:Connect(function()
+            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Size = UDim2.fromScale(1.065, 1.065)
+            }):Play()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end)
         Container.Interact.MouseLeave:Connect(function()
+            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Size = Utils.UDim.Full
+            }):Play()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
         end)
         Container.Interact.MouseButton1Click:Connect(function()
@@ -894,9 +945,15 @@ function Shop:ReloadContent(CreateCards: boolean?)
         self.LoadedItems.Survivors[name] = Card
         self.ItemModules[name] = SurvivorInfo
         Container.Interact.MouseEnter:Connect(function()
+            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Size = UDim2.fromScale(1.065, 1.065)
+            }):Play()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end)
         Container.Interact.MouseLeave:Connect(function()
+            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Size = Utils.UDim.Full
+            }):Play()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
         end)
         Container.Interact.MouseButton1Click:Connect(function()
@@ -987,9 +1044,15 @@ function Shop:ReloadContent(CreateCards: boolean?)
         self.LoadedItems.Emotes[name] = Card
         self.ItemModules[name] = EmoteInfo
         Container.Interact.MouseEnter:Connect(function()
+            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Size = UDim2.fromScale(1.065, 1.065)
+            }):Play()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end)
         Container.Interact.MouseLeave:Connect(function()
+            TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Size = Utils.UDim.Full
+            }):Play()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
         end)
         Container.Interact.MouseButton1Click:Connect(function()

@@ -154,7 +154,7 @@
                     "className": "Folder",
                     "attributes": {
                         "DisplayTitle": "Accessibility",
-                        "LayoutOrder": 3
+                        "LayoutOrder": 4
                     },
                     "children": [
                         {
@@ -167,6 +167,28 @@
                             },
                             "properties": {
                                 "Value": false
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Performance",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Performance",
+                        "LayoutOrder": 3
+                    },
+                    "children": [
+                        {
+                            "name": "SkinPreviews",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Skin Previews",
+                                "DisplayDescription": "When checked, skin previews will show in the shop and in the inventory when hovering over them.",
+                                "LayoutOrder": 1
+                            },
+                            "properties": {
+                                "Value": true
                             }
                         }
                     ]
@@ -292,7 +314,7 @@
                     "className": "Folder",
                     "attributes": {
                         "DisplayTitle": "Customization",
-                        "LayoutOrder": 6
+                        "LayoutOrder": 7
                     },
                     "children": [
                         {
@@ -374,7 +396,7 @@
                     "className": "Folder",
                     "attributes": {
                         "DisplayTitle": "Miscellaneous / Fun",
-                        "LayoutOrder": 5
+                        "LayoutOrder": 6
                     },
                     "children": [
                         {
@@ -432,7 +454,7 @@
                     "className": "Folder",
                     "attributes": {
                         "DisplayTitle": "Privacy",
-                        "LayoutOrder": 4
+                        "LayoutOrder": 5
                     },
                     "children": [
                         {
