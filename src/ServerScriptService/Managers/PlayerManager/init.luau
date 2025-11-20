@@ -255,8 +255,8 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 		char = game:GetService(Service).Assets.Characters[RigType][RigName]:Clone()
 
 		if not char then
-			if Service == "ServerStorage" then
-				FindChar("ReplicatedStorage", Name, Type, Skin)
+			if Service == "ReplicatedStorage" then
+				FindChar("ServerStorage", Name, Type, Skin)
 				return
 			end
 			
@@ -266,7 +266,7 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 
 		char = char:Clone()
 	end
-	FindChar("ServerStorage", RigName, RigType, skinName)
+	FindChar("ReplicatedStorage", RigName, RigType, skinName)
 
 	if not char then
 		warn("[PlayerManager:_RespawnPlayer()]: Can't find character rig! Loading player character instead...")
