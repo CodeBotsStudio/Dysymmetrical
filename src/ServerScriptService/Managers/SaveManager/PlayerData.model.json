@@ -535,7 +535,7 @@
                             }
                         },
                         {
-                            "name": "Net Worth",
+                            "name": "NetWorth",
                             "className": "NumberValue",
                             "attributes": {
                                 "DisplayTitle": "Net Worth",

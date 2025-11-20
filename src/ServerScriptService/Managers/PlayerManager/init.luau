@@ -35,13 +35,7 @@ function PlayerManager:Init()
 		plr.CharacterAdded:Connect(function(char)
 			AntiFly:_SetupCharacter(plr, char)
 			
-			local Role = char:FindFirstChild("Role")
-			if not Role then
-				Role = Instance.new("StringValue")
-				Role.Name = "Role"
-				Role.Value = "Spectator"
-				Role.Parent = char
-			end
+			local Role = Utils:FindFirstChild(char, "Role")
 
 			if char:GetAttribute("BaseSpeed") == nil then
 				char:SetAttribute("BaseSpeed", 10.5)
@@ -143,14 +137,14 @@ function PlayerManager:Init()
 				end
 				
         	    threads[plr.UserId] = task.delay(3, function()
-        	        plr:LoadCharacter()
+					self:_RespawnPlayer(plr)
         	        threads[plr.UserId] = nil
         	    end)
         	end)
 		end)
 
 		task.delay(2, function()
-			plr:LoadCharacter()
+			self:_RespawnPlayer(plr)
 		end)
 		
 		local TimePlayed = Utils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
@@ -219,16 +213,27 @@ function PlayerManager:_SetupHitboxes(Character)
 end
 
 --- Internal: Respawns a player with a possibility to add a custom character rig from `ServerStorage.Assets.Characters`.
-function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: "Killer"? | "Survivor"?, skinName: string?) --: Model
+function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("Killer" | "Survivor")?, skinName: string?) --: Model
 	self:CancelAutoRespawn(plr)
 	if plr.Character then
 		plr.Character:Destroy()
 	end
 
+	local function LoadEmpty()
+		plr:LoadCharacter()
+
+		--creates the role asap
+		local Role = Instance.new("StringValue")
+		Role.Name = "Role"
+		Role.Value = "Spectator"
+		Role.Parent = plr.Character
+
+		return plr.Character
+	end
+
 	--loads the default char if there's none to load already
 	if not RigName or not RigType then
-		plr:LoadCharacter()
-		return plr.Character
+		return LoadEmpty()
 	end
 
 	local char
@@ -257,13 +262,19 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: "K
 	if not char then
 		warn("[PlayerManager:_RespawnPlayer()]: Can't find character rig! Loading player character instead...")
 		warn(debug.traceback())
-		plr:LoadCharacter()
-		return
+
+		return LoadEmpty()
 	end
 	
 	char:SetAttribute("CharacterName", RigName)
 
 	char.Name = plr.Name
+
+	--creates the role asap
+	local Role = Instance.new("StringValue")
+	Role.Name = "Role"
+	Role.Value = RigType
+	Role.Parent = char
 	
 	plr.Character = char
 	
@@ -271,12 +282,6 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: "K
 	for _, i in StarterCharacterScripts:GetChildren() do
 		i:Clone().Parent = char
 	end
-
-	--creates the role before `PlayerManager` can create it with the Spectator value
-	local Role = Instance.new("StringValue")
-	Role.Name = "Role"
-	Role.Value = RigType
-	Role.Parent = char
 
 	--adds the char to `Players` in `workspace`
 	char.Parent = PlayerFolder

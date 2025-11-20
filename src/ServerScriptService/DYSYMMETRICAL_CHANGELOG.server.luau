@@ -79,6 +79,9 @@
     ------17/11/2025------
     * Added support for multi-killer intro toasts (MAKE SURE TO GO INTO `ReplicatedStorage/Assets/KillerIntros/KillerNameToast` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------20/11/2025------
+    * Added skin previews on card hover (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Shop/ShopUI/Container/SkinsContainer/Content/SkinPreviewCache` & `StarterPlayer/StarterPlayerScripts/UI/Shop/Templates/CardTemplate` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()

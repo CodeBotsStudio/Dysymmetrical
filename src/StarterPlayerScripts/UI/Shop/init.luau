@@ -130,11 +130,11 @@ function Shop:ReorderSkins()
             or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
-    for _, i in Ordered.Unowned do
+    for _, i in ipairs(Ordered.Unowned) do
         LO += 1
         i.LayoutOrder = LO
     end
-    for _, i in Ordered.Owned do
+    for _, i in ipairs(Ordered.Owned) do
         LO += 1
         i.LayoutOrder = LO
     end
@@ -144,18 +144,21 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
     if Open == nil then
         Open = not self.SkinMenu.Open
     end
-
-    if Open then
-        self:ToggleInfoMenu(false)
-    end
     
     if Open then
+        self:ToggleInfoMenu(false)
+
         local Skins = ReplicatedStorage.Characters.Skins[self.SelectedItem.Type.."s"]:FindFirstChild(self.SelectedItem.Name)
         if not Skins then return end
 
         for _, i in self.LoadedItems.Skins do
+            if SkinContainer.SkinPreviewCache:FindFirstChild(i.Name) then
+                SkinContainer.SkinPreviewCache[i.Name]:Destroy()
+            end
+
             i:Destroy()
         end
+
         table.clear(self.LoadedItems.Skins)
         self.ItemModules.Skins = self.ItemModules.Skins or {}
         table.clear(self.ItemModules.Skins)
@@ -190,15 +193,44 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             Container.CharacterRender.Image = Info.Config.Render
             Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).."$" or "FREE"
 
-            local SkinPreview = Container.Preview.ViewportFrame
+            local SkinPreview: ViewportFrame = Container.Preview.ViewportFrame
             if CanMakePreviews then
                 task.defer(function()
-                    local SkinModel = Utils:FindFirstChild(CharacterFolder, "Skins."..self.SelectedItem.Type.."."..self.SelectedItem.Name)
+                    local SkinModel: Model = Utils:FindFirstChild(CharacterFolder, "Skins."..self.SelectedItem.Type.."."..self.SelectedItem.Name.."."..name)
                     if not SkinModel then
                         return
                     end
 
-                    
+                    -- i'm going fucking insane. -dys
+                    local Camera = Instance.new("Camera")
+                    Camera.FieldOfView = 10
+                    Camera.Parent = SkinPreview
+                    local WorldModel = Instance.new("WorldModel")
+                    WorldModel.Parent = Camera
+                    SkinPreview.CurrentCamera = Camera
+
+                    SkinModel = SkinModel:Clone()
+                    if not SkinModel.Humanoid:FindFirstChildOfClass("Animator") then
+                        Instance.new("Animator").Parent = SkinModel.Humanoid
+                    end
+                    SkinModel.HumanoidRootPart.Anchored = true
+                    SkinModel:PivotTo(CFrame.new(0, 10000, 0) * CFrame.fromEulerAnglesXYZ(0, math.rad(180), 0))
+
+                    Camera.CFrame = CFrame.new(0, 10000, 5 + 7.5 * SkinModel:GetExtentsSize().Y)
+
+                    SkinModel.Parent = SkinContainer.SkinPreviewCache
+
+                    Utils:LoadAnimationFromID(SkinModel, Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
+
+                    SkinPreview:GetPropertyChangedSignal("ImageTransparency"):Connect(function()
+                        if SkinPreview.ImageTransparency < 1 then
+                            if SkinModel.Parent ~= WorldModel then
+                                SkinModel.Parent = WorldModel
+                            end
+                        elseif SkinModel.Parent ~= SkinContainer.SkinPreviewCache then
+                            SkinModel.Parent = SkinContainer.SkinPreviewCache
+                        end
+                    end)
                 end)
             end
 
@@ -874,10 +906,10 @@ function Shop:ReloadContent(CreateCards: boolean?)
         end)
     end
 
-    for _, module in Ordered.Unowned do
+    for _, module in ipairs(Ordered.Unowned) do
         SetupKillerCard(module)
     end
-    for _, module in Ordered.Owned do
+    for _, module in ipairs(Ordered.Owned) do
         SetupKillerCard(module)
     end
 
@@ -973,7 +1005,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
         end)
     end
     
-    for _, module in Ordered.Unowned do
+    for _, module in ipairs(Ordered.Unowned) do
         SetupSurvivorCard(module)
     end
     for _, module in Ordered.Owned do
@@ -1069,10 +1101,10 @@ function Shop:ReloadContent(CreateCards: boolean?)
         end)
     end
     
-    for _, module in Ordered.Unowned do
+    for _, module in ipairs(Ordered.Unowned) do
         SetupEmoteCard(module)
     end
-    for _, module in Ordered.Owned do
+    for _, module in ipairs(Ordered.Owned) do
         SetupEmoteCard(module)
     end
 end

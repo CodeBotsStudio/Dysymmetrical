@@ -607,6 +607,7 @@ function Utils:GetCharacterModule(charType: "Survivor" | "Killer", charName: str
         end
 
         warn("Can't find character module! ("..charType..", "..charName..", "..skinName..")")
+        warn(debug.traceback())
         return
     end
 

@@ -104,6 +104,7 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
         DestroyOnCollision = ProjectileSettings.DestroyOnCollision or false,
     }
     ProjectileSettings.HitboxSettings.IsProjectile = true
+    ProjectileSettings.HitboxSettings.HitMultiple = ProjectileSettings.HitboxSettings.HitMultiple ~= nil and ProjectileSettings.HitboxSettings.HitMultiple or true
 
     -- Make a new table for throwing this all into an instance.
     local ProjectileInstance = {}
