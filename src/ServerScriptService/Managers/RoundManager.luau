@@ -34,7 +34,7 @@ local RoundManager = {
     },
     StopLoop = false,
     CanSpawnKiller = true, --for debugging purposes
-    CanInitLMS = false, --for debugging purposes
+    CanInitLMS = true, --for debugging purposes
 }
 
 function RoundManager:Init()
