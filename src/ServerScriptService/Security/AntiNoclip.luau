@@ -17,6 +17,7 @@ function AntiNoclip:_SetupPart(Character, RootPart, Humanoid)
 	NoclipPart.Transparency = self.VisualizePart and 0 or 1
 	NoclipPart:AddTag("Transparent")
 	NoclipPart.Name = "AntiNoclipBrain"
+	NoclipPart.CollisionGroup = RootPart.CollisionGroup
 	NoclipPart.Parent = Character
 	local Weld = Instance.new("Weld")
 	Weld.Part0 = NoclipPart

@@ -1,6 +1,5 @@
 --!nocheck
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Rand = Random.new()
@@ -35,7 +34,7 @@ local RoundManager = {
     },
     StopLoop = false,
     CanSpawnKiller = true, --for debugging purposes
-    CanInitLMS = true, --for debugging purposes
+    CanInitLMS = false, --for debugging purposes
 }
 
 function RoundManager:Init()
@@ -294,7 +293,7 @@ function RoundManager.Utils:CheckForKillerWin()
             RoundManager.Callables:EndRound("Survivors")
         -- lms
         elseif Survivors == 1 then
-            RoundManager.Callables:InitLMS(Players:GetPlayerFromCharacter(Count.Survivor[1]))
+            RoundManager.Callables:InitLMS(Utils:GetPlayerFromCharacter(Count.Survivor[1]))
         -- if every surv is dead
         elseif #RoundManager.CurrentRound.PlayersAccepted > 1 and Survivors <= 0 then
             RoundManager.Callables:EndRound("Killer")

@@ -36,7 +36,6 @@ local CommonFunctions = {
 
 local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
 
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -57,8 +56,9 @@ function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
     local Char = targetHumanoid.Parent
 	local HRP: BasePart = Char.HumanoidRootPart
     local targetPos = HRP.Position
-	local Player = Players:GetPlayerFromCharacter(Char)
+	local Player = Utils:GetPlayerFromCharacter(Char)
 
+	-- leaving these comments here as memories from may 2025 lol -dys
 	--decided to remove server-side checking because BRO. THEY DON'T DO THAT IN FORSAKEN.
 	--correction: the hitboxes in Forsaken are FULLY server-handled, but it doesn't lag because THEIR GAME SOMEHOW DOESN'T LAG AT ALL. WHAT????
 	--quick thing: hitboxes are now fully server-sided. yup. i had to. :(

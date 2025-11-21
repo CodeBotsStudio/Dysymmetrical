@@ -1,5 +1,4 @@
 local Debris = game:GetService("Debris")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -214,7 +213,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                 end
 
                 -- Finally parse through the hitbox itself.
-                Damaged = workspace:GetPartsInPart(Part, Over)
+                Damaged = workspace:GetPartsInPart(CheckPart, Over)
 
                 -- Flip through all of the parts hit, sort them by hitboxpriority for the next step.
                 table.sort(Damaged, function(a, b)
@@ -363,7 +362,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         TargetCharacter:SetAttribute("Executing", true)
 
                                         -- Get the player that's about to be executed
-                                        local TargetPlayer = Players:GetPlayerFromCharacter(TargetCharacter)
+                                        local TargetPlayer = Utils:GetPlayerFromCharacter(TargetCharacter)
                                         if TargetPlayer then
                                             -- Execute the same code as if a survivor was killed while in chase to make it more fair for the killer (it won't execute again when the character actually dies later)
                 	                        Network:FireClientConnection(SourcePlayer, "KilledPlayer", "REMOTE_EVENT", TargetPlayer)
