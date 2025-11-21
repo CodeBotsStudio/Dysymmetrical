@@ -192,10 +192,15 @@ export type Killer = {
         Render: string?,
 
         --- A possible custom LMS theme the character might have.
-        LastManStandingTheme: string?,
+        --- If it's a table of strings, a random one will be pulled.
+        LastManStandingTheme: (string | {string})?,
+        --- Any possible LMS's for this character VS another specific character.
+        --- Every entry in this table should be `CHARACTERMODULENAME = {Default = ID, SKINNAME = ID, ...}`, e.g. `Commander = {Default = "rbxassetid://0000000000"}`.
+        --- You can add skins by making a new field in the table named after the skin's module's name, e.g. `Yourself = "rbxassetid://0000000000"`.
+        --- If and ID is a table of strings, a random one will be pulled.
         SpecialLastManStandings: {[string]: {
-            Default: string,
-            [string]: string,
+            Default: string | {string},
+            [string]: string | {string},
         }}?,
 
         --- All AnimationIDs related to this character.
@@ -221,8 +226,8 @@ export type Killer = {
             CameraRig: string?,
             --- The animations that'll play when executing a player.
             --- Inside, make a `Default` for any survivor.
-            --- You may make others with the `"[SkinName][CharacterName]"` format to add customs for skins and characters.
-            --- Remove `[SkinName]` to make it for a survivor in general.
+            --- You may make others with the `"[SkinName][CharacterName]"` format to add customs for skins and characters, e.g. `YourselfCommander = "rbxassetid://0000000000"`.
+            --- Remove `[SkinName]` to make it for a survivor in general, e.g. `Commander = "rbxassetid://0000000000"`.
             Execution: {
                 Default: {
                     Killer: string,
