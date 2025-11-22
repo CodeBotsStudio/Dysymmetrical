@@ -4,7 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Network = require(ReplicatedStorage.Modules.Network)
 local ModPanelManager = {
     Admins = {
-        432073982, --Dyscarn
+        -- Add the Roblox userid of moderators here
     },
 
     Commands = {},
