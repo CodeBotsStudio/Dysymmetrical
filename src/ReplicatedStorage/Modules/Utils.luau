@@ -402,7 +402,7 @@ function Utils:RevealPlayerAuraTo(Player: Player | Model, RevealedPlayer: Player
         return
     end
     if Player and Player:IsA("Model") then
-        Player = Players:GetPlayerFromCharacter(Player)
+        Player = self:GetPlayerFromCharacter(Player)
     end
     Network:FireClientConnection(Player, "RevealPlayerAura", "REMOTE_EVENT", RevealedPlayer, Duration, Color)
 end
@@ -607,6 +607,7 @@ function Utils:GetCharacterModule(charType: "Survivor" | "Killer", charName: str
         end
 
         warn("Can't find character module! ("..charType..", "..charName..", "..skinName..")")
+        warn(debug.traceback())
         return
     end
 
@@ -1121,6 +1122,19 @@ function Utils:DeepTableWrite(Target: {any}, Source: {any})
 		    Target[key] = value
         end
 	end
+end
+
+--- Attempts to get a `Player` instance from a character `Model`.
+--- Usually runs better than `Players:GetPlayerFromCharacter()` as this one just looks for a player with the same name as the character in `Players`.
+--- This is assured to return a player if the character is tied to one as they're both named the same.
+--- When using this, pass a character from `workspace.Players` as the `Character` param to make sure this works.
+--- Take into account that if the player isn't found, `Players:GetPlayerFromCharacter()` WILL be used as a fallback.
+function Utils:GetPlayerFromCharacter(Character: Model): Player
+    local Player = self:FindFirstChild(Players, Character.Name, false)
+    if not Player then
+        Player = Players:GetPlayerFromCharacter(Character)
+    end
+    return Player
 end
 
 return Utils

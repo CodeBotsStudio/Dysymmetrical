@@ -48,6 +48,9 @@ export type Survivor = {
             Stunned: string?,
             --- The animation that'll play before a stun ends.
             StunnedEnd: string?,
+            --- The animation that'll play in the character model's preview in the shop.
+            --- If none is provided, `IdleAnimation` will play instead.
+            PreviewAnimation: string?,
         },
 
         --- Any voicelines this character might have. It's built with strings as keys, and either strings, string tables or string dictionaries as values for random voicelines.
@@ -152,6 +155,8 @@ end
 --- Creates a survivor with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function CharTypes:CreateSurvivor(Props: Survivor): Survivor
+    Props = Props or {}
+    
     Utils:DeepTableWrite(Props, self:GetDefaultSurvivorSettings())
 
     return Props
@@ -205,6 +210,9 @@ export type Killer = {
             Stunned: string?,
             --- The animation that'll play before a stun ends.
             StunnedEnd: string?,
+            --- The animation that'll play in the character model's preview in the shop.
+            --- If none is provided, `IdleAnimation` will play instead.
+            PreviewAnimation: string?,
             --- The animation that'll play when slashing.
             SlashAnimation: string?,
             --- The animation that the killer will have in the intro animation.
@@ -398,6 +406,8 @@ end
 --- Creates a killer with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function CharTypes:CreateKiller(Props: Killer): Killer
+    Props = Props or {}
+    
     Utils:DeepTableWrite(Props, self:GetDefaultKillerSettings())
 
     return Props

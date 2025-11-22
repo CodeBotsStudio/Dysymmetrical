@@ -28,8 +28,8 @@ local ToastPrefab = GetIntroModule("KillerNameToast")
 return {
     Init = function(_)
         local KillerPlayerNames = {}
+		local CurrentIntro
 
-        --TODO: cancel current intro when another one plays through making a table of intro props (the intro & a cancelled property) kinda like OOP
         local function SetupCharacter(Char: Model)
             if not workspace:GetAttribute("ClientLoaded") then
                 return
@@ -43,17 +43,20 @@ return {
             local KillerName = Char:GetAttribute("CharacterName")
             local KillerSkin = Char:GetAttribute("CharacterSkinName")
 
-		    local RootKillerModule = require(Utils:GetCharacterModule("Killer", KillerName))
-
             --TODO: multi-killer toast support
             KillerPlayerNames[1] = Char.Name
 
 		    if Utils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.DisableKillerIntros") then
-		    	task.spawn(require(ToastPrefab), IntroContainer, RootKillerModule.Config.Name, KillerPlayerNames)
+		    	task.spawn(require(ToastPrefab), IntroContainer, KillerPlayerNames)
 
 		    	Utils:Fade(Players.LocalPlayer, "Out", 0.6)
 		    	return
 		    end
+
+			if CurrentIntro then
+				CurrentIntro:Destroy()
+				CurrentIntro = nil
+			end
         
 		    local IntroInfo: KillerIntro.IntroSettings = {
 		    	KillerName = KillerName,
@@ -68,10 +71,11 @@ return {
 		    local Intro2D = GetIntroModule(KillerName, KillerSkin)
 
 		    local Intro = Intro2D and KillerIntro:New2DIntro(IntroInfo, Intro2D) or KillerIntro:New3DIntro(IntroInfo)
+			CurrentIntro = Intro
 
 		    Intro:Init()
 
-		    task.spawn(require(ToastPrefab), IntroContainer, RootKillerModule.Config.Name, KillerPlayerNames)
+		    task.spawn(require(ToastPrefab), IntroContainer, KillerPlayerNames)
 
 		    Utils:Fade(Players.LocalPlayer, "Out", 0.6)
 

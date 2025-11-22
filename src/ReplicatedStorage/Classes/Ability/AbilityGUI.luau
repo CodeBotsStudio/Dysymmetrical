@@ -2,11 +2,11 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+local Ability = require(script.Parent)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
 type Ability = {
-    ModuleCode: any,
+    ModuleCode: Ability.Ability,
     Keybind: TextLabel,
     Timer: TextLabel,
     Uses: TextLabel?,
@@ -64,11 +64,6 @@ function AbilityGUI:InitGUI()
     end
 
     local Conns = {
-        RunService.PreRender:Connect(function(_delta: number)
-            for _, Ability: Ability in Abilities do
-                self:_UpdateAbilityFrame(Ability, InputManager)
-            end
-        end),
         InputManager.SchemeChanged:Connect(function(CurrentScheme: string)
             for _, Ability: Ability in Abilities do
                 self:_UpdateAbilityFrameInput(Ability, InputManager, CurrentScheme)
@@ -77,6 +72,34 @@ function AbilityGUI:InitGUI()
     }
     for _, Ability: Ability in Abilities do
         self:_UpdateAbilityFrameInput(Ability, InputManager, InputManager.CurrentControlScheme)
+
+        --it would be stupid to not add this (again). -Dyscarn
+        -- uses label
+        if Ability.Uses and Ability.ModuleCode.UseSettings.Limited then
+            table.insert(Conns, Ability.ModuleCode.Signals.ChargesChanged:Connect(function(chargeAmount: number)
+                Ability.Uses.Text = Ability.ModuleCode.UsesLeft
+            end))
+        end
+
+        if Ability.Timer then
+            Ability.Timer.TextTransparency = 1
+        end
+
+        table.insert(Conns, Ability.ModuleCode.Signals.Used:Connect(function()
+            Ability.Timer.TextTransparency = 0
+            while Ability.ModuleCode.CooldownTimer > 0 do
+                -- failsafe if the ui gets destroyed for any reason
+                if not Ability.Timer then
+                    break
+                end
+                Ability.Timer.Text = tostring(math.ceil(Ability.ModuleCode.CooldownTimer * 10) / 10)
+                task.wait(0.025)
+            end
+            -- failsafe if the ui gets destroyed for any reason
+            if Ability.Timer then
+                Ability.Timer.TextTransparency = 1
+            end
+        end))
     end
 
     --kids, remember to disconnect your useless crap!
@@ -132,22 +155,6 @@ function AbilityGUI:_SetupAbilityFrame(Ability): Ability
     end
 
     return AbilityT
-end
-
---- Function used to update an ability's frame's values to display accurate information about the ability itself and its current state.
-function AbilityGUI:_UpdateAbilityFrame(Ability: Ability, InputManager)
-    --duh
-    if Ability.ModuleCode.CooldownTimer > 0 then
-        Ability.Timer.TextTransparency = 0
-        Ability.Timer.Text = tostring(math.round(Ability.ModuleCode.CooldownTimer * 10) / 10)
-    else
-        Ability.Timer.TextTransparency = 1
-    end
-
-    --it would be stupid to not add this (again). -Dyscarn
-    if Ability.Uses and Ability.ModuleCode.UseSettings.Limited then
-        Ability.Uses.Text = Ability.ModuleCode.UsesLeft
-    end
 end
 
 function AbilityGUI:_UpdateAbilityFrameInput(Ability: Ability, InputManager, CurrentScheme: string)

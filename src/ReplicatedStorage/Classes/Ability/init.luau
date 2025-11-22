@@ -6,6 +6,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local Signal = require(ReplicatedStorage.Utils.Signal)
 
 local AbilityType = {}
 
@@ -37,6 +38,9 @@ export type Ability = {
 
     --- CLIENT FUNCTION: Attempts to use the ability by checking if it's possible in the first place.
     AttemptUse: (self: Ability) -> (),
+    --- Modifies the `UsesLeft` property in both client and server.
+    --- SHOULD ONLY BE USED IN SERVER.
+    ChangeAbilityCharges: (self: Ability, Type: "Set" | "Add" | "Take", amount: number) -> (),
 
     --- The name of the input used for the ability, set up in `InputManager`.
     InputName: string,
@@ -77,6 +81,11 @@ export type Ability = {
         Limited: boolean,
         --- Initial uses / charges for an ability when starting a round.
         InitialUses: number,
+    },
+
+    Signals: {
+        ChargesChanged: Signal.Signal,
+        Used: Signal.Signal,
     },
 
     --- Connections and threads that make the ability work. Add any `task.delay()`s or `RBXScriptConnection`s here.
@@ -123,6 +132,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         Init = function(own: Ability, charModule: any, plr: Player)
             own.Owner = plr
             own.CharModule = charModule
+            own.UsesLeft = own.UseSettings.InitialUses
             if RunService:IsServer() then
                 Utils:Print("Initting "..own.Name.." ability for "..plr.Name)
 
@@ -146,18 +156,29 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
                         --cooldown stuffs
                         own.OnCooldown = true
-                        -- divide timer by two to make sure that it's fair when it ends in client
-                        own.CooldownTimer = (own.Cooldown - 0.1)
+                        own.CooldownTimer = own.Cooldown
                         task.spawn(function()
-                            --TODO: replace with a method that isn't network stability dependant
+                            --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
                             while own.CooldownTimer > 0 do
-                                task.wait(0.1)
-                                own.CooldownTimer -= 0.1
+                                -- gets the amount the server waits
+                                local WaitAmount = task.wait(0.1)
+                                -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
+                                WaitAmount = math.floor(WaitAmount * 10) / 10
+                                -- reduces cooldown timer
+                                own.CooldownTimer -= WaitAmount
                             end
                             own.CooldownTimer = 0
                             own.OnCooldown = false
                         end)
 
+                        --decreasing uses left if it's supposed to be limited
+                        if own.UseSettings.Limited then
+                            own:ChangeAbilityCharges("Set", own.UsesLeft - 1)
+                        end
+
+                        task.spawn(function()
+                            own.Signals.Used:Fire()
+                        end)
                         Network:FireClientConnection(own.Owner, "UsePlayerAbility", "REMOTE_EVENT", own.Name)
                         if own.Behaviour then
                             own:Behaviour()
@@ -189,7 +210,6 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 TurnToMoveDirection = require(own.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
             }
 
-            own.UsesLeft = own.UseSettings.InitialUses
             if #own.UseAnimation > 0 then
                 --nesting in pcall so that if there's nothing it doesn't matter
                 pcall(function()
@@ -231,30 +251,39 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                     end
                     --cooldown stuffs
                     own.OnCooldown = true
-                    own.CooldownTimer = own.Cooldown - 0.1
+                    own.CooldownTimer = own.Cooldown
                     task.spawn(function()
-                        --TODO: replace with a method that isn't network stability dependant
+                        --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
                         while own.CooldownTimer > 0 do
-                            task.wait(0.1)
-                            own.CooldownTimer -= 0.1
+                            -- gets the amount the client waits
+                            local WaitAmount = task.wait(0.1)
+                            -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
+                            WaitAmount = math.floor(WaitAmount * 10) / 10
+                            -- reduces cooldown timer
+                            own.CooldownTimer -= WaitAmount
                         end
                         own.CooldownTimer = 0
                         own.OnCooldown = false
                     end)
-                    --decreasing uses left if it's supposed to be limited
-                    if own.UseSettings.Limited then
-                        own.UsesLeft -= 1
-                    end
                     --plays any existant use animation
                     if own.PlayUseAnimationOnUse then
                         own:PlayUseAnimation()
                     end
+                    task.spawn(function()
+                        own.Signals.Used:Fire()
+                    end)
                     --ability stuffs
                     if own.Behaviour then
                         task.spawn(function()
                             own:Behaviour()
                         end)
                     end
+                end
+            end))
+
+            table.insert(own.Connections, Network:SetConnection("ChangeAbilityCharges", "REMOTE_EVENT", function(abilityName: string, Type: "Set" | "Add" | "Take", amount: number)
+                if abilityName == own.Name then
+                    own:ChangeAbilityCharges(Type, amount)
                 end
             end))
 
@@ -274,6 +303,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
         ReloadAnimation = function(own: Ability, id: string)
             own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
+            local AnimName = own.Name:gsub(" ", "").."UseAnim"
+            own.CharModule.GameplayConfig.Cache.Animations[AnimName] = Utils:LoadAnimationFromID(own.Owner.Character, id)
+            own.UseAnimationTrack = own.CharModule.GameplayConfig.Cache.Animations[AnimName]
         end,
 
         PlayUseAnimation = nil,
@@ -290,6 +322,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 end
             end
             table.clear(own.Connections)
+
+            own.CooldownTimer = 0
+            own.OnCooldown = false
         end,
 
         AttemptUse = function(own: Ability)
@@ -300,6 +335,21 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             --NOTE: this is handled this way (by making separate cooldowns in both server and client) so that it's possible to prevent network calls if it's impossible to use the ability in client
             if own:CanUse() then
                 Network:FireServerConnection("UsePlayerAbility", "REMOTE_EVENT", own.Name) --i know this is insecure but sue me lol
+            end
+        end,
+
+        ChangeAbilityCharges = function(own: Ability, Type:"Add" | "Set" | "Take", amount: number)
+            if Type == "Set" then
+                own.UsesLeft = amount
+            elseif Type == "Add" then
+                own.UsesLeft += amount
+            elseif Type == "Take" then
+                own.UsesLeft -= amount
+            end
+
+            own.Signals.ChargesChanged:Fire(own.UsesLeft)
+            if RunService:IsServer() then
+                Network:FireClientConnection(own.Owner, "ChangeAbilityCharges", "REMOTE_EVENT", own.Name, Type, amount)
             end
         end,
 
@@ -341,9 +391,11 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             end
 
             --if the player isn't emoting
-            local Emoting = false
-            if not RunService:IsServer() then
-                Emoting = own.OwnerProperties.EmoteManager.CurrentlyPlayingEmote
+            local Emoting
+            if RunService:IsServer() then
+                Emoting = own.OwnerProperties.Character:GetAttribute("Emoting") == true
+            else
+                Emoting = own.OwnerProperties.EmoteManager.CurrentlyPlayingEmote ~= nil
             end
 
             return EnoughUses
@@ -366,6 +418,11 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             InitialUses = 1,
         },
 
+        Signals = {
+            ChargesChanged = Signal.new(),
+            Used = Signal.new(),
+        },
+
         Connections = {},
     }
 end
@@ -373,6 +430,8 @@ end
 --- Creates an ability with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function AbilityType:CreateAbility(Props: Ability): Ability
+    Props = Props or {}
+    
     Utils:DeepTableWrite(Props, self:GetDefaultAbilitySettings())
 
     return Props

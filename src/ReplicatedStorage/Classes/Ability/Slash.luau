@@ -14,9 +14,7 @@ local SlashModule = {}
 function SlashModule.New(Props: Ability?): Ability
 
 	-- Doesn't require you to unintuitively slot in an empty table for it to work at all– someone was confused about this a bit earlier, so I figured a fix was in order.
-	if not Props then 
-		Props = {}
-	end
+	Props = Props or {}
 
 	Utils:DeepTableWrite(Props, Ability:CreateAbility({
 		Name = "Slash",

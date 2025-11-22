@@ -3,8 +3,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
-local TimeManager
-local CommonFunctions
+local TimeManager = RunService:IsServer() and require(ServerScriptService.Managers.TimeManager) or nil
+local CommonFunctions = RunService:IsServer() and require(ServerScriptService.System.CommonFunctions) or nil
+local Network = require(ReplicatedStorage.Modules.Network)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
@@ -77,17 +78,9 @@ export type HitboxDetails = {
 function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
     -- Prevent this from normally running on the client
-    --i love writing server shit and putting it in ReplicatedStorage :]
+    --i love writing server shit and putting it in ReplicatedStorage :] -dys
     if not RunService:IsServer() then
         return {}
-    end
-
-    -- Grabbing server-sided modules only here, after the client has been filtered out (why have this in ReplicatedStorage anyways...?)
-    if TimeManager == nil then
-        TimeManager = require(ServerScriptService.Managers.TimeManager)
-    end
-    if CommonFunctions == nil then
-        CommonFunctions = require(ServerScriptService.System.CommonFunctions)
     end
 
     -- Define the player in question for this hitbox, find their HumanoidRoot (or adjacent)
@@ -220,7 +213,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                 end
 
                 -- Finally parse through the hitbox itself.
-                Damaged = workspace:GetPartsInPart(Part, Over)
+                Damaged = workspace:GetPartsInPart(CheckPart, Over)
 
                 -- Flip through all of the parts hit, sort them by hitboxpriority for the next step.
                 table.sort(Damaged, function(a, b)
@@ -330,7 +323,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         if Humanoid.Health > 0 and Humanoid.Health - Damage <= 0 then
 
                             -- Find the killermodule for the user, who is assumedly on the "killer" team
-                            local KillerModule = require(Utils:GetCharacterModule("Killer", Char:GetAttribute("CharacterName"), Char:GetAttribute("CharacterSkinName")))
+                            local Module = require(Utils:GetCharacterModule(Char.Role.Value, Char:GetAttribute("CharacterName"), Char:GetAttribute("CharacterSkinName")))
 
                             -- Find out who the survivor they killed was, and what their skin was (if applicable)
                             local KilledSurvivor = {
@@ -339,12 +332,12 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                             }
 
                             -- Play on-kill voicelines, only if the user is properly able to execute the target.
-                            if KillerModule.Config.Voicelines.Kill and not TargetCharacter:GetAttribute("ExecutionsDisabled") then
+                            if Module.Config.Voicelines.Kill and not TargetCharacter:GetAttribute("ExecutionsDisabled") then
 
                                 -- Fetch the voiceline, or if one isn't found, resort to a default.
-                                local Voiceline = KilledSurvivor.Skin and KillerModule.Config.Voicelines.Kill[KilledSurvivor.Skin..KilledSurvivor.Name] or KillerModule.Config.Voicelines.Kill[KilledSurvivor.Name]
+                                local Voiceline = KilledSurvivor.Skin and Module.Config.Voicelines.Kill[KilledSurvivor.Skin..KilledSurvivor.Name] or Module.Config.Voicelines.Kill[KilledSurvivor.Name]
                                 if not Voiceline then
-                                    Voiceline = KillerModule.Config.Voicelines.Kill["Default"]
+                                    Voiceline = Module.Config.Voicelines.Kill["Default"]
                                 end
 
                                 -- Finally, play the voiceline.
@@ -354,14 +347,32 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                             end
 
                             -- Play execution animations, if applicable
-                            if Config.ExecuteOnKill and not TargetCharacter:GetAttribute("ExecutionsDisabled") then
+                            if Char.Role.Value == "Killer" and Config.ExecuteOnKill and not TargetCharacter:GetAttribute("ExecutionsDisabled") then
                                 
                                 -- Fetch if the user has execution animations to use
-                                local ExecutionAnimsAvailable = KillerModule.GameplayConfig.Cache.Animations.Execution
+                                local ExecutionAnimsAvailable = Module.GameplayConfig.Cache.Animations.Execution
 
                                 -- If the user has valid execution animations to use, go through with running them:
                                 if ExecutionAnimsAvailable then
                                     task.defer(function() -- Switched from task.spawn() to task.defer() to avoid task scheduler conflicts
+
+                                        -- Set the user and the target to be in an executing state. 
+                                        Char:SetAttribute("Executing", true)
+                                        Char:SetAttribute("Invincible", true)
+                                        TargetCharacter:SetAttribute("Executing", true)
+
+                                        -- Get the player that's about to be executed
+                                        local TargetPlayer = Utils:GetPlayerFromCharacter(TargetCharacter)
+                                        if TargetPlayer then
+                                            -- Execute the same code as if a survivor was killed while in chase to make it more fair for the killer (it won't execute again when the character actually dies later)
+                	                        Network:FireClientConnection(SourcePlayer, "KilledPlayer", "REMOTE_EVENT", TargetPlayer)
+                	                        Network:FireConnection("KilledPlayer", SourcePlayer, TargetPlayer)
+
+					                        CommonFunctions:UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
+                	                        CommonFunctions:GrantRewardToPlayer(SourcePlayer, 20, 60, "killing a Survivor")
+
+					                        TimeManager:SetTime(TimeManager.CurrentTime + 35)
+                                        end
 
                                         -- Find out if theres a special execution animation to use for this specific survivor; if there isn't, use a default.
                                         local ExecutionAnim = KilledSurvivor.Skin and ExecutionAnimsAvailable[KilledSurvivor.Skin..KilledSurvivor.Name] or ExecutionAnimsAvailable[KilledSurvivor.Name]
@@ -385,25 +396,20 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         local KillerAnim = ExecutionAnim.Killer
 
                                         -- If the survivor has a special death animation for this case, grab that, too.
-                                        local SurvivorAnim = KilledSurvivor.Skin and KillerModule.Config.AnimationIDs.Execution[KilledSurvivor.Skin..KilledSurvivor.Name] or KillerModule.Config.AnimationIDs.Execution[KilledSurvivor.Name]
-                                        SurvivorAnim = SurvivorAnim or KillerModule.Config.AnimationIDs.Execution["Default"]
+                                        local SurvivorAnim = KilledSurvivor.Skin and Module.Config.AnimationIDs.Execution[KilledSurvivor.Skin..KilledSurvivor.Name] or Module.Config.AnimationIDs.Execution[KilledSurvivor.Name]
+                                        SurvivorAnim = SurvivorAnim or Module.Config.AnimationIDs.Execution["Default"]
                                         SurvivorAnim = Utils:LoadAnimationFromID(TargetCharacter, SurvivorAnim)
 
                                         -- Grab the execution sound to play, if applicable; or use a default, if needed.
-                                        local ExSound = KilledSurvivor.Skin and KillerModule.Config.Sounds.Execute[KilledSurvivor.Skin..KilledSurvivor.Name] or KillerModule.Config.Sounds.Execute[KilledSurvivor.Name]
-                                        ExSound = ExSound or KillerModule.Config.Sounds.Execute["Default"]
+                                        local ExSound = KilledSurvivor.Skin and Module.Config.Sounds.Execute[KilledSurvivor.Skin..KilledSurvivor.Name] or Module.Config.Sounds.Execute[KilledSurvivor.Name]
+                                        ExSound = ExSound or Module.Config.Sounds.Execute["Default"]
 
                                         -- Clear all of the target's effects (they won't need 'em where they're goin').
                                         TargetCharacter.Effects:ClearAllChildren()
 
-                                        -- Set the user and the target to be in an executing state. 
-                                        Char:SetAttribute("Executing", true)
-                                        Char:SetAttribute("Invincible", true)
-                                        TargetCharacter:SetAttribute("Executing", true)
-
                                         -- Move in for the kill
                                         Char:PivotTo(CFrame.new(Root.Position, Vector3.new(HRoot.Position.X, Root.Position.Y, HRoot.Position.Z)))
-                                        TargetCharacter:PivotTo(Root.CFrame * (KillerModule.Config.ExecutionSurvivorCFrameOffset or CFrame.new(0, 0, 5)))
+                                        TargetCharacter:PivotTo(Root.CFrame * (Module.Config.ExecutionSurvivorCFrameOffset or CFrame.new(0, 0, 5)))
 
                                         -- Anchor both the user and the target to play the animation
                                         Root.Anchored = true
@@ -436,8 +442,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         end
 
                                         -- Fire a signal for any on-execution abilities the killer may have.
-                                        if KillerModule.GameplayConfig.OnExecution then
-                                            KillerModule.GameplayConfig:OnExecution(KillerModule, TargetCharacter)
+                                        if Module.GameplayConfig.OnExecution then
+                                            Module.GameplayConfig:OnExecution(Module, TargetCharacter)
                                         end
 
                                     end)

@@ -23,7 +23,7 @@ function HitmarkerCreator:ShowHitmarker(position: Vector3, dmgAmount: number, pl
 
 	local Hitmarker = HitmarkerPrefab:Clone()
 	Hitmarker.Position = position
-	Hitmarker.BillboardGui.TextLabel.Text = tostring(dmgAmount)
+	Hitmarker.BillboardGui.TextLabel.Text = tostring(math.floor(dmgAmount * 100) / 100)
 	Hitmarker.Parent = HitmarkerFolder
 	--
 	if playSound then
