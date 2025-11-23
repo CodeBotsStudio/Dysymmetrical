@@ -17,6 +17,7 @@ local ModPanel = {
     CloseOthersOnOpen = true,
     UIInstance = nil,
     Opened = false,
+    Initted = false,
 }
 
 local PrefabFolder = Utils:FindFirstChild(script, "Prefabs")
@@ -25,6 +26,10 @@ local Prefabs = {
 }
 
 function ModPanel:Init()
+    if self.Initted then
+        return
+    end
+
     local HasRank, Rank = Network:FireServerConnection("HasPermRank", "REMOTE_FUNCTION", "ServerOwner")
     if not HasRank then
         return
@@ -33,12 +38,14 @@ function ModPanel:Init()
     self.Rank = Rank
 
     self:Start()
+    self.Initted = true
 end
 
 function ModPanel:Start()
     local UI = Utils:FindFirstChild(script, "ModPanel")
     UI.Parent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
     UI.Size = Utils.UDim.Zero
+    UI.Visible = false
     self.UIInstance = UI
 
     local TopbarButton = TopbarPlus.new()
