@@ -16,15 +16,6 @@ local CommonFunctions = {
 			Message = "Player assumed to be teleporting across great distances.",
 		},
 	},
-	Ranks = {
-		Owner = 1,
-		LeadDeveloper = 5,
-		HeadModerator = 10,
-		Moderator = 15,
-		Developer = 18,
-		ServerOwner = 20,
-		DefaultPlayer = 30,
-	},
 	AdminPerms = {
 		{
 			Name = "Dyscarn",
@@ -32,6 +23,9 @@ local CommonFunctions = {
 			Rank = "Developer",
 		},
 	},
+
+	--don't add anything in here
+	Commands = {},
 }
 
 local Debris = game:GetService("Debris")
@@ -41,13 +35,27 @@ local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
-function Utils:Init()
+function CommonFunctions:Init()
+    for _, CommandScript in ReplicatedStorage.Security.ModeratorCommands:GetChildren() do
+        if not CommandScript:IsA("ModuleScript") then
+            continue
+        end
+        self.Commands[CommandScript.Name] = require(CommandScript)
+    end
+
 	Network:SetConnection("GetPermRank", "REMOTE_FUNCTION", function(Player: Player): number
 		return self:GetPlayerPermissionRank(Player)
 	end)
 	Network:SetConnection("HasPermRank", "REMOTE_FUNCTION", function(Player: Player, Rank: string | number): boolean
 		return self:PlayerHasPermissionRank(Player, Rank)
 	end)
+	Network:SetConnection("ExecuteCommand", "REMOTE_FUNCTION", function(Player: Player, CommandName: string, ...)
+        if not self:PlayerHasPermissionRank(Player, self.Commands[CommandName].RankRequired or Utils.Ranks.ServerOwner) or self.Commands[CommandName] == nil then
+            return
+        end
+        
+        return self.Commands[CommandName]:Executed(...)
+    end)
 end
 
 --- Function that should be used to damage a player from another player's attack.
@@ -274,11 +282,11 @@ end
 function CommonFunctions:GetPlayerPermissionRank(Player: Player): number
 	for _, i in self.AdminPerms do
 		if i.UserId == Player.UserId then
-			return self.Ranks[i.Rank] or tonumber(i.Rank) or self.Ranks.DefaultPlayer
+			return Utils.Ranks[i.Rank] or tonumber(i.Rank) or Utils.Ranks.DefaultPlayer
 		end
 	end
 
-	return self.Ranks.DefaultPlayer
+	return Utils.Ranks.DefaultPlayer
 end
 
 --- Checks if a player has a specific permission rank or higher.
@@ -286,8 +294,8 @@ end
 --- Inputting a number is still possible but the existing ranks should be checked.
 --- @return Will return if the player has the specified rank and its actual rank.
 function CommonFunctions:PlayerHasPermissionRank(Player: Player, MandatoryRank: string | number): (boolean, number)
-	local Rank = self:GetPlayerRank(Player)
-	return Rank < (typeof(MandatoryRank) == "string" and self.Ranks[MandatoryRank] or MandatoryRank), Rank
+	local Rank = self:GetPlayerPermissionRank(Player)
+	return Rank < (typeof(MandatoryRank) == "string" and Utils.Ranks[MandatoryRank] or MandatoryRank), Rank
 end
 
 function CommonFunctions:RigImpulse(Rig: Model | BasePart, magnitude: number, direction: Vector3)
