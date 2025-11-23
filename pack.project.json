@@ -1,0 +1,50 @@
+{
+  "name": "Dysymmetrical",
+  
+  "tree": {
+    "$className": "Folder",
+
+    "ReplicatedStorage": {
+      "$className": "Folder",
+      "$path": "src/ReplicatedStorage",
+
+      "Packages": {
+        "$path": "Packages"
+      }
+    },
+
+    "ReplicatedFirst": {
+      "$className": "Folder",
+      "$path": "src/ReplicatedFirst"
+    },
+
+    "ServerScriptService": {
+      "$className": "Folder",
+      "$path": "src/ServerScriptService"
+    },
+
+    "StarterPlayer": {
+      "$className": "Folder",
+
+      "StarterPlayerScripts": {
+        "$className": "Folder",
+        "$path": "src/StarterPlayerScripts"
+      },
+
+      "StarterCharacterScripts": {
+        "$className": "Folder",
+        "$path": "src/StarterCharacterScripts"
+      }
+    },
+    
+    "ServerStorage": {
+      "$className": "Folder",
+      "$path": "src/ServerStorage"
+    },
+
+    "StarterGui": {
+      "$className": "Folder",
+      "$path": "src/StarterGui"
+    }
+  }
+}

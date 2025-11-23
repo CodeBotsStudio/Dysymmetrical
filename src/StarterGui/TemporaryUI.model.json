@@ -1,0 +1,6 @@
+{
+    "className": "ScreenGui",
+    "properties": {
+        "IgnoreGuiInset": true
+    }
+}

@@ -1,0 +1,8 @@
+[package]
+name = "usuario/dysymmetrical"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+TopbarPlus = "1foreverhd/topbarplus@3.4.0"
