@@ -7,14 +7,14 @@ local Network = require(ReplicatedStorage.Modules.Network)
 return function()
     Network:SetConnection("EquipItem", "REMOTE_EVENT", function(plr: Player, name: string, Type: string, SkinPath: string?)
         if Type == "Skin" and SkinPath then
-            Utils:GetPlayerEquipped(plr, SkinPath, false).Value = name
+            Utils.PlayerData.GetPlayerEquipped(plr, SkinPath, false).Value = name
             return
         end
 
-        if not Utils:GetPlayerOwned(plr, Type.."s."..name, false) then
+        if not Utils.PlayerData.GetPlayerOwned(plr, Type.."s."..name, false) then
             return
         end
 
-        Utils:GetPlayerEquipped(plr, Type, false).Value = name
+        Utils.PlayerData.GetPlayerEquipped(plr, Type, false).Value = name
     end)
 end

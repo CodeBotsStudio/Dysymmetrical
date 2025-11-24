@@ -42,8 +42,8 @@ function AntiTP:Init()
 end
 
 function AntiTP:_SetupCharacter(Player: Player, Character: Model)
-    local HRP = Utils:FindFirstChild(Character, "HumanoidRootPart")
-    local Humanoid = Utils:FindFirstChild(Character, "Humanoid")
+    local HRP = Utils.Instance.FindFirstChild(Character, "HumanoidRootPart")
+    local Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
 
     local LastPos = HRP.Position
 
@@ -56,7 +56,7 @@ function AntiTP:_SetupCharacter(Player: Player, Character: Model)
                 return
             end
 
-            Utils:Print("Killing "..Player.Name..": TP detected")
+            Utils.Misc.Print("Killing "..Player.Name..": TP detected")
             Humanoid.Health = 0
         end
 

@@ -31,11 +31,11 @@ end
 
 function QueryHitboxVisibility:_CharSetup(char: Model)
     task.defer(function()
-        if not Utils:GetPlayerSetting(LocalPlayer, "Advanced.ShowPlayerHitboxes") then
+        if not Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Advanced.ShowPlayerHitboxes") then
             return
         end
 
-        if Utils:FindFirstChild(char, "Hitboxes", true, 3) then
+        if Utils.Instance.FindFirstChild(char, "Hitboxes", true, 3) then
             for _, i in char.Hitboxes:GetChildren() do
                 if not i:IsA("BasePart") then
                     continue

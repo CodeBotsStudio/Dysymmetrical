@@ -9,10 +9,10 @@ return {
     Init = function(_self)
         local Player = Players.LocalPlayer
         local Character = Player.Character
-        if Utils:FindFirstChild(Character, "Role").Value == "Killer" then
+        if Utils.Instance.FindFirstChild(Character, "Role").Value == "Killer" then
             return
         end
-        local Humanoid = Utils:FindFirstChild(Character, "Humanoid")
+        local Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
 
         local LastValue = Humanoid.Health
         Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
@@ -21,7 +21,7 @@ return {
                 return
             end
 
-            Utils:ShakeCamera(1.56 * (LastValue - Humanoid.Health) / 100, 0.4)
+            Utils.Player.ShakeCamera(1.56 * (LastValue - Humanoid.Health) / 100, 0.4)
 
             LastValue = Humanoid.Health
         end)

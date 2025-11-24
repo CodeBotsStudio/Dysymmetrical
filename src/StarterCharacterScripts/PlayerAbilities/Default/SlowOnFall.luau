@@ -6,7 +6,7 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 return {
     Init = function(_self)
         local char = script.Parent.Parent.Parent
-        local role = Utils:FindFirstChild(char, "Role")
+        local role = Utils.Instance.FindFirstChild(char, "Role")
 
         local thr = {}
 
@@ -28,7 +28,7 @@ return {
                         local elapsed = 0
                         repeat
                            local alpha = math.clamp(elapsed / Recovery, 0, 1)
-                           SpeedManager.SpeedFactors["FallSlowness"] = Utils:Lerp(Mult, 1, TweenService:GetValue(alpha, Enum.EasingStyle.Circular, Enum.EasingDirection.In))
+                           SpeedManager.SpeedFactors["FallSlowness"] = Utils.Math.Lerp(Mult, 1, TweenService:GetValue(alpha, Enum.EasingStyle.Circular, Enum.EasingDirection.In))
                            elapsed += task.wait()
                         until alpha == 1 or not SpeedManager.SpeedFactors["FallSlowness"]
                     end)

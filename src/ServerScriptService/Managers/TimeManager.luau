@@ -54,7 +54,7 @@ function TimeManager:Init()
 end
 
 function TimeManager:_EnoughPlayers()
-    return #Utils:GetLoadedPlayers(false) >= self.Config.MinimumPlayerAmount
+    return #Utils.Player.GetLoadedPlayers(false) >= self.Config.MinimumPlayerAmount
 end
 
 --- You can use this instead of changing the value directly. It works better.

@@ -2,7 +2,6 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
@@ -14,12 +13,12 @@ local RoundPlayerList = {
     Conns = {},
 }
 
-local TemplateFolder = Utils:FindFirstChild(script, "Templates")
+local TemplateFolder = Utils.Instance.FindFirstChild(script, "Templates")
 local Prefabs = {
-    UI = Utils:FindFirstChild(script, "RoundPlayerListUI"),
-    Card = Utils:FindFirstChild(TemplateFolder, "Card"),
+    UI = Utils.Instance.FindFirstChild(script, "RoundPlayerListUI"),
+    Card = Utils.Instance.FindFirstChild(TemplateFolder, "Card"),
 }
-local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "RoundPlayerList")
+local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "RoundPlayerList")
 
 function RoundPlayerList:Init()
     LocalPlayer.CharacterAdded:Connect(function(Char: Model)
@@ -37,7 +36,7 @@ function RoundPlayerList:Init()
 end
 
 function RoundPlayerList:_InitUI(Char: Model)
-    if Utils:FindFirstChild(Char, "Role").Value == "Spectator" then
+    if Utils.Instance.FindFirstChild(Char, "Role").Value == "Spectator" then
         return
     end
 
@@ -52,7 +51,7 @@ function RoundPlayerList:_InitUI(Char: Model)
     local Conns: {[string]: RBXScriptConnection} = {}
 
     for _, Character in workspace.Players:GetChildren() do
-        if not Utils:FindFirstChild(Character, "Role") or Character.Role.Value ~= "Survivor" then
+        if not Utils.Instance.FindFirstChild(Character, "Role") or Character.Role.Value ~= "Survivor" then
             continue
         end
 
@@ -60,11 +59,11 @@ function RoundPlayerList:_InitUI(Char: Model)
         Card.Name = Character.Name
 
         --should show the skin portrait if equipped
-        Card.Portrait.Image = require(Utils:GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"), Character:GetAttribute("CharacterSkinName"))).Config.Render
+        Card.Portrait.Image = require(Utils.Instance.GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"), Character:GetAttribute("CharacterSkinName"))).Config.Render
         --should show the root character's name without caring about the skin
-        Card.CharacterName.Text = require(Utils:GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"))).Config.Name
+        Card.CharacterName.Text = require(Utils.Instance.GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"))).Config.Name
 
-        local Humanoid = Utils:FindFirstChild(Character, "Humanoid")
+        local Humanoid: Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
 
         if Character == LocalPlayer.Character then
             Card.PlayerHealth.TextTransparency = 1
@@ -75,7 +74,8 @@ function RoundPlayerList:_InitUI(Char: Model)
             Card.PlayerName.Text = Character.Name
 
             local PlayerConns = {}
-            table.insert(PlayerConns, RunService.PreRender:Connect(function(_delta: number)
+
+            local function HealthUpdate(Health)
                 --stop checking when they die
                 if Humanoid.Health <= 0 and Card then
                     Card.Portrait.ImageColor3 = Color3.fromRGB(161, 0, 0)
@@ -95,12 +95,14 @@ function RoundPlayerList:_InitUI(Char: Model)
 
                 local HealthPercentageMagnitude = Humanoid.Health / Humanoid.MaxHealth
                 Card.PlayerHealth.TextColor3 = Color3.fromRGB(
-                    Utils:MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
+                    Utils.Math.MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
                     HealthPercentageMagnitude * 180 + 75,
                     75
                 )
                 Card.PlayerHealth.Text = tostring(HealthPercentageMagnitude * 100).."%"
-            end))
+            end
+
+            table.insert(PlayerConns, Humanoid.HealthChanged:Connect(HealthUpdate))
             table.insert(PlayerConns, Players.PlayerRemoving:Connect(function(Player: Player)
                 if not Character then
                     return
@@ -122,6 +124,8 @@ function RoundPlayerList:_InitUI(Char: Model)
                     Card.PlayerHealth.TextTransparency = 1
                 end
             end))
+
+            HealthUpdate(Humanoid.Health)
 
             Conns[Character.Name] = PlayerConns
         end

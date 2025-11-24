@@ -39,7 +39,7 @@ local Credits: {{ Name: string, Credits: {Credit} }} = {
     },
 }
 
-local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function CreditsMenu:Init()
     if self.UIInstance then
         self.UIInstance.Parent = UIParent
@@ -48,15 +48,15 @@ function CreditsMenu:Init()
         return
     end
 
-    local UI = Utils:FindFirstChild(script, "CreditsMenu")
+    local UI = Utils.Instance.FindFirstChild(script, "CreditsMenu")
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
     self.UIInstance = UI
     UI.Parent = UIParent
 
     local Prefabs = {
-        Section = Utils:FindFirstChild(script, "SectionLabel"),
-        Credit = Utils:FindFirstChild(script, "Credit"),
+        Section = Utils.Instance.FindFirstChild(script, "SectionLabel"),
+        Credit = Utils.Instance.FindFirstChild(script, "Credit"),
     }
 
     local LO = 0

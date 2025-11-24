@@ -24,7 +24,7 @@ local Hitboxes = ServerStorage.Assets.Hitboxes
 local StarterCharacterScripts = game:GetService("StarterPlayer").StarterCharacterScripts
 local PlayerFolder = workspace.Players
 
-local StunSPPrefab = Utils:FindFirstChild(script, "StunSpawnProtection")
+local StunSPPrefab = Utils.Instance.FindFirstChild(script, "StunSpawnProtection")
 
 function PlayerManager:Init()
 	local TimePlayedThreads = {}
@@ -35,7 +35,7 @@ function PlayerManager:Init()
 		plr.CharacterAdded:Connect(function(char)
 			AntiFly:_SetupCharacter(plr, char)
 			
-			local Role = Utils:FindFirstChild(char, "Role")
+			local Role = Utils.Instance.FindFirstChild(char, "Role")
 
 			if char:GetAttribute("BaseSpeed") == nil then
 				char:SetAttribute("BaseSpeed", 10.5)
@@ -43,7 +43,7 @@ function PlayerManager:Init()
 
 			char.Parent = PlayerFolder
 			
-        	Utils:FindFirstChild(char, "Humanoid").BreakJointsOnDeath = false
+        	Utils.Instance.FindFirstChild(char, "Humanoid").BreakJointsOnDeath = false
 
 			local KillerValue
 			if Role.Value ~= "Spectator" then
@@ -78,7 +78,7 @@ function PlayerManager:Init()
 						end)
 					end)
 				else
-					local HRP = Utils:FindFirstChild(char, "HumanoidRootPart")
+					local HRP = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
 					local StunSP = StunSPPrefab:Clone()
 					StunSP.Parent = HRP
 					local Weld = Instance.new("Weld")
@@ -147,7 +147,7 @@ function PlayerManager:Init()
 			self:_RespawnPlayer(plr)
 		end)
 		
-		local TimePlayed = Utils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
+		local TimePlayed = Utils.Instance.FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
 		TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
 			TimePlayed.Value += delta
 		end)
@@ -241,7 +241,7 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	local function FindChar(Service: "ServerStorage" | "ReplicatedStorage", Name: string, Type: ("Killer" | "Survivor")?, Skin: string?)
 		--gets the skin if queued to
 		if Skin ~= nil and #Skin > 0 then
-			char = Utils:FindFirstChild(game:GetService(Service).Assets.Characters.Skins[RigType], RigName.."."..Skin, false)
+			char = Utils.Instance.FindFirstChild(game:GetService(Service).Assets.Characters.Skins[RigType], RigName.."."..Skin, false)
 		end
 
 		--if there's a skin then it gets cloned and used

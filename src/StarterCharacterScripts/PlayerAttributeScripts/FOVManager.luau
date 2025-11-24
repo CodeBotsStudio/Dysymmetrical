@@ -21,7 +21,7 @@ function FOVManager:Init()
 				FOV *= factor
 			end
 
-			Camera.FieldOfView = Utils:Lerp(
+			Camera.FieldOfView = Utils.Math.Lerp(
 				Camera.FieldOfView,
 				FOV,
 				delta * self.DeltaMultiplier

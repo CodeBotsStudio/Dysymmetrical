@@ -108,17 +108,17 @@ function EmoteClass:GetDefaultEmoteSettings(): Emote
                 return
             end
 
-            Utils:PreloadAssets({own.Config.Render, own.AnimationIds, own.SoundIds})
+            Utils.Misc.PreloadAssets({own.Config.Render, own.AnimationIds, own.SoundIds})
 
             if typeof(own.AnimationIds) == "string" then
                 own.AnimationTracks[own.AnimationIds] = {
-                    Animation = Utils:LoadAnimationFromID(own.Owner.Character, own.AnimationIds),
+                    Animation = Utils.Character.LoadAnimationFromID(own.Owner.Character, own.AnimationIds),
                     Sound = nil,
                 }
             else
                 for _, id: string in own.AnimationIds do
                     own.AnimationTracks[id] = {
-                        Animation = Utils:LoadAnimationFromID(own.Owner.Character, id),
+                        Animation = Utils.Character.LoadAnimationFromID(own.Owner.Character, id),
                         Sound = nil,
                     }
                 end
@@ -211,7 +211,7 @@ end
 function EmoteClass:CreateEmote(Props: Emote): Emote
     Props = Props or {}
     
-    Utils:DeepTableWrite(Props, self:GetDefaultEmoteSettings())
+    Utils.Type.DeepTableWrite(Props, self:GetDefaultEmoteSettings())
 
     return Props
 end

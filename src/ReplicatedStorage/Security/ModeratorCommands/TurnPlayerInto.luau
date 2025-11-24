@@ -41,13 +41,13 @@ return {
         if Player:lower() == "all" then
             for _, i in Players:GetPlayers() do
                 task.spawn(function()
-                    ServerCharacterManager:SetupCharacter(i, Utils:GetPlayerEquipped(i, Type), Type)
+                    ServerCharacterManager:SetupCharacter(i, Utils.PlayerData.GetPlayerEquipped(i, Type), Type)
                 end)
             end
             return
         end
 
         Player = Players:FindFirstChild(Player)
-        ServerCharacterManager:SetupCharacter(Players:FindFirstChild(Player), Utils:GetPlayerEquipped(Player, Type), Type)
+        ServerCharacterManager:SetupCharacter(Players:FindFirstChild(Player), Utils.PlayerData.GetPlayerEquipped(Player, Type), Type)
     end,
 }

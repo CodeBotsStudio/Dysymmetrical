@@ -16,7 +16,7 @@ local music: Sound
 function module:Init()
 	frames = {}
 	frame_threads = {}
-	ScreenGUI = Utils:FindFirstChild(Player.PlayerGui, "VideoPlayer")
+	ScreenGUI = Utils.Instance.FindFirstChild(Player.PlayerGui, "VideoPlayer")
 end
 
 function module:LoadVideo(assetids: {string})
@@ -42,7 +42,7 @@ function module:LoadVideo(assetids: {string})
 
 			label.BackgroundTransparency = 1
 			label.ImageTransparency = 1
-			Utils:Print("loaded")
+			Utils.Misc.Print("loaded")
 		end)
 		table.insert(threads, thread)
 	end
@@ -58,7 +58,7 @@ function module:LoadVideo(assetids: {string})
 		end
 	end
 
-	Utils:Print("loaded")
+	Utils.Misc.Print("loaded")
 end
 
 function module:Reset()
@@ -82,7 +82,7 @@ function module:Reset()
 end
 
 function module:AddFrame(rbxassetid: string)
-	Utils:Print("loading video...")
+	Utils.Misc.Print("loading video...")
 
 	local label = Instance.new("ImageLabel")
 	label.Size = Utils.UDim.Full
@@ -104,7 +104,7 @@ function module:AddFrame(rbxassetid: string)
 		label.BackgroundTransparency = 1
 		label.ImageTransparency = 1
 
-		Utils:Print("loaded")
+		Utils.Misc.Print("loaded")
 	end)
 
 	table.insert(frame_threads, thread)
@@ -117,7 +117,7 @@ function module:SetAudio(assetid: string)
 	music.Looped = false
 	music.PlaybackSpeed = 1
 
-	Utils:Print(music.TimeLength)
+	Utils.Misc.Print(music.TimeLength)
 
 	if not music.IsLoaded then
 		while not music.IsLoaded do
@@ -127,7 +127,7 @@ function module:SetAudio(assetid: string)
 end
 
 function module:Play(fps: number)
-	Utils:Print("Play")
+	Utils.Misc.Print("Play")
 
 	--Wait for individualualy added frames to load
 	if #frame_threads > 0 then
@@ -145,7 +145,7 @@ function module:Play(fps: number)
 	local spf = 1 / fps
 
 	ScreenGUI.Enabled = true
-	Utils:Print("Play")
+	Utils.Misc.Print("Play")
 
 	local startTime = time()
 
@@ -174,7 +174,7 @@ function module:Play(fps: number)
 		end
 	end
 
-	Utils:Print(time() - startTime)
+	Utils.Misc.Print(time() - startTime)
 
 	if music then
 		music:Stop()

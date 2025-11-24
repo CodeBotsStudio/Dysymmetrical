@@ -134,7 +134,7 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
 
     -- If the throwtype is "mouse", fetch another function for grabbing the player's mouse position, to know where to aim the projectile.
     if ProjectileSettings.ThrowType == "Mouse" then
-        local Direction = Utils:GetPlayerMousePosition(ProjectileSettings.SourcePlayer, false)
+        local Direction = Utils.Player.GetPlayerMousePosition(ProjectileSettings.SourcePlayer, false)
         ProjectileSettings.StartingCFrame = CFrame.lookAt(ProjectileSettings.StartingCFrame.Position, Direction)
     end
 

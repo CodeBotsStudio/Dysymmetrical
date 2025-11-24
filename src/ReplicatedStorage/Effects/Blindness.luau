@@ -28,7 +28,7 @@ return Effect:CreateEffect({
 
             CC = Instance.new("ColorCorrectionEffect")
             CC.Name = "BlindnessColorCorrection"
-            CC.Brightness = Utils:GetPlayerSetting(Players.LocalPlayer, "Accessibility.EpilepsyMode") and 0.99 or -0.24
+            CC.Brightness = Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer, "Accessibility.EpilepsyMode") and 0.99 or -0.24
             CC.Saturation = 1
             CC.Parent = Lighting
 

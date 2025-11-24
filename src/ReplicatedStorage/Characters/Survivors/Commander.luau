@@ -114,18 +114,10 @@ local Commander = Character:CreateSurvivor({
                             self:ChangeAbilityCharges("Set", 1)
                         end))
 
+                        CommonFunctions:ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", 3, 5)
+
                         return
                     end
-                
-                    if self.CharModule.GameplayConfig.Abilities.Justice.UsesLeft > 0 then
-                        return
-                    end
-                
-                    table.insert(self.Connections, task.delay(self.Duration, function()
-                        self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
-                    end))
-                
-                    self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0.35)
                 end,
             }),
 
@@ -147,7 +139,7 @@ local Commander = Character:CreateSurvivor({
                 },
 
                 ExtraInit = function(self)
-                    self.JusticeModel = Utils:FindFirstChild(self.OwnerProperties.Character, "Deagle")
+                    self.JusticeModel = Utils.Instance.FindFirstChild(self.OwnerProperties.Character, "Deagle")
                 end,
 
                 Behaviour = function(self)
@@ -295,7 +287,7 @@ Commander.Config.Description = {
     },
     {
         Type = "Text",
-        Text = "Commander reloads his gun, getting <b>Slowness "..Utils:IntToRoman(Commander.GameplayConfig.Abilities.Reload.SlownessLevel)..
+        Text = "Commander reloads his gun, getting <b>Slowness "..Utils.Math.IntToRoman(Commander.GameplayConfig.Abilities.Reload.SlownessLevel)..
             "</b> for "..tostring(Commander.GameplayConfig.Abilities.Reload.Duration).." seconds.",
     },
     {

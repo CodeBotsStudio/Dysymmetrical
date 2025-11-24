@@ -6,3 +6,4 @@ realm = "shared"
 
 [dependencies]
 TopbarPlus = "1foreverhd/topbarplus@3.4.0"
+Janitor = "howmanysmall/janitor@1.18.3"

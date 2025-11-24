@@ -29,11 +29,11 @@ local AbilityGUI = {
     },
 }
 
-local PrefabContainer = Utils:FindFirstChild(script, "Prefabs")
+local PrefabContainer = Utils.Instance.FindFirstChild(script, "Prefabs")
 local Prefabs = {
-    Container = Utils:FindFirstChild(PrefabContainer, "CharacterAbilitiesContainer"),
-    AbilityContainer = Utils:FindFirstChild(PrefabContainer, "AbilityContainer"),
-    UsesLeftText = Utils:FindFirstChild(PrefabContainer, "UsesLeft"),
+    Container = Utils.Instance.FindFirstChild(PrefabContainer, "CharacterAbilitiesContainer"),
+    AbilityContainer = Utils.Instance.FindFirstChild(PrefabContainer, "AbilityContainer"),
+    UsesLeftText = Utils.Instance.FindFirstChild(PrefabContainer, "UsesLeft"),
 }
 
 --- Function used to init a character's ability GUI based on their ability table's info stored in `StarterCharacterScripts.PlayerAbilities.CharacterAbilities`.

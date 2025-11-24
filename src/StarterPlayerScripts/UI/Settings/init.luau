@@ -14,16 +14,16 @@ local Settings = {
 }
 
 local Classes = {
-    Bool = require(Utils:FindFirstChild(script, "Bool")),
-    Number = require(Utils:FindFirstChild(script, "Number")),
-    String = require(Utils:FindFirstChild(script, "String")),
+    Bool = require(Utils.Instance.FindFirstChild(script, "Bool")),
+    Number = require(Utils.Instance.FindFirstChild(script, "Number")),
+    String = require(Utils.Instance.FindFirstChild(script, "String")),
 }
 local Prefabs = {
-    UIPrefab = Utils:FindFirstChild(script, "SettingsScreen"),
-    Section = Utils:FindFirstChild(script, "Section"),
+    UIPrefab = Utils.Instance.FindFirstChild(script, "SettingsScreen"),
+    Section = Utils.Instance.FindFirstChild(script, "Section"),
 }
 
-local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 
 function Settings:Init()
     if self.UIInstance then

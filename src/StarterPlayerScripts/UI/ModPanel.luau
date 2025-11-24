@@ -20,9 +20,9 @@ local ModPanel = {
     Initted = false,
 }
 
-local PrefabFolder = Utils:FindFirstChild(script, "Prefabs")
+local PrefabFolder = Utils.Instance.FindFirstChild(script, "Prefabs")
 local Prefabs = {
-    Bool = Utils:FindFirstChild(PrefabFolder, "BoolToggle"),
+    Bool = Utils.Instance.FindFirstChild(PrefabFolder, "BoolToggle"),
 }
 
 function ModPanel:Init()
@@ -42,8 +42,8 @@ function ModPanel:Init()
 end
 
 function ModPanel:Start()
-    local UI = Utils:FindFirstChild(script, "ModPanel")
-    UI.Parent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+    local UI = Utils.Instance.FindFirstChild(script, "ModPanel")
+    UI.Parent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
     self.UIInstance = UI

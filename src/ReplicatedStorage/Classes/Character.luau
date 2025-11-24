@@ -157,7 +157,7 @@ end
 function CharTypes:CreateSurvivor(Props: Survivor): Survivor
     Props = Props or {}
     
-    Utils:DeepTableWrite(Props, self:GetDefaultSurvivorSettings())
+    Utils.Type.DeepTableWrite(Props, self:GetDefaultSurvivorSettings())
 
     return Props
 end
@@ -413,7 +413,7 @@ end
 function CharTypes:CreateKiller(Props: Killer): Killer
     Props = Props or {}
     
-    Utils:DeepTableWrite(Props, self:GetDefaultKillerSettings())
+    Utils.Type.DeepTableWrite(Props, self:GetDefaultKillerSettings())
 
     return Props
 end

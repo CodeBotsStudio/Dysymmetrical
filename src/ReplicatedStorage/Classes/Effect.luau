@@ -61,7 +61,7 @@ end
 function EffectType:CreateEffect(Props: Effect): Effect
     Props = Props or {}
     
-    Utils:DeepTableWrite(Props, self:GetDefaultEffect())
+    Utils.Type.DeepTableWrite(Props, self:GetDefaultEffect())
 
     return Props
 end

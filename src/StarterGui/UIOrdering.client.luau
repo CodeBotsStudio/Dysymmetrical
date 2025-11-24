@@ -31,5 +31,5 @@ local GUIs = {
 }
 
 for index, name in GUIs do
-	Utils:FindFirstChild(StarterGui, name).DisplayOrder = index
+	Utils.Instance.FindFirstChild(StarterGui, name).DisplayOrder = index
 end

@@ -20,7 +20,7 @@ local AnimLoadPrevented = {
 
 function CharManager:Init()
     LocalPlayer.CharacterAdded:Connect(function(Char: Model)
-        if Utils:FindFirstChild(Char, "Role").Value ~= "Spectator" then
+        if Utils.Instance.FindFirstChild(Char, "Role").Value ~= "Spectator" then
             self:LoadCharacter(Char:GetAttribute("CharacterName"), Char.Role.Value, Char:GetAttribute("CharacterSkinName"))
         end
     end)
@@ -43,7 +43,7 @@ function CharManager:_InitCharacterAbilities(Module)
             continue
         end
 
-        Module.GameplayConfig.Cache.Animations[name] = Utils:LoadAnimationFromID(LocalPlayer.Character, anim, false)
+        Module.GameplayConfig.Cache.Animations[name] = Utils.Character.LoadAnimationFromID(LocalPlayer.Character, anim, false)
     end
 
     return CharacterAbilities
@@ -56,12 +56,12 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     end)
 
     local Char: Model = LocalPlayer.Character
-    local Animate = Utils:FindFirstChild(Char, "Animate")
+    local Animate = Utils.Instance.FindFirstChild(Char, "Animate")
 
-    local CharModule = Utils:CopyTable(require(Utils:GetCharacterModule(charType, charName, skinName)))
+    local CharModule = Utils.Type.CopyTable(require(Utils.Instance.GetCharacterModule(charType, charName, skinName)))
     CharModule.Owner = LocalPlayer
 
-    Utils:PreloadAssets(CharModule.Config)
+    Utils.Misc.PreloadAssets(CharModule.Config)
 
     Animate.idle.IdleAnim.AnimationId = CharModule.Config.AnimationIDs.IdleAnimation
     Animate.walk.WalkAnim.AnimationId = CharModule.Config.AnimationIDs.WalkAnimation

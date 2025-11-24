@@ -21,15 +21,15 @@ function FootstepPlayer:PlayFootstep(Anchor: BasePart)
 end
 
 function FootstepPlayer:_SetupChar(character: Model)
-	local HRP = Utils:FindFirstChild(character, "HumanoidRootPart")
+	local HRP = Utils.Instance.FindFirstChild(character, "HumanoidRootPart")
 	if not HRP then
 		return
 	end
-	local Humanoid = Utils:FindFirstChild(character, "Humanoid")
+	local Humanoid = Utils.Instance.FindFirstChild(character, "Humanoid")
 	if not Humanoid then
 		return
 	end
-	Utils:FindFirstChild(Humanoid, "Animator").AnimationPlayed:Connect(function(track: AnimationTrack)
+	Utils.Instance.FindFirstChild(Humanoid, "Animator").AnimationPlayed:Connect(function(track: AnimationTrack)
 		track:GetMarkerReachedSignal("Footstep"):Connect(function()
 			if (character.PlayerAttributes.Sprinting and character.PlayerAttributes.Sprinting.Value) or Humanoid.FloorMaterial == Enum.Material.Air or HRP.Anchored then
 				return

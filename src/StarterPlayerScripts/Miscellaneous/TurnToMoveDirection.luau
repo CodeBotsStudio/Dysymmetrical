@@ -1,217 +1,120 @@
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
-local GlobalTurnToMoveDirection = {
-    HeadPreventionFactors = {},
-}
+local LERP_ALPHA = 0.25
+local FOWARD_LEAN_ANGLE = math.rad(10)
+local SIDE_LEAN_ANGLE = math.rad(35)
 
-local framerate = 1/60
-local lerpMult = 0.1
+local TARGET_FPS = 60
+local TARGET_DELTA = 1 / TARGET_FPS
 
-local deltaVal = framerate / lerpMult
+local camera = workspace.CurrentCamera
 
-function GlobalTurnToMoveDirection:Init()
-    Players.PlayerAdded:Connect(function(plr: Player)
-		self:SetupPlayer(plr)
-	end)
-    for _, Player: Player in Players:GetPlayers() do
-        task.spawn(function()
-			self:SetupPlayer(Player)
+return {
+	Init = function(_)
+		Utils.Player.ObservePlayers(function(player: Player, playerJanitor)
+			playerJanitor:Add(Utils.Character.ObserveHumanoid(player, function(humanoid: Humanoid, humanoidJanitor)
+				local character = humanoid.Parent
+				--TODO: support for r15 and customs
+				if character:GetAttribute("CustomRig") or humanoid.RigType ~= Enum.HumanoidRigType.R6 then
+					return
+				end
+
+				local rootPart = humanoid.RootPart
+				local torso = Utils.Instance.FindFirstChild(character, "Torso") :: BasePart
+				local head = Utils.Instance.FindFirstChild(character, "Head") :: BasePart
+
+				local joints = {
+					RootJoint = rootPart:FindFirstChild("RootJoint"),
+					Neck = torso:FindFirstChild("Neck"),
+					RightShoulder = torso:FindFirstChild("Right Shoulder"),
+					LeftShoulder = torso:FindFirstChild("Left Shoulder"),
+					RightHip = torso:FindFirstChild("Right Hip"),
+					LeftHip = torso:FindFirstChild("Left Hip"),
+				} :: {[string]: Motor6D}
+
+				local defaultC0s = {}
+				local offsets = {}
+
+				for name, joint in joints do
+					defaultC0s[name] = joint.C0
+					offsets[name] = CFrame.identity
+				end
+
+				local function lerpTilt(name: string, angles: {number}, deltaTimeSim: number)
+					offsets[name] = offsets[name]:Lerp(CFrame.Angles(table.unpack(angles)), LERP_ALPHA * deltaTimeSim)
+				end
+
+				local Accumulator = 0
+				humanoidJanitor:Add(RunService.PreSimulation:Connect(function(deltaTimeSim: number)
+					Accumulator += deltaTimeSim
+					if Accumulator < TARGET_DELTA then
+						return
+					end
+
+					deltaTimeSim = Accumulator * 60
+					Accumulator = 0
+
+					if not humanoid.AutoRotate then
+						for name, joint in joints do
+							if name == "Neck" then
+								continue
+							end
+							joint.C0 = joint.C0:Lerp(defaultC0s[name], 0.1 * deltaTimeSim)
+						end
+						return
+					end
+
+					local moveDirection = rootPart.CFrame:VectorToObjectSpace(humanoid.MoveDirection)
+
+					local x = math.clamp(moveDirection.X, -1, 1)
+					local z = math.clamp(moveDirection.Z, -1, 1)
+
+					local forwardLean = -z * FOWARD_LEAN_ANGLE
+					local sideLean = -x * SIDE_LEAN_ANGLE
+					-- isBackward = z > 0.5
+					local hipTiltFactor = z > 0.5 and 1 or -1
+
+					for name, angles in {
+						RootJoint = {forwardLean, 0, sideLean * -hipTiltFactor},
+						Neck = {-forwardLean * 0.5, 0, -sideLean * 0.5},
+						Shoulder = {0, x * math.rad(10), 0},
+						Hip = {0, hipTiltFactor * x * math.rad(20), 0},
+					} do
+
+						if name:lower() == "hip" or name:lower() == "shoulder" then
+							for _, side in {"Left", "Right"} do
+								lerpTilt(side..name, angles, deltaTimeSim)
+							end
+
+							continue
+						end
+
+						lerpTilt(name, angles, deltaTimeSim)
+					end
+
+					for name, joint in joints do
+						if name == "Neck" then
+							continue
+						end
+						joint.C0 = defaultC0s[name] * offsets[name]
+					end
+
+					local cameraLook = camera.CFrame.LookVector
+					local torsoLook = torso.CFrame.LookVector
+					local headPos = head.Position
+					local targetPos = headPos + cameraLook * 10
+
+					local dist = (headPos - targetPos).Magnitude
+					local diff = head.Position.Y - targetPos.Y
+
+					local finalx = (((headPos - targetPos).Unit):Cross(torsoLook)).Y * -1
+					local y = (math.atan(diff / dist) / 2)
+
+					joints.Neck.C0 = joints.Neck.C0:Lerp(defaultC0s["Neck"] * CFrame.Angles(y, 0, -finalx), LERP_ALPHA * deltaTimeSim)
+				end))
+			end))
 		end)
-    end
-end
-
-function GlobalTurnToMoveDirection:SetupPlayer(Player: Player)
-    local Conn
-    Player.CharacterAdded:Connect(function(Char: Model)
-        if Conn then
-            Conn:Disconnect()
-        end
-        Conn = self:SetupCharacter(Char)
-    end)
-    if Player.Character then
-        Conn = self:SetupCharacter(Player.Character)
-    end
-end
-
-function GlobalTurnToMoveDirection:SetupCharacter(Char: Model): RBXScriptConnection?
-    local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
-    if Humanoid.RigType ~= Enum.HumanoidRigType.R6 then
-    	return
-    end
-    local HumanoidRootPart = Utils:FindFirstChild(Char, "HumanoidRootPart")
-    local Torso = Utils:FindFirstChild(Char, "Torso")
-    local Head = Utils:FindFirstChild(Char, "Head")
-    --
-    local RootJoint = HumanoidRootPart:FindFirstChild("RootJoint")
-    local Neck = Torso.Neck
-    local RightShoulder = Torso:FindFirstChild("Right Shoulder")
-    local LeftShoulder = Torso:FindFirstChild("Left Shoulder")
-    local RightHip = Torso:FindFirstChild("Right Hip")
-    local LeftHip = Torso:FindFirstChild("Left Hip")
-    --
-    local RootC0 = RootJoint.C0
-    local NeckC0 = Neck.C0
-    local RightShoulderC0 = RightShoulder.C0
-    local LeftShoulderC0 = LeftShoulder.C0
-    local RightHipC0 = RightHip.C0
-    local LeftHipC0 = LeftHip.C0
-    --
-    local RootCF = CFrame.new()
-    local RightShoulderCF = CFrame.new()
-    local LeftShoulderCF = CFrame.new()
-    local RightHipCF = CFrame.new()
-    local LeftHipCF = CFrame.new()
-    local NeckCF = CFrame.new()
-    --
-    local lastWorkspaceServerTime = 0
-    local Updating = false
-    --
-
-    local function UpdateNeckDirection()
-	    if Updating and #self.HeadPreventionFactors <= 0 then
-	    	local p = Head.CFrame.p
-	    	local lookAt = p + workspace.CurrentCamera.CFrame.LookVector * 10
-	    	NeckCF = NeckCF:Lerp(CFrame.Angles(math.atan((Head.CFrame.Y - lookAt.Y) / (p - lookAt).magnitude) * 0.5, 0, -((p - lookAt).Unit:Cross(Torso.CFrame.lookVector).Y * -1)), deltaVal)
-	    	Neck.C0 = NeckC0 * NeckCF
-	    else
-	    	Neck.C0 = NeckC0
-	    end
-    end
-
-    return RunService.PreRender:Connect(function(_delta: number)
-		--failsafe
-		if not Char or not HumanoidRootPart or not Torso or not Humanoid or Humanoid.Health <= 0 then
-			return
-		end
-        if Humanoid.WalkSpeed <= 0.1 or HumanoidRootPart.Anchored or Char:GetAttribute("Ragdolling") then
-	    	if Updating then
-	    		Updating = false
-	    		RootJoint.C0 = RootC0
-	    		Neck.C0 = NeckC0
-	    		RightShoulder.C0 = RightShoulderC0
-	    		LeftShoulder.C0 = LeftShoulderC0
-	    		RightHip.C0 = RightHipC0
-	    		LeftHip.C0 = LeftHipC0
-	    	end
-	    	return
-	    else
-	    	Updating = true
-
-	    	local workspaceServerTimeNow = workspace:GetServerTimeNow()
-
-	    	if workspaceServerTimeNow - lastWorkspaceServerTime >= framerate then
-	    		lastWorkspaceServerTime = workspaceServerTimeNow
-	    		local MoveDir = HumanoidRootPart.CFrame:VectorToObjectSpace(Humanoid.MoveDirection)
-
-                if Players.LocalPlayer.Character and Char == Players.LocalPlayer.Character then
-	    		    task.spawn(UpdateNeckDirection)
-                end
-
-	    		if MoveDir:Dot(Vector3.new(1, 0, -1).Unit) > 0.95 or MoveDir:Dot(Vector3.new(-1, 0, -1).Unit) > 0.95 then
-
-	    			RootCF = RootCF:Lerp(CFrame.Angles(math.rad(-MoveDir.Z) * 5, 0, math.rad(-MoveDir.X) * 15), deltaVal)
-
-	    			RightShoulderCF = RightShoulderCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 10, 0), deltaVal)
-
-	    			LeftShoulderCF = LeftShoulderCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 10, 0), deltaVal)
-
-	    			RightHipCF = RightHipCF:Lerp(CFrame.Angles(0, math.rad(-MoveDir.X) * 25, 0), deltaVal)
-
-	    			LeftHipCF = LeftHipCF:Lerp(CFrame.Angles(0, math.rad(-MoveDir.X) * 25, 0), deltaVal)
-
-	    		elseif MoveDir:Dot(Vector3.new(1, 0, 1).Unit) > 0.95 or MoveDir:Dot(Vector3.new(-1, 0, 1).Unit) > 0.95 then
-
-	    			RootCF = RootCF:Lerp(CFrame.Angles(math.rad(-MoveDir.Z) * 5, 0, math.rad(MoveDir.X) * 15), deltaVal)
-
-	    			RightShoulderCF = RightShoulderCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 10, 0), deltaVal)
-
-	    			LeftShoulderCF = LeftShoulderCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 10, 0), deltaVal)
-
-	    			RightHipCF = RightHipCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 25, 0), deltaVal)
-
-	    			LeftHipCF = LeftHipCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 25, 0), deltaVal)
-
-	    		elseif MoveDir:Dot(Vector3.new(0, 0, -1).Unit) > 0.95 then
-
-	    			RootCF = RootCF:Lerp(CFrame.Angles(math.rad(-MoveDir.Z) * 0, 0, 0), deltaVal)
-
-	    			RightShoulderCF = RightShoulderCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-
-	    			LeftShoulderCF = LeftShoulderCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-
-	    			RightHipCF = RightHipCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-
-	    			LeftHipCF = LeftHipCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-
-	    		elseif MoveDir:Dot(Vector3.new(1, 0, 0).Unit) > 0.95 then
-
-	    			RootCF = RootCF:Lerp(CFrame.Angles(0, 0, math.rad(-MoveDir.X) * 35), deltaVal)
-
-	    			RightShoulderCF = RightShoulderCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 15, 0), deltaVal)
-
-	    			LeftShoulderCF = LeftShoulderCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 15, 0), deltaVal)
-
-	    			RightHipCF = RightHipCF:Lerp(CFrame.Angles(0, math.rad(-MoveDir.X) * 25, 0), deltaVal)
-
-	    			LeftHipCF = LeftHipCF:Lerp(CFrame.Angles(0, math.rad(-MoveDir.X) * 30, 0), deltaVal)
-
-	    		elseif MoveDir:Dot(Vector3.new(0, 0, 1).Unit) > 0.95 then
-
-	    			RootCF = RootCF:Lerp(CFrame.Angles(math.rad(-MoveDir.Z) * 15, 0, 0), deltaVal)
-
-	    			RightShoulderCF = RightShoulderCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-
-	    			LeftShoulderCF = LeftShoulderCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-
-	    			RightHipCF = RightHipCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-                
-	    			LeftHipCF = LeftHipCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-
-	    		elseif MoveDir:Dot(Vector3.new(-1, 0, 0).Unit) > 0.95 then
-
-	    			RootCF = RootCF:Lerp(CFrame.Angles(0, 0, math.rad(-MoveDir.X) * 35), deltaVal)
-
-	    			RightShoulderCF = RightShoulderCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 15, 0), deltaVal)
-
-	    			LeftShoulderCF = LeftShoulderCF:Lerp(CFrame.Angles(0, math.rad(MoveDir.X) * 15, 0), deltaVal)
-
-	    			RightHipCF = RightHipCF:Lerp(CFrame.Angles(0, math.rad(-MoveDir.X) * 30, 0), deltaVal)
-
-	    			LeftHipCF = LeftHipCF:Lerp(CFrame.Angles(0, math.rad(-MoveDir.X) * 25, 0), deltaVal)
-
-	    		elseif MoveDir == Vector3.zero then
-
-	    			RootCF = RootCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-                
-	    			RightShoulderCF = RightShoulderCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-                
-	    			LeftShoulderCF = LeftShoulderCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-                
-	    			RightHipCF = RightHipCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-                
-	    			LeftHipCF = LeftHipCF:Lerp(CFrame.Angles(0, 0, 0), deltaVal)
-                
-	    		end
-
-	    		RootJoint.C0 = RootC0 * RootCF
-	    		RightShoulder.C0 = RightShoulderC0 * RightShoulderCF
-	    		LeftShoulder.C0 = LeftShoulderC0 * LeftShoulderCF
-	    		RightHip.C0 = RightHipC0 * RightHipCF
-	    		LeftHip.C0 = LeftHipC0 * LeftHipCF
-	    	end
-	    end
-    end)
-end
-
-function GlobalTurnToMoveDirection:AddHeadPreventionFactor(Factor: string)
-	table.insert(self.HeadPreventionFactors, Factor)
-end
-function GlobalTurnToMoveDirection:RemoveHeadPreventionFactor(Factor: string)
-	table.remove(self.HeadPreventionFactors, table.find(self.HeadPreventionFactors, Factor))
-end
-
-return GlobalTurnToMoveDirection
+	end,
+}

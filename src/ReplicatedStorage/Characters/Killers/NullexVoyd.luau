@@ -165,8 +165,8 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                     end))
                 
                     --shows all players' aura
-                    for _, plr: Model in Utils:GetCharactersWithRoles(false).Survivor or {} do
-                        Utils:RevealPlayerAura(plr, self.Duration)
+                    for _, plr: Model in Utils.Character.GetCharactersWithRoles(false).Survivor or {} do
+                        Utils.Player.RevealPlayerAura(plr, self.Duration)
                     end
                 end,
             }),
@@ -274,8 +274,8 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Text",
-        Text = NullexVoydNameLabel.." overloads his systems with electricity, giving him <b>Speed "..Utils:IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedDuration).." seconds. "..
-        "When the effect wears off, his systems will exhaust briefly, inflicting him with <b>Slowness "..Utils:IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessDuration).." seconds.",
+        Text = NullexVoydNameLabel.." overloads his systems with electricity, giving him <b>Speed "..Utils.Math.IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedDuration).." seconds. "..
+        "When the effect wears off, his systems will exhaust briefly, inflicting him with <b>Slowness "..Utils.Math.IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessDuration).." seconds.",
     },
 }
 

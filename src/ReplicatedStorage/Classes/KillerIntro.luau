@@ -76,7 +76,7 @@ function KillerIntroClass:New2DIntro(Config: IntroSettings, IntroModule: ModuleS
             local VideoPlayer = require(Players.LocalPlayer.PlayerScripts.UI.VideoPlayer)
 
             local Intro = require(IntroModule)
-            local Module = require(Utils:GetCharacterModule("Killer", Config.KillerName, Config.SkinName))
+            local Module = require(Utils.Instance.GetCharacterModule("Killer", Config.KillerName, Config.SkinName))
 
             if Intro.Frames then
                 VideoPlayer:LoadVideo(Intro.Frames)
@@ -155,14 +155,14 @@ function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
                 return
             end
 
-            local Module = Utils:GetCharacterModule("Killer", Config.KillerName, Config.SkinName)
+            local Module = Utils.Instance.GetCharacterModule("Killer", Config.KillerName, Config.SkinName)
 
-            local PlayerRig = Utils:FindFirstChild(workspace.Players, Config.PlayerName)
+            local PlayerRig = Utils.Instance.FindFirstChild(workspace.Players, Config.PlayerName)
             --yield until the char loads properly
-            local HRP = Utils:FindFirstChild(PlayerRig, "HumanoidRootPart")
+            local HRP = Utils.Instance.FindFirstChild(PlayerRig, "HumanoidRootPart")
 
             local KillerRig = PlayerRig:Clone()
-            HRP = Utils:FindFirstChild(KillerRig, "HumanoidRootPart")
+            HRP = Utils.Instance.FindFirstChild(KillerRig, "HumanoidRootPart")
             KillerRig.Parent = workspace.TempObjectFolders.Intro
             HRP.Anchored = true
             KillerRig:PivotTo(CFrame.new(0, 10000, 0))
@@ -191,7 +191,7 @@ function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
                 "CameraRig",
             } do
                 if Module.Config.AnimationIDs[i] then
-                    own.Animations[i] = Utils:LoadAnimationFromID(i:find("Killer") and KillerRig or CameraRig, Module.Config.AnimationIDs[i])
+                    own.Animations[i] = Utils.Character.LoadAnimationFromID(i:find("Killer") and KillerRig or CameraRig, Module.Config.AnimationIDs[i])
                 end
             end
         end,

@@ -13,8 +13,8 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local TooltipClass = {}
 
 local Tooltip = nil
-local Prefab = Utils:FindFirstChild(script, "Tooltip")
-local UI = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "Menus")
+local Prefab = Utils.Instance.FindFirstChild(script, "Tooltip")
+local UI = Utils.Instance.FindFirstChild(Players.LocalPlayer.PlayerGui, "Menus")
 
 --- Creates a new Tooltip.
 --- If there's an existing one, it'll just change the text if it's different.

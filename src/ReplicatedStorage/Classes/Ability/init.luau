@@ -134,7 +134,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             own.CharModule = charModule
             own.UsesLeft = own.UseSettings.InitialUses
             if RunService:IsServer() then
-                Utils:Print("Initting "..own.Name.." ability for "..plr.Name)
+                Utils.Misc.Print("Initting "..own.Name.." ability for "..plr.Name)
 
                 --is this exploitable? yes.
                 --do i give a fuck? no.
@@ -142,7 +142,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
                 own.OwnerProperties = {
                     Character = own.Owner.Character,
-                    HRP = Utils:FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
+                    HRP = Utils.Instance.FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
                     CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
@@ -201,7 +201,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
 
             own.OwnerProperties = {
                 Character = own.Owner.Character,
-                HRP = Utils:FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
+                HRP = Utils.Instance.FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
                 InputManager = require(own.Owner.PlayerScripts.InputManager),
                 SpeedManager = require(own.Owner.Character.PlayerAttributeScripts.SpeedManager),
                 FOVManager = require(own.Owner.Character.PlayerAttributeScripts.FOVManager),
@@ -214,7 +214,7 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
                 --nesting in pcall so that if there's nothing it doesn't matter
                 pcall(function()
                     local AnimName = own.Name:gsub(" ", "").."UseAnim"
-                    charModule.GameplayConfig.Cache.Animations[AnimName] = Utils:LoadAnimationFromID(own.Owner.Character, own.UseAnimation)
+                    charModule.GameplayConfig.Cache.Animations[AnimName] = Utils.Character.LoadAnimationFromID(own.Owner.Character, own.UseAnimation)
                     own.UseAnimationTrack = charModule.GameplayConfig.Cache.Animations[AnimName]
                 end)
             end
@@ -302,9 +302,9 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         OnRemove = nil,
 
         ReloadAnimation = function(own: Ability, id: string)
-            own.UseAnimationTrack = Utils:LoadAnimationFromID(own.Owner.Character, id)
+            own.UseAnimationTrack = Utils.Character.LoadAnimationFromID(own.Owner.Character, id)
             local AnimName = own.Name:gsub(" ", "").."UseAnim"
-            own.CharModule.GameplayConfig.Cache.Animations[AnimName] = Utils:LoadAnimationFromID(own.Owner.Character, id)
+            own.CharModule.GameplayConfig.Cache.Animations[AnimName] = Utils.Character.LoadAnimationFromID(own.Owner.Character, id)
             own.UseAnimationTrack = own.CharModule.GameplayConfig.Cache.Animations[AnimName]
         end,
 
@@ -432,7 +432,7 @@ end
 function AbilityType:CreateAbility(Props: Ability): Ability
     Props = Props or {}
     
-    Utils:DeepTableWrite(Props, self:GetDefaultAbilitySettings())
+    Utils.Type.DeepTableWrite(Props, self:GetDefaultAbilitySettings())
 
     return Props
 end

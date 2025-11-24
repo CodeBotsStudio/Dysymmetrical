@@ -13,12 +13,12 @@ local EmoteManager = {
 
 function EmoteManager:Init()
 	local LocalPlayer = game:GetService("Players").LocalPlayer
-	local EquippedEmotes = Utils:FindFirstChild(LocalPlayer, "PlayerData.Equipped.Emotes")
+	local EquippedEmotes = Utils.Instance.FindFirstChild(LocalPlayer, "PlayerData.Equipped.Emotes")
 
 	self.Char = Players.LocalPlayer.Character
 	self.Char:SetAttribute("Emoting", false)
-	self.Hum = Utils:FindFirstChild(self.Char, "Humanoid")
-	self.Head = Utils:FindFirstChild(self.Char, "Head")
+	self.Hum = Utils.Instance.FindFirstChild(self.Char, "Humanoid")
+	self.Head = Utils.Instance.FindFirstChild(self.Char, "Head")
 
 	self.Animator = self.Char:FindFirstChildOfClass("Humanoid"):FindFirstChildOfClass("Animator")
 
@@ -42,7 +42,7 @@ function EmoteManager:Init()
 		end
 	end))
 
-	table.insert(self.Connections, Utils:FindFirstChild(self.Char, "Humanoid").Died:Connect(function()
+	table.insert(self.Connections, Utils.Instance.FindFirstChild(self.Char, "Humanoid").Died:Connect(function()
 		if self.CurrentlyPlayingEmote then
 			self:StopEmote(self.CurrentlyPlayingEmote)
 		end
@@ -107,12 +107,12 @@ function EmoteManager:ReloadAvailableContent(EquippedEmotes: Folder)
 			continue
 		end
 
-		local Module = Utils:GetEmoteModule(emote.Value)
+		local Module = Utils.Instance.GetEmoteModule(emote.Value)
 		if not Module then
 			return
 		end
 
-		self.EmotesAvailable[emote.Value] = Utils:CopyTable(require(Module))
+		self.EmotesAvailable[emote.Value] = Utils.Type.CopyTable(require(Module))
 		Network:FireServerConnection("InitEmote", "REMOTE_EVENT", Module.Name)
 		self.EmotesAvailable[emote.Value]:Init(Players.LocalPlayer, self.Animator)
 	end

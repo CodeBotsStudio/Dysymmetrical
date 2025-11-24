@@ -116,7 +116,7 @@ function SaveManager:Init()
 
 		-- Check the default killer
 		local DefaultKiller = EquippedFolder.Killer.Value
-		local KillerModule = Utils:GetCharacterModule("Killer", DefaultKiller)
+		local KillerModule = Utils.Instance.GetCharacterModule("Killer", DefaultKiller)
 
 		-- If the default killer points to a killer who doesn't exist anymore, grab the first one the game can find and use that as the default instead.
 		if not KillerModule then
@@ -135,7 +135,7 @@ function SaveManager:Init()
 
 		-- Check the default survivor
 		local DefaultSurvivor = EquippedFolder.Survivor.Value
-		local SurvivorModule = Utils:GetCharacterModule("Survivor", DefaultSurvivor)
+		local SurvivorModule = Utils.Instance.GetCharacterModule("Survivor", DefaultSurvivor)
 
 		-- Same deal for survivors– If the default survivor points to one whom doesn't exist anymore, grab the first one the game can find and use that as the default instead.
 		if not SurvivorModule then
@@ -158,7 +158,7 @@ function SaveManager:Init()
 		for index, purchasedkiller in PurchasedFolder.Killers:GetChildren() do
 
 			-- Find its module.
-			local PurchasedKillerModule = Utils:GetCharacterModule("Killer", purchasedkiller.Name)
+			local PurchasedKillerModule = Utils.Instance.GetCharacterModule("Killer", purchasedkiller.Name)
 
 			-- If it doesn't exist, set its name to the default killer instead after just one more check.
 			if not PurchasedKillerModule then
@@ -183,7 +183,7 @@ function SaveManager:Init()
 		for index, purchasedsurvivor in PurchasedFolder.Survivors:GetChildren() do
 
 			-- Find its module.
-			local PurchasedSurvivorModule = Utils:GetCharacterModule("Survivor", purchasedsurvivor.Name)
+			local PurchasedSurvivorModule = Utils.Instance.GetCharacterModule("Survivor", purchasedsurvivor.Name)
 
 			-- If it doesn't exist, set its name to the default survivor instead after just one more check.
 			if not PurchasedSurvivorModule then
@@ -300,7 +300,7 @@ function SaveManager:Load(Player: Player): Folder
 
 		-- Iterate through equipped emotes
 		for emotename, emote in PlayerData.Equipped.Emotes do
-			if Utils:GetEmoteModule(emotename) == nil then
+			if Utils.Instance.GetEmoteModule(emotename) == nil then
 				continue
 			end
 
@@ -313,8 +313,8 @@ function SaveManager:Load(Player: Player): Folder
 		-- Iterate through equipped skins
 		for skinname, skin in PlayerData.Equipped.Skins do
 			if
-				Utils:GetCharacterModule("Killer", skinname, skin) == nil
-				and Utils:GetCharacterModule("Survivor", skinname, skin) == nil
+				Utils.Instance.GetCharacterModule("Killer", skinname, skin) == nil
+				and Utils.Instance.GetCharacterModule("Survivor", skinname, skin) == nil
 			then
 				continue
 			end
@@ -326,8 +326,8 @@ function SaveManager:Load(Player: Player): Folder
 		end
 
 		-- Find their equipped killer and survivor
-		ClonedData.Equipped.Killer.Value = Utils:GetCharacterModule("Killer", PlayerData.Equipped.Killer) ~= nil and PlayerData.Equipped.Killer or ""
-		ClonedData.Equipped.Survivor.Value = Utils:GetCharacterModule("Survivor", PlayerData.Equipped.Survivor) ~= nil and PlayerData.Equipped.Survivor or ""
+		ClonedData.Equipped.Killer.Value = Utils.Instance.GetCharacterModule("Killer", PlayerData.Equipped.Killer) ~= nil and PlayerData.Equipped.Killer or ""
+		ClonedData.Equipped.Survivor.Value = Utils.Instance.GetCharacterModule("Survivor", PlayerData.Equipped.Survivor) ~= nil and PlayerData.Equipped.Survivor or ""
 
 		-- Not sure what this does, likely to do with the update log appearing.
 		ClonedData.Misc.LastSeenLog.Value = PlayerData.Misc.LastSeenLog
@@ -337,7 +337,7 @@ function SaveManager:Load(Player: Player): Folder
 		for emotename, emotedata in PlayerData.Purchased.Emotes do
 
 			-- If the emote doesn't exist, skip it for now. It'll likely cleaned up later.
-			if not Utils:GetEmoteModule(emotename) then
+			if not Utils.Instance.GetEmoteModule(emotename) then
 				continue
 			end
 
@@ -350,7 +350,7 @@ function SaveManager:Load(Player: Player): Folder
 		for killer, level in PlayerData.Purchased.Killers do
 
 			-- If the killer doesn't exist, skip it for now. It'll also likely be cleaned up later.
-			if Utils:GetCharacterModule("Killer", killer) == nil then
+			if Utils.Instance.GetCharacterModule("Killer", killer) == nil then
 				continue
 			end
 
@@ -368,7 +368,7 @@ function SaveManager:Load(Player: Player): Folder
 		for survivor, level in PlayerData.Purchased.Survivors do
 
 			-- If the survivor doesn't exist, skip it as well. It'll likely be cleaned up later, too.
-			if Utils:GetCharacterModule("Survivor", survivor) == nil then
+			if Utils.Instance.GetCharacterModule("Survivor", survivor) == nil then
 				continue
 			end
 
@@ -385,10 +385,10 @@ function SaveManager:Load(Player: Player): Folder
 		for skinname, skindata in PlayerData.Purchased.Skins do
 
 			-- Check whether its a survivor or killer skin
-			local IsSurvivor = Utils:GetCharacterModule("Survivor", skinname) ~= nil
+			local IsSurvivor = Utils.Instance.GetCharacterModule("Survivor", skinname) ~= nil
 
 			if not IsSurvivor then
-				if Utils:GetCharacterModule("Killer", skinname) == nil then
+				if Utils.Instance.GetCharacterModule("Killer", skinname) == nil then
 					continue
 				end
 			end
@@ -399,7 +399,7 @@ function SaveManager:Load(Player: Player): Folder
 
 			for index, value in skindata do
 
-				if Utils:GetCharacterModule(if IsSurvivor then "Survivor" else "Killer", skinname, index) == nil then
+				if Utils.Instance.GetCharacterModule(if IsSurvivor then "Survivor" else "Killer", skinname, index) == nil then
 					continue
 				end
 
@@ -459,7 +459,7 @@ function SaveManager:Save(Player: Player, Data: Folder)
 	-- Grab the currently equipped killer and survivor.
 	for target, equipped in { Killer = SaveFile.Equipped.Killer, Survivor = SaveFile.Equipped.Survivor } do
 
-		local Module = Utils:GetCharacterModule(target, equipped)
+		local Module = Utils.Instance.GetCharacterModule(target, equipped)
 
 		if not Module or Module:HasTag("PreventSave") then
 			SaveFile["Equipped"][target] = script:FindFirstChild("Equipped"):FindFirstChild(target).Value --if it's smth like a dev item it doesn't save in publics

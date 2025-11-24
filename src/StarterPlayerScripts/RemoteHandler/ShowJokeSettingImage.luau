@@ -48,9 +48,9 @@ local SoundsTable = {
 }
 
 return function()
-    Utils:PreloadAssets({Images, SoundsTable})
+    Utils.Misc.PreloadAssets({Images, SoundsTable})
 
-    local ImagePreset = Utils:FindFirstChild(script, "ImageLabel")
+    local ImagePreset = Utils.Instance.FindFirstChild(script, "ImageLabel")
 
     Network:SetConnection("ShowJokeSettingImage", "REMOTE_EVENT", function(isVictim: boolean, role: string)
         if not role then

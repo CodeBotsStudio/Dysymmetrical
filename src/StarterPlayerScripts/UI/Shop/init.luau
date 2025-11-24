@@ -50,7 +50,7 @@ local Shop = {
 
 local LocalPlayer = Players.LocalPlayer
 
-local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 
 local Buttons = {
     Purchase = nil,
@@ -104,7 +104,7 @@ function Shop:ReorderSkins()
     local LO = 0
 
     for n, i in self.LoadedItems.Skins do
-        if Utils:GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
+        if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
             table.insert(Ordered.Owned, i)
         else
             table.insert(Ordered.Unowned, i)
@@ -113,8 +113,8 @@ function Shop:ReorderSkins()
 
     table.sort(Ordered.Owned, function(a, b)
         local Modules = {
-            A = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
-            B = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+            A = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
+            B = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
         }
 
         return
@@ -123,8 +123,8 @@ function Shop:ReorderSkins()
     end)
     table.sort(Ordered.Unowned, function(a, b)
         local Modules = {
-            A = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
-            B = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+            A = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
+            B = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
         }
 
         return
@@ -181,18 +181,18 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
         local function CheckSkinOwnLabels()
             for n, i in self.LoadedItems.Skins do
-                if Utils:GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
+                if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
                     i.Container.Owned.BackgroundTransparency = 0.55
                     i.Container.Owned.TextLabel.TextTransparency = 0
                 end
             end
         end
 
-        SkinContainer.Parent.Label.TextLabel.Text = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name)).Config.Name.." Skins"
+        SkinContainer.Parent.Label.TextLabel.Text = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name)).Config.Name.." Skins"
 
-        local CanMakePreviews = self.PreviewsEnabled and Utils:GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
+        local CanMakePreviews = self.PreviewsEnabled and Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
         for _, i in VisibleSkins do
-            local Module = Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
+            local Module = Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
 
             if Module:HasTag("Dev") or Module:HasTag("Milestone") then
                 continue
@@ -212,7 +212,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             local SkinPreview = Container.Preview.ViewportFrame
             if CanMakePreviews then
                 task.defer(function()
-                    local SkinModel = Utils:FindFirstChild(CharacterFolder, "Skins."..self.SelectedItem.Type.."."..self.SelectedItem.Name.."."..name, false)
+                    local SkinModel = Utils.Instance.FindFirstChild(CharacterFolder, "Skins."..self.SelectedItem.Type.."."..self.SelectedItem.Name.."."..name, false)
                     if not SkinModel then
                         warn("[Shop:ToggleSkinsMenu]: Item preview model can't be found! Make sure it's located in ReplicatedStorage/Characters/Skins/"..self.SelectedItem.Type.."/"..self.SelectedItem.Name.."s! ("..name..")")
                         return
@@ -237,7 +237,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
                     SkinModel.Parent = SkinContainer.SkinPreviewCache
 
-                    Utils:LoadAnimationFromID(SkinModel, Info.Config.AnimationIDs.PreviewAnimation or Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
+                    Utils.Character.LoadAnimationFromID(SkinModel, Info.Config.AnimationIDs.PreviewAnimation or Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
 
                     SkinPreview:GetPropertyChangedSignal("ImageTransparency"):Connect(function()
                         if SkinPreview.ImageTransparency < 1 then
@@ -331,7 +331,7 @@ function Shop:ToggleInfoMenu(Open: boolean?)
             end
         end
 
-        local CharacterInfo = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name))
+        local CharacterInfo = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name))
 
         if not CharacterInfo.Config.Description then
             return
@@ -518,7 +518,7 @@ local function SwitchSection(sectionName: string)
 end
 
 function Shop:Init()
-    UI = Utils:FindFirstChild(script, "ShopUI"):Clone()
+    UI = Utils.Instance.FindFirstChild(script, "ShopUI"):Clone()
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
     UI.Parent = UIParent
@@ -553,7 +553,7 @@ function Shop:Init()
         end
     end
 
-    local templates = Utils:FindFirstChild(script, "Templates")
+    local templates = Utils.Instance.FindFirstChild(script, "Templates")
     Templates.CardTemplate = Templates.CardTemplate or templates.CardTemplate
     Templates.Header = Templates.Header or templates.Header
     Templates.Text = Templates.Text or templates.TextContainer
@@ -586,13 +586,13 @@ function Shop:Init()
     end))
     table.insert(Conns, Buttons.Purchase.MouseButton1Click:Connect(function()
         Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-        if not Utils:GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
+        if not Utils.PlayerData.GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
             if self.SelectedItem.Type == "Emote" then
-                self:CreateBuyWindow(Utils:GetEmoteModule(self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
+                self:CreateBuyWindow(Utils.Instance.GetEmoteModule(self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
                 return
             end
 
-            self:CreateBuyWindow(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
+            self:CreateBuyWindow(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
         end
     end))
 
@@ -742,7 +742,7 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
     PreviewInstances.Render.Image = info.Config.Render
     PreviewInstances.Title.Text = info.Config.Name
 
-    if Utils:GetPlayerOwned(LocalPlayer, Type.."s."..codeName) then
+    if Utils.PlayerData.GetPlayerOwned(LocalPlayer, Type.."s."..codeName) then
         Buttons.Purchase.Title.Text = "Purchased"
     else
         Buttons.Purchase.Title.Text = "Purchase"
@@ -780,7 +780,7 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
             local AnimIDs = info.AnimationIds
             if typeof(AnimIDs) == "string" then
                 LoadedEmoteTracks[Module.Name] = {
-                    Animation = Utils:LoadAnimationFromID(EmoteRig, AnimIDs),
+                    Animation = Utils.Character.LoadAnimationFromID(EmoteRig, AnimIDs),
                     Sound = nil,
                 }
             else
@@ -788,7 +788,7 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
 
                 for _, ID: string in AnimIDs do
                     LoadedEmoteTracks[Module.Name][ID] = {
-                        Animation = Utils:LoadAnimationFromID(EmoteRig, ID),
+                        Animation = Utils.Character.LoadAnimationFromID(EmoteRig, ID),
                         Sound = nil,
                     }
                 end
@@ -840,7 +840,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
     }
     local LO = 0
 
-    local CanMakePreviews = self.PreviewsEnabled and Utils:GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
+    local CanMakePreviews = self.PreviewsEnabled and Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
 
     local function SetupCard(module, Type: "Survivor" | "Killer" | "Emote")
         if module:HasTag("Dev") then
@@ -862,7 +862,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
             return
         end
 
-        local Module = Type == "Emote" and Utils:GetEmoteModule(name) or Utils:GetCharacterModule(Type, name)
+        local Module = Type == "Emote" and Utils.Instance.GetEmoteModule(name) or Utils.Instance.GetCharacterModule(Type, name)
         local Info = require(Module)
 
         local Card = Templates.CardTemplate:Clone()
@@ -877,7 +877,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
         local Preview = Container.Preview.ViewportFrame
         if CanMakePreviews and Type ~= "Emote" then
             task.defer(function()
-                local Model = Utils:FindFirstChild(CharacterFolder, Type.."."..name, false)
+                local Model = Utils.Instance.FindFirstChild(CharacterFolder, Type.."."..name, false)
                 if not Model then
                     warn("[Shop:ReloadContent]: Item preview model can't be found! Make sure it's located in ReplicatedStorage/Characters/"..Type.."! ("..name..")")
                     return
@@ -902,7 +902,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
 
                 Model.Parent = ShopContainer.PreviewCache
 
-                Utils:LoadAnimationFromID(Model, Info.Config.AnimationIDs.PreviewAnimation or Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
+                Utils.Character.LoadAnimationFromID(Model, Info.Config.AnimationIDs.PreviewAnimation or Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
 
                 Preview:GetPropertyChangedSignal("ImageTransparency"):Connect(function()
                     if Preview.ImageTransparency < 1 then
@@ -916,7 +916,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
             end)
         end
 
-        if Utils:GetPlayerOwned(LocalPlayer, Type.."s."..name) then
+        if Utils.PlayerData.GetPlayerOwned(LocalPlayer, Type.."s."..name) then
             Container.Owned.BackgroundTransparency = 0.55
             Container.Owned.TextLabel.TextTransparency = 0
         end
@@ -984,7 +984,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
         LO = 0
 
         for _, module in ReplicatedStorage[Type == "Emote" and "Assets" or "Characters"][Type.."s"]:GetChildren() do
-            table.insert(Ordered[Utils:GetPlayerOwned(LocalPlayer, Type.."s."..module.Name) and "Owned" or "Unowned"], module)
+            table.insert(Ordered[Utils.PlayerData.GetPlayerOwned(LocalPlayer, Type.."s."..module.Name) and "Owned" or "Unowned"], module)
         end
 
         SortTableByPriceAndName(Ordered.Owned)
@@ -1010,7 +1010,7 @@ function Shop:CreateBuyWindow(Module: ModuleScript, skin: boolean?, Parent: Fram
 
     local Window = BuyWindow.New(self, Module, skin, Parent, Card)
     Window.Purchased:Connect(function()
-        if Utils:GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
+        if Utils.PlayerData.GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
             Buttons.Purchase.Title.Text = "Purchased"
         else
             Buttons.Purchase.Title.Text = "Purchase"

@@ -10,12 +10,12 @@ local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Signal = require(ReplicatedStorage.Utils.Signal)
 
-local ButtonPrefab = Utils:FindFirstChild(script, "EmoteButton")
+local ButtonPrefab = Utils.Instance.FindFirstChild(script, "EmoteButton")
 
 return {
     New = function(Slot: number, Parent: Instance)
         local Window = {
-            Instance = Utils:FindFirstChild(script, "EmoteEquipWindow"):Clone(),
+            Instance = Utils.Instance.FindFirstChild(script, "EmoteEquipWindow"):Clone(),
             Connections = {},
             Equipped = Signal.new(),
             Removed = Signal.new(),
@@ -57,7 +57,7 @@ return {
         end
 
         local EmotesToInstantiate = {}
-        for _, i in Utils:GetPlayerOwned(Players.LocalPlayer, "Emotes", false):GetChildren() do
+        for _, i in Utils.PlayerData.GetPlayerOwned(Players.LocalPlayer, "Emotes", false):GetChildren() do
             table.insert(EmotesToInstantiate, i.Name)
         end
         table.sort(EmotesToInstantiate, function(a, b)
@@ -65,7 +65,7 @@ return {
         end)
 
         for _, i in EmotesToInstantiate do
-            local EmoteInfo = require(Utils:GetEmoteModule(i))
+            local EmoteInfo = require(Utils.Instance.GetEmoteModule(i))
 
             local Button = ButtonPrefab:Clone()
             Button.Name = i

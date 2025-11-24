@@ -206,7 +206,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                 -- Some amount of ping compensation for placing the hitbox.
                 if Config.PredictVelocity and not Config.IsProjectile then
-                    -- Utils:Print(SourcePlayer:GetNetworkPing())
+                    -- Utils.Misc.Print(SourcePlayer:GetNetworkPing())
                     local PingDivider = 6.5 - math.clamp(SourcePlayer:GetNetworkPing(), 0, 3)
                     local PingOffset = CheckPart.CFrame:VectorToObjectSpace(Root.AssemblyLinearVelocity) / PingDivider
                     CheckPart.CFrame *= CFrame.new(PingOffset)
@@ -323,7 +323,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         if Humanoid.Health > 0 and Humanoid.Health - Damage <= 0 then
 
                             -- Find the killermodule for the user, who is assumedly on the "killer" team
-                            local Module = require(Utils:GetCharacterModule(Char.Role.Value, Char:GetAttribute("CharacterName"), Char:GetAttribute("CharacterSkinName")))
+                            local Module = require(Utils.Instance.GetCharacterModule(Char.Role.Value, Char:GetAttribute("CharacterName"), Char:GetAttribute("CharacterSkinName")))
 
                             -- Find out who the survivor they killed was, and what their skin was (if applicable)
                             local KilledSurvivor = {
@@ -362,7 +362,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         TargetCharacter:SetAttribute("Executing", true)
 
                                         -- Get the player that's about to be executed
-                                        local TargetPlayer = Utils:GetPlayerFromCharacter(TargetCharacter)
+                                        local TargetPlayer = Utils.Player.GetPlayerFromCharacter(TargetCharacter)
                                         if TargetPlayer then
                                             -- Execute the same code as if a survivor was killed while in chase to make it more fair for the killer (it won't execute again when the character actually dies later)
                 	                        Network:FireClientConnection(SourcePlayer, "KilledPlayer", "REMOTE_EVENT", TargetPlayer)
@@ -398,7 +398,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         -- If the survivor has a special death animation for this case, grab that, too.
                                         local SurvivorAnim = KilledSurvivor.Skin and Module.Config.AnimationIDs.Execution[KilledSurvivor.Skin..KilledSurvivor.Name] or Module.Config.AnimationIDs.Execution[KilledSurvivor.Name]
                                         SurvivorAnim = SurvivorAnim or Module.Config.AnimationIDs.Execution["Default"]
-                                        SurvivorAnim = Utils:LoadAnimationFromID(TargetCharacter, SurvivorAnim)
+                                        SurvivorAnim = Utils.Character.LoadAnimationFromID(TargetCharacter, SurvivorAnim)
 
                                         -- Grab the execution sound to play, if applicable; or use a default, if needed.
                                         local ExSound = KilledSurvivor.Skin and Module.Config.Sounds.Execute[KilledSurvivor.Skin..KilledSurvivor.Name] or Module.Config.Sounds.Execute[KilledSurvivor.Name]
