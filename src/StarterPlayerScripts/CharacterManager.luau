@@ -72,11 +72,6 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
 
     local CharacterAbilities = self:_InitCharacterAbilities(CharModule)
 
-    if charType ~= "Killer" and charType ~= "Survivor" then
-        LocalPlayer:Kick("https://www.youtube.com/watch?v=L8XbI9aJOXk")
-        return
-    end
-
     Char.Effects.ChildAdded:Connect(function(newChild)
         if newChild.Name == "Stunned" then
             if CharacterAbilities.Animations.Stunned then
