@@ -62,15 +62,21 @@ function SideBar:Toggle(visible: boolean)
     self.Enabled = visible
 
     for _, m in self.MenuModules do
+        if not m.Button then
+            continue
+        end
         TweenInverted(m.Button, false)
     end
 end
 
 function SideBar:CloseAll(Remaining: any)
     for _, menu in self.MenuModules do
-        if menu == Remaining or not menu.CloseOnOtherOpen then continue end
+        if menu == Remaining or not menu.CloseOnOtherOpen or not menu.UIInstance then continue end
         if menu.Opened then
             menu:Close(self.ToggleDuration)
+            if not menu.Button then
+                continue
+            end
             TweenInverted(menu.Button, false)
         end
     end
@@ -82,13 +88,17 @@ function SideBar:OpenMenu(Menu)
         if Menu:Open(self.ToggleDuration) == "Prevented" then
             return
         end
-        TweenInverted(Menu.Button, true)
+        if Menu.Button then
+            TweenInverted(Menu.Button, true)
+        end
         if Menu.CloseOthersOnOpen then
             self:CloseAll(Menu)
         end
     else
         Menu:Close(self.ToggleDuration)
-        TweenInverted(Menu.Button, false)
+        if Menu.Button then
+            TweenInverted(Menu.Button, false)
+        end
     end
 end
 

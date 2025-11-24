@@ -27,6 +27,17 @@ local Utils = {
     },
     --- INTERNAL: Used for fading in/out.
     Fade = nil,
+
+    --- The levels of each mod rank.
+    Ranks = {
+		Owner = 1,
+		LeadDeveloper = 5,
+		HeadModerator = 10,
+		Moderator = 15,
+		Developer = 18,
+		ServerOwner = 20,
+		DefaultPlayer = 30,
+    },
 }
 
 --- If you change this, you're a bum.
@@ -78,7 +89,19 @@ function Utils:Init()
         Network:SetConnection("ShakeCamera", "REMOTE_EVENT", function(Magnitude: number, Duration: number)
             return self:ShakeCamera(Magnitude, Duration)
         end)
+
+        return
     end
+
+    Network:SetConnection("CreateMissingSkinValue", "REMOTE_FUNCTION", function(SourcePlayer: Player, name: string)
+        return Utils:CreateMissingSkinValue(SourcePlayer, name)
+    end)
+    Network:SetConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", function(SourcePlayer: Player, name: string)
+        return Utils:CreateMissingPurchasedSkinValue(SourcePlayer, name)
+    end)
+    Network:SetConnection("GetMousePosition", "REMOTE_FUNCTION", function(v)
+        return Utils:_GetMousePosition(v)
+    end)
 end
 
 --- Splits a path into multiple strings.

@@ -2,10 +2,11 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
-local ServerCharacterManager = require(ServerScriptService.Managers.ServerCharacterManager)
+local ServerCharacterManager = RunService:IsServer() and require(ServerScriptService.Managers.ServerCharacterManager) or nil
 
 return {
     Name = "Turn Player Into Killer/Survivor",
