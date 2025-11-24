@@ -102,23 +102,18 @@ end
 
 -- making this a metatable so that function calls from already existing scripts don't break
 return setmetatable(Utils, {
-    -- __index = function(self, name: string)
-    --     if not self[name] then
-    --         -- tries to index in the table's contents unrecursively
-    --         for _, section in self do
-    --             if typeof(section) ~= "table" then
-    --                 continue
-    --             end
+    __index = function(self, name: string)
+        -- tries to index in the table's contents unrecursively
+        for _, section in self do
+            if typeof(section) ~= "table" then
+                continue
+            end
 
-    --             if section[name] then
-    --                 return section[name]
-    --             end
-    --         end
+            if section[name] then
+                return section[name]
+            end
+        end
 
-    --         return
-    --     end
-
-    --     return self[name]
-    -- end,
-    __index = Utils,
+        return
+    end,
 })

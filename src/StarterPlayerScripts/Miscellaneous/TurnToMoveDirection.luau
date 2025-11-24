@@ -56,15 +56,17 @@ return {
 					deltaTimeSim = Accumulator * 60
 					Accumulator = 0
 
-					if not humanoid.AutoRotate then
-						for name, joint in joints do
-							if name == "Neck" then
-								continue
-							end
-							joint.C0 = joint.C0:Lerp(defaultC0s[name], 0.1 * deltaTimeSim)
-						end
-						return
-					end
+					-- NOTE: disabled this because of smooth shift lock, might find a workaround later -dys
+
+					-- if not humanoid.AutoRotate then
+					-- 	for name, joint in joints do
+					-- 		if name == "Neck" then
+					-- 			continue
+					-- 		end
+					-- 		joint.C0 = joint.C0:Lerp(defaultC0s[name], 0.1 * deltaTimeSim)
+					-- 	end
+					-- 	return
+					-- end
 
 					local moveDirection = rootPart.CFrame:VectorToObjectSpace(humanoid.MoveDirection)
 

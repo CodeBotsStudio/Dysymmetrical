@@ -184,18 +184,18 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
     --checking who won and giving the proper amounts to their stats
     if winner == "Killer" then
         for _, i in RoundManager.CurrentRound.Killers do
-            CommonFunctions:UpdatePlayerStat(i.Player, "KillerStats.KillerWins", 1)
-            CommonFunctions:GrantRewardToPlayer(i.Player, 120, 180, "winning a match as Killer")
+            CommonFunctions.UpdatePlayerStat(i.Player, "KillerStats.KillerWins", 1)
+            CommonFunctions.GrantRewardToPlayer(i.Player, 120, 180, "winning a match as Killer")
         end
         --survivor losses aren't handled here since when a player dies it directly counts
         Utils.Misc.Print("killer wins")
     elseif winner == "Survivors" then
         for _, i in RoundManager.CurrentRound.Killers do
-            CommonFunctions:UpdatePlayerStat(i.Player, "KillerStats.KillerLosses", 1)
+            CommonFunctions.UpdatePlayerStat(i.Player, "KillerStats.KillerLosses", 1)
         end
         for _, Player: Player in RoundManager.CurrentRound.PlayersRemaining do
-            CommonFunctions:UpdatePlayerStat(Player, "SurvivorStats.SurvivorWins", 1)
-            CommonFunctions:GrantRewardToPlayer(Player, 70, 110, "winning a match as Survivor")
+            CommonFunctions.UpdatePlayerStat(Player, "SurvivorStats.SurvivorWins", 1)
+            CommonFunctions.GrantRewardToPlayer(Player, 70, 110, "winning a match as Survivor")
         end
         
         Utils.Misc.Print("survivors win")
@@ -251,7 +251,7 @@ function RoundManager.Callables:_OnPlayerDeath(dead: Player, wasKiller: boolean?
     --if it was a killer, remove killer from table and resort it
     if wasKiller then
         --updates killer losses
-        CommonFunctions:UpdatePlayerStat(dead, "KillerStats.KillerLosses", 1)
+        CommonFunctions.UpdatePlayerStat(dead, "KillerStats.KillerLosses", 1)
         --removes killer from table using table index
         RoundManager.CurrentRound.Killers[RoundManager.CurrentRound.KillerIndex[dead]] = nil
         RoundManager.CurrentRound.KillerIndex[dead] = nil
@@ -348,7 +348,7 @@ function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
 
         RoundManager.CurrentRound.Killers[KillerIndex].Character = Char
     else
-        CommonFunctions:UpdatePlayerStat(Player, "General.Malice", 1) --adds 1 malice
+        CommonFunctions.UpdatePlayerStat(Player, "General.Malice", 1) --adds 1 malice
 
         local SurvivorSpawns = Spawns.Survivors:GetChildren()
 
@@ -373,7 +373,7 @@ function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
             --checks for death to count kills n shit
             Char.Humanoid.Died:Connect(function()
                 --if the survivor dies they lose duh
-                CommonFunctions:UpdatePlayerStat(Player, "SurvivorStats.SurvivorLosses", 1) --increasing loss stat
+                CommonFunctions.UpdatePlayerStat(Player, "SurvivorStats.SurvivorLosses", 1) --increasing loss stat
                 RoundManager.Callables:_OnPlayerDeath(Player)
             end)
         }

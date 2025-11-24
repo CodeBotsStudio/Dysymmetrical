@@ -159,7 +159,7 @@ function Sounds:PlayTheme(ID: string | Instance, properties: {[string]: any}): S
             properties.Looped = true
         end
 
-        properties = Utils.Type.CopyTable(properties)
+        properties = Utils.CopyTable(properties)
 
         local Priority = properties.Priority or 1
         properties.Priority = nil

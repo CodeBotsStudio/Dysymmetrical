@@ -75,7 +75,7 @@ export type HitboxDetails = {
 
 
 --- Creates a new hitbox, assigning it to a specific player.
-function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
+function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
     -- Prevent this from normally running on the client
     --i love writing server shit and putting it in ReplicatedStorage :] -dys
@@ -368,8 +368,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                 	                        Network:FireClientConnection(SourcePlayer, "KilledPlayer", "REMOTE_EVENT", TargetPlayer)
                 	                        Network:FireConnection("KilledPlayer", SourcePlayer, TargetPlayer)
 
-					                        CommonFunctions:UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
-                	                        CommonFunctions:GrantRewardToPlayer(SourcePlayer, 20, 60, "killing a Survivor")
+					                        CommonFunctions.UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
+                	                        CommonFunctions.GrantRewardToPlayer(SourcePlayer, 20, 60, "killing a Survivor")
 
 					                        TimeManager:SetTime(TimeManager.CurrentTime + 35)
                                         end
@@ -383,7 +383,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         -- If there are no execution animations to use, for one reason or another, resort to just flinging the target really far.
                                         if not ExecutionAnim then
                                             if Config.Knockback then
-                                                CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
+                                                CommonFunctions.RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                                             end
 
                                             -- Kill the target after flinging them.
@@ -450,7 +450,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                 else
                                     -- If no execution animations are availible, resort to 'ol reliable– flinging the target. 
                                     if Config.Knockback then
-                                        CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
+                                        CommonFunctions.RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                                     end
 
                                     Humanoid.Health = 0
@@ -463,23 +463,23 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                         -- If the Target doesn't die to the hitbox, do some knockback:
                         if Config.Knockback then
-                            CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
+                            CommonFunctions.RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                         end
 
                         -- If the hitbox deals damage, inflict it.
                         if Damage > 0 then
-                            CommonFunctions:DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason)
+                            CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason)
                         end
 
                         -- If the hitbox applies effects, apply them.
                         if Config.EffectsToApply then
                             for _, i in Config.EffectsToApply do
-					            CommonFunctions:ApplyEffect(Humanoid, i.Name, i.Level, i.Duration, i.Subfolder)
+					            CommonFunctions.ApplyEffect(Humanoid, i.Name, i.Level, i.Duration, i.Subfolder)
 				            end
                         end
 
                         -- If the hitbox has a callback tied to it, fire it.
-                        self:_RunCallback(Config.Connections, "Hit", Index == 1)
+                        Hitbox._RunCallback(Config.Connections, "Hit", Index == 1)
                     end
                 end
 
@@ -491,14 +491,14 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
         end
         
         -- If the hitbox has a callback tied to it for when it ends, run that.
-        self:_RunCallback(Config.Connections, "Ended")
+        Hitbox._RunCallback(Config.Connections, "Ended")
     end)
 
     return Props
 end
 
 -- Coordinate a callback for anything that would need to be listening to the hitbox's various states (ending, hitting something, etc.).
-function Hitbox:_RunCallback(ConnList: {[string]: (any?) -> ()}?, ID: string, ...)
+function Hitbox._RunCallback(ConnList: {[string]: (any?) -> ()}?, ID: string, ...)
     if ConnList and ConnList[ID] then
         ConnList[ID](...)
     end

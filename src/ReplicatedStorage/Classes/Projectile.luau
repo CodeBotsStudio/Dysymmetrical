@@ -61,12 +61,11 @@ export type ProjectileDetails = {
         Cancelled: boolean?,
         --- Cancels the hitbox and destroys it.
         --- Call this with a `:`.
-        Cancel: (self: any) -> ()?,
+        Cancel: (self: Hitbox.HitboxDetails) -> ()?,
     }?,
     --- Destroys this projectile by destroying the model and cancelling the hitbox.
-    Destroy: (self: any) -> ()?,
+    Destroy: (self: ProjectileDetails) -> ()?,
 }
-
 
 --- Creates a new projectile instance.
 ---
@@ -107,7 +106,7 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
     ProjectileSettings.HitboxSettings.HitMultiple = ProjectileSettings.HitboxSettings.HitMultiple ~= nil and ProjectileSettings.HitboxSettings.HitMultiple or true
 
     -- Make a new table for throwing this all into an instance.
-    local ProjectileInstance = {}
+    local ProjectileInstance: ProjectileDetails = {}
 
     -- Clone the model into the workspace for use with the projectile.
     ProjectileInstance.Model = ProjectileSettings.Model:Clone()

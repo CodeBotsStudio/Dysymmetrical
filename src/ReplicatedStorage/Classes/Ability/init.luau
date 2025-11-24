@@ -101,9 +101,9 @@ export type Ability = {
         HRP: BasePart,
         --this is server
         --- See `ServerScriptService.System.CommonFunctions`.
-        CommonFunctions: any,
+        CommonFunctions. any,
         --the rest are all from client
-        --- See `StarterPlayerScripts..InputManager`.
+        --- See `StarterPlayerScripts.InputManager`.
         InputManager: any,
         --- See `StarterCharacterScripts.PlayerAttributeScripts.SpeedManager`.
         SpeedManager: any,
@@ -121,7 +121,7 @@ export type Ability = {
 }
 
 --- Ability preset for customization.
-function AbilityType:GetDefaultAbilitySettings(): Ability
+function AbilityType.GetDefaultAbilitySettings(): Ability
     return {
         Name = "Ability",
         Description = "Does something",
@@ -129,227 +129,227 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         UICorner = true,
         Passive = false,
         
-        Init = function(own: Ability, charModule: any, plr: Player)
-            own.Owner = plr
-            own.CharModule = charModule
-            own.UsesLeft = own.UseSettings.InitialUses
+        Init = function(self: Ability, charModule: any, plr: Player)
+            self.Owner = plr
+            self.CharModule = charModule
+            self.UsesLeft = self.UseSettings.InitialUses
             if RunService:IsServer() then
-                Utils.Misc.Print("Initting "..own.Name.." ability for "..plr.Name)
+                Utils.Misc.Print("Initting "..self.Name.." ability for "..plr.Name)
 
                 --is this exploitable? yes.
                 --do i give a fuck? no.
                 --thanks byfron.
 
-                own.OwnerProperties = {
-                    Character = own.Owner.Character,
-                    HRP = Utils.Instance.FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
+                self.OwnerProperties = {
+                    Character = self.Owner.Character,
+                    HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
                     CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
-                table.insert(own.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
-                    if player == plr and abilityName == own.Name and own:CanUse() then
+                table.insert(self.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
+                    if player == plr and abilityName == self.Name and self:CanUse() then
                         task.defer(function()
-                            if own.CharModule.Config.Voicelines and own.CharModule.Config.Voicelines[own.Name] then
-                                Sounds:PlayVoiceline(own.Owner.Character, own.CharModule.Config.Voicelines[own.Name])
+                            if self.CharModule.Config.Voicelines and self.CharModule.Config.Voicelines[self.Name] then
+                                Sounds:PlayVoiceline(self.Owner.Character, self.CharModule.Config.Voicelines[self.Name])
                             end
                         end)
 
                         --cooldown stuffs
-                        own.OnCooldown = true
-                        own.CooldownTimer = own.Cooldown
+                        self.OnCooldown = true
+                        self.CooldownTimer = self.Cooldown
                         task.spawn(function()
                             --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
-                            while own.CooldownTimer > 0 do
+                            while self.CooldownTimer > 0 do
                                 -- gets the amount the server waits
                                 local WaitAmount = task.wait(0.1)
                                 -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
                                 WaitAmount = math.floor(WaitAmount * 10) / 10
                                 -- reduces cooldown timer
-                                own.CooldownTimer -= WaitAmount
+                                self.CooldownTimer -= WaitAmount
                             end
-                            own.CooldownTimer = 0
-                            own.OnCooldown = false
+                            self.CooldownTimer = 0
+                            self.OnCooldown = false
                         end)
 
                         --decreasing uses left if it's supposed to be limited
-                        if own.UseSettings.Limited then
-                            own:ChangeAbilityCharges("Set", own.UsesLeft - 1)
+                        if self.UseSettings.Limited then
+                            self:ChangeAbilityCharges("Set", self.UsesLeft - 1)
                         end
 
                         task.spawn(function()
-                            own.Signals.Used:Fire()
+                            self.Signals.Used:Fire()
                         end)
-                        Network:FireClientConnection(own.Owner, "UsePlayerAbility", "REMOTE_EVENT", own.Name)
-                        if own.Behaviour then
-                            own:Behaviour()
+                        Network:FireClientConnection(self.Owner, "UsePlayerAbility", "REMOTE_EVENT", self.Name)
+                        if self.Behaviour then
+                            self:Behaviour()
                         end
                     end
                 end))
 
                 --clearing ability connections to dispose of this code when the player gets readded
-                table.insert(own.Connections, plr.CharacterAdded:Connect(function()
-                    own:Destroy()
+                table.insert(self.Connections, plr.CharacterAdded:Connect(function()
+                    self:Destroy()
                 end))
 
                 --executes any extra initialization code that the ability might need
-                if own.ExtraInit then
-                    own:ExtraInit()
+                if self.ExtraInit then
+                    self:ExtraInit()
                 end
 
                 return
             end
 
-            own.OwnerProperties = {
-                Character = own.Owner.Character,
-                HRP = Utils.Instance.FindFirstChild(own.Owner.Character, "HumanoidRootPart"),
-                InputManager = require(own.Owner.PlayerScripts.InputManager),
-                SpeedManager = require(own.Owner.Character.PlayerAttributeScripts.SpeedManager),
-                FOVManager = require(own.Owner.Character.PlayerAttributeScripts.FOVManager),
-                EffectManager = require(own.Owner.Character.PlayerAttributeScripts.EffectManager),
-                EmoteManager = require(own.Owner.Character.Miscellaneous.EmoteManager),
-                TurnToMoveDirection = require(own.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
+            self.OwnerProperties = {
+                Character = self.Owner.Character,
+                HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
+                InputManager = require(self.Owner.PlayerScripts.InputManager),
+                SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
+                FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),
+                EffectManager = require(self.Owner.Character.PlayerAttributeScripts.EffectManager),
+                EmoteManager = require(self.Owner.Character.Miscellaneous.EmoteManager),
+                TurnToMoveDirection = require(self.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
             }
 
-            if #own.UseAnimation > 0 then
+            if #self.UseAnimation > 0 then
                 --nesting in pcall so that if there's nothing it doesn't matter
                 pcall(function()
-                    local AnimName = own.Name:gsub(" ", "").."UseAnim"
-                    charModule.GameplayConfig.Cache.Animations[AnimName] = Utils.Character.LoadAnimationFromID(own.Owner.Character, own.UseAnimation)
-                    own.UseAnimationTrack = charModule.GameplayConfig.Cache.Animations[AnimName]
+                    local AnimName = self.Name:gsub(" ", "").."UseAnim"
+                    charModule.GameplayConfig.Cache.Animations[AnimName] = Utils.Character.LoadAnimationFromID(self.Owner.Character, self.UseAnimation)
+                    self.UseAnimationTrack = charModule.GameplayConfig.Cache.Animations[AnimName]
                 end)
             end
 
-            own.PlayUseAnimation = function()
-                if own.UseAnimationTrack then
-                    own.UseAnimationTrack:Play(0)
-	                own.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor(own.Name)
-                    task.delay(own.UseAnimationTrack.Length - (1/20 * 2), function()
-                        own.UseAnimationTrack:Stop(0)
-	                    own.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor(own.Name)
+            self.PlayUseAnimation = function()
+                if self.UseAnimationTrack then
+                    self.UseAnimationTrack:Play(0)
+	                self.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor(self.Name)
+                    task.delay(self.UseAnimationTrack.Length - (1/20 * 2), function()
+                        self.UseAnimationTrack:Stop(0)
+	                    self.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor(self.Name)
                     end)
                 end
             end
 
-            if own.OwnerProperties.InputManager.DefaultActions[own.InputName] ~= nil then
-                table.insert(own.Connections, own.OwnerProperties.InputManager.DefaultActions[own.InputName].Pressed:Connect(function()
-                    own:AttemptUse()
+            if self.OwnerProperties.InputManager.DefaultActions[self.InputName] ~= nil then
+                table.insert(self.Connections, self.OwnerProperties.InputManager.DefaultActions[self.InputName].Pressed:Connect(function()
+                    self:AttemptUse()
                 end))
             end
 
-            table.insert(own.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(abilityName: string)
-                if abilityName == own.Name then
+            table.insert(self.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(abilityName: string)
+                if abilityName == self.Name then
                     --disables ability keys for preventing the usage of a different ability while using it
-                    if own.DisableOtherAbilitiesOnPerform then
-                        for _, input in own.OwnerProperties.InputManager.DefaultActions do
-                            if input.Name:lower():find("ability") or (input.Name:lower():find("slash") and own.DisableSlashOnPerform) then
+                    if self.DisableOtherAbilitiesOnPerform then
+                        for _, input in self.OwnerProperties.InputManager.DefaultActions do
+                            if input.Name:lower():find("ability") or (input.Name:lower():find("slash") and self.DisableSlashOnPerform) then
                                 input.Enabled = false
-                                table.insert(own.Connections, task.delay(if own.UseAnimationTrack then own.UseAnimationTrack.Length else own.Duration, function()
+                                table.insert(self.Connections, task.delay(if self.UseAnimationTrack then self.UseAnimationTrack.Length else self.Duration, function()
                                     input.Enabled = true
                                 end))
                             end
                         end
                     end
                     --cooldown stuffs
-                    own.OnCooldown = true
-                    own.CooldownTimer = own.Cooldown
+                    self.OnCooldown = true
+                    self.CooldownTimer = self.Cooldown
                     task.spawn(function()
                         --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
-                        while own.CooldownTimer > 0 do
+                        while self.CooldownTimer > 0 do
                             -- gets the amount the client waits
                             local WaitAmount = task.wait(0.1)
                             -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
                             WaitAmount = math.floor(WaitAmount * 10) / 10
                             -- reduces cooldown timer
-                            own.CooldownTimer -= WaitAmount
+                            self.CooldownTimer -= WaitAmount
                         end
-                        own.CooldownTimer = 0
-                        own.OnCooldown = false
+                        self.CooldownTimer = 0
+                        self.OnCooldown = false
                     end)
                     --plays any existant use animation
-                    if own.PlayUseAnimationOnUse then
-                        own:PlayUseAnimation()
+                    if self.PlayUseAnimationOnUse then
+                        self:PlayUseAnimation()
                     end
                     task.spawn(function()
-                        own.Signals.Used:Fire()
+                        self.Signals.Used:Fire()
                     end)
                     --ability stuffs
-                    if own.Behaviour then
+                    if self.Behaviour then
                         task.spawn(function()
-                            own:Behaviour()
+                            self:Behaviour()
                         end)
                     end
                 end
             end))
 
-            table.insert(own.Connections, Network:SetConnection("ChangeAbilityCharges", "REMOTE_EVENT", function(abilityName: string, Type: "Set" | "Add" | "Take", amount: number)
-                if abilityName == own.Name then
-                    own:ChangeAbilityCharges(Type, amount)
+            table.insert(self.Connections, Network:SetConnection("ChangeAbilityCharges", "REMOTE_EVENT", function(abilityName: string, Type: "Set" | "Add" | "Take", amount: number)
+                if abilityName == self.Name then
+                    self:ChangeAbilityCharges(Type, amount)
                 end
             end))
 
             --clearing ability connections to dispose of this code when the player gets readded
-            table.insert(own.Connections, own.Owner.CharacterAdded:Connect(function()
-                own:Destroy()
+            table.insert(self.Connections, self.Owner.CharacterAdded:Connect(function()
+                self:Destroy()
             end))
 
             --executes any extra initialization code that the ability might need
-            if own.ExtraInit then
-                own:ExtraInit()
+            if self.ExtraInit then
+                self:ExtraInit()
             end
         end,
 
         ExtraInit = nil,
         OnRemove = nil,
 
-        ReloadAnimation = function(own: Ability, id: string)
-            own.UseAnimationTrack = Utils.Character.LoadAnimationFromID(own.Owner.Character, id)
-            local AnimName = own.Name:gsub(" ", "").."UseAnim"
-            own.CharModule.GameplayConfig.Cache.Animations[AnimName] = Utils.Character.LoadAnimationFromID(own.Owner.Character, id)
-            own.UseAnimationTrack = own.CharModule.GameplayConfig.Cache.Animations[AnimName]
+        ReloadAnimation = function(self: Ability, id: string)
+            self.UseAnimationTrack = Utils.Character.LoadAnimationFromID(self.Owner.Character, id)
+            local AnimName = self.Name:gsub(" ", "").."UseAnim"
+            self.CharModule.GameplayConfig.Cache.Animations[AnimName] = Utils.Character.LoadAnimationFromID(self.Owner.Character, id)
+            self.UseAnimationTrack = self.CharModule.GameplayConfig.Cache.Animations[AnimName]
         end,
 
         PlayUseAnimation = nil,
 
-        Destroy = function(own: Ability)
-            if own.OnRemove then
-                own:OnRemove()
+        Destroy = function(self: Ability)
+            if self.OnRemove then
+                self:OnRemove()
             end
-            for _, i in own.Connections do
+            for _, i in self.Connections do
                 if typeof(i) == "thread" then
                     task.cancel(i)
                 else
                     i:Disconnect()
                 end
             end
-            table.clear(own.Connections)
+            table.clear(self.Connections)
 
-            own.CooldownTimer = 0
-            own.OnCooldown = false
+            self.CooldownTimer = 0
+            self.OnCooldown = false
         end,
 
-        AttemptUse = function(own: Ability)
+        AttemptUse = function(self: Ability)
             if RunService:IsServer() then
                 return
             end
 
             --NOTE: this is handled this way (by making separate cooldowns in both server and client) so that it's possible to prevent network calls if it's impossible to use the ability in client
-            if own:CanUse() then
-                Network:FireServerConnection("UsePlayerAbility", "REMOTE_EVENT", own.Name) --i know this is insecure but sue me lol
+            if self:CanUse() then
+                Network:FireServerConnection("UsePlayerAbility", "REMOTE_EVENT", self.Name) --i know this is insecure but sue me lol
             end
         end,
 
-        ChangeAbilityCharges = function(own: Ability, Type:"Add" | "Set" | "Take", amount: number)
+        ChangeAbilityCharges = function(self: Ability, Type:"Add" | "Set" | "Take", amount: number)
             if Type == "Set" then
-                own.UsesLeft = amount
+                self.UsesLeft = amount
             elseif Type == "Add" then
-                own.UsesLeft += amount
+                self.UsesLeft += amount
             elseif Type == "Take" then
-                own.UsesLeft -= amount
+                self.UsesLeft -= amount
             end
 
-            own.Signals.ChargesChanged:Fire(own.UsesLeft)
+            self.Signals.ChargesChanged:Fire(self.UsesLeft)
             if RunService:IsServer() then
-                Network:FireClientConnection(own.Owner, "ChangeAbilityCharges", "REMOTE_EVENT", own.Name, Type, amount)
+                Network:FireClientConnection(self.Owner, "ChangeAbilityCharges", "REMOTE_EVENT", self.Name, Type, amount)
             end
         end,
 
@@ -365,27 +365,27 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
         OnCooldown = false,
 
         --read
-        CanUse = function(own: Ability): boolean
+        CanUse = function(self: Ability): boolean
             --if it's limited then it should have to have enough uses left
             local EnoughUses = true
-            if workspace:GetAttribute("ChargesEnabled") and own.UseSettings.Limited then
-                EnoughUses = own.UsesLeft > 0
+            if workspace:GetAttribute("ChargesEnabled") and self.UseSettings.Limited then
+                EnoughUses = self.UsesLeft > 0
             end
 
             --if the ability is on cooldown or not
             local OnCooldown = false
-            if workspace:GetAttribute("CooldownsEnabled") and own.OnCooldown then
+            if workspace:GetAttribute("CooldownsEnabled") and self.OnCooldown then
                 OnCooldown = true
             end
 
             --if the player isn't stunned, thus can be conscious OR has hope (UNDERTALE REFERENCE????)
             local EffectPrevention = false
             if RunService:IsServer() then
-                if own.Owner.Character.Effects:FindFirstChild("Stunned") or own.Owner.Character.Effects:FindFirstChild("Helpless") then
+                if self.Owner.Character.Effects:FindFirstChild("Stunned") or self.Owner.Character.Effects:FindFirstChild("Helpless") then
                     EffectPrevention = true
                 end
             else
-                if own.OwnerProperties.EffectManager.Effects["Stunned"] or own.OwnerProperties.EffectManager.Effects["Helpless"] then
+                if self.OwnerProperties.EffectManager.Effects["Stunned"] or self.OwnerProperties.EffectManager.Effects["Helpless"] then
                     EffectPrevention = true
                 end
             end
@@ -393,14 +393,14 @@ function AbilityType:GetDefaultAbilitySettings(): Ability
             --if the player isn't emoting
             local Emoting
             if RunService:IsServer() then
-                Emoting = own.OwnerProperties.Character:GetAttribute("Emoting") == true
+                Emoting = self.OwnerProperties.Character:GetAttribute("Emoting") == true
             else
-                Emoting = own.OwnerProperties.EmoteManager.CurrentlyPlayingEmote ~= nil
+                Emoting = self.OwnerProperties.EmoteManager.CurrentlyPlayingEmote ~= nil
             end
 
             return EnoughUses
-            and own.Owner.Character:FindFirstChildOfClass("Humanoid").Health > 0 --if the player's alive
-            and not own.Owner.Character:FindFirstChild("HumanoidRootPart").Anchored --if the player isn't restrained by initial round setup
+            and self.Owner.Character:FindFirstChildOfClass("Humanoid").Health > 0 --if the player's alive
+            and not self.Owner.Character:FindFirstChild("HumanoidRootPart").Anchored --if the player isn't restrained by initial round setup
             and not Emoting
             and not EffectPrevention
             and not OnCooldown
@@ -429,10 +429,10 @@ end
 
 --- Creates an ability with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
-function AbilityType:CreateAbility(Props: Ability): Ability
+function AbilityType.CreateAbility(Props: Ability): Ability
     Props = Props or {}
     
-    Utils.Type.DeepTableWrite(Props, self:GetDefaultAbilitySettings())
+    Utils.Type.DeepTableWrite(Props, AbilityType.GetDefaultAbilitySettings())
 
     return Props
 end

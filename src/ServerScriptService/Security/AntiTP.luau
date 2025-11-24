@@ -52,7 +52,7 @@ function AntiTP:_SetupCharacter(Player: Player, Character: Model)
 
         if PosDiff.Magnitude > self.PositionMagnitudeThreshold then
             if self.KickAllowed then
-                CommonFunctions:KickPlayer(Player, CommonFunctions.KickIDs.TPing)
+                CommonFunctions.KickPlayer(Player, CommonFunctions.KickIDs.TPing)
                 return
             end
 

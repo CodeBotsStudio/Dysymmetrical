@@ -20,7 +20,7 @@ function SlashModule.New(Props: Ability?): Ability
 		Name = "Slash",
 		InputName = "Slash",
 		Cooldown = 2,
-		Duration = 0.54,
+		Duration = 0.4,
 		Damage = 20,
 		RenderImage = "rbxassetid://11218451110",
 		UseSound = "rbxassetid://12222200",
@@ -33,7 +33,7 @@ function SlashModule.New(Props: Ability?): Ability
 			if RunService:IsServer() then
 				Sounds:PlaySound(self.UseSound, {Parent = self.OwnerProperties.HRP})
 				task.delay(self.Delay, function()
-					Hitbox:New(self.Owner, {
+					Hitbox.New(self.Owner, {
 						CFrameOffset = self.HitboxOffset,
 						Size = self.HitboxSize,
 						Time = self.Duration,

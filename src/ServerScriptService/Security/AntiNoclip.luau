@@ -104,7 +104,7 @@ function AntiNoclip:Init()
 								NoclipTime += TimePast
 								if NoclipTime > self.Margin then
 									if self.Kick then
-										CommonFunctions:KickPlayer(Player, CommonFunctions.KickIDs.Noclipping)
+										CommonFunctions.KickPlayer(Player, CommonFunctions.KickIDs.Noclipping)
 									else
         								Humanoid.Health = 0 --REPLACE WITH KICKING
 									end

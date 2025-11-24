@@ -72,12 +72,7 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
 
     local CharacterAbilities = self:_InitCharacterAbilities(CharModule)
 
-    if charType == "Killer" then
-        local Slash = require(Char.PlayerAbilities.CharacterAbilities).Abilities.Slash
-        Slash:ReloadAnimation(CharModule.Config.AnimationIDs.SlashAnimation)
-        Slash.Duration = CharModule.GameplayConfig.SlashDuration
-        Slash.Cooldown = CharModule.GameplayConfig.SlashCooldown
-    elseif charType ~= "Survivor" then
+    if charType ~= "Killer" and charType ~= "Survivor" then
         LocalPlayer:Kick("https://www.youtube.com/watch?v=L8XbI9aJOXk")
         return
     end

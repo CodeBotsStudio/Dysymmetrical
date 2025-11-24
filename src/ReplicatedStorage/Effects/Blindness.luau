@@ -11,7 +11,7 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local DisappearThread
 
-return Effect:CreateEffect({
+return Effect.CreateEffect({
     Name = "Blindness",
     Description = "Blinds the affected player for a set time. This effect will flash white if the Photosensitive setting is off, and black if it's on.",
 

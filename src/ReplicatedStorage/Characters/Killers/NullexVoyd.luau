@@ -19,7 +19,7 @@ local MasterSoundGroup = SoundService.SoundGroups.Master
 local SoundFolder = SoundService.TempSounds
 
 --Character Definition
-local NullexVoyd: Character.Killer = Character:CreateKiller({
+local NullexVoyd: Character.Killer = Character.CreateKiller({
     Config = {
         Name = "Nullex Voyd",
         Quote = "Order was the first lie.",
@@ -37,7 +37,7 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                 Duration = 0.35
             }),
 
-            DataAnchor = Ability:CreateAbility({
+            DataAnchor = Ability.CreateAbility({
                 Name = "Data Anchor",
 
                 FirstCooldown = 3,
@@ -58,7 +58,7 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                 PositionInfo = CFrame.new(),
 
                 Behaviour = function(self)
-                    if RunService:IsServer() then
+                    if RunService.IsServer() then
                         if self.Setup then
                             self.OwnerProperties.Character:PivotTo(self.PositionInfo)
                         
@@ -108,7 +108,7 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                 end,
             }),
 
-            CallbackPing = Ability:CreateAbility({
+            CallbackPing = Ability.CreateAbility({
                 Name = "Callback Ping",
                 Description = "Allows Nullex Voyd to see every single alive player's aura for 3 seconds. He gets extremely slowed down while performed.",
                 Duration = 3,
@@ -171,7 +171,7 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                 end,
             }),
 
-            Overcharge = Ability:CreateAbility({
+            Overcharge = Ability.CreateAbility({
                 Name = "Overcharge",
                 Description = "Increases walk speed for a very short time but removes the ability to use any ability apart from the slash. When it ends, it lowers his walk speed under default and prevents him from using his abilities for a very very short time (stun).",
                 Cooldown = 45,
@@ -184,10 +184,10 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                 DisableSlashOnPerform = false,
                 Behaviour = function(self)
                     if RunService:IsServer() then
-                        CommonFunctions:ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Speed", self.SpeedLevel, self.SpeedDuration)
+                        CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Speed", self.SpeedLevel, self.SpeedDuration)
 
                         table.insert(self.Connections, task.delay(self.SpeedDuration, function()
-                            CommonFunctions:ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", self.SlownessLevel, self.SlownessDuration)
+                            CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", self.SlownessLevel, self.SlownessDuration)
                         end))
                     
                         return

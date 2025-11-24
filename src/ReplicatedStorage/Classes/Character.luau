@@ -106,7 +106,7 @@ export type Survivor = {
 }
 
 --- Survivor preset for customization.
-function CharTypes:GetDefaultSurvivorSettings(): Survivor
+function CharTypes.GetDefaultSurvivorSettings(): Survivor
     return {
         Owner = nil,
         Config = {
@@ -154,10 +154,10 @@ end
 
 --- Creates a survivor with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
-function CharTypes:CreateSurvivor(Props: Survivor): Survivor
+function CharTypes.CreateSurvivor(Props: Survivor): Survivor
     Props = Props or {}
     
-    Utils.Type.DeepTableWrite(Props, self:GetDefaultSurvivorSettings())
+    Utils.Type.DeepTableWrite(Props, CharTypes.GetDefaultSurvivorSettings())
 
     return Props
 end
@@ -218,8 +218,6 @@ export type Killer = {
             --- The animation that'll play in the character model's preview in the shop.
             --- If none is provided, `IdleAnimation` will play instead.
             PreviewAnimation: string?,
-            --- The animation that'll play when slashing.
-            SlashAnimation: string?,
             --- The animation that the killer will have in the intro animation.
             KillerRig: string?,
             --- The animation that the camera will have in the intro animation.
@@ -326,13 +324,6 @@ export type Killer = {
             StaminaGain: number,
         },
 
-        --- The damage the slash'll do.
-        SlashDamage: number,
-        --- The cooldown the slash'll have.
-        SlashCooldown: number,
-        --- How long every slash's hitbox will last.
-        SlashDuration: number,
-
         --- All of the initialized abilities the character has, counting the slash.
         Abilities: {any},
         --- Any temp objects or instances that might be created mid-match.
@@ -347,7 +338,7 @@ export type Killer = {
 }
 
 --- Killer preset for customization.
-function CharTypes:GetDefaultKillerSettings(): Killer
+function CharTypes.GetDefaultKillerSettings(): Killer
     return {
         Owner = nil,
         Config = {
@@ -370,7 +361,6 @@ function CharTypes:GetDefaultKillerSettings(): Killer
                 IdleAnimation = "rbxassetid://138818467051890",
                 WalkAnimation = "rbxassetid://96779101755387",
                 RunAnimation = "rbxassetid://139221510401164",
-                SlashAnimation = "rbxassetid://133504250023139",
             },
 
             Voicelines = {},
@@ -393,10 +383,6 @@ function CharTypes:GetDefaultKillerSettings(): Killer
                 StaminaGain = 32,
             },
 
-            SlashDamage = 20,
-            SlashCooldown = 2,
-            SlashDuration = 0.4,
-
             Abilities = {},
             Cache = {
                 Animations = {},
@@ -410,10 +396,10 @@ end
 
 --- Creates a killer with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
-function CharTypes:CreateKiller(Props: Killer): Killer
+function CharTypes.CreateKiller(Props: Killer): Killer
     Props = Props or {}
     
-    Utils.Type.DeepTableWrite(Props, self:GetDefaultKillerSettings())
+    Utils.Type.DeepTableWrite(Props, CharTypes.GetDefaultKillerSettings())
 
     return Props
 end

@@ -50,7 +50,7 @@ function AntiFly:_SetupCharacter(player: Player, char: Model)
         
             local timeSinceFloor = time() - lastTouched
             if timeSinceFloor >= self.MaximumFlyTime then
-                CommonFunctions:KickPlayer(player, CommonFunctions.KickIDs.Flying)
+                CommonFunctions.KickPlayer(player, CommonFunctions.KickIDs.Flying)
             end
         end
     end)
