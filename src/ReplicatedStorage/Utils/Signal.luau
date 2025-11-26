@@ -16,18 +16,20 @@ export type Connection = {
 	Disconnect: (self: Connection) -> (),
 }
 
-export type Signal = {
+export type Signal<T...> = {
 	--- Connects a function to this signal so that, when it's fired, it executes.
-	Connect: (self: Signal, funcToConnect: (...any) -> (...any)) -> (Connection),
+	Connect: (self: Signal<T...>, funcToConnect: (T...) -> ()) -> Connection,
 	--- Disconnects all of the connections to this signal.
-	DisconnectAll: (self: Signal) -> (),
+	DisconnectAll: (self: Signal<T...>) -> (),
 	--- Fires this signal and executes all connections.
-	Fire: (self: Signal, ...any) -> (),
+	Fire: (self: Signal<T...>, T...) -> (),
+	--- Same as `Fire()`, but uses `task.defer()` internally & doesn't take advantage of thread reuse.
+	FireDeferred: (self: Signal<T...>, T...) -> (),
 	--- Yields the current thread until this connection is fired.
-	Wait: (self: Signal) -> (),
+	Wait: (self: Signal<T...>) -> T...,
 	--- Connects a function to this signal so that, when it's fired, it executes.
 	--- The difference with `Signal:Connect()` is that, when it executes once, it disconnects itself.
-	Once: (self: Signal, funcToConnect: (...any) -> (...any)) -> (Connection),
+	Once: (self: Signal<T...>, funcToConnect: (T...) -> ()) -> Connection,
 }
 
 -- The currently idle thread to run the next handler on
@@ -111,7 +113,7 @@ function Signal.new()
 	return setmetatable({
 		_handlerListHead = false,
 
-		Connect = function(self: Signal, fn: (...any) -> (...any))
+		Connect = function(self: Signal<T...>, fn: (...any) -> (...any))
 			local connection = Connection.new(self, fn)
 			if self._handlerListHead then
 				connection._next = self._handlerListHead
@@ -124,7 +126,7 @@ function Signal.new()
 
 		-- Disconnect all handlers. Since we use a linked list it suffices to clear the
 		-- reference to the head handler.
-		DisconnectAll = function(self: Signal)
+		DisconnectAll = function(self: Signal<T...>)
 			self._handlerListHead = false
 		end,
 
@@ -132,7 +134,7 @@ function Signal.new()
 		-- coRunnerThread, and any time the resulting thread yielded without returning
 		-- to us, that means that it yielded to the Roblox scheduler and has been taken
 		-- over by Roblox scheduling, meaning we have to make a new coroutine runner.
-		Fire = function(self: Signal, ...)
+		Fire = function(self: Signal<T...>, ...)
 			local item = self._handlerListHead
 			while item do
 				if item._connected then
@@ -147,9 +149,22 @@ function Signal.new()
 			end
 		end,
 
+		FireDeferred = function(self: Signal<T...>, ...)
+			local item = self._handlerListHead
+			while item do
+				local conn = item
+				task.defer(function(...)
+					if conn._connected then
+						conn._fn(...)
+					end
+				end, ...)
+				item = item._next
+			end
+		end,
+
 		-- Implement Signal:Wait() in terms of a temporary connection using
 		-- a Signal:Connect() which disconnects itself.
-		Wait = function(self: Signal)
+		Wait = function(self: Signal<T...>)
 			local waitingCoroutine = coroutine.running()
 			local cn;
 			cn = self:Connect(function(...)
@@ -161,7 +176,7 @@ function Signal.new()
 
 		-- Implement Signal:Once() in terms of a connection which disconnects
 		-- itself before running the handler.
-		Once = function(self: Signal, fn:(...any) -> (...any))
+		Once = function(self: Signal<T...>, fn:(...any) -> (...any))
 			local cn
 			cn = self:Connect(function(...)
 				if cn._connected then

@@ -86,7 +86,7 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
         end
     end)
 
-    AbilityGUI:InitGUI()
+    AbilityGUI.InitGUI()
 
     if CharModule.OnInit then
         CharModule:OnInit(Char)
