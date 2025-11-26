@@ -7,6 +7,7 @@ local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local InstanceUtils = {}
 
+--- Equivalent of `Instance.ChildAdded:Connect()` but managed by Janitor.
 function InstanceUtils.ObserveChildren(
 	parent: Instance,
 	callback: (child: Instance, childJanitor: Janitor.Janitor) -> (),
@@ -33,6 +34,7 @@ function InstanceUtils.ObserveChildren(
 	return mainJanitor
 end
 
+--- Equivalent of `Instance.DescendantAdded:Connect()` but managed by Janitor.
 function InstanceUtils.ObserveDescendants(
 	parent: Instance,
 	callback: (descendant: Instance, descendantJanitor: Janitor.Janitor) -> (),
@@ -59,6 +61,7 @@ function InstanceUtils.ObserveDescendants(
 	return mainJanitor
 end
 
+--- Equivalent of `Instance.ChildAdded:Connect()` but only for children of a specific class and managed by Janitor.
 function InstanceUtils.ObserveChildrenWhichIsA(
 	parent: Instance,
 	className: string,
@@ -69,6 +72,7 @@ function InstanceUtils.ObserveChildrenWhichIsA(
 	end)
 end
 
+--- Equivalent of `Instance.DescendantAdded:Connect()` but only for descendants of a specific class and managed by Janitor.
 function InstanceUtils.ObserveDescendantsWhichIsA(
 	parent: Instance,
 	className: string,
@@ -79,6 +83,7 @@ function InstanceUtils.ObserveDescendantsWhichIsA(
 	end)
 end
 
+--- Equivalent of `Instance.ChildAdded:Connect()` but only for children of a specific name and managed by Janitor.
 function InstanceUtils.ObserveChildrenOfName(
 	parent: Instance,
 	name: string,
@@ -89,6 +94,7 @@ function InstanceUtils.ObserveChildrenOfName(
 	end)
 end
 
+--- Equivalent of `Instance.DescendantAdded:Connect()` but only for descendants of a specific name and managed by Janitor.
 function InstanceUtils.ObserveDescendantsOfName(
 	parent: Instance,
 	name: Instance,
@@ -99,6 +105,7 @@ function InstanceUtils.ObserveDescendantsOfName(
 	end)
 end
 
+--- Executes a callback when the `Parent` property of an `Instance` changes.
 function InstanceUtils.ObserveParent(
 	instance: Instance,
 	callback: (parent: Instance, parentJanitor: Janitor.Janitor) -> (),
@@ -107,9 +114,9 @@ function InstanceUtils.ObserveParent(
 	return InstanceUtils.ObserveProperty(instance, "Parent", callback, predicate)
 end
 
---[[
-⚠️ YIELDS
-]]
+--- Behaves like `WaitForChild()` but uses `...ChildWhichIsA()` which lets you look for a specific type of `Instance`.
+--- 
+--- ⚠️ THIS FUNCTION YIELDS!
 function InstanceUtils.WaitForChildWhichIsA(parent: Instance, className: string)
 	local child = parent:FindFirstChildWhichIsA(className)
 	if child then
@@ -124,6 +131,7 @@ function InstanceUtils.WaitForChildWhichIsA(parent: Instance, className: string)
 	return child
 end
 
+--- Executes a callback when a specific property of an `Instance` changes.
 function InstanceUtils.ObserveProperty(
 	instance: Instance,
 	propertyName: string,
@@ -146,6 +154,7 @@ function InstanceUtils.ObserveProperty(
 	return mainJanitor
 end
 
+--- Executes a callback when a specific attribute of an `Instance` changes.
 function InstanceUtils.ObserveAttribute(
 	instance: Instance,
 	attributeName: string,
@@ -169,6 +178,7 @@ function InstanceUtils.ObserveAttribute(
 	return mainJanitor
 end
 
+--- Equivalent to `Instance:WaitForChild()` but it uses `Instance:FindFirstChild()` first to check if it's already there and not have to do `Instance:WaitForChild()`.
 function InstanceUtils.FindFirstChild(Parent: Instance, ChildPath: string, Timeout: number?): Instance
     if not Parent then
         warn("[Utils.Instance.FindFirstChild()] `Parent` is nil!")

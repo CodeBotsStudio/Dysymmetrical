@@ -23,6 +23,7 @@ local PlayerUtils = {
     },
 }
 
+--- Equivalent to `Players.PlayerAdded:Connect()` but connections are handled by Janitor.
 function PlayerUtils.ObservePlayers(callback: (player: Player, playerJanitor: Janitor.Janitor) -> ())
 	local mainJanitor = Janitor.new()
 

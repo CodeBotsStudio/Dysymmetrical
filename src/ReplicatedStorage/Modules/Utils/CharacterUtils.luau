@@ -11,6 +11,7 @@ local Rand = Random.new()
 
 local CharacterUtils = {}
 
+--- Waits for a character to properly load.
 function CharacterUtils.WaitForCharacterLoaded(character: Model)
 	if not character.PrimaryPart then
 		character:GetPropertyChangedSignal("PrimaryPart"):Wait()
@@ -21,6 +22,7 @@ function CharacterUtils.WaitForCharacterLoaded(character: Model)
 	end
 end
 
+--- Gets a player's character's humanoid.
 function CharacterUtils.GetPlayerHumanoid(player: Player) : Humanoid
 	local character = player.Character
 	if not character then
@@ -30,6 +32,7 @@ function CharacterUtils.GetPlayerHumanoid(player: Player) : Humanoid
 	return character:FindFirstChildWhichIsA("Humanoid")
 end
 
+--- Equal to `Humanoid.Died:Connect()` but managed by Janitor.
 function CharacterUtils.ObserveOnDeath(humanoid: Humanoid, callback: () -> ())
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(humanoid)
@@ -61,12 +64,14 @@ function CharacterUtils.ObserveOnDeath(humanoid: Humanoid, callback: () -> ())
 	return mainJanitor
 end
 
+--- Checks if a `Humanoid` instance is actually dead.
 function CharacterUtils.IsHumanoidDead(humanoid: Humanoid)
 	return humanoid.Health <= 0
 		or humanoid:GetState() == Enum.HumanoidStateType.Dead
 		or not humanoid:IsDescendantOf(workspace)
 end
 
+--- Gets the alive character of a player if it exists. If there's no character, it'll yield until there is one. If it's dead, it won't be returned.
 function CharacterUtils.GetAliveCharacter(player: Player) : Model?
 	local character = player.Character or player.CharacterAdded:Wait()
 	local humanoid = character:FindFirstChildWhichIsA("Humanoid")
@@ -76,6 +81,7 @@ function CharacterUtils.GetAliveCharacter(player: Player) : Model?
 	return character
 end
 
+--- Gets the root part of a player's alive character.
 function CharacterUtils.GetAliveRootPart(player: Player) : BasePart?
 	local character = CharacterUtils.GetAliveCharacter(player)
 	if not character then
@@ -84,6 +90,7 @@ function CharacterUtils.GetAliveRootPart(player: Player) : BasePart?
 	return character:FindFirstChild("HumanoidRootPart")
 end
 
+--- Gets the humanoid of a player's alive character.
 function CharacterUtils.GetAlivePlayerHumanoid(player: Player) : Humanoid?
 	local humanoid = CharacterUtils.GetPlayerHumanoid(player)
 	if not humanoid or CharacterUtils.IsHumanoidDead(humanoid) then
@@ -92,6 +99,7 @@ function CharacterUtils.GetAlivePlayerHumanoid(player: Player) : Humanoid?
 	return humanoid
 end
 
+--- Equivalent to `Player.CharacterAdded:Connect()` but managed by Janitor.
 function CharacterUtils.ObserveCharacter(
 	player: Player,
 	callback: (character: Model, characterJanitor: janitor.Janitor) -> ()
@@ -116,6 +124,8 @@ function CharacterUtils.ObserveCharacter(
 	return mainJanitor
 end
 
+--- Equivalent to waiting for a player's character's humanoid to appear.
+--- Will execute code whenever a `Humanoid` appears in a player's character.
 function CharacterUtils.ObserveHumanoid(
 	player: Player,
 	callback: (humanoid: Humanoid, humanoidJanitor: janitor.Janitor) -> ()
