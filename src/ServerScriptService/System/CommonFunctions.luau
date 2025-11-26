@@ -115,14 +115,16 @@ end
 function CommonFunctions.ApplyEffect(hum: Humanoid, name: string, level: number?, duration: number?, subfolder: string?)
 	local char = hum.Parent
 
+	local CharEffects = Utils.Instance.FindFirstChild(char, "Effects")
+
 	if name == "Stunned" then
-		if Utils.Instance.FindFirstChild(char, "Effects"):FindFirstChild("SpawnProtection") then
+		if CharEffects:FindFirstChild("SpawnProtection") then
 			return
 		end
 	end
 	
 	local EffectModule = Utils.Instance.GetEffectModule(name, subfolder)
-	local EffectValue = Utils.Instance.FindFirstChild(char, "Effects."..name, false) or Instance.new("NumberValue")
+	local EffectValue = CharEffects:FindFirstChild(name) or Instance.new("NumberValue")
 
 	EffectValue.Name = name
 	EffectValue.Value = level or EffectModule.Level
@@ -131,7 +133,7 @@ function CommonFunctions.ApplyEffect(hum: Humanoid, name: string, level: number?
 	end
 	EffectValue:SetAttribute("Duration", duration or EffectModule.Duration)
 
-	EffectValue.Parent = Utils.Instance.FindFirstChild(char, "Effects")
+	EffectValue.Parent = CharEffects
 	
 	task.delay(duration, function()
 		if EffectValue then

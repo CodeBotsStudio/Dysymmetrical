@@ -58,7 +58,7 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                 PositionInfo = CFrame.new(),
 
                 Behaviour = function(self)
-                    if RunService.IsServer() then
+                    if RunService:IsServer() then
                         if self.Setup then
                             self.OwnerProperties.Character:PivotTo(self.PositionInfo)
                         
@@ -99,7 +99,7 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                         
                             self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0)
                         
-                            self.PlayUseAnimation()
+                            self:PlayUseAnimation()
                             table.insert(self.Connections, task.delay(self.UseAnimationTrack.Length + 0.4, function()
                                 self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
                             end))

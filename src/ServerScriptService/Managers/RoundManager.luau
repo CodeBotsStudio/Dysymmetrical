@@ -47,8 +47,8 @@ end
 --- Starts the round right away. There's no more mystery to it.
 --- Chooses a killer, resets their malice, increases everyone else's in the round by 1, spawns a map, sets up all characters, sets the round time and plays the killer intro. 
 function RoundManager:StartRound()
-    local LoadedPlayers = Utils.Players.GetLoadedPlayers(false)
-    Utils.Players.Fade(LoadedPlayers, "In", 0.6, true)
+    local LoadedPlayers = Utils.Player.GetLoadedPlayers(false)
+    Utils.Player.Fade(LoadedPlayers, "In", 0.6, true)
     
     --shuffling so that if there's a tie it chooses a truly random one
     RoundManager.CurrentRound.PlayersAccepted = Utils.Type.ShuffleTable(LoadedPlayers)

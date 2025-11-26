@@ -12,7 +12,8 @@ local TARGET_DELTA = 1 / TARGET_FPS
 local camera = workspace.CurrentCamera
 
 return {
-	Init = function(_)
+	HeadPreventionFactors = {},
+	Init = function(self)
 		Utils.Player.ObservePlayers(function(player: Player, playerJanitor)
 			playerJanitor:Add(Utils.Character.ObserveHumanoid(player, function(humanoid: Humanoid, humanoidJanitor)
 				local character = humanoid.Parent
@@ -114,9 +115,15 @@ return {
 					local finalx = (((headPos - targetPos).Unit):Cross(torsoLook)).Y * -1
 					local y = (math.atan(diff / dist) / 2)
 
-					joints.Neck.C0 = joints.Neck.C0:Lerp(defaultC0s["Neck"] * CFrame.Angles(y, 0, -finalx), LERP_ALPHA * deltaTimeSim)
+					joints.Neck.C0 = Utils.Type.GetCountOfDict(self.HeadPreventionFactors) <= 0 and joints.Neck.C0:Lerp(defaultC0s["Neck"] * CFrame.Angles(y, 0, -finalx), LERP_ALPHA * deltaTimeSim) or defaultC0s["Neck"]
 				end))
 			end))
 		end)
+	end,
+	AddHeadPreventionFactor = function(self, name: string)
+		self.HeadPreventionFactors[name] = true
+	end,
+	RemoveHeadPreventionFactor = function(self, name: string)
+		self.HeadPreventionFactors[name] = nil
 	end,
 }

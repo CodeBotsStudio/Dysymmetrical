@@ -173,7 +173,9 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
 
                         --decreasing uses left if it's supposed to be limited
                         if self.UseSettings.Limited then
-                            self:ChangeAbilityCharges("Set", self.UsesLeft - 1)
+                            task.spawn(function()
+                                self:ChangeAbilityCharges("Set", self.UsesLeft - 1)
+                            end)
                         end
 
                         task.spawn(function()
@@ -219,17 +221,6 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 end)
             end
 
-            self.PlayUseAnimation = function()
-                if self.UseAnimationTrack then
-                    self.UseAnimationTrack:Play(0)
-	                self.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor(self.Name)
-                    task.delay(self.UseAnimationTrack.Length - (1/20 * 2), function()
-                        self.UseAnimationTrack:Stop(0)
-	                    self.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor(self.Name)
-                    end)
-                end
-            end
-
             if self.OwnerProperties.InputManager.DefaultActions[self.InputName] ~= nil then
                 table.insert(self.Connections, self.OwnerProperties.InputManager.DefaultActions[self.InputName].Pressed:Connect(function()
                     self:AttemptUse()
@@ -240,14 +231,18 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 if abilityName == self.Name then
                     --disables ability keys for preventing the usage of a different ability while using it
                     if self.DisableOtherAbilitiesOnPerform then
+                        local inputsToCancelLater = {}
                         for _, input in self.OwnerProperties.InputManager.DefaultActions do
                             if input.Name:lower():find("ability") or (input.Name:lower():find("slash") and self.DisableSlashOnPerform) then
                                 input.Enabled = false
-                                table.insert(self.Connections, task.delay(if self.UseAnimationTrack then self.UseAnimationTrack.Length else self.Duration, function()
-                                    input.Enabled = true
-                                end))
+                                table.insert(inputsToCancelLater, input)
                             end
                         end
+                        table.insert(self.Connections, task.delay(if self.UseAnimationTrack then self.UseAnimationTrack.Length else self.Duration, function()
+                            for _, input in inputsToCancelLater do
+                                input.Enabled = true
+                            end
+                        end))
                     end
                     --cooldown stuffs
                     self.OnCooldown = true
@@ -266,9 +261,11 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                         self.OnCooldown = false
                     end)
                     --plays any existant use animation
-                    if self.PlayUseAnimationOnUse then
-                        self:PlayUseAnimation()
-                    end
+                    task.defer(function()
+                        if self.PlayUseAnimationOnUse then
+                            self:PlayUseAnimation()
+                        end
+                    end)
                     task.spawn(function()
                         self.Signals.Used:Fire()
                     end)
@@ -308,7 +305,16 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             self.UseAnimationTrack = self.CharModule.GameplayConfig.Cache.Animations[AnimName]
         end,
 
-        PlayUseAnimation = nil,
+        PlayUseAnimation = function(self)
+            if self.UseAnimationTrack then
+                self.UseAnimationTrack:Play(0)
+	            self.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor(self.Name)
+                task.delay(self.UseAnimationTrack.Length - (1/20 * 2), function()
+                    self.UseAnimationTrack:Stop(0)
+	                self.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor(self.Name)
+                end)
+            end
+        end,
 
         Destroy = function(self: Ability)
             if self.OnRemove then

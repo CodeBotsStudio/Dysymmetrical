@@ -10,13 +10,13 @@ function TypeUtils.SplitStringPath(path: string): {string}
 end
 
 --- Makes a copy of an entire table.
-function TypeUtils.CopyTable<T>(CloneThis: T & {}) : T
+function TypeUtils.CopyTable<T>(CloneThis: T & {}) : T & {}
 	local MetaTable = getmetatable(CloneThis)
 	local NewTable = (MetaTable and setmetatable({}, MetaTable :: {}?) or {}) :: typeof(CloneThis)
 
 	for i, v in CloneThis do
-		if type(v) == `table` then
-			NewTable[i] = TypeUtils:CopyTable(v)
+		if typeof(v) == "table" then
+			NewTable[i] = TypeUtils.CopyTable(v)
 		else
 			NewTable[i] = v
 		end
