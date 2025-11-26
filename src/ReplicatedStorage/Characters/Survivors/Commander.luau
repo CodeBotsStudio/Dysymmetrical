@@ -75,9 +75,11 @@ local Commander = Character.CreateSurvivor({
                                                 Level = 1,
                                             },
                                         },
-                                        OnHit = function(Hum: Humanoid)
-                                            CommonFunctions.GrantRewardToPlayer(self.Owner, 10, 20, "blinding the killer with Blindside")
-                                        end,
+                                        Connections = {
+                                            PostHit = function(Hum: Humanoid)
+                                                CommonFunctions.GrantRewardToPlayer(self.Owner, 10, 20, "blinding the killer with Blindside")
+                                            end,
+                                        }
                                     })
                                 end)
                             
@@ -161,9 +163,11 @@ local Commander = Character.CreateSurvivor({
                                             Subfolder = "KillerSpecific"
                                         },
                                     },
-                                    OnHit = function(Hum: Humanoid)
-                                        CommonFunctions.GrantRewardToPlayer(self.Owner, 6, 14, "stunning the killer with Justice")
-                                    end,
+                                    Connections = {
+                                        PostHit = function(Hum: Humanoid)
+                                            CommonFunctions.GrantRewardToPlayer(self.Owner, 6, 14, "stunning the killer with Justice")
+                                        end,
+                                    }
                                 })
                             end)
                         

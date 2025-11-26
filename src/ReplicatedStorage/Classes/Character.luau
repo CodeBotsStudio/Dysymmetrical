@@ -5,7 +5,20 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local KillerIntro = require(script.Parent.KillerIntro)
 
-local CharTypes = {}
+local CharTypes = {
+    AutoLoadedAnims = {
+        "Idle",
+        "Walk",
+        "Run",
+        "Stunned",
+        "StunnedEnd",
+        "Preview",
+        "Slash",
+        "KillerRig",
+        "CameraRig",
+        "Execution",
+    }
+}
 
 --- Type used for survivor characters.
 export type Survivor = {

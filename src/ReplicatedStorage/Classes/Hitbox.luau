@@ -50,10 +50,9 @@ export type HitboxSettings = {
         --- If in a subfolder, specify it.
 		Subfolder: string?,
 	}}?,
-    --- Internal variable used to make cancelling the hitbox possible.
+    --- Any callbacks for events fired in the hitbox's functionality.
+    -- TODO: write what connections there are and what they do
     Connections: {[string]: (any?) -> ()}?,
-    --- Empty function that serves as custom behaviour code when the hitbox hits a humanoid.
-    OnHit: (hum: Humanoid) -> ()?,
 }
 
 --- Details on a hitbox's current stats
@@ -281,6 +280,8 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                 -- Register a hit in every player detected in the previous step.
                 for Index, Humanoid in Hit do
 
+                    Hitbox._RunCallback(Config.Connections, "PreHit", Index == 1)
+
                     -- Look for critical parts in the character in question, as well as the resistance effect, if applicable.
                     local TargetCharacter = Humanoid.Parent
                     local HRoot = TargetCharacter and TargetCharacter:IsA("Model") and TargetCharacter.PrimaryPart
@@ -310,9 +311,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         end
 
                         -- If theres a function set to be executed on player hit for this hitbox, toss the humanoid to it.
-                        if Config.OnHit then
-                            Config.OnHit(Humanoid)
-                        end
+                        Hitbox._RunCallback(Config.Connections, "Hit", Index == 1)
 
                         -- Store the user as the last player whom hit the target, to give a readout of their killer if they are to die from a status effect or similar.
                         if TargetCharacter:FindFirstChild("Killer") then
@@ -479,7 +478,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         end
 
                         -- If the hitbox has a callback tied to it, fire it.
-                        Hitbox._RunCallback(Config.Connections, "Hit", Index == 1)
+                        Hitbox._RunCallback(Config.Connections, "PostHit", Index == 1)
                     end
                 end
 

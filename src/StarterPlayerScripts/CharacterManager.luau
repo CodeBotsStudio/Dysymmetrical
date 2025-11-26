@@ -9,6 +9,7 @@ local CharManager = {}
 local LocalPlayer = Players.LocalPlayer
 
 local AbilityGUI = require(ReplicatedStorage.Classes.Ability.AbilityGUI)
+local Character = require(ReplicatedStorage.Classes.Character)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local AnimLoadPrevented = {
@@ -69,6 +70,18 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     local Sprinting = require(Char.PlayerAbilities.Default.Sprinting)
     Sprinting:ReloadAnimation(CharModule.Config.AnimationIDs.RunAnimation)
     Sprinting.SprintMultiplier = CharModule.GameplayConfig.SprintSpeedMultiplier
+
+    --loading any anims in `Config.AnimationIDs` that aren't loaded by the engine itself
+    task.defer(function()
+        for name, anim in CharModule.Config.AnimationIDs do
+            local animCodeName = name:gsub("Animation", "")
+            if table.find(Character.AutoLoadedAnims, animCodeName) then
+                continue
+            end
+
+            CharModule.GameplayConfig.Cache.Animations[animCodeName.."Anim"] = Utils.Character.LoadAnimationFromID(Char, anim, false)
+        end
+    end)
 
     local CharacterAbilities = self:_InitCharacterAbilities(CharModule)
 
