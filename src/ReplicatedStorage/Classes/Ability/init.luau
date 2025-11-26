@@ -101,7 +101,7 @@ export type Ability = {
         HRP: BasePart,
         --this is server
         --- See `ServerScriptService.System.CommonFunctions`.
-        CommonFunctions. any,
+        CommonFunctions: any,
         --the rest are all from client
         --- See `StarterPlayerScripts.InputManager`.
         InputManager: any,
