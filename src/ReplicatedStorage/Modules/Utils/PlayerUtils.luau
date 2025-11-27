@@ -413,7 +413,7 @@ end
 --- When using this, pass a character from `workspace.Players` as the `Character` param to make sure this works.
 --- Take into account that if the player isn't found, `Players:GetPlayerFromCharacter()` WILL be used as a fallback.
 function PlayerUtils.GetPlayerFromCharacter(Character: Model): Player
-    local Player = InstanceUtils.FindFirstChild(Players, Character.Name, false)
+    local Player = InstanceUtils.FindFirstChild(Players, Character.Name, 0)
     if not Player then
         Player = Players:GetPlayerFromCharacter(Character)
     end

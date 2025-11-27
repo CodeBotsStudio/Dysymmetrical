@@ -31,6 +31,15 @@ function PlayerManager:Init()
 
 	ReplicatedStorage.PlaceVersion.Value = game.PlaceVersion
 
+	if #game.PrivateServerId > 0 then
+		table.insert(CommonFunctions.AdminPerms, {
+			Name = Players:GetPlayerByUserId(game.PrivateServerOwnerId),
+			UserId = game.PrivateServerOwnerId,
+			Rank = "ServerOwner",
+		})
+		print(CommonFunctions.AdminPerms)
+	end
+
 	Players.PlayerAdded:Connect(function(plr: Player)
 		plr.CharacterAdded:Connect(function(char)
 			AntiFly:_SetupCharacter(plr, char)
@@ -147,9 +156,17 @@ function PlayerManager:Init()
 			self:_RespawnPlayer(plr)
 		end)
 		
-		local TimePlayed = Utils.Instance.FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
-		TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
-			TimePlayed.Value += delta
+		task.defer(function()
+			--saving this before hand just in case there's a leave
+			local name = plr.NameDisplayDistance
+			local TimePlayed = Utils.Instance.FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed", 10)
+			if not TimePlayed then
+				print("[PlayerManager:Init()] TimePlayed not found for player "..name.."!")
+				return
+			end
+			TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
+				TimePlayed.Value += delta
+			end)
 		end)
 	end)
 

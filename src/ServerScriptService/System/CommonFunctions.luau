@@ -26,6 +26,7 @@ local CommonFunctions = {
 
 	--don't add anything in here
 	Commands = {},
+	CommandDebounce = {},
 }
 
 local Debris = game:GetService("Debris")
@@ -50,9 +51,17 @@ function CommonFunctions.Init()
 		return CommonFunctions.PlayerHasPermissionRank(Player, Rank)
 	end)
 	Network:SetConnection("ExecuteCommand", "REMOTE_FUNCTION", function(Player: Player, CommandName: string, ...)
-        if not CommonFunctions.PlayerHasPermissionRank(Player, CommonFunctions.Commands[CommandName].RankRequired or Utils.Ranks.ServerOwner) or CommonFunctions.Commands[CommandName] == nil then
+        if CommonFunctions.CommandDebounce[Player.UserId] and not CommonFunctions.PlayerHasPermissionRank(Player, CommonFunctions.Commands[CommandName].RankRequired or Utils.Ranks.ServerOwner) or CommonFunctions.Commands[CommandName] == nil then
             return
         end
+		
+		task.defer(function()
+			CommonFunctions.CommandDebounce[Player.UserId] = 0.5
+			while CommonFunctions.CommandDebounce[Player.UserId] > 0 do
+				CommonFunctions.CommandDebounce[Player.UserId] -= task.wait(0.05)
+			end
+			CommonFunctions.CommandDebounce[Player.UserId] = nil
+		end)
         
         return CommonFunctions.Commands[CommandName]:Executed(...)
     end)
@@ -71,17 +80,18 @@ function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	--correction: the hitboxes in Forsaken are FULLY server-handled, but it doesn't lag because THEIR GAME SOMEHOW DOESN'T LAG AT ALL. WHAT????
 	--quick thing: hitboxes are now fully server-sided. yup. i had to. :(
 
-	if Utils.Instance.FindFirstChild(Char, "Effects.StunSpawnProtection", false) and not sourcePlayer.Character:GetAttribute("BypassStunProtection") then
+	if Utils.Instance.FindFirstChild(Char, "Effects.StunSpawnProtection", 0) and not sourcePlayer.Character:GetAttribute("BypassStunProtection") then
 		return
 	end
 
-	if Utils.Instance.FindFirstChild(Char, "Role") and Char.Role.Value == "Survivor" then
+	local Role = Utils.Instance.FindFirstChild(Char, "Role", 0.2)
+	if Role and Role.Value == "Survivor" then
 		Char.Killer.Value = sourcePlayer
 	end
 	
 	reason = reason or "HAHAHA https://www.youtube.com/watch?v=L8XbI9aJOXk" --OnlyIvo
 
-	if Utils.Instance.FindFirstChild(Char, "Effects.Resistance", false) then
+	if Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0) then
 		inflictedDamage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
 
@@ -105,7 +115,7 @@ function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	if Player then
 		Network:FireClientConnection(Player, "DamagePlayer", "REMOTE_EVENT", sourcePlayer, reason)
 		if Utils.PlayerData.GetPlayerSetting(Player, "Miscellaneous.ImageFlashOnHit") then
-			Network:FireClientConnection(Player, "ShowJokeSettingImage", "REMOTE_EVENT", true, Utils.Instance.FindFirstChild(Char, "Role") and Char.Role.Value or "Survivor")
+			Network:FireClientConnection(Player, "ShowJokeSettingImage", "REMOTE_EVENT", true, Role and Role.Value or "Survivor")
 		end
 	end
 	Network:FireClientConnection(sourcePlayer, "DamagedPlayer", "REMOTE_EVENT", Player, targetHumanoid, reason)
@@ -282,13 +292,17 @@ end
 
 --- Gets a player's permission rank.
 function CommonFunctions.GetPlayerPermissionRank(Player: Player): number
+	local HighestPlayerRank = Utils.Ranks.DefaultPlayer
 	for _, i in CommonFunctions.AdminPerms do
 		if i.UserId == Player.UserId then
-			return Utils.Ranks[i.Rank] or tonumber(i.Rank) or Utils.Ranks.DefaultPlayer
+			local Value = Utils.Ranks[i.Rank] or tonumber(i.Rank) or Utils.Ranks.DefaultPlayer
+			if Value < HighestPlayerRank then
+				HighestPlayerRank = Value
+			end
 		end
 	end
 
-	return Utils.Ranks.DefaultPlayer
+	return HighestPlayerRank
 end
 
 --- Checks if a player has a specific permission rank or higher.
