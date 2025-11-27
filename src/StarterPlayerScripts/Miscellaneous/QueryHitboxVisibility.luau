@@ -10,22 +10,10 @@ local LocalPlayer = Players.LocalPlayer
 local QueryHitboxVisibility = {}
 
 function QueryHitboxVisibility:Init()
-    for _, i: Player in Players:GetPlayers() do
-        self:_SetupPlayer(i)
-    end
-
-    Players.PlayerAdded:Connect(function(i: Player)
-        self:_SetupPlayer(i)
-    end)
-end
-
-function QueryHitboxVisibility:_SetupPlayer(Player: Player)
-    if Player.Character then
-        self:_CharSetup(Player.Character)
-    end
-
-    Player.CharacterAdded:Connect(function(char: Model)
-        self:_CharSetup(char)
+    Utils.Player.ObservePlayers(function(i: Player)
+        Utils.Character.ObserveCharacter(i, function(char: Model)
+            self:_CharSetup(char)
+        end)
     end)
 end
 

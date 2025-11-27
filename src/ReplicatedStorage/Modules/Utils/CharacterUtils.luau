@@ -117,7 +117,7 @@ function CharacterUtils.ObserveCharacter(
 	end
 
 	if player.Character then
-		onCharacterAdded(player.Character)
+		task.spawn(onCharacterAdded, player.Character)
 	end
 	mainJanitor:Add(player.CharacterAdded:Connect(onCharacterAdded))
 

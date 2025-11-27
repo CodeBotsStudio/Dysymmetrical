@@ -14,7 +14,7 @@ function EffectViewer:Init()
     EffectDisplay = Utils.Instance.FindFirstChild(script, "EffectDisplay")
     local UIPrefab = Utils.Instance.FindFirstChild(script, "StatusContainer")
 
-    LocalPlayer.CharacterAdded:Connect(function(Char: Model)
+    Utils.Character.ObserveCharacter(LocalPlayer, function(Char: Model)
         self:_SetupUI(UIPrefab:Clone(), Char)
     end)
 end

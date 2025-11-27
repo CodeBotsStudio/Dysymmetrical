@@ -40,8 +40,8 @@ function PlayerManager:Init()
 		print(CommonFunctions.AdminPerms)
 	end
 
-	Players.PlayerAdded:Connect(function(plr: Player)
-		plr.CharacterAdded:Connect(function(char)
+	Utils.Player.ObservePlayers(function(plr: Player)
+		Utils.Character.ObserveCharacter(plr, function(char)
 			AntiFly:_SetupCharacter(plr, char)
 			
 			local Role = Utils.Instance.FindFirstChild(char, "Role")
@@ -52,7 +52,8 @@ function PlayerManager:Init()
 
 			char.Parent = PlayerFolder
 			
-        	Utils.Instance.FindFirstChild(char, "Humanoid").BreakJointsOnDeath = false
+			local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
+        	Humanoid.BreakJointsOnDeath = false
 
 			local KillerValue
 			if Role.Value ~= "Spectator" then
@@ -128,7 +129,7 @@ function PlayerManager:Init()
 				end)
 			end
 
-        	char.Humanoid.Died:Connect(function()
+			Utils.Character.ObserveOnDeath(Humanoid, function()
 				char:SetAttribute("Dead", true)
 
 				if LeaveConn then
@@ -204,7 +205,8 @@ end
 
 --- Internal: Creates all hitboxes available for a character.
 function PlayerManager:_SetupHitboxes(Character)
-	local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+	local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
+	local HumanoidRootPart = Humanoid.RootPart
 	local HitboxFolder = Instance.new("Folder")
 	HitboxFolder.Name = "Hitboxes"
 	HitboxFolder.Parent = Character
@@ -221,7 +223,7 @@ function PlayerManager:_SetupHitboxes(Character)
 		Weld.C0 *= CFrame.fromEulerAnglesXYZ(0, 0, math.rad(90))
 	end
 
-	Character.Humanoid.Died:Connect(function()
+	Utils.Character.ObserveOnDeath(Humanoid, function()
 		for _, i in HitboxFolder:GetDescendants() do
 			i:Destroy()
 		end

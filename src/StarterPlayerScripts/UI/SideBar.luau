@@ -235,12 +235,12 @@ function SideBar:Init()
             }):Play()
         end)
 
-        LocalPlayer.CharacterAdded:Connect(function(char: Model)
+        Utils.Character.ObserveCharacter(LocalPlayer, function(char: Model)
             Menu:Toggle(Utils.Instance.FindFirstChild(char, "Role").Value == "Spectator")
         end)
     end
 
-    LocalPlayer.CharacterAdded:Connect(function(char: Model)
+    Utils.Character.ObserveCharacter(LocalPlayer, function(char: Model)
         self:Toggle(Utils.Instance.FindFirstChild(char, "Role").Value == "Spectator")
     end)
 end

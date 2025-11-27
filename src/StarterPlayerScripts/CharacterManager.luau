@@ -20,7 +20,7 @@ local AnimLoadPrevented = {
 }
 
 function CharManager:Init()
-    LocalPlayer.CharacterAdded:Connect(function(Char: Model)
+    Utils.Character.ObserveCharacter(LocalPlayer, function(Char: Model)
         if Utils.Instance.FindFirstChild(Char, "Role").Value ~= "Spectator" then
             self:LoadCharacter(Char:GetAttribute("CharacterName"), Char.Role.Value, Char:GetAttribute("CharacterSkinName"))
         end

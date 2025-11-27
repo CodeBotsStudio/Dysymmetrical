@@ -1,7 +1,6 @@
 --!nocheck
 
 local Debris = game:GetService("Debris")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -13,25 +12,15 @@ local AntiFly = {
 }
 
 function AntiFly:Init()
-    --check for any players that joined before initting
-    for _, plr: Player in Players:GetPlayers() do
-        if plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
-            self:_SetupCharacter(plr, plr.Character)
-        end
-        plr.CharacterAdded:Connect(function(char: Model)
-            self:_SetupCharacter(plr, char)
-        end)
-    end
-
-    Players.PlayerAdded:Connect(function(plr: Player)
-        plr.CharacterAdded:Connect(function(char: Model)
+    Utils.Player.ObservePlayers(function(plr: Player)
+        Utils.Character.ObserveCharacter(plr, function(char: Model)
             self:_SetupCharacter(plr, char)
         end)
     end)
 end
 
 function AntiFly:_SetupCharacter(player: Player, char: Model)
-    local root = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
+    local root = Utils.Instance.FindFirstChild(char, "Humanoid").RootPart
 
     local Params = RaycastParams.new()
     Params.FilterType = Enum.RaycastFilterType.Exclude

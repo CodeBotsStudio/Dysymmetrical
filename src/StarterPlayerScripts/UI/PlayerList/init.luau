@@ -88,7 +88,7 @@ function PlayerList:Init()
         Container.Parent = UI.Content
     end
 
-    LocalPlayer.CharacterAdded:Connect(function(Char: Model)
+    Utils.Character.ObserveCharacter(LocalPlayer, function(Char: Model)
         local Role = Utils.Instance.FindFirstChild(Char, "Role")
         if Role.Value ~= "Spectator" then
             if CurrentPlayerWindow then
@@ -114,16 +114,12 @@ function PlayerList:Init()
         Toggle()
     end)
 
-    Players.PlayerAdded:Connect(SetupPlayer)
+    Utils.Player.ObservePlayers(SetupPlayer)
     Players.PlayerRemoving:Connect(function(Player: Player)
         if UI.Content:FindFirstChild(tostring(Player.UserId)) then
             UI.Content[tostring(Player.UserId)]:Destroy()
         end
     end)
-
-    for _, i in Players:GetPlayers() do
-        SetupPlayer(i)
-    end
 end
 
 return PlayerList

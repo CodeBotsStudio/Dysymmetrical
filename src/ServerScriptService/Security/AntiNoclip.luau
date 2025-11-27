@@ -43,10 +43,10 @@ function AntiNoclip:_SetupPart(Character, RootPart, Humanoid)
 end
 
 function AntiNoclip:Init()
-    Players.PlayerAdded:Connect(function(Player)
-        Player.CharacterAdded:Connect(function(Character)
+    Utils.Player.ObservePlayers(function(Player)
+        Utils.Character.ObserveCharacter(Player, function(Character)
         	local Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
-        	local HumanoidRootPart = Utils.Instance.FindFirstChild(Character, "HumanoidRootPart")
+        	local HumanoidRootPart = Humanoid.RootPart
         	local NoclipPart = self:_SetupPart(Character, HumanoidRootPart)
 
             local RayParams = RaycastParams.new()

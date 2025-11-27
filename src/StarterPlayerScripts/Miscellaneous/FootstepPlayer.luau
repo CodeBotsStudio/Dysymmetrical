@@ -1,6 +1,5 @@
 --!nocheck
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -40,18 +39,8 @@ function FootstepPlayer:_SetupChar(character: Model)
 end
 
 function FootstepPlayer:Init()
-	for _, i in Players:GetPlayers() do
-		if i.Character then
-			FootstepPlayer:_SetupChar(i.Character)
-		end
-
-		i.CharacterAdded:Connect(function(newChar: Model)
-			FootstepPlayer:_SetupChar(newChar)
-		end)
-	end
-
-	Players.PlayerAdded:Connect(function(plr: Player)
-		plr.CharacterAdded:Connect(function(newChar: Model)
+	Utils.Player.ObservePlayers(function(plr: Player)
+		Utils.Character.ObserveCharacter(plr, function(newChar: Model)
 			FootstepPlayer:_SetupChar(newChar)
 		end)
 	end)

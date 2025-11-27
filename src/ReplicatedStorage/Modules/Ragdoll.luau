@@ -34,19 +34,11 @@ function Ragdoll:Init()
 		for _, i in workspace:GetDescendants() do
 			AddHumRagdoll(i)
 		end
-		Players.PlayerAdded:Connect(function(Player: Player)
-			Player.CharacterAdded:Connect(function(Char: Model)
+		Utils.Player.ObservePlayers(function(Player: Player)
+			Utils.Character.ObserveCharacter(Player, function(Char: Model)
 				AddHumRagdoll(Utils.Instance.FindFirstChild(Char, "Humanoid"))
 			end)
 		end)
-		for _, Player: Player in Players:GetPlayers() do
-			Player.CharacterAdded:Connect(function(Char: Model)
-				AddHumRagdoll(Utils.Instance.FindFirstChild(Char, "Humanoid"))
-			end)
-			if Player.Character then
-				AddHumRagdoll(Utils.Instance.FindFirstChild(Player.Character, "Humanoid"))
-			end
-		end
 	else
 		Network:SetConnection("Ragdoll", "REMOTE_EVENT", function(Character: Model, WaitTime: number?, Force: string, Position: CFrame?)
 			if WaitTime then
@@ -90,15 +82,11 @@ function Ragdoll:Init()
 		for _, i in workspace:GetDescendants() do
 			AddHumRagdoll(i)
 		end
-		Players.PlayerAdded:Connect(function(Player: Player)
-			Player.CharacterAdded:Connect(function(Char: Model)
-				AddHumRagdoll(Utils.Instance.FindFirstChild(Char, "Humanoid"), Utils.Instance.FindFirstChild(Char, "HumanoidRootPart"))
+		Utils.Player.ObservePlayers(function(Player: Player)
+			Utils.Character.ObserveCharacter(Player, function(Char: Model)
+				local Hum = Utils.Instance.FindFirstChild(Char, "Humanoid")
+				AddHumRagdoll(Hum, Hum.RootPart)
 			end)
-		end)
-		Network:SetConnection("SetupLocalRagdoll", "REMOTE_EVENT", function(p: Player)
-			if p.Character then
-				AddHumRagdoll(Utils.Instance.FindFirstChild(p.Character, "Humanoid"), Utils.Instance.FindFirstChild(p.Character, "HumanoidRootPart"))
-			end
 		end)
 	end
 end

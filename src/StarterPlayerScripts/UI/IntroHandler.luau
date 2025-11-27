@@ -87,13 +87,8 @@ return {
 		    Utils.Player.Fade(Players.LocalPlayer, "Out", 0.6)
         end
 
-        local function SetupPlayer(Player: Player)
-            Player.CharacterAdded:Connect(SetupCharacter)
-        end
-
-        Players.PlayerAdded:Connect(SetupPlayer)
-        for _, i in Players:GetPlayers() do
-            SetupPlayer(i)
-        end
+		Utils.Player.ObservePlayers(function(plr: Player)
+			Utils.Character.ObserveCharacter(plr, SetupCharacter)
+		end)
     end,
 }

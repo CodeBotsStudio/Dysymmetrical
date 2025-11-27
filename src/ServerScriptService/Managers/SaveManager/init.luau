@@ -61,8 +61,8 @@ end
 --- Sets up save data handlers, listens for players joining and leaving to read, write, retrieve, and store save data.
 function SaveManager:Init()
 
-	--- Initial wave of setting up playerdata, fired on an individual player when they join the game.
-	local function LoadPlayer(Player: Player)
+	-- Load a player's data when they join, and additionally retrieve and load all players that may have been in the game before this runs. Feels like that'd be rare, but I suppose one never knows...
+	Utils.Player.ObservePlayers(function(Player: Player)
 
 		-- Grab the player's data from the datastore, place it into a table for later use 
 		self.PlayerDatas[Player.UserId] = self:Load(Player)
@@ -97,7 +97,7 @@ function SaveManager:Init()
 			end
 
 		end
-	end
+	end)
 
 	-- Ensure default values for playerdata doing point to killers/survivors that exist. First, check to make sure the valueobjects which these would be stored in exist.
 	-- spawn to execute it as soon as possible
@@ -203,12 +203,6 @@ function SaveManager:Init()
 			end
 		end
 	end)
-
-	-- Load a player's data when they join, and additionally retrieve and load all players that may have been in the game before this runs. Feels like that'd be rare, but I suppose one never knows...
-	Players.PlayerAdded:Connect(LoadPlayer)
-	for _, i in Players:GetPlayers() do
-		LoadPlayer(i)
-	end
 
 	-- Save a player's data when they leave the game.
 	Players.PlayerRemoving:Connect(function(Player: Player)

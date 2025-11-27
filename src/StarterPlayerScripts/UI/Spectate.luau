@@ -63,42 +63,34 @@ function Spectate:Init()
         self:_Update()
     end)
 
-    local function OnPlayerAdded(Player: Player)
-        local function OnCharacterAdded(Character: Model)
-            local Role = Utils.Instance.FindFirstChild(Character, "Role")
+    local function OnCharacterAdded(Player: Player, Character: Model)
+        local Role = Utils.Instance.FindFirstChild(Character, "Role")
 
-            if Role.Value == "Spectator" then
+        if Role.Value == "Spectator" then
 
-                local I = table.find(self.PlayersAvailable, Player.Name)
-                if I then
+            local I = table.find(self.PlayersAvailable, Player.Name)
+            if I then
 
-                    table.remove(self.PlayersAvailable, I)
+                table.remove(self.PlayersAvailable, I)
 
-                    if self.CurSelected <= I then
-                        self:ChangeSelection(-1)
-                    end
-
+                if self.CurSelected <= I then
+                    self:ChangeSelection(-1)
                 end
 
-            elseif not table.find(self.PlayersAvailable, Player.Name) then
-                
-                table.insert(self.PlayersAvailable, Player.Name)
-                self:ChangeSelection()
             end
-        end
 
-        Player.CharacterAdded:Connect(OnCharacterAdded)
-        if Player.Character then
-            OnCharacterAdded(Player.Character)
+        elseif not table.find(self.PlayersAvailable, Player.Name) then
+            
+            table.insert(self.PlayersAvailable, Player.Name)
+            self:ChangeSelection()
         end
     end
 
-    Players.PlayerAdded:Connect(OnPlayerAdded)
-    for _, i in Players:GetPlayers() do
-        if i ~= Players.LocalPlayer then
-            OnPlayerAdded(i)
-        end
-    end
+    Utils.Player.ObservePlayers(function(Player: Player)
+        Utils.Character.ObserveCharacter(Player, function(Character: Model)
+            OnCharacterAdded(Player, Character)
+        end)
+    end)
 
     self:ChangeSelection()
 end

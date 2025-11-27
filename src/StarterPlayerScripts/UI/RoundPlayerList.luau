@@ -21,7 +21,7 @@ local Prefabs = {
 local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "RoundPlayerList")
 
 function RoundPlayerList:Init()
-    LocalPlayer.CharacterAdded:Connect(function(Char: Model)
+    Utils.Character.ObserveCharacter(LocalPlayer, function(Char: Model)
         if self.UI then
             self.UI:Destroy()
         end
