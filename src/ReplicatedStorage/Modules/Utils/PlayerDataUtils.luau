@@ -16,7 +16,7 @@ function PlayerDataUtils.GetPlayerEquipped(Player: Player, path: string, value: 
     end
 
     local splitPath = TypeUtils.SplitStringPath(path)
-    local Equipped = InstanceUtils.FindFirstChild(Player, "PlayerData.Equipped", 0)
+    local Equipped = InstanceUtils.FindFirstChild(Player, "PlayerData.Equipped", 5)
     if #splitPath == 1 then
         local Child = Equipped:FindFirstChild(splitPath[1])
         return value and Child.Value or Child
@@ -57,7 +57,8 @@ function PlayerDataUtils.GetPlayerOwned(Player: Player, path: string, value: boo
         value = true
     end
 
-    local Child = InstanceUtils.FindFirstChild(Player, "PlayerData.Purchased."..path, 0)
+    local PurchasedFolder = InstanceUtils.FindFirstChild(Player, "PlayerData.Purchased", 5)
+    local Child = InstanceUtils.FindFirstChild(PurchasedFolder, path, 0)
     return value and (Child and Child.Value or false) or Child
 end
 
@@ -68,14 +69,15 @@ function PlayerDataUtils.GetPlayerStat(Player: Player, path: string, value: bool
         value = true
     end
 
-    local Stat = InstanceUtils.FindFirstChild(Player, "PlayerData.Stats."..path)
+    local Stats = InstanceUtils.FindFirstChild(Player, "PlayerData.Stats", 5)
+    local Stat = InstanceUtils.FindFirstChild(Stats, path, 0)
     return value and Stat.Value or Stat
 end
 
 --- Retrieves a player's setting value through a string path.
 function PlayerDataUtils.GetPlayerSetting(Player: Player, path: string): any
     local splitPath = TypeUtils.SplitStringPath(path)
-    local PlayerSettings = InstanceUtils.FindFirstChild(Player, "PlayerData.Settings", 0)
+    local PlayerSettings = InstanceUtils.FindFirstChild(Player, "PlayerData.Settings", 5)
     if #splitPath == 1 then
         return PlayerSettings:FindFirstChild(splitPath[1]).Value
     else
@@ -97,7 +99,7 @@ function PlayerDataUtils.CreateMissingSkinValue(SourcePlayer: Player, name: stri
         return
     end
 
-    local EquippedSkins = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins", 0)
+    local EquippedSkins = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins", 5)
     local SkinValue = InstanceUtils.FindFirstChild(EquippedSkins, name, 0)
     if SkinValue then
         return SkinValue
@@ -117,7 +119,7 @@ function PlayerDataUtils.CreateMissingPurchasedSkinValue(SourcePlayer: Player, n
         return
     end
 
-    local PurchasedSkins = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins", 0)
+    local PurchasedSkins = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins", 5)
     local SkinFolder = InstanceUtils.FindFirstChild(PurchasedSkins, name, 0)
     if SkinFolder then
         return SkinFolder
