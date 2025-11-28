@@ -27,6 +27,7 @@ local char = LocalPlayer.Character
 local HumanoidRootPart: BasePart = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
 local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
 local Role: StringValue = Utils.Instance.FindFirstChild(char, "Role")
+local AnimationTransitionTime = Utils.Instance.FindFirstChild(char, "PlayerAttributes.AnimationTransitionTime")
 local playersFolder = workspace.Players
 --
 local PlayerAttributeScripts = char.PlayerAttributeScripts
@@ -67,7 +68,7 @@ function Sprinting:_Stop(StopExhausted: boolean)
 	self.Recovering = true
 
 	if self.SprintTrack and self.SprintTrack.IsPlaying then
-		self.SprintTrack:Stop(0)
+		self.SprintTrack:Stop(AnimationTransitionTime.Value)
 	end
 
 	if StopExhausted then
@@ -129,7 +130,7 @@ function Sprinting:Init()
 			end
 
 			if self.SprintTrack and not self.SprintTrack.IsPlaying then
-				self.SprintTrack:Play(0)
+				self.SprintTrack:Play(AnimationTransitionTime.Value)
 			end
 
 			if self.RecoveryThread then
