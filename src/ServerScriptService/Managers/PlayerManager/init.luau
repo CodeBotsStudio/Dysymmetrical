@@ -197,9 +197,11 @@ end
 
 --- Cancels a player's automatic respawn if they died.
 function PlayerManager:CancelAutoRespawn(plr: Player)
-    if threads[plr.UserId] and coroutine.running() ~= threads[plr.UserId] then
-        task.cancel(threads[plr.UserId])
-        threads[plr.UserId] = nil
+    if threads[plr.UserId] then
+		pcall(function()
+        	task.cancel(threads[plr.UserId])
+        	threads[plr.UserId] = nil
+		end)
     end
 end
 
