@@ -66,6 +66,11 @@ export type Survivor = {
             PreviewAnimation: string?,
         },
 
+        --- The time it'll take to transition between animations.
+        --- 
+        --- Will be overriden by abilities if their `Ability.AnimationTransitionTime` exists, but will still work for idle, walk and run animations.
+        AnimationTransitionTime: number,
+
         --- Any voicelines this character might have. It's built with strings as keys, and either strings, string tables or string dictionaries as values for random voicelines.
         --- * You can also name voicelines after abilities' code names (the ones that you define them with) so that they play when those abilities are used.
         --- * For example, if I have an ability named `TestAbility` in code and I add a `TestAbility` field here, it'll play a voiceline from here when I use it.
@@ -140,6 +145,8 @@ function CharTypes.GetDefaultSurvivorSettings(): Survivor
                 WalkAnimation = "rbxassetid://95139037304316",
                 RunAnimation = "rbxassetid://84289923509689",
             },
+
+            AnimationTransitionTime = 0.1,
 
             Voicelines = {},
         },
@@ -250,6 +257,11 @@ export type Killer = {
                 },
             }?,
         },
+
+        --- The time it'll take to transition between animations.
+        --- 
+        --- Will be overriden by abilities if their `Ability.AnimationTransitionTime` exists, but will still work for idle, walk and run animations.
+        AnimationTransitionTime: number,
 
         --- Any voicelines this character might have. It's built with strings as keys, and either strings or string dictionaries as values for random voicelines.
         --- For killers, use `Kill` to set the kill voicelines.
@@ -375,6 +387,8 @@ function CharTypes.GetDefaultKillerSettings(): Killer
                 WalkAnimation = "rbxassetid://96779101755387",
                 RunAnimation = "rbxassetid://139221510401164",
             },
+
+            AnimationTransitionTime = 0.1,
 
             Voicelines = {},
 

@@ -39,6 +39,7 @@ export type Ability = {
     --- CLIENT FUNCTION: Attempts to use the ability by checking if it's possible in the first place.
     AttemptUse: (self: Ability) -> (),
     --- Modifies the `UsesLeft` property in both client and server.
+    --- 
     --- SHOULD ONLY BE USED IN SERVER.
     ChangeAbilityCharges: (self: Ability, Type: "Set" | "Add" | "Take", amount: number) -> (),
 
@@ -53,6 +54,10 @@ export type Ability = {
     UseAnimationTrack: AnimationTrack,
     --- Toggle that lets you not play the use animation when using this ability.
     PlayUseAnimationOnUse: boolean,
+    --- The time it'll take to transition between the currently playing animation and this one and viceversa.
+    --- 
+    --- Overrides `Character.Config.AnimationTransitionTime` for `self.UseAnimation`'s transition time.
+    UseAnimationTransitionTime: number,
 
     --- The cooldown setting of the ability / how long it takes to recharge. It can also be changed dynamically.
     Cooldown: number,
@@ -307,10 +312,10 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
 
         PlayUseAnimation = function(self)
             if self.UseAnimationTrack then
-                self.UseAnimationTrack:Play(0)
+                self.UseAnimationTrack:Play(self.UseAnimationTransitionTime)
 	            self.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor(self.Name)
                 task.delay(self.UseAnimationTrack.Length - (1/20 * 2), function()
-                    self.UseAnimationTrack:Stop(0)
+                    self.UseAnimationTrack:Stop(self.UseAnimationTransitionTime)
 	                self.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor(self.Name)
                 end)
             end
@@ -365,6 +370,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
         UseAnimation = "",
         UseAnimationTrack = nil,
         PlayUseAnimationOnUse = true,
+        UseAnimationTransitionTime = 0.1,
 
         Cooldown = 5,
         CooldownTimer = 0,

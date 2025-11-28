@@ -71,6 +71,8 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     Sprinting:ReloadAnimation(CharModule.Config.AnimationIDs.RunAnimation)
     Sprinting.SprintMultiplier = CharModule.GameplayConfig.SprintSpeedMultiplier
 
+    Utils.Instance.FindFirstChild(Char, "PlayerAttributes.AnimationTransitionTime", 0).Value = CharModule.Config.AnimationTransitionTime
+
     --loading any anims in `Config.AnimationIDs` that aren't loaded by the engine itself
     task.defer(function()
         for name, anim in CharModule.Config.AnimationIDs do
