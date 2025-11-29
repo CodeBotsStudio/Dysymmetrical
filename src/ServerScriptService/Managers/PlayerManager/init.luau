@@ -129,7 +129,7 @@ function PlayerManager:Init()
 				end)
 			end
 
-			Humanoid.Died:Connect(function()
+			Utils.Character.ObserveOnDeath(Humanoid, function()
 				char:SetAttribute("Dead", true)
 
 				if LeaveConn then
