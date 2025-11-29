@@ -18,12 +18,12 @@ repeat
 	Attempt += 1
 
 	_, Storage = pcall(function()
-		return DataStoreService:GetDataStore("DriftwoodThing") -- PLACE YOUR DATASTORE HERE
+		return DataStoreService:GetDataStore("Baleful") -- PLACE YOUR DATASTORE HERE
 	end)
 until Storage or Attempt > 50
 
 
-local StoreKey = "driftwooding77" -- PLACE YOUR DATASTORE KEY HERE
+local StoreKey = "baleful" -- PLACE YOUR DATASTORE KEY HERE
 
 
 --- Organizes a hiearchy of instances and valueobjects into a table
@@ -258,12 +258,14 @@ function SaveManager:Load(Player: Player): Folder
 			pcall(function() 
 				PlayerData = Storage:GetAsync(`{StoreKey}_{Player.UserId}`)
 			end)
-		until PlayerData or Attempt > 50 
+			
+			task.wait()
+		-- do few attempts just in case it's a new player
+		until PlayerData or Attempt > 7
 
 	else    
 		warn("[SaveManager:Init()]: WARNING – ENTIRE DATASTORE failed to load. Handling playerdata from here is extremely hazardous. Here be dragons!")
 	end
-
 
 	local ClonedData = script.PlayerData:Clone()
 

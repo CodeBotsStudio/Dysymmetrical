@@ -162,7 +162,7 @@ function PlayerManager:Init()
 			local name = plr.NameDisplayDistance
 			local TimePlayed = Utils.Instance.FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed", 10)
 			if not TimePlayed then
-				print("[PlayerManager:Init()] TimePlayed not found for player "..name.."!")
+				warn("[PlayerManager:Init()] TimePlayed not found for player "..name.."!")
 				return
 			end
 			TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
