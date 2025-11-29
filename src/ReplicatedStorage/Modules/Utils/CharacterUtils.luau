@@ -59,7 +59,7 @@ function CharacterUtils.ObserveOnDeath(humanoid: Humanoid, callback: () -> ())
 		onDied()
 	end))
 	mainJanitor:Add(humanoid.Died:Connect(onDied))
-	mainJanitor:Add(onDied)
+	-- mainJanitor:Add(onDied)
 
 	return mainJanitor
 end
@@ -128,7 +128,7 @@ end
 --- Will execute code whenever a `Humanoid` appears in a player's character.
 function CharacterUtils.ObserveHumanoid(
 	player: Player,
-	callback: (humanoid: Humanoid, humanoidJanitor: janitor.Janitor) -> ()
+	callback: (humanoid: Humanoid, humanoidJanitor: Janitor.Janitor) -> ()
 )
 	return CharacterUtils.ObserveCharacter(player, function(character: Model, characterJanitor)
 		characterJanitor:Add(

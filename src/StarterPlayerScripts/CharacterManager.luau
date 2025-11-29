@@ -57,16 +57,12 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     end)
 
     local Char: Model = LocalPlayer.Character
-    local Animate = Utils.Instance.FindFirstChild(Char, "Animate")
 
     local CharModule = Utils.Type.CopyTable(require(Utils.Instance.GetCharacterModule(charType, charName, skinName)))
     CharModule.Owner = LocalPlayer
 
     Utils.Misc.PreloadAssets(CharModule.Config)
 
-    Animate.idle.IdleAnim.AnimationId = CharModule.Config.AnimationIDs.IdleAnimation
-    Animate.walk.WalkAnim.AnimationId = CharModule.Config.AnimationIDs.WalkAnimation
-    Animate.run.RunAnim.AnimationId = CharModule.Config.AnimationIDs.RunAnimation
     local Sprinting = require(Char.PlayerAbilities.Default.Sprinting)
     Sprinting:ReloadAnimation(CharModule.Config.AnimationIDs.RunAnimation)
     Sprinting.SprintMultiplier = CharModule.GameplayConfig.SprintSpeedMultiplier

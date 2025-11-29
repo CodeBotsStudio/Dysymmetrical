@@ -67,6 +67,10 @@ export type Ability = {
     OnCooldown: boolean,
     --- Utility to check if the ability can legally be used.
     CanUse: (self: Ability) -> boolean,
+    --- Extra, custom conditions to add to `Ability:CanUse()` instead of replacing the latter.
+    --- 
+    --- Must return a `boolean`.
+    UseConditions: (self: Ability) -> boolean,
 
     --- The duration of the ability. Mainly used to disable input until it finishes. Doesn't need to be the literal length.
     Duration: number,
@@ -416,6 +420,10 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             and not Emoting
             and not EffectPrevention
             and not OnCooldown
+            and self:UseConditions() --any extra conditions added by the ability's definition in `Ability:UseConditions()`
+        end,
+        UseConditions = function(_self: Ability): boolean
+            return true
         end,
         
         Duration = 0.4,
