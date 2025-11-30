@@ -90,6 +90,12 @@ export type Survivor = {
 
             [string]: string | {string} | {[string]: string | {string}},
         },
+
+        --- Any SFX that you may want to play with the character.
+        --- Voicelines go in `Voicelines`.
+        Sounds: {
+            [string]: (string | {string}),
+        },
     },
 
     --- Gameplay mechanics config that will affect how the character works.
@@ -149,6 +155,8 @@ function CharTypes.GetDefaultSurvivorSettings(): Survivor
             AnimationTransitionTime = 0.1,
 
             Voicelines = {},
+
+            Sounds = {},
         },
 
         GameplayConfig = {
@@ -359,7 +367,9 @@ export type Killer = {
     OnInit: (self: Killer, charModel: Model) -> ()?,
     --- SERVER FUNCTION: An empty function that you can replace to execute custom behaviour when this character gets hit.
     --- * If you want the character to not get affected by the hit, you can return `"Ignored"`.
-    OnHit: (self: Survivor, hitbox: any, damage: number) -> (string?)?,
+    OnHit: (self: Killer, hitbox: any, damage: number) -> (string?)?,
+    --- SERVER FUNCTION: An empty function that you can replace to execute custom behaviour when this character executes a survivor (the animation MUST be set).
+    OnExecution: ((self: Killer, victim: Model, usedAnimName: string) -> ())?,
 }
 
 --- Killer preset for customization.
@@ -398,6 +408,8 @@ function CharTypes.GetDefaultKillerSettings(): Killer
                 L3 = "rbxassetid://78435073515542",
                 L4 = "rbxassetid://100400124559989",
             },
+
+            Sounds = {},
         },
 
         GameplayConfig = {
@@ -418,6 +430,7 @@ function CharTypes.GetDefaultKillerSettings(): Killer
 
         OnInit = nil,
         OnHit = nil,
+        OnExecution = nil,
     }
 end
 

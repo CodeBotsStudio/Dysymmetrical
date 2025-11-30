@@ -39,6 +39,12 @@ export type HitboxSettings = {
     FriendlyFire: boolean?,
     --- Reason ID for custom behaviours on hit. Please assign this.
     Reason: string?,
+    --- The specific execution animation to use if `ExecuteOnKill` is `true`.
+    --- 
+    --- Will be looked up automatically if this isn't set.
+    --- 
+    --- TODO: **Fill this field with examples as this property is a bit weird to use and research is needed.**
+    ExecutionAnimation: string?,
     --- Optional parameter to specify certain status effects that'll be applied to whoever's hit.
     EffectsToApply: {{
         --- Name of the effect in the files.
@@ -85,7 +91,6 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
     -- Define the player in question for this hitbox, find their HumanoidRoot (or adjacent)
     local Char = SourcePlayer and SourcePlayer.Character -- "Oh, that's pretty clever, too. Huh!" – Itred
     local Root = Char and Char.PrimaryPart
-
     -- Prevent the hitbox from running if such is not found.
     if not Root then
         -- "Figured some feedback on this would be nice, I can see this accidentally being tripped with custom player models for a killer (maybe???)" – Itred
@@ -108,6 +113,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
         IsProjectile = Config.IsProjectile or false,
         FriendlyFire = Config.FriendlyFire or false,
         Reason = Config.Reason or "Slash Attack",
+        ExecutionAnimation = Config.ExecutionAnimation or nil,
         EffectsToApply = Config.EffectsToApply or {},
         Connections = Config.Connections or {},
     }
@@ -280,7 +286,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                 -- Register a hit in every player detected in the previous step.
                 for Index, Humanoid in Hit do
 
-                    Hitbox._RunCallback(Config.Connections, "PreHit", Index == 1)
+                    Hitbox._RunCallback(Config.Connections, "PreHit", Config, Humanoid, Index == 1)
 
                     -- Look for critical parts in the character in question, as well as the resistance effect, if applicable.
                     local TargetCharacter = Humanoid.Parent
@@ -311,7 +317,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         end
 
                         -- If theres a function set to be executed on player hit for this hitbox, toss the humanoid to it.
-                        Hitbox._RunCallback(Config.Connections, "Hit", Index == 1)
+                        Hitbox._RunCallback(Config.Connections, "Hit", Config, Humanoid, Index == 1)
 
                         -- Store the user as the last player whom hit the target, to give a readout of their killer if they are to die from a status effect or similar.
                         if TargetCharacter:FindFirstChild("Killer") then
@@ -349,7 +355,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                             if Char.Role.Value == "Killer" and Config.ExecuteOnKill and not TargetCharacter:GetAttribute("ExecutionsDisabled") then
                                 
                                 -- Fetch if the user has execution animations to use
-                                local ExecutionAnimsAvailable = Module.GameplayConfig.Cache.Animations.Execution
+                                local ExecutionAnimsAvailable = Module.Config.AnimationIDs[Config.ExecutionAnimation or "Execution"]
 
                                 -- If the user has valid execution animations to use, go through with running them:
                                 if ExecutionAnimsAvailable then
@@ -361,58 +367,69 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         TargetCharacter:SetAttribute("Executing", true)
 
                                         -- Get the player that's about to be executed
-                                        local TargetPlayer = Utils.Player.GetPlayerFromCharacter(TargetCharacter)
-                                        if TargetPlayer then
-                                            -- Execute the same code as if a survivor was killed while in chase to make it more fair for the killer (it won't execute again when the character actually dies later)
-                	                        Network:FireClientConnection(SourcePlayer, "KilledPlayer", "REMOTE_EVENT", TargetPlayer)
-                	                        Network:FireConnection("KilledPlayer", SourcePlayer, TargetPlayer)
+                                        task.spawn(function()
+                                            local TargetPlayer = Utils.Player.GetPlayerFromCharacter(TargetCharacter)
+                                            if TargetPlayer then
+                                                -- Execute the same code as if a survivor was killed while in chase to make it more fair for the killer (it won't execute again when the character actually dies later)
+                	                            Network:FireClientConnection(SourcePlayer, "KilledPlayer", "REMOTE_EVENT", TargetPlayer)
+                	                            Network:FireConnection("KilledPlayer", SourcePlayer, TargetPlayer)
 
-					                        CommonFunctions.UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
-                	                        CommonFunctions.GrantRewardToPlayer(SourcePlayer, 20, 60, "killing a Survivor")
+					                            CommonFunctions.UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
+                	                            CommonFunctions.GrantRewardToPlayer(SourcePlayer, 20, 60, "killing a Survivor")
 
-					                        TimeManager:SetTime(TimeManager.CurrentTime + 35)
-                                        end
+					                            TimeManager:SetTime(TimeManager.CurrentTime + 35)
+                                            end
+                                        end)
 
                                         -- Find out if theres a special execution animation to use for this specific survivor; if there isn't, use a default.
-                                        local ExecutionAnim = KilledSurvivor.Skin and ExecutionAnimsAvailable[KilledSurvivor.Skin..KilledSurvivor.Name] or ExecutionAnimsAvailable[KilledSurvivor.Name]
-                                        if not ExecutionAnim then
-                                            ExecutionAnim = ExecutionAnimsAvailable["Default"]
-                                        end
+                                        local ExecutionAnim =
+                                            (KilledSurvivor.Skin and
+                                                ExecutionAnimsAvailable[KilledSurvivor.Skin..KilledSurvivor.Name]
+                                                or ExecutionAnimsAvailable[KilledSurvivor.Name]
+                                            )
+                                            or ExecutionAnimsAvailable["Default"]
 
-                                        -- If there are no execution animations to use, for one reason or another, resort to just flinging the target really far.
+                                        -- If there are no execution animations to use, for one reason or another, resort to just killing the target and flinging it really far.
                                         if not ExecutionAnim then
-                                            if Config.Knockback then
-                                                CommonFunctions.RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
-                                            end
-
-                                            -- Kill the target after flinging them.
-                                            Humanoid.Health = 0
+                                            CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason, CheckPart.CFrame.LookVector, Config.Knockback)
 
                                             return
                                         end
 
                                         -- If there is an animation to play, grab it.
-                                        local KillerAnim = ExecutionAnim.Killer
+                                        local RuntimeKillerModule = require(Char.PlayerAbilities.CharacterAbilities).CharacterModule
+                                        local KillerExecAnims = RuntimeKillerModule.GameplayConfig.Cache.Animations[Config.ExecutionAnimation or "Execution"]
+                                        local KillerAnim = ((KilledSurvivor.Skin and
+                                                KillerExecAnims[KilledSurvivor.Skin..KilledSurvivor.Name]
+                                                or KillerExecAnims[KilledSurvivor.Name]
+                                            )
+                                            or KillerExecAnims["Default"])
+                                        .Killer
 
                                         -- If the survivor has a special death animation for this case, grab that, too.
-                                        local SurvivorAnim = KilledSurvivor.Skin and Module.Config.AnimationIDs.Execution[KilledSurvivor.Skin..KilledSurvivor.Name] or Module.Config.AnimationIDs.Execution[KilledSurvivor.Name]
-                                        SurvivorAnim = SurvivorAnim or Module.Config.AnimationIDs.Execution["Default"]
-                                        SurvivorAnim = Utils.Character.LoadAnimationFromID(TargetCharacter, SurvivorAnim)
+                                        local SurvivorAnim = Utils.Character.LoadAnimationFromID(TargetCharacter, ExecutionAnim.Survivor)
 
                                         -- Grab the execution sound to play, if applicable; or use a default, if needed.
-                                        local ExSound = KilledSurvivor.Skin and Module.Config.Sounds.Execute[KilledSurvivor.Skin..KilledSurvivor.Name] or Module.Config.Sounds.Execute[KilledSurvivor.Name]
-                                        ExSound = ExSound or Module.Config.Sounds.Execute["Default"]
+                                        local ExSound
+                                        if Module.Config.Sounds.Execute then
+                                            ExSound = 
+                                                (KilledSurvivor.Skin and
+                                                    Module.Config.Sounds.Execute[KilledSurvivor.Skin..KilledSurvivor.Name]
+                                                    or Module.Config.Sounds.Execute[KilledSurvivor.Name]
+                                                )
+                                                or Module.Config.Sounds.Execute["Default"]
+                                        end
 
                                         -- Clear all of the target's effects (they won't need 'em where they're goin').
                                         TargetCharacter.Effects:ClearAllChildren()
 
-                                        -- Move in for the kill
-                                        Char:PivotTo(CFrame.new(Root.Position, Vector3.new(HRoot.Position.X, Root.Position.Y, HRoot.Position.Z)))
-                                        TargetCharacter:PivotTo(Root.CFrame * (Module.Config.ExecutionSurvivorCFrameOffset or CFrame.new(0, 0, 5)))
-
                                         -- Anchor both the user and the target to play the animation
                                         Root.Anchored = true
                                         HRoot.Anchored = true
+
+                                        -- Move in for the kill
+                                        Char:PivotTo(CFrame.new(Root.Position, Vector3.new(HRoot.Position.X, Root.Position.Y, HRoot.Position.Z)))
+                                        TargetCharacter:PivotTo(Root.CFrame * (Module.Config.ExecutionSurvivorCFrameOffset or CFrame.new(0, 0, -3)) * CFrame.fromEulerAnglesXYZ(0, math.rad(180), 0))
 
                                         -- Schedule some work for when the animation is over: to reset the execution and invincible state back to false for the user, and do some cleanup (including, y'know, actually killing the target the user just executed).
                                         task.delay(KillerAnim.Length, function()
@@ -441,18 +458,14 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         end
 
                                         -- Fire a signal for any on-execution abilities the killer may have.
-                                        if Module.GameplayConfig.OnExecution then
-                                            Module.GameplayConfig:OnExecution(Module, TargetCharacter)
+                                        if RuntimeKillerModule.OnExecution then
+                                            RuntimeKillerModule:OnExecution(TargetCharacter, Config.ExecutionAnimation or "Execution")
                                         end
 
                                     end)
                                 else
                                     -- If no execution animations are availible, resort to 'ol reliable– flinging the target. 
-                                    if Config.Knockback then
-                                        CommonFunctions.RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
-                                    end
-
-                                    Humanoid.Health = 0
+                                    CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason, CheckPart.CFrame.LookVector, Config.Knockback)
                                 end
 
                                 return
@@ -460,14 +473,9 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                         end
 
-                        -- If the Target doesn't die to the hitbox, do some knockback:
-                        if Config.Knockback then
-                            CommonFunctions.RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
-                        end
-
-                        -- If the hitbox deals damage, inflict it.
+                        -- If the hitbox deals damage, inflict it and do some knockback if existent.
                         if Damage > 0 then
-                            CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason)
+                            CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason, CheckPart.CFrame.LookVector, Config.Knockback)
                         end
 
                         -- If the hitbox applies effects, apply them.
@@ -478,7 +486,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         end
 
                         -- If the hitbox has a callback tied to it, fire it.
-                        Hitbox._RunCallback(Config.Connections, "PostHit", Index == 1)
+                        Hitbox._RunCallback(Config.Connections, "PostHit", Config, Humanoid, Index == 1)
                     end
                 end
 

@@ -17,6 +17,7 @@ local AnimLoadPrevented = {
     "WalkAnimation",
     "RunAnimation",
     "SlashAnimation",
+    "Execution",
 }
 
 function CharManager:Init()
@@ -39,12 +40,23 @@ function CharManager:_InitCharacterAbilities(Module)
         end
     end
 
-    for name, anim in Module.Config.AnimationIDs do
+    local function LoadAnim(name, anim)
+        if typeof(anim) == "table" then
+            for Name, Anim in anim do
+                LoadAnim(Name, Anim)
+            end
+            return
+        end
+
         if table.find(AnimLoadPrevented, name) then
-            continue
+            return
         end
 
         Module.GameplayConfig.Cache.Animations[name] = Utils.Character.LoadAnimationFromID(LocalPlayer.Character, anim, false)
+    end
+
+    for name, anim in Module.Config.AnimationIDs do
+        LoadAnim(name, anim)
     end
 
     return CharacterAbilities
@@ -73,7 +85,7 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
     task.defer(function()
         for name, anim in CharModule.Config.AnimationIDs do
             local animCodeName = name:gsub("Animation", "")
-            if table.find(Character.AutoLoadedAnims, animCodeName) then
+            if table.find(Character.AutoLoadedAnims, animCodeName) or animCodeName:lower():find("execution") then
                 continue
             end
 

@@ -59,81 +59,103 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
     Humanoid.JumpPower = 0
     Humanoid.JumpHeight = 0
 
+    Utils.Misc.PreloadAssets(module.Config)
+
     for name, value in module.GameplayConfig.StaminaProperties do
         Char.PlayerAttributes:FindFirstChild(name).Value = value
     end
 
     for _, Ability in module.GameplayConfig.Abilities do
-        CharacterAbilities.Abilities[Ability] = Ability
         if Ability.Init then
             Ability:Init(module, player)
         end
+        CharacterAbilities.Abilities[Ability] = Ability
     end
 
     if module.OnInit then
         module:OnInit(Char)
     end
 
-    if module.Config.Voicelines and module.Config.Voicelines.Stunned then
-        Char.Effects.ChildAdded:Connect(function(newChild)
-            if newChild.Name == "Stunned" then
-                Sounds:PlayVoiceline(Char, module.Config.Voicelines.Stunned)
-            end
-        end)
-    end
+    task.defer(function()
+        -- loading all execution animations
+        task.defer(function()
+            for N, s in module.Config.AnimationIDs do
+                if not N:lower():find("execution") then
+                    continue
+                end
 
-    --Idle Voicelines every while
-    if module.Config.Voicelines and module.Config.Voicelines.Idle then
-        local Primary = Char.PrimaryPart or Char:FindFirstChild("HumanoidRootPart")
-        if not Primary then
-            return
-        end
+                module.GameplayConfig.Cache.Animations[N] = {}
 
-        local Connections = {}
-        if module.Config.Voicelines.LMS then
-            table.insert(Connections, Network:SetConnection("LMSVoiceline", "BINDABLE_EVENT", function(LastMan: Player)
-                local Voiceline =
-                    module.Config.Voicelines.LMS[LastMan:GetAttribute("CharacterSkinName") and LastMan:GetAttribute("CharacterSkinName")..LastMan:GetAttribute("CharacterName") or LastMan:GetAttribute("CharacterName")]
-                    or module.Config.Voicelines.LMS["Default"]
-                    or module.Config.Voicelines.LMS
-                
-                Sounds:PlayVoiceline(Char, Voiceline, {
-                    Priority = 999,
-                })
-            end))
-        end
-
-        task.spawn(function()
-            if module.Config.AnimationIDs.Execution then
-                module.GameplayConfig.Cache.Animations["Execution"] = {}
-                for name, i in module.Config.AnimationIDs.Execution do
-                    module.GameplayConfig.Cache.Animations.Execution[name] = {}
-                    for n, ie in i do
-                        if n == "Survivor" then --no need to load survivor execution anims on killers
+                for name, anims in module.Config.AnimationIDs[N] do
+                    module.GameplayConfig.Cache.Animations[N][name] = {}
+                    for n, anim in anims do
+                        if n:lower() ~= "killer" then
                             continue
                         end
-                        module.GameplayConfig.Cache.Animations.Execution[name][n] = Utils.Character.LoadAnimationFromID(Char, ie, false)
+
+                        module.GameplayConfig.Cache.Animations[N][name][n] = Utils.Character.LoadAnimationFromID(Char, anim)
                     end
                 end
             end
         end)
 
-        task.spawn(function()
-            task.wait(math.random(10, 25))
-            while player.Character and Char and player.Character == Char and Primary do
-                if module.Config.Voicelines.Idle then
-                    Sounds:PlayVoiceline(Char, module.Config.Voicelines.Idle, {
-                        Priority = 0,
-                    })
-                end
-                task.wait(math.random(10, 25))
+        if module.Config.Voicelines then
+            local Primary = Char.PrimaryPart or Char:FindFirstChild("HumanoidRootPart")
+            if not Primary then
+                return
             end
 
-            for _, i in Connections do
-                i:Disconnect()
+            local Connections = {}
+            task.defer(function()
+                while player.Character and Char and player.Character == Char and Primary do
+                    task.wait(1)
+                end
+
+                for _, i in Connections do
+                    i:Disconnect()
+                end
+            end)
+
+            if module.Config.Voicelines.Stunned then
+                Char.Effects.ChildAdded:Connect(function(newChild)
+                    if newChild.Name == "Stunned" then
+                        Sounds:PlayVoiceline(Char, module.Config.Voicelines.Stunned)
+                    end
+                end)
             end
-        end)
-    end
+
+            if module.Config.Voicelines.Idle then
+                task.defer(function()
+                    task.wait(math.random(10, 25))
+                    while player.Character and Char and player.Character == Char and Primary do
+                        if module.Config.Voicelines.Idle then
+                            Sounds:PlayVoiceline(Char, module.Config.Voicelines.Idle, {
+                                Priority = 0,
+                            })
+                        end
+                        task.wait(math.random(10, 25))
+                    end
+                
+                    for _, i in Connections do
+                        i:Disconnect()
+                    end
+                end)
+            end
+
+            if module.Config.Voicelines.LMS then
+                table.insert(Connections, Network:SetConnection("LMSVoiceline", "BINDABLE_EVENT", function(LastMan: Player)
+                    local Voiceline =
+                        module.Config.Voicelines.LMS[LastMan:GetAttribute("CharacterSkinName") and LastMan:GetAttribute("CharacterSkinName")..LastMan:GetAttribute("CharacterName") or LastMan:GetAttribute("CharacterName")]
+                        or module.Config.Voicelines.LMS["Default"]
+                        or module.Config.Voicelines.LMS
+
+                    Sounds:PlayVoiceline(Char, Voiceline, {
+                        Priority = 999,
+                    })
+                end))
+            end
+        end
+    end)
 end
 
 return ServerCharacterManager

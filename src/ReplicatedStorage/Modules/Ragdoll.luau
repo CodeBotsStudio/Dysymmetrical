@@ -43,7 +43,7 @@ function Ragdoll:Init()
 		Network:SetConnection("Ragdoll", "REMOTE_EVENT", function(Character: Model, WaitTime: number?, Force: string, Position: CFrame?)
 			if WaitTime then
 				repeat task.wait()
-				until workspace:GetServerTimeNow() >= WaitTime or 0
+				until time() >= (WaitTime or 0)
 			end
 			local rag = Ragdoll:Enable(Character, true)
 			if rag and rag.PrimaryPart then
@@ -118,7 +118,7 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 		if not RagdollFolder then
 			return
 		end
-		local Silly = Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer, "Advanced.SillyRagdolls")
+		local Silly = Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer or Utils.Player.GetPlayerFromCharacter(Char), "Advanced.SillyRagdolls")
 		--handle ragdoll limit option
 		Char = Character:Clone()
 		Char.Parent = RagdollFolder
@@ -131,12 +131,12 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
                 i:Destroy()
             end
 		end
-		for index, i in pairs({
+		for index, i in {
 			"LinearVelocity",
 			"Highlight"
-		}) do
+		} do
 			local First = Char:FindFirstChild(i, true)
-			while First and (index > 2 or not Silly) do
+			while First and (index > 1 or not Silly) do
 				First.Name = "ded"
 				First:Destroy()
 				First = Char:FindFirstChild(i, true)

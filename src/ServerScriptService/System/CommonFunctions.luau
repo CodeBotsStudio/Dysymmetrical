@@ -122,7 +122,11 @@ function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 end
 
 --- Applies an effect on a specific humanoid. It can be a player or an NPC, it doesn't matter.
-function CommonFunctions.ApplyEffect(hum: Humanoid, name: string, level: number?, duration: number?, subfolder: string?)
+function CommonFunctions.ApplyEffect(hum: Humanoid, name: string, level: number?, duration: number?, subfolder: string?, overwriteExisting: boolean?) : NumberValue?
+	if overwriteExisting == nil then
+		overwriteExisting = true
+	end
+
 	local char = hum.Parent
 
 	local CharEffects = Utils.Instance.FindFirstChild(char, "Effects")
@@ -132,9 +136,19 @@ function CommonFunctions.ApplyEffect(hum: Humanoid, name: string, level: number?
 			return
 		end
 	end
+
+	local ExistingEffect = CharEffects:FindFirstChild(name)
+	if ExistingEffect then
+		if not overwriteExisting then
+			return
+		end
+
+		ExistingEffect:Destroy()
+	end
 	
 	local EffectModule = Utils.Instance.GetEffectModule(name, subfolder)
-	local EffectValue = CharEffects:FindFirstChild(name) or Instance.new("NumberValue")
+
+	local EffectValue = Instance.new("NumberValue")
 
 	EffectValue.Name = name
 	EffectValue.Value = level or EffectModule.Level
@@ -152,6 +166,23 @@ function CommonFunctions.ApplyEffect(hum: Humanoid, name: string, level: number?
 		end
 	end)
 	EffectModule:Apply(level, char, duration or EffectModule.Duration)
+
+	return EffectValue
+end
+
+function CommonFunctions.RemoveEffect(char: Model | Humanoid, name: string)
+	char = char:IsA("Model") and char or char.Parent
+
+	local CharEffects = Utils.Instance.FindFirstChild(char, "Effects")
+
+	local EffectInst = CharEffects:FindFirstChild(name)
+	if not EffectInst then
+		return
+	end
+	
+	local EffectModule = Utils.Instance.GetEffectModule(name, EffectInst:GetAttribute("Subfolder"))
+	EffectModule:Remove(char)
+	EffectInst:Destroy()
 end
 
 --- Grants money and/or EXP to a player and displays a notification showing it.
@@ -314,16 +345,20 @@ function CommonFunctions.PlayerHasPermissionRank(Player: Player, MandatoryRank: 
 	return Rank < (typeof(MandatoryRank) == "string" and Utils.Ranks[MandatoryRank] or MandatoryRank), Rank
 end
 
-function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, direction: Vector3)
+function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, direction: Vector3, allowAssembly: boolean?)
 	if magnitude <= 0 or direction == Vector3.zero then
 		return
+	end
+
+	if allowAssembly == nil then
+		allowAssembly = true
 	end
 
 	local HRP = Rig:IsA("Model") and Rig:FindFirstChild("HumanoidRootPart") or Rig
 
 	-- If the knockback property of the hitbox is greater than 15, fling the target(?) -itrid
 	-- FLINGING GO BOOM -dys
-	if magnitude >= 15 then
+	if magnitude >= 15 and allowAssembly then
 		HRP.AssemblyLinearVelocity = direction * magnitude * 10
 	
 	-- Otherwise, lightly push the target instead. -itrid

@@ -11,39 +11,32 @@ local MiscellaneousUtils = {}
 function MiscellaneousUtils.PreloadAssets(assets: string | {string})
     task.defer(function()
         local loadedAssets = {}
-        local checkedAssets = {}
 
-        local function Fetch(assetsToFetch: string | {string})
-            if typeof(assetsToFetch) == "string" then
-                table.insert(loadedAssets, assetsToFetch)
-                table.insert(checkedAssets, assetsToFetch)
+        local function Fetch(assetsToFetch: any)
+            if typeof(assetsToFetch) == "table" then
+                for _, i in assetsToFetch do
+                    pcall(Fetch, i)
+                end
                 return
             end
-            
-            for t, asset in assetsToFetch do
-                if table.find(checkedAssets, asset) then
-                    continue
-                end
-                
-                if typeof(asset) == "table" then
-                    pcall(Fetch, asset)
 
-                elseif typeof(asset) == "string" and asset:find("rbxassetid://") then
-                    if t == "SoundIDs" and RunService:IsClient() then
-                        local Sound = Instance.new("Sound")
-                        Sound.Name = asset
-                        Sound.SoundId = asset
-                        Sound.Volume = 0
-                        Sound.Parent = workspace.Sounds
-                        Sound:Play()
-
-                        Debris:AddItem(Sound, 1)
-                    end
-
-                    table.insert(loadedAssets, asset)
-                end
-                table.insert(checkedAssets, asset)
+            if typeof(assetsToFetch) ~= "string" and typeof(assetsToFetch) ~= "Instance" then
+                return
             end
+
+            if typeof(assetsToFetch) == "string" and assetsToFetch:find("rbxassetid://") then
+                if assetsToFetch:lower() == "soundids" and RunService:IsClient() then
+                    local Sound = Instance.new("Sound")
+                    Sound.Name = assetsToFetch
+                    Sound.SoundId = assetsToFetch
+                    Sound.Volume = 0
+                    Sound.Parent = workspace.Sounds
+                    Sound:Play()
+
+                    Debris:AddItem(Sound, 1)
+                end
+            end
+            table.insert(loadedAssets, assetsToFetch)
         end
 
         pcall(Fetch, assets)

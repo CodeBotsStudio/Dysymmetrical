@@ -417,6 +417,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             return EnoughUses
             and self.Owner.Character:FindFirstChildOfClass("Humanoid").Health > 0 --if the player's alive
             and not self.Owner.Character:FindFirstChild("HumanoidRootPart").Anchored --if the player isn't restrained by initial round setup
+            and not self.Owner.Character:GetAttribute("Executing")
             and not Emoting
             and not EffectPrevention
             and not OnCooldown
