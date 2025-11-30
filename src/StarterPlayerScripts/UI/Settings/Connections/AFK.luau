@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
-local AFKLabel = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "AFKLabel")
+local AFKLabel = Utils.Instance.FindFirstChild(Players.LocalPlayer.PlayerGui, "AFKLabel")
 
 return function(Value: boolean)
     AFKLabel.Enabled = Value

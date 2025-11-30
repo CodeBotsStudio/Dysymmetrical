@@ -22,7 +22,7 @@ local function GetIntroModule(name: string, skin: string?)
 	return Intro
 end
 
-local IntroContainer = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "KillerIntros")
+local IntroContainer = Utils.Instance.FindFirstChild(Players.LocalPlayer.PlayerGui, "KillerIntros")
 local ToastPrefab = GetIntroModule("KillerNameToast")
 
 return {
@@ -35,7 +35,7 @@ return {
                 return
             end
 
-            local Role = Utils:FindFirstChild(Char, "Role")
+            local Role = Utils.Instance.FindFirstChild(Char, "Role")
             if Role.Value ~= "Killer" then
                 return
             end
@@ -46,10 +46,10 @@ return {
             --TODO: multi-killer toast support
             KillerPlayerNames[1] = Char.Name
 
-		    if Utils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.DisableKillerIntros") then
+		    if Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.DisableKillerIntros") then
 		    	task.spawn(require(ToastPrefab), IntroContainer, KillerPlayerNames)
 
-		    	Utils:Fade(Players.LocalPlayer, "Out", 0.6)
+		    	Utils.Player.Fade(Players.LocalPlayer, "Out", 0.6)
 		    	return
 		    end
 
@@ -70,30 +70,25 @@ return {
 
 		    local Intro2D = GetIntroModule(KillerName, KillerSkin)
 
-		    local Intro = Intro2D and KillerIntro:New2DIntro(IntroInfo, Intro2D) or KillerIntro:New3DIntro(IntroInfo)
+		    local Intro = Intro2D and KillerIntro.New2DIntro(IntroInfo, Intro2D) or KillerIntro.New3DIntro(IntroInfo)
 			CurrentIntro = Intro
 
 		    Intro:Init()
 
 		    task.spawn(require(ToastPrefab), IntroContainer, KillerPlayerNames)
 
-		    Utils:Fade(Players.LocalPlayer, "Out", 0.6)
+		    Utils.Player.Fade(Players.LocalPlayer, "Out", 0.6)
 
 		    Intro:Play()
 		    task.wait(2.5)
 
-		    Utils:Fade(Players.LocalPlayer, "In", 0.6, true)
+		    Utils.Player.Fade(Players.LocalPlayer, "In", 0.6, true)
 		    Intro:Destroy()
-		    Utils:Fade(Players.LocalPlayer, "Out", 0.6)
+		    Utils.Player.Fade(Players.LocalPlayer, "Out", 0.6)
         end
 
-        local function SetupPlayer(Player: Player)
-            Player.CharacterAdded:Connect(SetupCharacter)
-        end
-
-        Players.PlayerAdded:Connect(SetupPlayer)
-        for _, i in Players:GetPlayers() do
-            SetupPlayer(i)
-        end
+		Utils.Player.ObservePlayers(function(plr: Player)
+			Utils.Character.ObserveCharacter(plr, SetupCharacter)
+		end)
     end,
 }

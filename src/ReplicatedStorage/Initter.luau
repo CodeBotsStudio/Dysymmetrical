@@ -12,7 +12,10 @@ function Initter:Init()
         end
         if i:IsA("ModuleScript") and not i:HasTag("PreventInit") then
             self.CurrentlyInitting = i.Name
-            require(i):Init()
+            local Code = require(i)
+            if Code.Init ~= nil and typeof(Code.Init) == "function" then
+                Code:Init()
+            end
         end
     end
 

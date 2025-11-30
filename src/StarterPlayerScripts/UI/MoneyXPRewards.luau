@@ -9,13 +9,13 @@ local Network = require(ReplicatedStorage.Modules.Network)
 local MoneyXPRewards = {}
 
 function MoneyXPRewards:Init()
-    local UI = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "MoneyXPRewards")
-    local Container = Utils:FindFirstChild(script, "MoneyXPRewardsContainer")
+    local UI = Utils.Instance.FindFirstChild(Players.LocalPlayer.PlayerGui, "MoneyXPRewards")
+    local Container = Utils.Instance.FindFirstChild(script, "MoneyXPRewardsContainer")
     Container.Parent = UI
-    local Prefab = Utils:FindFirstChild(script, "Reward")
+    local Prefab = Utils.Instance.FindFirstChild(script, "Reward")
 
     Network:SetConnection("GrantReward", "REMOTE_EVENT", function(Money: number?, EXP: number?, Reason: string?)
-        if not Utils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.ShowRewardNotifications") then
+        if not Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.ShowRewardNotifications") then
             return
         end
 

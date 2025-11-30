@@ -20,7 +20,7 @@ function EffectManager:Init()
         end
     end))
 
-    local Effects = Utils:FindFirstChild(Players.LocalPlayer.Character, "Effects")
+    local Effects = Utils.Instance.FindFirstChild(Players.LocalPlayer.Character, "Effects")
 
     table.insert(self.Connections, Effects.ChildAdded:Connect(function(EffectValue: Instance)
         if EffectValue:IsA("NumberValue") then
@@ -29,7 +29,7 @@ function EffectManager:Init()
                 until EffectValue:GetAttribute("Duration") ~= nil
             end
 
-            self:AddEffect(Utils:GetEffectModule(EffectValue.Name, EffectValue:GetAttribute("Subfolder"), true), EffectValue.Value, EffectValue:GetAttribute("Duration"))
+            self:AddEffect(Utils.Instance.GetEffectModule(EffectValue.Name, EffectValue:GetAttribute("Subfolder"), true), EffectValue.Value, EffectValue:GetAttribute("Duration"))
         end
     end))
 
@@ -55,7 +55,7 @@ function EffectManager:AddEffect(Effect: ModuleScript, level: number?, duration:
         return
     end
 
-    local effect = Utils:CopyTable(require(Effect))
+    local effect = Utils.Type.CopyTable(require(Effect))
     self.Effects[Effect.Name] = effect
 
     effect.TimeLeft = duration or effect.Duration

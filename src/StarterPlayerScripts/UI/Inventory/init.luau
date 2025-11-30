@@ -17,7 +17,7 @@ local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local LocalPlayer = Players.LocalPlayer
 
-local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 
 local Inventory = {
     Opened = false,
@@ -99,8 +99,8 @@ function Inventory:ReorderSkins()
 
     table.sort(Ordered, function(a, b)
         local Modules = {
-            A = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
-            B = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+            A = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
+            B = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
         }
 
         return
@@ -175,14 +175,14 @@ end
 
 function Inventory:ReloadEquippedEmotes()
     for _, i in EmoteContainer.EmoteContainer:GetChildren() do
-        local Value = Utils:GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
+        local Value = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
         if #Value <= 0 then
             i.Render.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
             i.NameLabel.Text = ""
             continue
         end
 
-        local EmoteInfo = require(Utils:GetEmoteModule(Value))
+        local EmoteInfo = require(Utils.Instance.GetEmoteModule(Value))
         i.Render.Image = EmoteInfo.Config.Render
         i.NameLabel.Text = EmoteInfo.Config.Name
     end
@@ -206,7 +206,7 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
         table.clear(self.ItemModules.Skins)
 
         local charName = self.SelectedItem.Name
-        local EquippedSkin = Utils:GetPlayerEquipped(LocalPlayer, "Skins."..charName, false)
+        local EquippedSkin = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Skins."..charName, false)
 
         local function CheckSkinEquipLabels()
             for _, i in self.LoadedItems.Skins do
@@ -223,7 +223,7 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
         end
 
         for _, i in (LocalPlayer.PlayerData.Purchased.Skins:FindFirstChild(self.SelectedItem.Name) or Network:FireServerConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", self.SelectedItem.Name)):GetChildren() do
-            local Module = Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
+            local Module = Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
             local Info = require(Module)
             local name = Module.Name
 
@@ -301,7 +301,7 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
             end
         end
 
-        local CharacterInfo = require(Utils:GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name))
+        local CharacterInfo = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name))
 
         if not CharacterInfo.Config.Description then
             return
@@ -472,7 +472,7 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
 end
 
 function Inventory:Init()
-    UI = Utils:FindFirstChild(script, "InventoryUI"):Clone()
+    UI = Utils.Instance.FindFirstChild(script, "InventoryUI"):Clone()
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
     UI.Parent = UIParent
@@ -507,7 +507,7 @@ function Inventory:Init()
         end
     end
 
-    local templates = Utils:FindFirstChild(script, "Templates")
+    local templates = Utils.Instance.FindFirstChild(script, "Templates")
     Templates.CardTemplate = Templates.CardTemplate or templates.CardTemplate
     Templates.Header = Templates.Header or templates.Header
     Templates.Text = Templates.Text or templates.TextContainer
@@ -528,8 +528,8 @@ function Inventory:Init()
     Buttons.Skins = ButtonsContainer.Skins
     Buttons.Info = ButtonsContainer.MoreInfo
 
-    Equipped.EquippedKiller = Utils:GetPlayerEquipped(LocalPlayer, "Killer", false)
-    Equipped.EquippedSurvivor = Utils:GetPlayerEquipped(LocalPlayer, "Survivor", false)
+    Equipped.EquippedKiller = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Killer", false)
+    Equipped.EquippedSurvivor = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Survivor", false)
 
     local Conns = {}
 
@@ -718,7 +718,7 @@ function Inventory:ReloadContent()
             return
         end
         
-        local Module = Utils:GetCharacterModule(Type, name)
+        local Module = Utils.Instance.GetCharacterModule(Type, name)
         if not Module then
             warn(`[Inventory:ReloadContent()]: Couldn't display card for {Type:lower()} "{name}", as their module doesn't exist! Ignoring for now...`)
             return
@@ -780,7 +780,7 @@ function Inventory:ReloadContent()
         LO = 0
 
         for _, module in BoughtItems[Type.."s"]:GetChildren() do
-            table.insert(Ordered, Utils:GetCharacterModule(Type, module.Name))
+            table.insert(Ordered, Utils.Instance.GetCharacterModule(Type, module.Name))
         end
 
         SortTableByPriceAndName(Ordered)

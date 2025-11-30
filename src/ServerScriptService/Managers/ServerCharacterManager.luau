@@ -33,22 +33,27 @@ function ServerCharacterManager:SetupCharacter(player: Player, charName: string,
         return Char
     end
 
-    self:_InitCharacter(player, Utils:GetCharacterModule(charType, charName, skinName))
+    self:_InitCharacter(player, Utils.Instance.GetCharacterModule(charType, charName, skinName))
 
     return Char
 end
 
 --- Inits a character's abilities and sets its properties accordingly as specified in its `GameplayConfig`.
 function ServerCharacterManager:_InitCharacter(player: Player, charModule: ModuleScript)
-    local module = Utils:CopyTable(require(charModule))
+    local module = Utils.Type.CopyTable(require(charModule))
     module.Owner = player
 
     --Abilities
     local Char = player.Character
     local CharacterAbilities = require(Char.PlayerAbilities.CharacterAbilities)
     CharacterAbilities.CharacterModule = module
+    
+    local Animate = Utils.Instance.FindFirstChild(Char, "Animate")
+    Animate.idle.IdleAnim.AnimationId = module.Config.AnimationIDs.IdleAnimation
+    Animate.walk.WalkAnim.AnimationId = module.Config.AnimationIDs.WalkAnimation
+    Animate.run.RunAnim.AnimationId = module.Config.AnimationIDs.RunAnimation
 
-    local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
+    local Humanoid = Utils.Instance.FindFirstChild(Char, "Humanoid")
     Humanoid.MaxHealth = module.GameplayConfig.Health
     Humanoid.Health = module.GameplayConfig.Health
     Humanoid.JumpPower = 0
@@ -107,7 +112,7 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
                         if n == "Survivor" then --no need to load survivor execution anims on killers
                             continue
                         end
-                        module.GameplayConfig.Cache.Animations.Execution[name][n] = Utils:LoadAnimationFromID(Char, ie, false)
+                        module.GameplayConfig.Cache.Animations.Execution[name][n] = Utils.Character.LoadAnimationFromID(Char, ie, false)
                     end
                 end
             end

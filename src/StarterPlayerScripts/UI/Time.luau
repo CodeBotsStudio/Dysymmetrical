@@ -9,8 +9,8 @@ return {
         local TimeRemaining = TimeStats.TimeRemaining
         local State = TimeStats.CurrentState
 
-        local Frame = Utils:FindFirstChild(script, "TimeInfo")
-        Frame.Parent = Utils:FindFirstChild(game:GetService("Players").LocalPlayer.PlayerGui, "Time")
+        local Frame = Utils.Instance.FindFirstChild(script, "TimeInfo")
+        Frame.Parent = Utils.Instance.FindFirstChild(game:GetService("Players").LocalPlayer.PlayerGui, "Time")
         local TimeLabel = Frame.TimeLabel
         local Label = Frame.Label
 
@@ -23,11 +23,11 @@ return {
             Frozen = "Time frozen!",
         }
 
-        TimeLabel.Text = Utils:ConvertToMinSec(math.ceil(TimeRemaining.Value))
+        TimeLabel.Text = Utils.Math.ConvertToMinSec(math.ceil(TimeRemaining.Value))
         Label.Text = LabelTexts[State.Value]
 
         TimeRemaining.Changed:Connect(function(value: number)
-        	TimeLabel.Text = Utils:ConvertToMinSec(math.ceil(value))
+        	TimeLabel.Text = Utils.Math.ConvertToMinSec(math.ceil(value))
         end)
 
         local function Update(value: string)

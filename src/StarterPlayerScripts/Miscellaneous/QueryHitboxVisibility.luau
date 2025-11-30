@@ -10,32 +10,20 @@ local LocalPlayer = Players.LocalPlayer
 local QueryHitboxVisibility = {}
 
 function QueryHitboxVisibility:Init()
-    for _, i: Player in Players:GetPlayers() do
-        self:_SetupPlayer(i)
-    end
-
-    Players.PlayerAdded:Connect(function(i: Player)
-        self:_SetupPlayer(i)
-    end)
-end
-
-function QueryHitboxVisibility:_SetupPlayer(Player: Player)
-    if Player.Character then
-        self:_CharSetup(Player.Character)
-    end
-
-    Player.CharacterAdded:Connect(function(char: Model)
-        self:_CharSetup(char)
+    Utils.Player.ObservePlayers(function(i: Player)
+        Utils.Character.ObserveCharacter(i, function(char: Model)
+            self:_CharSetup(char)
+        end)
     end)
 end
 
 function QueryHitboxVisibility:_CharSetup(char: Model)
     task.defer(function()
-        if not Utils:GetPlayerSetting(LocalPlayer, "Advanced.ShowPlayerHitboxes") then
+        if not Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Advanced.ShowPlayerHitboxes") then
             return
         end
 
-        if Utils:FindFirstChild(char, "Hitboxes", true, 3) then
+        if Utils.Instance.FindFirstChild(char, "Hitboxes", true, 3) then
             for _, i in char.Hitboxes:GetChildren() do
                 if not i:IsA("BasePart") then
                     continue

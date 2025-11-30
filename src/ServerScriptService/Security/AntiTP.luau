@@ -13,11 +13,11 @@ local AntiTP = {
 }
 
 function AntiTP:Init()
-    Players.PlayerAdded:Connect(function(Player: Player)
-        Player.CharacterAdded:Connect(function(Character: Model)
+    Utils.Player.ObservePlayers(function(Player: Player)
+        Utils.Character.ObserveCharacter(Player, function(Character: Model)
             self:_SetupCharacter(Player, Character)
         end)
-        Player.CharacterRemoving:Connect(function(Character: Model)
+        Player.CharacterRemoving:Connect(function(_Character: Model)
             if not self.PlayerThreads[Player.UserId] then
                 return
             end
@@ -33,17 +33,11 @@ function AntiTP:Init()
             self.PlayerThreads[Player.UserId] = nil
         end
     end)
-
-    for _, i in Players:GetPlayers() do
-        if i.Character then
-            self:_SetupCharacter(i, i.Character)
-        end
-    end
 end
 
 function AntiTP:_SetupCharacter(Player: Player, Character: Model)
-    local HRP = Utils:FindFirstChild(Character, "HumanoidRootPart")
-    local Humanoid = Utils:FindFirstChild(Character, "Humanoid")
+    local HRP = Utils.Instance.FindFirstChild(Character, "HumanoidRootPart")
+    local Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
 
     local LastPos = HRP.Position
 
@@ -52,11 +46,11 @@ function AntiTP:_SetupCharacter(Player: Player, Character: Model)
 
         if PosDiff.Magnitude > self.PositionMagnitudeThreshold then
             if self.KickAllowed then
-                CommonFunctions:KickPlayer(Player, CommonFunctions.KickIDs.TPing)
+                CommonFunctions.KickPlayer(Player, CommonFunctions.KickIDs.TPing)
                 return
             end
 
-            Utils:Print("Killing "..Player.Name..": TP detected")
+            Utils.Misc.Print("Killing "..Player.Name..": TP detected")
             Humanoid.Health = 0
         end
 

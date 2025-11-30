@@ -26,6 +26,7 @@ local CommonFunctions = {
 
 	--don't add anything in here
 	Commands = {},
+	CommandDebounce = {},
 }
 
 local Debris = game:GetService("Debris")
@@ -35,94 +36,105 @@ local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
-function CommonFunctions:Init()
+function CommonFunctions.Init()
     for _, CommandScript in ReplicatedStorage.Security.ModeratorCommands:GetChildren() do
         if not CommandScript:IsA("ModuleScript") then
             continue
         end
-        self.Commands[CommandScript.Name] = require(CommandScript)
+        CommonFunctions.Commands[CommandScript.Name] = require(CommandScript)
     end
 
 	Network:SetConnection("GetPermRank", "REMOTE_FUNCTION", function(Player: Player): number
-		return self:GetPlayerPermissionRank(Player)
+		return CommonFunctions.GetPlayerPermissionRank(Player)
 	end)
 	Network:SetConnection("HasPermRank", "REMOTE_FUNCTION", function(Player: Player, Rank: string | number): boolean
-		return self:PlayerHasPermissionRank(Player, Rank)
+		return CommonFunctions.PlayerHasPermissionRank(Player, Rank)
 	end)
 	Network:SetConnection("ExecuteCommand", "REMOTE_FUNCTION", function(Player: Player, CommandName: string, ...)
-        if not self:PlayerHasPermissionRank(Player, self.Commands[CommandName].RankRequired or Utils.Ranks.ServerOwner) or self.Commands[CommandName] == nil then
+        if CommonFunctions.CommandDebounce[Player.UserId] and not CommonFunctions.PlayerHasPermissionRank(Player, CommonFunctions.Commands[CommandName].RankRequired or Utils.Ranks.ServerOwner) or CommonFunctions.Commands[CommandName] == nil then
             return
         end
+		
+		task.defer(function()
+			CommonFunctions.CommandDebounce[Player.UserId] = 0.5
+			while CommonFunctions.CommandDebounce[Player.UserId] > 0 do
+				CommonFunctions.CommandDebounce[Player.UserId] -= task.wait(0.05)
+			end
+			CommonFunctions.CommandDebounce[Player.UserId] = nil
+		end)
         
-        return self.Commands[CommandName]:Executed(...)
+        return CommonFunctions.Commands[CommandName]:Executed(...)
     end)
 end
 
 --- Function that should be used to damage a player from another player's attack.
 --- Handles resistance, weakness...
-function CommonFunctions:DamagePlayer(sourcePlayer: Player, targetHumanoid: Humanoid, inflictedDamage: number, reason: string?, knockbackDirection: Vector3?, knockbackMagnitude: number?)
+function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Humanoid, inflictedDamage: number, reason: string?, knockbackDirection: Vector3?, knockbackMagnitude: number?)
     local Char = targetHumanoid.Parent
 	local HRP: BasePart = Char.HumanoidRootPart
     local targetPos = HRP.Position
-	local Player = Utils:GetPlayerFromCharacter(Char)
+	local Player = Utils.Player.GetPlayerFromCharacter(Char)
 
 	-- leaving these comments here as memories from may 2025 lol -dys
 	--decided to remove server-side checking because BRO. THEY DON'T DO THAT IN FORSAKEN.
 	--correction: the hitboxes in Forsaken are FULLY server-handled, but it doesn't lag because THEIR GAME SOMEHOW DOESN'T LAG AT ALL. WHAT????
 	--quick thing: hitboxes are now fully server-sided. yup. i had to. :(
 
-	if Utils:FindFirstChild(Char, "Effects.StunSpawnProtection", false) and not sourcePlayer.Character:GetAttribute("BypassStunProtection") then
+	if Utils.Instance.FindFirstChild(Char, "Effects.StunSpawnProtection", 0) and not sourcePlayer.Character:GetAttribute("BypassStunProtection") then
 		return
 	end
 
-	if Utils:FindFirstChild(Char, "Role") and Char.Role.Value == "Survivor" then
+	local Role = Utils.Instance.FindFirstChild(Char, "Role", 0.2)
+	if Role and Role.Value == "Survivor" then
 		Char.Killer.Value = sourcePlayer
 	end
 	
 	reason = reason or "HAHAHA https://www.youtube.com/watch?v=L8XbI9aJOXk" --OnlyIvo
 
-	if Utils:FindFirstChild(Char, "Effects.Resistance", false) then
+	if Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0) then
 		inflictedDamage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
 
 	targetHumanoid:TakeDamage(inflictedDamage)
 
 	Network:FireClientConnection(sourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, inflictedDamage)
-	if Utils:GetPlayerSetting(sourcePlayer, "Miscellaneous.ImageFlashOnHit") then
+	if Utils.PlayerData.GetPlayerSetting(sourcePlayer, "Miscellaneous.ImageFlashOnHit") then
 		Network:FireClientConnection(sourcePlayer, "ShowJokeSettingImage", "REMOTE_EVENT", false, sourcePlayer.Character.Role.Value)
 	end
 
 	knockbackDirection = knockbackDirection or Vector3.zero
 	knockbackMagnitude = knockbackMagnitude or 1
-	self:RigImpulse(HRP, knockbackMagnitude, knockbackDirection)
+	CommonFunctions.RigImpulse(HRP, knockbackMagnitude, knockbackDirection)
 
 	--printing
 	local targetName = Char.Name or "Dummy"
     if workspace:GetAttribute("DebugAllowed") then
-		Utils:Print("[DamageDealt] Target: "..targetName.." || InflictedDamage: "..tostring(inflictedDamage).." || Reason: "..tostring(reason))
+		Utils.Misc.Print("[DamageDealt] Target: "..targetName.." || InflictedDamage: "..tostring(inflictedDamage).." || Reason: "..tostring(reason))
 	end
 
 	if Player then
 		Network:FireClientConnection(Player, "DamagePlayer", "REMOTE_EVENT", sourcePlayer, reason)
-		if Utils:GetPlayerSetting(Player, "Miscellaneous.ImageFlashOnHit") then
-			Network:FireClientConnection(Player, "ShowJokeSettingImage", "REMOTE_EVENT", true, Utils:FindFirstChild(Char, "Role") and Char.Role.Value or "Survivor")
+		if Utils.PlayerData.GetPlayerSetting(Player, "Miscellaneous.ImageFlashOnHit") then
+			Network:FireClientConnection(Player, "ShowJokeSettingImage", "REMOTE_EVENT", true, Role and Role.Value or "Survivor")
 		end
 	end
 	Network:FireClientConnection(sourcePlayer, "DamagedPlayer", "REMOTE_EVENT", Player, targetHumanoid, reason)
 end
 
 --- Applies an effect on a specific humanoid. It can be a player or an NPC, it doesn't matter.
-function CommonFunctions:ApplyEffect(hum: Humanoid, name: string, level: number?, duration: number?, subfolder: string?)
+function CommonFunctions.ApplyEffect(hum: Humanoid, name: string, level: number?, duration: number?, subfolder: string?)
 	local char = hum.Parent
 
+	local CharEffects = Utils.Instance.FindFirstChild(char, "Effects")
+
 	if name == "Stunned" then
-		if Utils:FindFirstChild(char, "Effects"):FindFirstChild("SpawnProtection") then
+		if CharEffects:FindFirstChild("SpawnProtection") then
 			return
 		end
 	end
 	
-	local EffectModule = Utils:GetEffectModule(name, subfolder)
-	local EffectValue = Utils:FindFirstChild(char, "Effects."..name, false) or Instance.new("NumberValue")
+	local EffectModule = Utils.Instance.GetEffectModule(name, subfolder)
+	local EffectValue = CharEffects:FindFirstChild(name) or Instance.new("NumberValue")
 
 	EffectValue.Name = name
 	EffectValue.Value = level or EffectModule.Level
@@ -131,7 +143,7 @@ function CommonFunctions:ApplyEffect(hum: Humanoid, name: string, level: number?
 	end
 	EffectValue:SetAttribute("Duration", duration or EffectModule.Duration)
 
-	EffectValue.Parent = Utils:FindFirstChild(char, "Effects")
+	EffectValue.Parent = CharEffects
 	
 	task.delay(duration, function()
 		if EffectValue then
@@ -144,7 +156,7 @@ end
 
 --- Grants money and/or EXP to a player and displays a notification showing it.
 --- The `Reason` parameter is the source of the reward to display in the UI locally.
-function CommonFunctions:GrantRewardToPlayer(Player: Player, Money: number?, EXP: number?, Reason: string?)
+function CommonFunctions.GrantRewardToPlayer(Player: Player, Money: number?, EXP: number?, Reason: string?)
 	--shouldn't give anything if in a private server
 	if #game.PrivateServerId > 0 then
 		return
@@ -160,25 +172,25 @@ function CommonFunctions:GrantRewardToPlayer(Player: Player, Money: number?, EXP
 
 	--if only EXP is granted
 	if MoneyGranted <= 0 then
-		self:_GrantEXPToPlayer(Player, EXP, true, Reason)
+		CommonFunctions._GrantEXPToPlayer(Player, EXP, true, Reason)
 		return
 	end
 
 	--if only money is granted
 	if EXPGranted <= 0 then
-		self:UpdatePlayerStat(Player, "Currency.Money", MoneyGranted)
+		CommonFunctions.UpdatePlayerStat(Player, "Currency.Money", MoneyGranted)
 		Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, 0, Reason)
 		return
 	end
 
 	--if both are granted
-	self:UpdatePlayerStat(Player, "Currency.Money", MoneyGranted)
-	self:_GrantEXPToPlayer(Player, EXPGranted, false, Reason)
+	CommonFunctions.UpdatePlayerStat(Player, "Currency.Money", MoneyGranted)
+	CommonFunctions._GrantEXPToPlayer(Player, EXPGranted, false, Reason)
 	Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, EXPGranted, Reason)
 end
 
---- INTERNAL FUNCTION: Function used to grant EXP to a player in `CommonFunctions:GrantRewardToPlayer()`. Use that one instead.
-function CommonFunctions:_GrantEXPToPlayer(Player: Player, amount: number, visual: boolean, Reason: string?)
+--- INTERNAL FUNCTION: Function used to grant EXP to a player in `CommonFunctions.GrantRewardToPlayer()`. Use that one instead.
+function CommonFunctions._GrantEXPToPlayer(Player: Player, amount: number, visual: boolean, Reason: string?)
 	--shouldn't give anything if in a private server
 	if #game.PrivateServerId > 0 then
 		return
@@ -194,24 +206,24 @@ function CommonFunctions:_GrantEXPToPlayer(Player: Player, amount: number, visua
 	end
 	local CharacterName = Player.Character:GetAttribute("CharacterName")
 
-	local CharValue = Utils:GetPlayerOwned(Player, Role.Value.."s."..CharacterName, false)
+	local CharValue = Utils.PlayerData.GetPlayerOwned(Player, Role.Value.."s."..CharacterName, false)
 	CharValue.Value += amount
 end
 
 --- Updates a player's stat specified by a `string` path.
 --- Stats are all either `int`s or `number`s.
-function CommonFunctions:UpdatePlayerStat(Player: Player, path: string, amount: number)
-    local Stat = Utils:FindFirstChild(Player, "PlayerData.Stats."..path)
+function CommonFunctions.UpdatePlayerStat(Player: Player, path: string, amount: number)
+    local Stat = Utils.Instance.FindFirstChild(Player, "PlayerData.Stats."..path)
 	if Stat then
 		Stat.Value += amount
 	else
-		warn("[CommonFunctions:UpdatePlayerStat()] Couldn't find stat "..path.."!")
+		warn("[CommonFunctions.UpdatePlayerStat()] Couldn't find stat "..path.."!")
 	end
 end
 
 --- Function used instead of the typical `Player:Kick()` to auto-generate an anti-cheat kick message and keep consistency.
 --- Use `Utils.KickIDs`.
-function CommonFunctions:KickPlayer(Player: Player, KickMessage: {
+function CommonFunctions.KickPlayer(Player: Player, KickMessage: {
     ID: string,
     Message: string,
 })
@@ -221,24 +233,24 @@ end
 
 --TODO: Achievement UI
 --- Increments a player's progress of a specific achievement.
-function CommonFunctions:IncrementAchievementProgress(Player: Player, AchievementPath: string, Amount: number)
-	local SplitPath = Utils:SplitStringPath(AchievementPath)
+function CommonFunctions.IncrementAchievementProgress(Player: Player, AchievementPath: string, Amount: number)
+	local SplitPath = Utils.Type.SplitStringPath(AchievementPath)
 	local Achievement: Achievements.Achievement = Achievements
 	for _, step in SplitPath do
 		Achievement = Achievement[step]
 		if not Achievement then
-			warn("[CommonFunctions:IncrementAchievementProgress] Achievement from path "..AchievementPath.." not found!", debug.traceback())
+			warn("[CommonFunctions.IncrementAchievementProgress] Achievement from path "..AchievementPath.." not found!", debug.traceback())
 			return
 		end
 	end
 	if not Achievement.Requirement then
-		warn("[CommonFunctions:IncrementAchievementProgress] Achievement from path "..AchievementPath.." doesn't have a numeric requirement!", debug.traceback())
+		warn("[CommonFunctions.IncrementAchievementProgress] Achievement from path "..AchievementPath.." doesn't have a numeric requirement!", debug.traceback())
 		return
 	end
 
-	local AValue = Utils:FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath)
+	local AValue = Utils.Instance.FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath)
 	if AValue.Value + Amount >= Achievement.Requirement then
-		self:CompleteAchievement(Player, AchievementPath)
+		CommonFunctions.CompleteAchievement(Player, AchievementPath)
 	else
 		AValue.Value += Amount
 	end
@@ -246,20 +258,20 @@ end
 
 --- Grants a player an achievement instantly.
 --- Useful to grant boolean achievements or just complete achievements that have a numeric requirement.
-function CommonFunctions:CompleteAchievement(Player: Player, AchievementPath: string)
-	local SplitPath = Utils:SplitStringPath(AchievementPath)
+function CommonFunctions.CompleteAchievement(Player: Player, AchievementPath: string)
+	local SplitPath = Utils.Type.SplitStringPath(AchievementPath)
 	local Achievement: Achievements.Achievement = Achievements
 	for _, step in SplitPath do
 		Achievement = Achievement[step]
 		if not Achievement then
-			warn("[CommonFunctions:CompleteAchievement] Achievement from path "..AchievementPath.." not found!", debug.traceback())
+			warn("[CommonFunctions.CompleteAchievement] Achievement from path "..AchievementPath.." not found!", debug.traceback())
 			return
 		end
 	end
 
 	--TODO: achievement rewards
 	if Achievement.Requirement then
-		Utils:FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath).Value = Achievement.Requirement
+		Utils.Instance.FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath).Value = Achievement.Requirement
 	else
 		local AValue = Instance.new("BoolValue")
 		AValue.Name = SplitPath[#SplitPath]
@@ -272,33 +284,37 @@ function CommonFunctions:CompleteAchievement(Player: Player, AchievementPath: st
 
 			InstPath = InstPath.."."..step
 		end
-		AValue.Parent = Utils:FindFirstChild(Player, "PlayerData.Achievements."..InstPath)
+		AValue.Parent = Utils.Instance.FindFirstChild(Player, "PlayerData.Achievements."..InstPath)
 	end
 
 	Network:FireClientConnection(Player, "CompletedAchievement", "REMOTE_EVENT", Achievement)
 end
 
 --- Gets a player's permission rank.
-function CommonFunctions:GetPlayerPermissionRank(Player: Player): number
-	for _, i in self.AdminPerms do
+function CommonFunctions.GetPlayerPermissionRank(Player: Player): number
+	local HighestPlayerRank = Utils.Ranks.DefaultPlayer
+	for _, i in CommonFunctions.AdminPerms do
 		if i.UserId == Player.UserId then
-			return Utils.Ranks[i.Rank] or tonumber(i.Rank) or Utils.Ranks.DefaultPlayer
+			local Value = Utils.Ranks[i.Rank] or tonumber(i.Rank) or Utils.Ranks.DefaultPlayer
+			if Value < HighestPlayerRank then
+				HighestPlayerRank = Value
+			end
 		end
 	end
 
-	return Utils.Ranks.DefaultPlayer
+	return HighestPlayerRank
 end
 
 --- Checks if a player has a specific permission rank or higher.
 --- The minimum rank should be grabbed from `CommonFunctions.Ranks` through its name.
 --- Inputting a number is still possible but the existing ranks should be checked.
 --- @return Will return if the player has the specified rank and its actual rank.
-function CommonFunctions:PlayerHasPermissionRank(Player: Player, MandatoryRank: string | number): (boolean, number)
-	local Rank = self:GetPlayerPermissionRank(Player)
+function CommonFunctions.PlayerHasPermissionRank(Player: Player, MandatoryRank: string | number): (boolean, number)
+	local Rank = CommonFunctions.GetPlayerPermissionRank(Player)
 	return Rank < (typeof(MandatoryRank) == "string" and Utils.Ranks[MandatoryRank] or MandatoryRank), Rank
 end
 
-function CommonFunctions:RigImpulse(Rig: Model | BasePart, magnitude: number, direction: Vector3)
+function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, direction: Vector3)
 	if magnitude <= 0 or direction == Vector3.zero then
 		return
 	end

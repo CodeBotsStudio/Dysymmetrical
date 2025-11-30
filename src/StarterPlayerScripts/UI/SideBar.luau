@@ -30,8 +30,8 @@ local InvertedInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirec
 
 local UI
 local BarButtonPrefabs = {
-    Button = Utils:FindFirstChild(script, "Button"),
-    SmallButton = Utils:FindFirstChild(script, "SmallButton"),
+    Button = Utils.Instance.FindFirstChild(script, "Button"),
+    SmallButton = Utils.Instance.FindFirstChild(script, "SmallButton"),
 }
 
 local function TweenInverted(BarButton, Inverted: boolean)
@@ -103,12 +103,12 @@ function SideBar:OpenMenu(Menu)
 end
 
 function SideBar:Init()
-    UI = Utils:FindFirstChild(script, "SideBarUI"):Clone()
-    UI.Parent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "SideBar")
+    UI = Utils.Instance.FindFirstChild(script, "SideBarUI"):Clone()
+    UI.Parent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "SideBar")
 
     local MoneyLabel = UI.Money.CurrentBalance
 
-    local Cash = Utils:GetPlayerStat(LocalPlayer, "Currency.Money", false)
+    local Cash = Utils.PlayerData.GetPlayerStat(LocalPlayer, "Currency.Money", false)
     MoneyLabel.Text = tostring(Cash.Value).." $"
     Cash.Changed:Connect(function(value: number)
         MoneyLabel.Text = tostring(value).." $"
@@ -235,13 +235,16 @@ function SideBar:Init()
             }):Play()
         end)
 
-        LocalPlayer.CharacterAdded:Connect(function(char: Model)
-            Menu:Toggle(Utils:FindFirstChild(char, "Role").Value == "Spectator")
+        Utils.Character.ObserveCharacter(LocalPlayer, function(char: Model)
+            if not Menu.UIInstance then
+                return
+            end
+            Menu:Toggle(Utils.Instance.FindFirstChild(char, "Role").Value == "Spectator")
         end)
     end
 
-    LocalPlayer.CharacterAdded:Connect(function(char: Model)
-        self:Toggle(Utils:FindFirstChild(char, "Role").Value == "Spectator")
+    Utils.Character.ObserveCharacter(LocalPlayer, function(char: Model)
+        self:Toggle(Utils.Instance.FindFirstChild(char, "Role").Value == "Spectator")
     end)
 end
 

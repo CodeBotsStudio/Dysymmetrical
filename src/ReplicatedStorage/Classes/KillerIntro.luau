@@ -63,12 +63,12 @@ export type IntroSettings = {
 
 --- Creates a new 2D killer intro.
 --- See `IntroSettings`.
-function KillerIntroClass:New2DIntro(Config: IntroSettings, IntroModule: ModuleScript): UiIntro
+function KillerIntroClass.New2DIntro(Config: IntroSettings, IntroModule: ModuleScript): UiIntro
     return {
         Connections = {},
         Disposables = {},
 
-        Init = function(own: UiIntro)
+        Init = function(self: UiIntro)
             if RunService:IsServer() then
                 return
             end
@@ -76,7 +76,7 @@ function KillerIntroClass:New2DIntro(Config: IntroSettings, IntroModule: ModuleS
             local VideoPlayer = require(Players.LocalPlayer.PlayerScripts.UI.VideoPlayer)
 
             local Intro = require(IntroModule)
-            local Module = require(Utils:GetCharacterModule("Killer", Config.KillerName, Config.SkinName))
+            local Module = require(Utils.Instance.GetCharacterModule("Killer", Config.KillerName, Config.SkinName))
 
             if Intro.Frames then
                 VideoPlayer:LoadVideo(Intro.Frames)
@@ -85,47 +85,47 @@ function KillerIntroClass:New2DIntro(Config: IntroSettings, IntroModule: ModuleS
                 VideoPlayer:SetAudio(Intro.Sound)
             end
 
-            own.VideoPlayer = VideoPlayer
-            own.Module = Module
+            self.VideoPlayer = VideoPlayer
+            self.Module = Module
 
             if Module.Config.OnIntroInit then
-                Module.Config:OnIntroInit(own)
+                Module.Config:OnIntroInit(self)
             end
         end,
 
-        Play = function(own: UiIntro): (any)
+        Play = function(self: UiIntro): (any)
             if RunService:IsServer() then
                 return
             end
 
             local Intro = require(IntroModule)
-            table.insert(own.Connections, task.spawn(function()
+            table.insert(self.Connections, task.spawn(function()
                 if Intro.Frames then
-                    own.VideoPlayer:Play(own.Module.Config.IntroFPS) --will default to 30 if nil
+                    self.VideoPlayer:Play(self.Module.Config.IntroFPS) --will default to 30 if nil
                 elseif Intro.Sound then
-                    Sounds:PlaySound(Intro.Sound or own.Module.Config.Sounds.IntroSound, {Name = "IntroSound"})
+                    Sounds:PlaySound(Intro.Sound or self.Module.Config.Sounds.IntroSound, {Name = "IntroSound"})
                 end
             end))
 
             if Intro.Behaviour then
-                table.insert(own.Connections, task.spawn(function()
-                    Intro:Behaviour(own)
+                table.insert(self.Connections, task.spawn(function()
+                    Intro:Behaviour(self)
                 end))
             end
 
-            if own.Module.Config.OnIntroPlay then
-                table.insert(own.Connections, task.spawn(function()
-                    own.Module.Config:OnIntroPlay(own.VideoPlayer)
+            if self.Module.Config.OnIntroPlay then
+                table.insert(self.Connections, task.spawn(function()
+                    self.Module.Config:OnIntroPlay(self.VideoPlayer)
                 end))
             end
 
-            return own.VideoPlayer
+            return self.VideoPlayer
         end,
 
-        Destroy = function(own: UiIntro)
-            own.VideoPlayer:Reset()
+        Destroy = function(self: UiIntro)
+            self.VideoPlayer:Reset()
 
-            for _, i in own.Connections do
+            for _, i in self.Connections do
                 if typeof(i) == "thread" then
                     if coroutine.status(i) ~= "running" then
                         task.cancel(i)
@@ -135,7 +135,7 @@ function KillerIntroClass:New2DIntro(Config: IntroSettings, IntroModule: ModuleS
                 end
             end
 
-            for _, i in own.Disposables do
+            for _, i in self.Disposables do
                 i:Destroy()
             end
         end,
@@ -144,46 +144,46 @@ end
 
 --- Creates a new 3D killer intro.
 --- See `IntroSettings`.
-function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
+function KillerIntroClass.New3DIntro(Config: IntroSettings): AnimatedIntro
     return {
         Connections = {},
         Disposables = {},
         Animations = {},
 
-        Init = function(own: AnimatedIntro)
+        Init = function(self: AnimatedIntro)
             if RunService:IsServer() then
                 return
             end
 
-            local Module = Utils:GetCharacterModule("Killer", Config.KillerName, Config.SkinName)
+            local Module = Utils.Instance.GetCharacterModule("Killer", Config.KillerName, Config.SkinName)
 
-            local PlayerRig = Utils:FindFirstChild(workspace.Players, Config.PlayerName)
+            local PlayerRig = Utils.Instance.FindFirstChild(workspace.Players, Config.PlayerName)
             --yield until the char loads properly
-            local HRP = Utils:FindFirstChild(PlayerRig, "HumanoidRootPart")
+            local HRP = Utils.Instance.FindFirstChild(PlayerRig, "HumanoidRootPart")
 
             local KillerRig = PlayerRig:Clone()
-            HRP = Utils:FindFirstChild(KillerRig, "HumanoidRootPart")
+            HRP = Utils.Instance.FindFirstChild(KillerRig, "HumanoidRootPart")
             KillerRig.Parent = workspace.TempObjectFolders.Intro
             HRP.Anchored = true
             KillerRig:PivotTo(CFrame.new(0, 10000, 0))
-            own.Disposables.KillerRig = KillerRig
+            self.Disposables.KillerRig = KillerRig
 
             local CameraRig = Module:FindFirstChild("CameraRig") or ReplicatedStorage.Objects.CameraRig
             CameraRig = CameraRig:Clone()
             CameraRig:PivotTo(CFrame.new(0, 10000, 0))
             CameraRig.Parent = workspace.TempObjectFolders.Intro
-            own.Disposables.CameraRig = CameraRig
+            self.Disposables.CameraRig = CameraRig
 
             Module = require(Module)
-            own.Module = Module
+            self.Module = Module
 
             if not Module.Config.AnimationIDs["KillerRig"] and not Module.Config.AnimationIDs["CameraRig"] then
-                own:Destroy()
+                self:Destroy()
                 return
             end
 
             if Module.Config.OnIntroInit then
-                Module.Config:OnIntroInit(own, KillerRig, CameraRig)
+                Module.Config:OnIntroInit(self, KillerRig, CameraRig)
             end
 
             for _, i in {
@@ -191,26 +191,26 @@ function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
                 "CameraRig",
             } do
                 if Module.Config.AnimationIDs[i] then
-                    own.Animations[i] = Utils:LoadAnimationFromID(i:find("Killer") and KillerRig or CameraRig, Module.Config.AnimationIDs[i])
+                    self.Animations[i] = Utils.Character.LoadAnimationFromID(i:find("Killer") and KillerRig or CameraRig, Module.Config.AnimationIDs[i])
                 end
             end
         end,
 
-        Play = function(own: AnimatedIntro): (Model, Model, number)
+        Play = function(self: AnimatedIntro): (Model, Model, number)
             if RunService:IsServer() then
                 return
             end
 
-            if not own.Module.Config.AnimationIDs["KillerRig"] and not own.Module.Config.AnimationIDs["CameraRig"] then
+            if not self.Module.Config.AnimationIDs["KillerRig"] and not self.Module.Config.AnimationIDs["CameraRig"] then
                 return
             end
 
             local Camera = workspace.CurrentCamera
-            local CamPart = own.Disposables.CameraRig:FindFirstChild(own.Disposables.CameraRig:GetAttribute("CameraName") or "CameraPart")
+            local CamPart = self.Disposables.CameraRig:FindFirstChild(self.Disposables.CameraRig:GetAttribute("CameraName") or "CameraPart")
 
-            table.insert(own.Connections, task.spawn(function()
+            table.insert(self.Connections, task.spawn(function()
                 if CamPart then
-                    while own.Disposables.Camera do
+                    while self.Disposables.Camera do
                         Camera.CameraType = Enum.CameraType.Scriptable
                         Camera.CFrame = CamPart.CFrame
                         task.wait()
@@ -221,25 +221,25 @@ function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
                 Camera.CameraSubject = Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
             end))
 
-            for _, i in own.Animations do
+            for _, i in self.Animations do
                 i:play(0)
             end
 
-            if own.Module.Config.Sounds.IntroSound then
-                Sounds:PlaySound(own.Module.Config.Sounds.IntroSound)
+            if self.Module.Config.Sounds.IntroSound then
+                Sounds:PlaySound(self.Module.Config.Sounds.IntroSound)
             end
 
-            if own.Module.Config.OnIntroPlay then
-                table.insert(own.Connections, task.spawn(function()
-                    own.Module.Config:OnIntroPlay(own.Disposables.KillerRig, own.Disposables.CameraRig, own.Animations.CameraRig.Length)
+            if self.Module.Config.OnIntroPlay then
+                table.insert(self.Connections, task.spawn(function()
+                    self.Module.Config:OnIntroPlay(self.Disposables.KillerRig, self.Disposables.CameraRig, self.Animations.CameraRig.Length)
                 end))
             end
 
-            return own.Disposables.KillerRig, own.Disposables.CameraRig, own.Animations.CameraRig.Length
+            return self.Disposables.KillerRig, self.Disposables.CameraRig, self.Animations.CameraRig.Length
         end,
 
-        Destroy = function(own: AnimatedIntro)
-            for _, i in own.Connections do
+        Destroy = function(self: AnimatedIntro)
+            for _, i in self.Connections do
                 if typeof(i) == "thread" then
                     task.cancel(i)
                 else
@@ -247,7 +247,7 @@ function KillerIntroClass:New3DIntro(Config: IntroSettings): AnimatedIntro
                 end
             end
 
-            for _, i in own.Disposables do
+            for _, i in self.Disposables do
                 i:Destroy()
             end
         end,

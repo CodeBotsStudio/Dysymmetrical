@@ -16,7 +16,7 @@ return {
             end
         end
 
-        local Role = Utils:FindFirstChild(Character, "Role")
+        local Role = Utils.Instance.FindFirstChild(Character, "Role")
         ToggleTheme(Role.Value)
         Role.Changed:Connect(function(Value: string)
             ToggleTheme(Value)

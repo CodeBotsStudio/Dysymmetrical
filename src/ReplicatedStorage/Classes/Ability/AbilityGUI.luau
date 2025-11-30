@@ -29,15 +29,15 @@ local AbilityGUI = {
     },
 }
 
-local PrefabContainer = Utils:FindFirstChild(script, "Prefabs")
+local PrefabContainer = Utils.Instance.FindFirstChild(script, "Prefabs")
 local Prefabs = {
-    Container = Utils:FindFirstChild(PrefabContainer, "CharacterAbilitiesContainer"),
-    AbilityContainer = Utils:FindFirstChild(PrefabContainer, "AbilityContainer"),
-    UsesLeftText = Utils:FindFirstChild(PrefabContainer, "UsesLeft"),
+    Container = Utils.Instance.FindFirstChild(PrefabContainer, "CharacterAbilitiesContainer"),
+    AbilityContainer = Utils.Instance.FindFirstChild(PrefabContainer, "AbilityContainer"),
+    UsesLeftText = Utils.Instance.FindFirstChild(PrefabContainer, "UsesLeft"),
 }
 
 --- Function used to init a character's ability GUI based on their ability table's info stored in `StarterCharacterScripts.PlayerAbilities.CharacterAbilities`.
-function AbilityGUI:InitGUI()
+function AbilityGUI.InitGUI()
     local InputManager = require(Players.LocalPlayer.PlayerScripts.InputManager)
     local Character = Players.LocalPlayer.Character
 
@@ -60,18 +60,18 @@ function AbilityGUI:InitGUI()
             UICorner = Ability.UICorner,
             Parent = Container,
         }
-        table.insert(Abilities, self:_SetupAbilityFrame(AbilityT))
+        table.insert(Abilities, AbilityGUI._SetupAbilityFrame(AbilityT))
     end
 
     local Conns = {
         InputManager.SchemeChanged:Connect(function(CurrentScheme: string)
             for _, Ability: Ability in Abilities do
-                self:_UpdateAbilityFrameInput(Ability, InputManager, CurrentScheme)
+                AbilityGUI._UpdateAbilityFrameInput(Ability, InputManager, CurrentScheme)
             end
         end),
     }
     for _, Ability: Ability in Abilities do
-        self:_UpdateAbilityFrameInput(Ability, InputManager, InputManager.CurrentControlScheme)
+        AbilityGUI._UpdateAbilityFrameInput(Ability, InputManager, InputManager.CurrentControlScheme)
 
         --it would be stupid to not add this (again). -Dyscarn
         -- uses label
@@ -112,12 +112,12 @@ end
 
 --this is so messy wth
 --- Function used to set up an entire ability's GUI for display in a character's GUI.
-function AbilityGUI:_SetupAbilityFrame(Ability): Ability
+function AbilityGUI._SetupAbilityFrame(Ability): Ability
     --we'll have to put everything in a frame right????
     local AbilityContainer: Frame = Prefabs.AbilityContainer:Clone()
     AbilityContainer.Name = Ability.Module.Name
-    AbilityContainer.Position = self.AbilityFramePositions[Ability.Module.InputName]
-    AbilityContainer.LayoutOrder = self.AbilityLayoutOrder[Ability.Module.InputName]
+    AbilityContainer.Position = AbilityGUI.AbilityFramePositions[Ability.Module.InputName]
+    AbilityContainer.LayoutOrder = AbilityGUI.AbilityLayoutOrder[Ability.Module.InputName]
     AbilityContainer.Parent = Ability.Parent
 
     --what if i put skibidi toilet in here -Quinn definetly not Dyscarn
@@ -157,7 +157,7 @@ function AbilityGUI:_SetupAbilityFrame(Ability): Ability
     return AbilityT
 end
 
-function AbilityGUI:_UpdateAbilityFrameInput(Ability: Ability, InputManager, CurrentScheme: string)
+function AbilityGUI._UpdateAbilityFrameInput(Ability: Ability, InputManager, CurrentScheme: string)
     --I HATE MOBILE SUPPORT GNMDKIMBKBMSPMBPJBSG
     if CurrentScheme ~= "Touch" then
         Ability.Keybind.TextTransparency = 0

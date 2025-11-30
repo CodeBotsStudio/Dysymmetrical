@@ -2,7 +2,7 @@
 
 local Effect = require(game:GetService("ReplicatedStorage").Classes.Effect)
 
-return Effect:CreateEffect({
+return Effect.CreateEffect({
     Name = "Spawn Protection",
     Description = "Prevents a killer from being stunned for a set time, generally 12 seconds.",
     Duration = 12,

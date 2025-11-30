@@ -24,9 +24,10 @@ local Network = require(ReplicatedStorage.Modules.Network)
 local InputManager = require(PlayerScripts.InputManager)
 --
 local char = LocalPlayer.Character
-local HumanoidRootPart: BasePart = Utils:FindFirstChild(char, "HumanoidRootPart")
-local Humanoid = Utils:FindFirstChild(char, "Humanoid")
-local Role: StringValue = Utils:FindFirstChild(char, "Role")
+local HumanoidRootPart: BasePart = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
+local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
+local Role: StringValue = Utils.Instance.FindFirstChild(char, "Role")
+local AnimationTransitionTime = Utils.Instance.FindFirstChild(char, "PlayerAttributes.AnimationTransitionTime")
 local playersFolder = workspace.Players
 --
 local PlayerAttributeScripts = char.PlayerAttributeScripts
@@ -56,7 +57,7 @@ function Sprinting:ReloadAnimation(animId: string)
 	if self.FootstepConnection then
 		self.FootstepConnection:Disconnect()
 	end
-	self.SprintTrack = Utils:LoadAnimationFromID(char, animId)
+	self.SprintTrack = Utils.Character.LoadAnimationFromID(char, animId)
 	self.FootstepConnection = self.SprintTrack:GetMarkerReachedSignal("Footstep"):Connect(function()
 		FootstepPlayer:PlayFootstep(HumanoidRootPart)
 	end)
@@ -67,7 +68,7 @@ function Sprinting:_Stop(StopExhausted: boolean)
 	self.Recovering = true
 
 	if self.SprintTrack and self.SprintTrack.IsPlaying then
-		self.SprintTrack:Stop(0)
+		self.SprintTrack:Stop(AnimationTransitionTime.Value)
 	end
 
 	if StopExhausted then
@@ -129,7 +130,7 @@ function Sprinting:Init()
 			end
 
 			if self.SprintTrack and not self.SprintTrack.IsPlaying then
-				self.SprintTrack:Play(0)
+				self.SprintTrack:Play(AnimationTransitionTime.Value)
 			end
 
 			if self.RecoveryThread then
@@ -178,7 +179,7 @@ function Sprinting:Init()
 		if self.TweenSpeed then
 			local ValueToTweenTo = self.SpeedApplied and self.SprintMultiplier or 1
 			
-			SpeedManager.SpeedFactors[FactorName] = Utils:Lerp(SpeedManager.SpeedFactors[FactorName], ValueToTweenTo, delta * 5.5)
+			SpeedManager.SpeedFactors[FactorName] = Utils.Math.Lerp(SpeedManager.SpeedFactors[FactorName], ValueToTweenTo, delta * 5.5)
 		else
 			SpeedManager.SpeedFactors[FactorName] = self.SpeedApplied and self.SprintMultiplier or 1
 		end

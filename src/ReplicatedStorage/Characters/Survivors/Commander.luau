@@ -12,7 +12,7 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local CommonFunctions = RunService:IsServer() and require(game:GetService("ServerScriptService").System.CommonFunctions) or nil
 
-local Commander = Character:CreateSurvivor({
+local Commander = Character.CreateSurvivor({
     Config = {
         Name = "Commander",
         Quote = "*pyro noises*",
@@ -21,13 +21,13 @@ local Commander = Character:CreateSurvivor({
 
     GameplayConfig = {
         Abilities = {
-            BodyArmor = Ability:CreateAbility({
+            BodyArmor = Ability.CreateAbility({
                 Name = "Body Armor",
                 Description = "Every time Commander gets damaged, he receives Resistance V for 1 second, acting as invincibility frames.",
                 Passive = true,
             }),
 
-            Blindside = Ability:CreateAbility({
+            Blindside = Ability.CreateAbility({
                 Name = "Blindside",
 
                 ThrowDelay = 1,
@@ -63,7 +63,7 @@ local Commander = Character:CreateSurvivor({
                         
                             table.insert(self.Connections, task.delay(self.TriggerDelay, function()
                                 task.spawn(function()
-                                    Hitbox:New(self.Owner, {
+                                    Hitbox.New(self.Owner, {
                                         CFrame = CFrame.new(FunctionalGrenade.Position),
                                         Size = Vector3.new(35, 35, 35),
                                         Damage = 0,
@@ -75,9 +75,11 @@ local Commander = Character:CreateSurvivor({
                                                 Level = 1,
                                             },
                                         },
-                                        OnHit = function(Hum: Humanoid)
-                                            CommonFunctions:GrantRewardToPlayer(self.Owner, 10, 20, "blinding the killer with Blindside")
-                                        end,
+                                        Connections = {
+                                            PostHit = function(Hum: Humanoid)
+                                                CommonFunctions.GrantRewardToPlayer(self.Owner, 10, 20, "blinding the killer with Blindside")
+                                            end,
+                                        }
                                     })
                                 end)
                             
@@ -101,7 +103,7 @@ local Commander = Character:CreateSurvivor({
                 end,
             }),
 
-            Reload = Ability:CreateAbility({
+            Reload = Ability.CreateAbility({
                 Name = "Reload",
                 Duration = 5,
                 Cooldown = 40,
@@ -114,22 +116,14 @@ local Commander = Character:CreateSurvivor({
                             self:ChangeAbilityCharges("Set", 1)
                         end))
 
+                        CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", 3, 5)
+
                         return
                     end
-                
-                    if self.CharModule.GameplayConfig.Abilities.Justice.UsesLeft > 0 then
-                        return
-                    end
-                
-                    table.insert(self.Connections, task.delay(self.Duration, function()
-                        self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
-                    end))
-                
-                    self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0.35)
                 end,
             }),
 
-            Justice = Ability:CreateAbility({
+            Justice = Ability.CreateAbility({
                 Name = "Justice",
                 Description = "Commander pulls out a gun and shoots forward while in low speed. Does 50 damage to the killer and stuns them for 4.2 seconds.",
                 UseAnimation = "",
@@ -147,7 +141,7 @@ local Commander = Character:CreateSurvivor({
                 },
 
                 ExtraInit = function(self)
-                    self.JusticeModel = Utils:FindFirstChild(self.OwnerProperties.Character, "Deagle")
+                    self.JusticeModel = Utils.Instance.FindFirstChild(self.OwnerProperties.Character, "Deagle")
                 end,
 
                 Behaviour = function(self)
@@ -155,7 +149,7 @@ local Commander = Character:CreateSurvivor({
                         --Shot Sound & Hitbox
                         table.insert(self.Connections, task.delay(1.17, function()
                             task.spawn(function()
-                                Hitbox:New(self.Owner, {
+                                Hitbox.New(self.Owner, {
                                     CFrameOffset = CFrame.new(0, 0, -(self.HitboxLength / 2)),
                                     Size = Vector3.new(3, 1.5, self.HitboxLength),
                                     Time = self.Duration,
@@ -169,9 +163,11 @@ local Commander = Character:CreateSurvivor({
                                             Subfolder = "KillerSpecific"
                                         },
                                     },
-                                    OnHit = function(Hum: Humanoid)
-                                        CommonFunctions:GrantRewardToPlayer(self.Owner, 6, 14, "stunning the killer with Justice")
-                                    end,
+                                    Connections = {
+                                        PostHit = function(Hum: Humanoid)
+                                            CommonFunctions.GrantRewardToPlayer(self.Owner, 6, 14, "stunning the killer with Justice")
+                                        end,
+                                    }
                                 })
                             end)
                         
@@ -214,7 +210,7 @@ local Commander = Character:CreateSurvivor({
     },
 
     OnHit = function(self, _hitbox, _damage)
-        CommonFunctions:ApplyEffect(self.Owner.Character:FindFirstChildOfClass("Humanoid"), "Resistance", 5, 1)
+        CommonFunctions.ApplyEffect(self.Owner.Character:FindFirstChildOfClass("Humanoid"), "Resistance", 5, 1)
 
         return
     end,
@@ -295,7 +291,7 @@ Commander.Config.Description = {
     },
     {
         Type = "Text",
-        Text = "Commander reloads his gun, getting <b>Slowness "..Utils:IntToRoman(Commander.GameplayConfig.Abilities.Reload.SlownessLevel)..
+        Text = "Commander reloads his gun, getting <b>Slowness "..Utils.Math.IntToRoman(Commander.GameplayConfig.Abilities.Reload.SlownessLevel)..
             "</b> for "..tostring(Commander.GameplayConfig.Abilities.Reload.Duration).." seconds.",
     },
     {

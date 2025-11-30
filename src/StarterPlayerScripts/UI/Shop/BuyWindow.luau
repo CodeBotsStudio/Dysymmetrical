@@ -10,7 +10,7 @@ return {
     New = function(Shop, Module: ModuleScript, skin: boolean?, Parent: Frame, Card)
         local Window = {
             Checking = false,
-            Instance = Utils:FindFirstChild(script, "Window"):Clone(),
+            Instance = Utils.Instance.FindFirstChild(script, "Window"):Clone(),
             Connections = {},
             Removed = Signal.new(),
             Purchased = Signal.new(),

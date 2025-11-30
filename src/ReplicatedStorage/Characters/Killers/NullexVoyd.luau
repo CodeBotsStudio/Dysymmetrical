@@ -19,7 +19,7 @@ local MasterSoundGroup = SoundService.SoundGroups.Master
 local SoundFolder = SoundService.TempSounds
 
 --Character Definition
-local NullexVoyd: Character.Killer = Character:CreateKiller({
+local NullexVoyd: Character.Killer = Character.CreateKiller({
     Config = {
         Name = "Nullex Voyd",
         Quote = "Order was the first lie.",
@@ -37,7 +37,7 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                 Duration = 0.35
             }),
 
-            DataAnchor = Ability:CreateAbility({
+            DataAnchor = Ability.CreateAbility({
                 Name = "Data Anchor",
 
                 FirstCooldown = 3,
@@ -99,7 +99,7 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                         
                             self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0)
                         
-                            self.PlayUseAnimation()
+                            self:PlayUseAnimation()
                             table.insert(self.Connections, task.delay(self.UseAnimationTrack.Length + 0.4, function()
                                 self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
                             end))
@@ -108,7 +108,7 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                 end,
             }),
 
-            CallbackPing = Ability:CreateAbility({
+            CallbackPing = Ability.CreateAbility({
                 Name = "Callback Ping",
                 Description = "Allows Nullex Voyd to see every single alive player's aura for 3 seconds. He gets extremely slowed down while performed.",
                 Duration = 3,
@@ -165,13 +165,13 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                     end))
                 
                     --shows all players' aura
-                    for _, plr: Model in Utils:GetCharactersWithRoles(false).Survivor or {} do
-                        Utils:RevealPlayerAura(plr, self.Duration)
+                    for _, plr: Model in Utils.Character.GetCharactersWithRoles(false).Survivor or {} do
+                        Utils.Player.RevealPlayerAura(plr, self.Duration)
                     end
                 end,
             }),
 
-            Overcharge = Ability:CreateAbility({
+            Overcharge = Ability.CreateAbility({
                 Name = "Overcharge",
                 Description = "Increases walk speed for a very short time but removes the ability to use any ability apart from the slash. When it ends, it lowers his walk speed under default and prevents him from using his abilities for a very very short time (stun).",
                 Cooldown = 45,
@@ -184,10 +184,10 @@ local NullexVoyd: Character.Killer = Character:CreateKiller({
                 DisableSlashOnPerform = false,
                 Behaviour = function(self)
                     if RunService:IsServer() then
-                        CommonFunctions:ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Speed", self.SpeedLevel, self.SpeedDuration)
+                        CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Speed", self.SpeedLevel, self.SpeedDuration)
 
                         table.insert(self.Connections, task.delay(self.SpeedDuration, function()
-                            CommonFunctions:ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", self.SlownessLevel, self.SlownessDuration)
+                            CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", self.SlownessLevel, self.SlownessDuration)
                         end))
                     
                         return
@@ -274,8 +274,8 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Text",
-        Text = NullexVoydNameLabel.." overloads his systems with electricity, giving him <b>Speed "..Utils:IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedDuration).." seconds. "..
-        "When the effect wears off, his systems will exhaust briefly, inflicting him with <b>Slowness "..Utils:IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessDuration).." seconds.",
+        Text = NullexVoydNameLabel.." overloads his systems with electricity, giving him <b>Speed "..Utils.Math.IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedDuration).." seconds. "..
+        "When the effect wears off, his systems will exhaust briefly, inflicting him with <b>Slowness "..Utils.Math.IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessDuration).." seconds.",
     },
 }
 

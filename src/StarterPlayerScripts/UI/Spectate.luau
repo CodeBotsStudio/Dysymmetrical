@@ -19,7 +19,7 @@ local Spectate = {
     CurSelected = 1,
 }
 
-local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 local ButtonTweenInfo = TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
 
 function Spectate:Init()
@@ -28,7 +28,7 @@ function Spectate:Init()
         return
     end
 
-    local UI = Utils:FindFirstChild(script, "SpectateUI")
+    local UI = Utils.Instance.FindFirstChild(script, "SpectateUI")
     UI.Visible = false
     UI.Parent = UIParent
     self.UIInstance = UI
@@ -63,42 +63,34 @@ function Spectate:Init()
         self:_Update()
     end)
 
-    local function OnPlayerAdded(Player: Player)
-        local function OnCharacterAdded(Character: Model)
-            local Role = Utils:FindFirstChild(Character, "Role")
+    local function OnCharacterAdded(Player: Player, Character: Model)
+        local Role = Utils.Instance.FindFirstChild(Character, "Role")
 
-            if Role.Value == "Spectator" then
+        if Role.Value == "Spectator" then
 
-                local I = table.find(self.PlayersAvailable, Player.Name)
-                if I then
+            local I = table.find(self.PlayersAvailable, Player.Name)
+            if I then
 
-                    table.remove(self.PlayersAvailable, I)
+                table.remove(self.PlayersAvailable, I)
 
-                    if self.CurSelected <= I then
-                        self:ChangeSelection(-1)
-                    end
-
+                if self.CurSelected <= I then
+                    self:ChangeSelection(-1)
                 end
 
-            elseif not table.find(self.PlayersAvailable, Player.Name) then
-                
-                table.insert(self.PlayersAvailable, Player.Name)
-                self:ChangeSelection()
             end
-        end
 
-        Player.CharacterAdded:Connect(OnCharacterAdded)
-        if Player.Character then
-            OnCharacterAdded(Player.Character)
+        elseif not table.find(self.PlayersAvailable, Player.Name) then
+            
+            table.insert(self.PlayersAvailable, Player.Name)
+            self:ChangeSelection()
         end
     end
 
-    Players.PlayerAdded:Connect(OnPlayerAdded)
-    for _, i in Players:GetPlayers() do
-        if i ~= Players.LocalPlayer then
-            OnPlayerAdded(i)
-        end
-    end
+    Utils.Player.ObservePlayers(function(Player: Player)
+        Utils.Character.ObserveCharacter(Player, function(Character: Model)
+            OnCharacterAdded(Player, Character)
+        end)
+    end)
 
     self:ChangeSelection()
 end
@@ -132,7 +124,7 @@ end
 function Spectate:ChangeSelection(amount: number?)
     amount = amount or 0
     
-    self.CurSelected = Utils:WrapNum(self.CurSelected + amount, 1, #self.PlayersAvailable)
+    self.CurSelected = Utils.Math.WrapNum(self.CurSelected + amount, 1, #self.PlayersAvailable)
     if #self.PlayersAvailable > 0 and not self.PlayersAvailable[self.CurSelected] then
         self:ChangeSelection(amount ~= 0 and amount or 1)
     end
@@ -159,15 +151,15 @@ function Spectate:_Update()
         return
     end
 
-    local Role = Utils:FindFirstChild(Char, "Role")
+    local Role = Utils.Instance.FindFirstChild(Char, "Role")
     if Role.Value == "Spectator" then
         return
     end
 
-    local Humanoid = Utils:FindFirstChild(Char, "Humanoid")
+    local Humanoid = Utils.Instance.FindFirstChild(Char, "Humanoid")
     workspace.CurrentCamera.CameraSubject = Humanoid
 
-    self.UIInstance.PlayerText.DisplayName.Text = Utils:GetPlayerFromCharacter(Char).DisplayName
+    self.UIInstance.PlayerText.DisplayName.Text = Utils.Player.GetPlayerFromCharacter(Char).DisplayName
     self.UIInstance.PlayerText.Username.Text = Char.Name
 
     local CharText = Char:GetAttribute("CharacterName")
@@ -178,7 +170,7 @@ function Spectate:_Update()
 
     local HealthPercentageMagnitude = Humanoid.Health / Humanoid.MaxHealth
     self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(
-        Utils:MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
+        Utils.Math.MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
         HealthPercentageMagnitude * 180 + 75,
         75
     )

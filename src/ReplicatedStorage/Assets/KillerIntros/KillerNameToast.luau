@@ -25,7 +25,7 @@ return function(Parent: ScreenGui, plrNames: {string})
 	for _, name in plrNames do
 		local Char = workspace.Players:FindFirstChild(name)
 		local CharName = Char:GetAttribute("CharacterName")
-		local KillerName = require(Utils:GetCharacterModule("Killer", CharName)).Config.Name
+		local KillerName = require(Utils.Instance.GetCharacterModule("Killer", CharName)).Config.Name
 
 		local PlayerLabel = PlayerLabelPrefab:Clone()
 		PlayerLabel.Name = name
