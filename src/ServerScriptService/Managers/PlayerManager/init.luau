@@ -24,18 +24,27 @@ local Hitboxes = ServerStorage.Assets.Hitboxes
 local StarterCharacterScripts = game:GetService("StarterPlayer").StarterCharacterScripts
 local PlayerFolder = workspace.Players
 
-local StunSPPrefab = Utils:FindFirstChild(script, "StunSpawnProtection")
+local StunSPPrefab = Utils.Instance.FindFirstChild(script, "StunSpawnProtection")
 
 function PlayerManager:Init()
 	local TimePlayedThreads = {}
 
 	ReplicatedStorage.PlaceVersion.Value = game.PlaceVersion
 
-	Players.PlayerAdded:Connect(function(plr: Player)
-		plr.CharacterAdded:Connect(function(char)
+	if #game.PrivateServerId > 0 then
+		table.insert(CommonFunctions.AdminPerms, {
+			Name = Players:GetPlayerByUserId(game.PrivateServerOwnerId),
+			UserId = game.PrivateServerOwnerId,
+			Rank = "ServerOwner",
+		})
+		print(CommonFunctions.AdminPerms)
+	end
+
+	Utils.Player.ObservePlayers(function(plr: Player)
+		Utils.Character.ObserveCharacter(plr, function(char)
 			AntiFly:_SetupCharacter(plr, char)
 			
-			local Role = Utils:FindFirstChild(char, "Role")
+			local Role = Utils.Instance.FindFirstChild(char, "Role")
 
 			if char:GetAttribute("BaseSpeed") == nil then
 				char:SetAttribute("BaseSpeed", 10.5)
@@ -43,7 +52,8 @@ function PlayerManager:Init()
 
 			char.Parent = PlayerFolder
 			
-        	Utils:FindFirstChild(char, "Humanoid").BreakJointsOnDeath = false
+			local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
+        	Humanoid.BreakJointsOnDeath = false
 
 			local KillerValue
 			if Role.Value ~= "Spectator" then
@@ -78,7 +88,7 @@ function PlayerManager:Init()
 						end)
 					end)
 				else
-					local HRP = Utils:FindFirstChild(char, "HumanoidRootPart")
+					local HRP = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
 					local StunSP = StunSPPrefab:Clone()
 					StunSP.Parent = HRP
 					local Weld = Instance.new("Weld")
@@ -111,7 +121,7 @@ function PlayerManager:Init()
                 			Network:FireConnection("KilledPlayer", KillerValue.Value, plr)
 						end
 
-            	    	CommonFunctions:GrantRewardToPlayer(KillerValue.Value, 7, 20, "making a Survivor ragequit")
+            	    	CommonFunctions.GrantRewardToPlayer(KillerValue.Value, 7, 20, "making a Survivor ragequit")
 
 						--i'm leaving this because it's funny to have double the extra time when someone ragequits lol -Dyscarn
 						TimeManager:SetTime(TimeManager.CurrentTime + 35)
@@ -119,7 +129,7 @@ function PlayerManager:Init()
 				end)
 			end
 
-        	char.Humanoid.Died:Connect(function()
+			Utils.Character.ObserveOnDeath(Humanoid, function()
 				char:SetAttribute("Dead", true)
 
 				if LeaveConn then
@@ -130,8 +140,8 @@ function PlayerManager:Init()
                 	Network:FireClientConnection(KillerValue.Value, "KilledPlayer", "REMOTE_EVENT", plr)
                 	Network:FireConnection("KilledPlayer", KillerValue.Value, plr)
 
-					CommonFunctions:UpdatePlayerStat(KillerValue.Value, "KillerStats.Kills", 1)
-                	CommonFunctions:GrantRewardToPlayer(KillerValue.Value, 20, 60, "killing a Survivor")
+					CommonFunctions.UpdatePlayerStat(KillerValue.Value, "KillerStats.Kills", 1)
+                	CommonFunctions.GrantRewardToPlayer(KillerValue.Value, 20, 60, "killing a Survivor")
 
 					TimeManager:SetTime(TimeManager.CurrentTime + 35)
 				end
@@ -147,9 +157,17 @@ function PlayerManager:Init()
 			self:_RespawnPlayer(plr)
 		end)
 		
-		local TimePlayed = Utils:FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed")
-		TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
-			TimePlayed.Value += delta
+		task.defer(function()
+			--saving this before hand just in case there's a leave
+			local name = plr.NameDisplayDistance
+			local TimePlayed = Utils.Instance.FindFirstChild(plr, "PlayerData.Stats.General.TimePlayed", 10)
+			if not TimePlayed then
+				warn("[PlayerManager:Init()] TimePlayed not found for player "..name.."!")
+				return
+			end
+			TimePlayedThreads[plr.UserId] = RunService.Heartbeat:Connect(function(delta: number)
+				TimePlayed.Value += delta
+			end)
 		end)
 	end)
 
@@ -180,14 +198,17 @@ end
 --- Cancels a player's automatic respawn if they died.
 function PlayerManager:CancelAutoRespawn(plr: Player)
     if threads[plr.UserId] then
-        task.cancel(threads[plr.UserId])
-        threads[plr.UserId] = nil
+		pcall(function()
+        	task.cancel(threads[plr.UserId])
+        	threads[plr.UserId] = nil
+		end)
     end
 end
 
 --- Internal: Creates all hitboxes available for a character.
 function PlayerManager:_SetupHitboxes(Character)
-	local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+	local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
+	local HumanoidRootPart = Humanoid.RootPart
 	local HitboxFolder = Instance.new("Folder")
 	HitboxFolder.Name = "Hitboxes"
 	HitboxFolder.Parent = Character
@@ -204,7 +225,7 @@ function PlayerManager:_SetupHitboxes(Character)
 		Weld.C0 *= CFrame.fromEulerAnglesXYZ(0, 0, math.rad(90))
 	end
 
-	Character.Humanoid.Died:Connect(function()
+	Utils.Character.ObserveOnDeath(Humanoid, function()
 		for _, i in HitboxFolder:GetDescendants() do
 			i:Destroy()
 		end
@@ -241,7 +262,7 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	local function FindChar(Service: "ServerStorage" | "ReplicatedStorage", Name: string, Type: ("Killer" | "Survivor")?, Skin: string?)
 		--gets the skin if queued to
 		if Skin ~= nil and #Skin > 0 then
-			char = Utils:FindFirstChild(game:GetService(Service).Assets.Characters.Skins[RigType], RigName.."."..Skin, false)
+			char = Utils.Instance.FindFirstChild(game:GetService(Service).Assets.Characters.Skins[RigType], RigName.."."..Skin, false)
 		end
 
 		--if there's a skin then it gets cloned and used

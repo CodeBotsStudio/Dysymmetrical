@@ -1,6 +1,5 @@
 --!nocheck
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -21,15 +20,15 @@ function FootstepPlayer:PlayFootstep(Anchor: BasePart)
 end
 
 function FootstepPlayer:_SetupChar(character: Model)
-	local HRP = Utils:FindFirstChild(character, "HumanoidRootPart")
+	local HRP = Utils.Instance.FindFirstChild(character, "HumanoidRootPart")
 	if not HRP then
 		return
 	end
-	local Humanoid = Utils:FindFirstChild(character, "Humanoid")
+	local Humanoid = Utils.Instance.FindFirstChild(character, "Humanoid")
 	if not Humanoid then
 		return
 	end
-	Utils:FindFirstChild(Humanoid, "Animator").AnimationPlayed:Connect(function(track: AnimationTrack)
+	Utils.Instance.FindFirstChild(Humanoid, "Animator").AnimationPlayed:Connect(function(track: AnimationTrack)
 		track:GetMarkerReachedSignal("Footstep"):Connect(function()
 			if (character.PlayerAttributes.Sprinting and character.PlayerAttributes.Sprinting.Value) or Humanoid.FloorMaterial == Enum.Material.Air or HRP.Anchored then
 				return
@@ -40,18 +39,8 @@ function FootstepPlayer:_SetupChar(character: Model)
 end
 
 function FootstepPlayer:Init()
-	for _, i in Players:GetPlayers() do
-		if i.Character then
-			FootstepPlayer:_SetupChar(i.Character)
-		end
-
-		i.CharacterAdded:Connect(function(newChar: Model)
-			FootstepPlayer:_SetupChar(newChar)
-		end)
-	end
-
-	Players.PlayerAdded:Connect(function(plr: Player)
-		plr.CharacterAdded:Connect(function(newChar: Model)
+	Utils.Player.ObservePlayers(function(plr: Player)
+		Utils.Character.ObserveCharacter(plr, function(newChar: Model)
 			FootstepPlayer:_SetupChar(newChar)
 		end)
 	end)

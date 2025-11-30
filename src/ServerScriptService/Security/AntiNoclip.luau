@@ -43,10 +43,10 @@ function AntiNoclip:_SetupPart(Character, RootPart, Humanoid)
 end
 
 function AntiNoclip:Init()
-    Players.PlayerAdded:Connect(function(Player)
-        Player.CharacterAdded:Connect(function(Character)
-        	local Humanoid = Utils:FindFirstChild(Character, "Humanoid")
-        	local HumanoidRootPart = Utils:FindFirstChild(Character, "HumanoidRootPart")
+    Utils.Player.ObservePlayers(function(Player)
+        Utils.Character.ObserveCharacter(Player, function(Character)
+        	local Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
+        	local HumanoidRootPart = Humanoid.RootPart
         	local NoclipPart = self:_SetupPart(Character, HumanoidRootPart)
 
             local RayParams = RaycastParams.new()
@@ -104,7 +104,7 @@ function AntiNoclip:Init()
 								NoclipTime += TimePast
 								if NoclipTime > self.Margin then
 									if self.Kick then
-										CommonFunctions:KickPlayer(Player, CommonFunctions.KickIDs.Noclipping)
+										CommonFunctions.KickPlayer(Player, CommonFunctions.KickIDs.Noclipping)
 									else
         								Humanoid.Health = 0 --REPLACE WITH KICKING
 									end

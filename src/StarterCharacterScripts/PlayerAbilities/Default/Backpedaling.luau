@@ -8,8 +8,8 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 --
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local char = LocalPlayer.Character
-local HumanoidRootPart: BasePart = Utils:FindFirstChild(char, "HumanoidRootPart")
-local Humanoid = Utils:FindFirstChild(char, "Humanoid")
+local HumanoidRootPart: BasePart = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
+local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
 --
 local SpeedManager = require(script.Parent.Parent.Parent.PlayerAttributeScripts.SpeedManager)
 --

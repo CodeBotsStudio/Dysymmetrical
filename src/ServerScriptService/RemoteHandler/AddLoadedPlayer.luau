@@ -18,7 +18,7 @@ return function()
 		task.wait(3)
 
 		if plr then
-			local Log = Utils:FindFirstChild(plr, "PlayerData.Misc.LastSeenLog")
+			local Log = Utils.Instance.FindFirstChild(plr, "PlayerData.Misc.LastSeenLog")
 			Log.Value = game.PlaceVersion
 		end
 	end)

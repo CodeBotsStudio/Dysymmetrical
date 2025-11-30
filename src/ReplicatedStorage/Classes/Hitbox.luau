@@ -50,10 +50,9 @@ export type HitboxSettings = {
         --- If in a subfolder, specify it.
 		Subfolder: string?,
 	}}?,
-    --- Internal variable used to make cancelling the hitbox possible.
+    --- Any callbacks for events fired in the hitbox's functionality.
+    -- TODO: write what connections there are and what they do
     Connections: {[string]: (any?) -> ()}?,
-    --- Empty function that serves as custom behaviour code when the hitbox hits a humanoid.
-    OnHit: (hum: Humanoid) -> ()?,
 }
 
 --- Details on a hitbox's current stats
@@ -75,7 +74,7 @@ export type HitboxDetails = {
 
 
 --- Creates a new hitbox, assigning it to a specific player.
-function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
+function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
     -- Prevent this from normally running on the client
     --i love writing server shit and putting it in ReplicatedStorage :] -dys
@@ -206,7 +205,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                 -- Some amount of ping compensation for placing the hitbox.
                 if Config.PredictVelocity and not Config.IsProjectile then
-                    -- Utils:Print(SourcePlayer:GetNetworkPing())
+                    -- Utils.Misc.Print(SourcePlayer:GetNetworkPing())
                     local PingDivider = 6.5 - math.clamp(SourcePlayer:GetNetworkPing(), 0, 3)
                     local PingOffset = CheckPart.CFrame:VectorToObjectSpace(Root.AssemblyLinearVelocity) / PingDivider
                     CheckPart.CFrame *= CFrame.new(PingOffset)
@@ -281,6 +280,8 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                 -- Register a hit in every player detected in the previous step.
                 for Index, Humanoid in Hit do
 
+                    Hitbox._RunCallback(Config.Connections, "PreHit", Index == 1)
+
                     -- Look for critical parts in the character in question, as well as the resistance effect, if applicable.
                     local TargetCharacter = Humanoid.Parent
                     local HRoot = TargetCharacter and TargetCharacter:IsA("Model") and TargetCharacter.PrimaryPart
@@ -310,9 +311,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         end
 
                         -- If theres a function set to be executed on player hit for this hitbox, toss the humanoid to it.
-                        if Config.OnHit then
-                            Config.OnHit(Humanoid)
-                        end
+                        Hitbox._RunCallback(Config.Connections, "Hit", Index == 1)
 
                         -- Store the user as the last player whom hit the target, to give a readout of their killer if they are to die from a status effect or similar.
                         if TargetCharacter:FindFirstChild("Killer") then
@@ -323,7 +322,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         if Humanoid.Health > 0 and Humanoid.Health - Damage <= 0 then
 
                             -- Find the killermodule for the user, who is assumedly on the "killer" team
-                            local Module = require(Utils:GetCharacterModule(Char.Role.Value, Char:GetAttribute("CharacterName"), Char:GetAttribute("CharacterSkinName")))
+                            local Module = require(Utils.Instance.GetCharacterModule(Char.Role.Value, Char:GetAttribute("CharacterName"), Char:GetAttribute("CharacterSkinName")))
 
                             -- Find out who the survivor they killed was, and what their skin was (if applicable)
                             local KilledSurvivor = {
@@ -362,14 +361,14 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         TargetCharacter:SetAttribute("Executing", true)
 
                                         -- Get the player that's about to be executed
-                                        local TargetPlayer = Utils:GetPlayerFromCharacter(TargetCharacter)
+                                        local TargetPlayer = Utils.Player.GetPlayerFromCharacter(TargetCharacter)
                                         if TargetPlayer then
                                             -- Execute the same code as if a survivor was killed while in chase to make it more fair for the killer (it won't execute again when the character actually dies later)
                 	                        Network:FireClientConnection(SourcePlayer, "KilledPlayer", "REMOTE_EVENT", TargetPlayer)
                 	                        Network:FireConnection("KilledPlayer", SourcePlayer, TargetPlayer)
 
-					                        CommonFunctions:UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
-                	                        CommonFunctions:GrantRewardToPlayer(SourcePlayer, 20, 60, "killing a Survivor")
+					                        CommonFunctions.UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
+                	                        CommonFunctions.GrantRewardToPlayer(SourcePlayer, 20, 60, "killing a Survivor")
 
 					                        TimeManager:SetTime(TimeManager.CurrentTime + 35)
                                         end
@@ -383,7 +382,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         -- If there are no execution animations to use, for one reason or another, resort to just flinging the target really far.
                                         if not ExecutionAnim then
                                             if Config.Knockback then
-                                                CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
+                                                CommonFunctions.RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                                             end
 
                                             -- Kill the target after flinging them.
@@ -398,7 +397,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         -- If the survivor has a special death animation for this case, grab that, too.
                                         local SurvivorAnim = KilledSurvivor.Skin and Module.Config.AnimationIDs.Execution[KilledSurvivor.Skin..KilledSurvivor.Name] or Module.Config.AnimationIDs.Execution[KilledSurvivor.Name]
                                         SurvivorAnim = SurvivorAnim or Module.Config.AnimationIDs.Execution["Default"]
-                                        SurvivorAnim = Utils:LoadAnimationFromID(TargetCharacter, SurvivorAnim)
+                                        SurvivorAnim = Utils.Character.LoadAnimationFromID(TargetCharacter, SurvivorAnim)
 
                                         -- Grab the execution sound to play, if applicable; or use a default, if needed.
                                         local ExSound = KilledSurvivor.Skin and Module.Config.Sounds.Execute[KilledSurvivor.Skin..KilledSurvivor.Name] or Module.Config.Sounds.Execute[KilledSurvivor.Name]
@@ -450,7 +449,7 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                 else
                                     -- If no execution animations are availible, resort to 'ol reliable– flinging the target. 
                                     if Config.Knockback then
-                                        CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
+                                        CommonFunctions.RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                                     end
 
                                     Humanoid.Health = 0
@@ -463,23 +462,23 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                         -- If the Target doesn't die to the hitbox, do some knockback:
                         if Config.Knockback then
-                            CommonFunctions:RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
+                            CommonFunctions.RigImpulse(HRoot, Config.Knockback, CheckPart.CFrame.LookVector)
                         end
 
                         -- If the hitbox deals damage, inflict it.
                         if Damage > 0 then
-                            CommonFunctions:DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason)
+                            CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason)
                         end
 
                         -- If the hitbox applies effects, apply them.
                         if Config.EffectsToApply then
                             for _, i in Config.EffectsToApply do
-					            CommonFunctions:ApplyEffect(Humanoid, i.Name, i.Level, i.Duration, i.Subfolder)
+					            CommonFunctions.ApplyEffect(Humanoid, i.Name, i.Level, i.Duration, i.Subfolder)
 				            end
                         end
 
                         -- If the hitbox has a callback tied to it, fire it.
-                        self:_RunCallback(Config.Connections, "Hit", Index == 1)
+                        Hitbox._RunCallback(Config.Connections, "PostHit", Index == 1)
                     end
                 end
 
@@ -491,14 +490,14 @@ function Hitbox:New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
         end
         
         -- If the hitbox has a callback tied to it for when it ends, run that.
-        self:_RunCallback(Config.Connections, "Ended")
+        Hitbox._RunCallback(Config.Connections, "Ended")
     end)
 
     return Props
 end
 
 -- Coordinate a callback for anything that would need to be listening to the hitbox's various states (ending, hitting something, etc.).
-function Hitbox:_RunCallback(ConnList: {[string]: (any?) -> ()}?, ID: string, ...)
+function Hitbox._RunCallback(ConnList: {[string]: (any?) -> ()}?, ID: string, ...)
     if ConnList and ConnList[ID] then
         ConnList[ID](...)
     end

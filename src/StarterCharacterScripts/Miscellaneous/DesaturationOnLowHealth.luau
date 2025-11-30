@@ -6,8 +6,8 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 return {
     Init = function(_)
-        local Humanoid = Utils:FindFirstChild(Players.LocalPlayer.Character, "Humanoid")
-        local DesaturationSetting = Utils:FindFirstChild(Players.LocalPlayer, "PlayerData.Settings.Customization.ScreenDesaturation")
+        local Humanoid = Utils.Instance.FindFirstChild(Players.LocalPlayer.Character, "Humanoid")
+        local DesaturationSetting = Utils.Instance.FindFirstChild(Players.LocalPlayer, "PlayerData.Settings.Customization.ScreenDesaturation")
 
         local Desat = Instance.new("ColorCorrectionEffect")
         Desat.Name = "HealthDesat"

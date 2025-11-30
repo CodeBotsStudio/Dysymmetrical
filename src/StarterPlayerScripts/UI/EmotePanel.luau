@@ -22,13 +22,13 @@ local UI
 local UISize = UDim2.fromScale(0.3, 0.533)
 
 function EmotePanel:Init()
-    local ScreenGui = Utils:FindFirstChild(LocalPlayer.PlayerGui, "EmotePanel")
+    local ScreenGui = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "EmotePanel")
 
-    UI = Utils:FindFirstChild(script, "EmotePanel")
+    UI = Utils.Instance.FindFirstChild(script, "EmotePanel")
     UI.Parent = ScreenGui
 
-    local Selector = Utils:FindFirstChild(UI, "Selector")
-    local EmoteButtonContainer = Utils:FindFirstChild(UI, "EmoteContainer")
+    local Selector = Utils.Instance.FindFirstChild(UI, "Selector")
+    local EmoteButtonContainer = Utils.Instance.FindFirstChild(UI, "EmoteContainer")
 
     local SelectedEmote = ""
 
@@ -40,7 +40,7 @@ function EmotePanel:Init()
 
         local EmoteToPlay = EmoteButtonContainer[SelectedEmote]:GetAttribute("Name")
         if LocalPlayer.Character and EmoteToPlay and #EmoteToPlay > 0 then
-            local E = Utils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", false)
+            local E = Utils.Instance.FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", false)
             if not E then
                 return
             end
@@ -52,7 +52,7 @@ function EmotePanel:Init()
 
     local function ReloadContent()
         for _, i in EmoteButtonContainer:GetChildren() do
-            local EquippedEmote = Utils:GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
+            local EquippedEmote = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
             local EmoteModule = EquippedEmote and #EquippedEmote > 0 and Utils:GetEmoteModule(EquippedEmote)
             if EmoteModule then
                 i:SetAttribute("Name", EquippedEmote)
@@ -74,7 +74,7 @@ function EmotePanel:Init()
     end
 
     ReloadContent()
-    for _, i in Utils:GetPlayerEquipped(LocalPlayer, "Emotes", false):GetChildren() do
+    for _, i in Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes", false):GetChildren() do
         i.Changed:Connect(ReloadContent)
     end
 
@@ -126,7 +126,7 @@ function EmotePanel:Init()
                     return
                 end
 
-                local E = Utils:FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", false)
+                local E = Utils.Instance.FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", false)
                 if not E then
                     return
                 end

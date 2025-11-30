@@ -18,7 +18,7 @@ local Prefabs = {
     Stat = script.Prefabs.Stat,
 }
 
-local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 
 function StatsMenu:Init()
     if self.UIInstance then
@@ -37,7 +37,7 @@ function StatsMenu:Init()
 
     local CurrentLayoutOrder = 0
     
-    local Folders = Utils:FindFirstChild(LocalPlayer, "PlayerData.Stats"):GetChildren()
+    local Folders = Utils.Instance.FindFirstChild(LocalPlayer, "PlayerData.Stats"):GetChildren()
 
     table.sort(Folders, function(a, b)
         return a:GetAttribute("LayoutOrder") < b:GetAttribute("LayoutOrder")
@@ -72,7 +72,7 @@ function StatsMenu:Init()
             Stat.Text = DisplayTitle..": "
 
             if StatValue:GetAttribute("FormatTime") == true then
-                Stat.Text = Stat.Text..Utils:ConvertToDHMS(StatValue.Value)
+                Stat.Text = Stat.Text..Utils.Math.ConvertToDHMS(StatValue.Value)
             else
                 Stat.Text = Stat.Text..tostring(StatValue.Value)
             end
@@ -82,7 +82,7 @@ function StatsMenu:Init()
             StatValue.Changed:Connect(function(value)
                 Stat.Text = DisplayTitle..": "
 
-                local RealValue = StatValue:GetAttribute("FormatTime") == true and Utils:ConvertToDHMS(value) or tostring(value)
+                local RealValue = StatValue:GetAttribute("FormatTime") == true and Utils.Math.ConvertToDHMS(value) or tostring(value)
                 Stat.Text = Stat.Text..RealValue
             end)
 

@@ -21,7 +21,7 @@ local Sounds = {
 
 function Sounds:Init()
     if not RunService:IsServer() then
-        Utils:PreloadAssets(self.CommonlyUsedSounds)
+        Utils.Misc.PreloadAssets(self.CommonlyUsedSounds)
     end
     workspace.Themes.ChildAdded:Connect(function()
         self:UpdateThemes()
@@ -100,7 +100,7 @@ function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any
     if SoundProperties then
         for name, value in SoundProperties do
             if name == "Position" then
-                Part = Utils:GetInvisPart(typeof(value) == "Vector3" and CFrame.new(value) or value)
+                Part = Utils.Instance.GetInvisPart(typeof(value) == "Vector3" and CFrame.new(value) or value)
                 Part.Name = Sound.Name
                 Part.Parent = workspace.Sounds
                 Sound.Parent = Part
@@ -159,7 +159,7 @@ function Sounds:PlayTheme(ID: string | Instance, properties: {[string]: any}): S
             properties.Looped = true
         end
 
-        properties = Utils:CopyTable(properties)
+        properties = Utils.CopyTable(properties)
 
         local Priority = properties.Priority or 1
         properties.Priority = nil

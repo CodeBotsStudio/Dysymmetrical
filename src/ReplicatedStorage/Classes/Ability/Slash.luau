@@ -16,11 +16,11 @@ function SlashModule.New(Props: Ability?): Ability
 	-- Doesn't require you to unintuitively slot in an empty table for it to work at all– someone was confused about this a bit earlier, so I figured a fix was in order.
 	Props = Props or {}
 
-	Utils:DeepTableWrite(Props, Ability:CreateAbility({
+	Utils.Type.DeepTableWrite(Props, Ability.CreateAbility({
 		Name = "Slash",
 		InputName = "Slash",
 		Cooldown = 2,
-		Duration = 0.54,
+		Duration = 0.4,
 		Damage = 20,
 		RenderImage = "rbxassetid://11218451110",
 		UseSound = "rbxassetid://12222200",
@@ -33,7 +33,7 @@ function SlashModule.New(Props: Ability?): Ability
 			if RunService:IsServer() then
 				Sounds:PlaySound(self.UseSound, {Parent = self.OwnerProperties.HRP})
 				task.delay(self.Delay, function()
-					Hitbox:New(self.Owner, {
+					Hitbox.New(self.Owner, {
 						CFrameOffset = self.HitboxOffset,
 						Size = self.HitboxSize,
 						Time = self.Duration,

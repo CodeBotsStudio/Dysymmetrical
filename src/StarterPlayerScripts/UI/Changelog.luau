@@ -93,14 +93,14 @@ local CurrentChangelog: ChangelogFormat = {
     },
 }
 
-local PrefabFolder = Utils:FindFirstChild(script, "Prefabs")
+local PrefabFolder = Utils.Instance.FindFirstChild(script, "Prefabs")
 local Prefabs = {
-    Separator = Utils:FindFirstChild(PrefabFolder, "Separator"),
-    SectionEntry = Utils:FindFirstChild(PrefabFolder, "SectionEntry"),
-    Text = Utils:FindFirstChild(PrefabFolder, "PlainText"),
+    Separator = Utils.Instance.FindFirstChild(PrefabFolder, "Separator"),
+    SectionEntry = Utils.Instance.FindFirstChild(PrefabFolder, "SectionEntry"),
+    Text = Utils.Instance.FindFirstChild(PrefabFolder, "PlainText"),
 }
 
-local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function Changelog:Init()
     if self.UIInstance then
         self.UIInstance.Parent = UIParent
@@ -109,7 +109,7 @@ function Changelog:Init()
         return
     end
 
-    local UI = Utils:FindFirstChild(script, "Changelog")
+    local UI = Utils.Instance.FindFirstChild(script, "Changelog")
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
     self.UIInstance = UI
@@ -134,7 +134,7 @@ function Changelog:Init()
         Inst.Parent = Content
     end
 
-    local Log = Utils:FindFirstChild(LocalPlayer, "PlayerData.Misc.LastSeenLog")
+    local Log = Utils.Instance.FindFirstChild(LocalPlayer, "PlayerData.Misc.LastSeenLog")
     if Log.Value < CurrentChangelog.PlaceVersion and Log.Value < ReplicatedStorage.PlaceVersion.Value and CurrentChangelog.PlaceVersion <= ReplicatedStorage.PlaceVersion.Value then
         SideBar:OpenMenu(self)
     end

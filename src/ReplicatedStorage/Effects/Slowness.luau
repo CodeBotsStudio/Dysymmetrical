@@ -5,7 +5,7 @@ local RunService = game:GetService("RunService")
 
 local Effect = require(game:GetService("ReplicatedStorage").Classes.Effect)
 
-return Effect:CreateEffect({
+return Effect.CreateEffect({
     Name = "Slowness",
     Description = "Makes the player slower the higher the level.",
     ApplyEffect = function(_own: Effect.Effect, level: number)

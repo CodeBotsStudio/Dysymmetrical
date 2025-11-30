@@ -6,10 +6,10 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 return {
     Init = function(_self)
-        local Vignette = Utils:FindFirstChild(script, "DamageVignette")
-        Vignette.Parent = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "TemporaryUI")
+        local Vignette = Utils.Instance.FindFirstChild(script, "DamageVignette")
+        Vignette.Parent = Utils.Instance.FindFirstChild(Players.LocalPlayer.PlayerGui, "TemporaryUI")
 
-        local Humanoid = Utils:FindFirstChild(Players.LocalPlayer.Character, "Humanoid")
+        local Humanoid = Utils.Instance.FindFirstChild(Players.LocalPlayer.Character, "Humanoid")
 
         RunService.PreRender:Connect(function(delta: number)
             local Target = Humanoid.Health < Humanoid.MaxHealth * 0.45 and 
@@ -18,7 +18,7 @@ return {
                     0.5,
                     0.999
                 ) or 0.999
-            Vignette.ImageTransparency = Utils:Lerp(
+            Vignette.ImageTransparency = Utils.Math.Lerp(
                 Vignette.ImageTransparency,
                 Target,
                 delta * 9.8

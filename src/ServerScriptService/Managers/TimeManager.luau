@@ -29,6 +29,9 @@ function TimeManager:Init()
     --print("FINISH TIMEMANAGER LATER >:(") --gotta save this line for memories lol
 
     self.FreezeTime = workspace:GetAttribute("FreezeTime")
+    Utils.Instance.ObserveAttribute(workspace, "FreezeTime", function(value: boolean)
+        self.FreezeTime = value
+    end)
     
     RunService.Heartbeat:Connect(function(delta: number)
         if self.Config.WaitForEnoughPlayers and State.Value == "Lobby" and not self:_EnoughPlayers() then
@@ -41,8 +44,8 @@ function TimeManager:Init()
         
         EnoughPlayers.Value = true
         if self.CanDecreaseTime and not self.FreezeTime then
-            self:SetTime(TimeValue.Value - delta)
-            if TimeValue.Value <= 0 then
+            self:SetTime(self.CurrentTime - delta)
+            if self.CurrentTime <= 0 then
                 self.CanDecreaseTime = false
                 self:SetTime(0)
                 self.OnTimerEnd()
@@ -54,7 +57,7 @@ function TimeManager:Init()
 end
 
 function TimeManager:_EnoughPlayers()
-    return #Utils:GetLoadedPlayers(false) >= self.Config.MinimumPlayerAmount
+    return #Utils.Player.GetLoadedPlayers(false) >= self.Config.MinimumPlayerAmount
 end
 
 --- You can use this instead of changing the value directly. It works better.

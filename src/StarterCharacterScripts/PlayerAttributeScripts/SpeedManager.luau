@@ -14,7 +14,7 @@ local SpeedManager = {
 
 function SpeedManager:Init()
 	local char = Players.LocalPlayer.Character
-	local humanoid = Utils:FindFirstChild(char, "Humanoid")
+	local humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
 
 	table.insert(self.Conns, RunService.PreSimulation:Connect(function(_delta: number)
 		local CurrentSpeed = char:GetAttribute("BaseSpeed")

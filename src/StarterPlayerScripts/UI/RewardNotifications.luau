@@ -10,11 +10,11 @@ local Network = require(ReplicatedStorage.Modules.Network)
 local RewardNotifications = {}
 
 function RewardNotifications:Init()
-    local Container = Utils:FindFirstChild(script, "RewardNotificationContainer")
-    Container.Parent = Utils:FindFirstChild(Players.LocalPlayer.PlayerGui, "RewardNotifications")
+    local Container = Utils.Instance.FindFirstChild(script, "RewardNotificationContainer")
+    Container.Parent = Utils.Instance.FindFirstChild(Players.LocalPlayer.PlayerGui, "RewardNotifications")
 
-    local Prefab = Utils:FindFirstChild(script, "RewardNotification")
-    local AchievementPrefab = Utils:FindFirstChild(script, "AchievementNotification")
+    local Prefab = Utils.Instance.FindFirstChild(script, "RewardNotification")
+    local AchievementPrefab = Utils.Instance.FindFirstChild(script, "AchievementNotification")
 
     Network:SetConnection("ShowRewardNotification", "REMOTE_EVENT", function(Module: ModuleScript | string, Type: string)
         if not Type then
@@ -24,7 +24,7 @@ function RewardNotifications:Init()
         local IsAchievement = Type:lower():find("achievement")
 
         local Card = (IsAchievement and AchievementPrefab or Prefab):Clone()
-        local Info = IsAchievement and Utils:GetAchievementData(Module) or require(Module)
+        local Info = IsAchievement and Utils.Instance.GetAchievementData(Module) or require(Module)
         
         Card.ImageContainer.Render.Image = IsAchievement and Info.Icon or Info.Config.Render
 

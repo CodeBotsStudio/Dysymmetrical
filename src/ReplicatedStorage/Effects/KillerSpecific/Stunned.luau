@@ -8,7 +8,7 @@ local Effect = require(ReplicatedStorage.Classes.Effect)
 
 local CommonFunctions = RunService:IsServer() and require(game:GetService("ServerScriptService").System.CommonFunctions) or nil
 
-return Effect:CreateEffect({
+return Effect.CreateEffect({
     Name = "Stunned",
     Description = "Keeps the player still and unable to use their abilities for a specific amount of time.",
     Duration = 3,
@@ -21,7 +21,7 @@ return Effect:CreateEffect({
     end,
     RemoveEffect = function(self: Effect.Effect, char: Model)
         if RunService:IsServer() then
-            CommonFunctions:ApplyEffect(char:FindFirstChild("Humanoid"), "SpawnProtection", nil, nil, "KillerSpecific")
+            CommonFunctions.ApplyEffect(char:FindFirstChild("Humanoid"), "SpawnProtection", nil, nil, "KillerSpecific")
 
             return
         end

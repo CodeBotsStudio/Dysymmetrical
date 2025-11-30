@@ -28,7 +28,7 @@ local function Work(apply: boolean, instances: {BasePart & Decal}, level: number
     end
 end
 
-return Effect:CreateEffect({
+return Effect.CreateEffect({
     Name = "Invisibility",
     Description = "Makes the player fairly transparent (but never fully invisible) the higher the level.",
     Duration = 10,

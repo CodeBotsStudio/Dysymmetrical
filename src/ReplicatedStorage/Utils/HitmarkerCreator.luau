@@ -13,7 +13,7 @@ local DisappearTweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDi
 
 local FinalBillboardSize = UDim2.fromScale(0.7, 0.7)
 
-local HitmarkerPrefab = Utils:FindFirstChild(script, "Hitmarker")
+local HitmarkerPrefab = Utils.Instance.FindFirstChild(script, "Hitmarker")
 local HitmarkerFolder = workspace.TempObjectFolders.Hitmarkers
 
 local SoundGroup: SoundGroup = SoundService.SoundGroups.Master.UI
@@ -27,7 +27,7 @@ function HitmarkerCreator:ShowHitmarker(position: Vector3, dmgAmount: number, pl
 	Hitmarker.Parent = HitmarkerFolder
 	--
 	if playSound then
-		local SoundID = Utils:GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.HitsoundID")
+		local SoundID = Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.HitsoundID")
 		if SoundID and #SoundID > 0 then
 			task.spawn(function()
 				Sounds:PlaySound(SoundID, {Volume = 0.5, SoundGroup = SoundGroup})

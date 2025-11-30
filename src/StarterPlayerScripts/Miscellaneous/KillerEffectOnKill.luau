@@ -13,7 +13,7 @@ return {
             local FX = Instance.new("ColorCorrectionEffect")
             FX.Name = "KillFX"
             
-            local Epilepsy = Utils:GetPlayerSetting(Players.LocalPlayer, "Accessibility")
+            local Epilepsy = Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer, "Accessibility")
 
             FX.TintColor = Epilepsy and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(255, 20, 20)
             FX.Contrast = Epilepsy and 0.5 or 2

@@ -67,14 +67,14 @@ local Ruleset: {{
     },
 }
 
-local PrefabFolder = Utils:FindFirstChild(script, "Prefabs")
+local PrefabFolder = Utils.Instance.FindFirstChild(script, "Prefabs")
 local Prefabs = {
-    Separator = Utils:FindFirstChild(PrefabFolder, "Separator"),
-    SectionEntry = Utils:FindFirstChild(PrefabFolder, "SectionEntry"),
-    Text = Utils:FindFirstChild(PrefabFolder, "PlainText"),
+    Separator = Utils.Instance.FindFirstChild(PrefabFolder, "Separator"),
+    SectionEntry = Utils.Instance.FindFirstChild(PrefabFolder, "SectionEntry"),
+    Text = Utils.Instance.FindFirstChild(PrefabFolder, "PlainText"),
 }
 
-local UIParent = Utils:FindFirstChild(LocalPlayer.PlayerGui, "Menus")
+local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function Rules:Init()
     if self.UIInstance then
         self.UIInstance.Parent = UIParent
@@ -83,7 +83,7 @@ function Rules:Init()
         return
     end
 
-    local UI = Utils:FindFirstChild(script, "Rules")
+    local UI = Utils.Instance.FindFirstChild(script, "Rules")
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
     self.UIInstance = UI

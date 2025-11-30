@@ -11,16 +11,16 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local EffectDisplay: Frame
 
 function EffectViewer:Init()
-    EffectDisplay = Utils:FindFirstChild(script, "EffectDisplay")
-    local UIPrefab = Utils:FindFirstChild(script, "StatusContainer")
+    EffectDisplay = Utils.Instance.FindFirstChild(script, "EffectDisplay")
+    local UIPrefab = Utils.Instance.FindFirstChild(script, "StatusContainer")
 
-    LocalPlayer.CharacterAdded:Connect(function(Char: Model)
+    Utils.Character.ObserveCharacter(LocalPlayer, function(Char: Model)
         self:_SetupUI(UIPrefab:Clone(), Char)
     end)
 end
 
 function EffectViewer:_SetupUI(UI: Frame, char: Model)
-    if Utils:FindFirstChild(char, "Role").Value == "Spectator" then
+    if Utils.Instance.FindFirstChild(char, "Role").Value == "Spectator" then
         UI:Destroy()
         return
     end
@@ -40,12 +40,12 @@ function EffectViewer:_SetupUI(UI: Frame, char: Model)
 	    		Display.Name = name
 	    		Display.Title.Text = effect.Name
                 if effect.Level > 1 then
-                    local RomanLevel = Utils:IntToRoman(effect.Level)
+                    local RomanLevel = Utils.Math.IntToRoman(effect.Level)
                     Display.Title.Text = Display.Title.Text.." "..RomanLevel
                 end
 	    		Display.Parent = UI
 	    	end
-	    	Display.Timer.Text = Utils:ConvertToMinSec(effect.TimeLeft + 1)
+	    	Display.Timer.Text = Utils.Math.ConvertToMinSec(effect.TimeLeft + 1)
 	    end
     
 	    for _, display in UI:GetChildren() do
