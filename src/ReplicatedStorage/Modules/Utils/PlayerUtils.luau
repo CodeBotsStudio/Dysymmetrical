@@ -34,6 +34,7 @@ function PlayerUtils.ObservePlayers(callback: (player: Player, playerJanitor: Ja
 	for _, player in Players:GetPlayers() do
 		task.spawn(onNewPlayer, player)
 	end
+    
 	mainJanitor:Add(Players.PlayerAdded:Connect(onNewPlayer))
 	mainJanitor:Add(Players.PlayerRemoving:Connect(function(player: Player)
 		mainJanitor:Remove(player)
