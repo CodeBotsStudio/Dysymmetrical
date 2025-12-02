@@ -59,7 +59,7 @@ function Sprinting:ReloadAnimation(animId: string)
 	end
 	self.SprintTrack = Utils.Character.LoadAnimationFromID(char, animId)
 	self.FootstepConnection = self.SprintTrack:GetMarkerReachedSignal("Footstep"):Connect(function()
-		FootstepPlayer:PlayFootstep(HumanoidRootPart)
+		FootstepPlayer:PlayFootstep(LocalPlayer, HumanoidRootPart)
 	end)
 end
 

@@ -156,14 +156,17 @@ function CharacterUtils.CheckPlayerEffect(Player: Player, effectName: string): (
 end
 
 --- Loads an animation into a rig, returning the corresponding `AnimationTrack` for usage.
+--- 
 --- If `YieldUntilLoad` is true, the code executing this function will yield until the `AnimationTrack` is fully loaded. Defaults to `false`.
+--- 
+--- Can also be used in non-humanoid rigs as it looks for an Animator recursively, regardless of the hierarchy of the rig.
 function CharacterUtils.LoadAnimationFromID(Rig: Model, ID: string | {string} | {[string]: string}, YieldUntilLoad: boolean?): AnimationTrack
     if not Rig then
         error("[Utils:LoadAnimationFromID()]: Rig not provided or nil.")
         return
     end
 
-    if not ID or #ID < 0 then
+    if not ID or #ID <= 0 then
         error("[Utils:LoadAnimationFromID()]: Animation ID invalid or nil.")
         return
     end

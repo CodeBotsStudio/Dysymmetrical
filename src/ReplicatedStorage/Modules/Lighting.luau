@@ -1,8 +1,12 @@
+-- TODO: intro lighting support
+
 local Debris = game:GetService("Debris")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+
 local Network = require(ReplicatedStorage.Modules.Network)
+
 local LightingModule = {
     Properties = {
         Ambient = Color3.fromRGB(0, 0, 0), 
