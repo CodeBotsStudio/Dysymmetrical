@@ -24,9 +24,9 @@ jobs:
           # All boolean properties (true/false) must be wrapped in quotes
 
           # text-content: "" # Message displayed above the embed
-          # embed-title: "" # Title/heading for the embed
+          embed-title: "Dysymmetrical Activity Notification" # Title/heading for the embed
           # embed-description: "" # Description/body for the embed
-          # embed-colour: "#6a19e3" # Border color for the embed in hexadecimal, prefixed by a "#" within the string
+          embed-colour: "#999999ff" # Border color for the embed in hexadecimal, prefixed by a "#" within the string
           # embed-author-name: "" # Author splash text for the embed
           # embed-author-icon-url: "" # Link-to-an-image-asset-from-github-repo, in raw format
           # embed-author-url: "" # A link to the home of the repositroy itself
@@ -37,7 +37,7 @@ jobs:
           # embed-footer-timestamp: "" # "true" or "false", yes, in quotes.
           # show-commit-message: "" # Whether or not to show the commit message, I'd keep this at true
           # colour-changes: "true" # Uncertain
-          # show-changed-files: "true" # Whether or not to show what files were changed
+          show-changed-files: "true" # Whether or not to show what files were changed
           # show-commit-branch: "false" # Whether or not to specify what branch was changed
-          # show-commit-author: "true" # Whether or not to show who made the commit
-          # show-commit-link: "true" # Whether or not to display a link to the commit itself
+          show-commit-author: "true" # Whether or not to show who made the commit
+          show-commit-link: "false" # Whether or not to display a link to the commit itself
