@@ -20,7 +20,8 @@ local Attempt = 0
 
 -- An attempt to fix constantly having to go back to this script and re-set your datastore name and key whenever the SaveManager updates.
 -- These objects are parented to the SaveManager script. Place your datastore name and key in them, and it should never require you to go back and set them again, since those objects will not be updated as frequently as this script here.
--- You can modify the objects in Roblox Studio, or modify it in VSC by modifying the .model.json files adjacent to this script in src/ServerScriptService/Managers/SaveManager/DataStoreRef.model.json and src/ServerScriptService/Managers/SaveManager/DataStoreKey.model.json.
+-- If Rojo is being used, the values for these objects MUST be changed by going into their .model.json files adjacent to this script.
+-- If not, then they can just be changed through Studio in this script's children.
 local DataStoreHolder = script:FindFirstChild("DataStoreRef")
 local DataStoreKeyHolder = script:FindFirstChild("DataStoreKey")
 
@@ -28,16 +29,16 @@ local DataStoreRef = DataStoreHolder.Value
 if not DataStoreRef or DataStoreRef == "DATA_STORE_NAME_HERE" then
 	warn("[SaveManager] – WARNING: Datastore name not set!")
 	warn("Place the name of your datastore in ServerScriptService/Managers/SaveManager/DataStoreRef in Roblox Studio, or in src/ServerScriptService/Managers/SaveManager/DataStoreRef.model.json in Visual Studio Code.")
-	warn("You should only need to do this once– if this happens frequently, contact a Dysymmetrical developer.\n")
-	DataStoreRef = "Baleful" -- Dysymmetrical default datastore for testing purposes.
+	warn("You should only need to do this once – if this happens frequently, contact a Dysymmetrical developer.\n")
+	DataStoreRef = "Dysymmetrical" -- Dysymmetrical default datastore for testing purposes.
 end
 
 local DataStoreKey = DataStoreKeyHolder.Value
 if not DataStoreKey or DataStoreKey == "DATA_STORE_KEY_HERE" then
 	warn("[SaveManager] – WARNING: Key for datastore '"..DataStoreRef.."' not set!")
 	warn("Make sure you have the key of your datastore in ServerScriptService/Managers/SaveManager/DataStoreKey in Roblox Studio, or in src/ServerScriptService/Managers/SaveManager/DataStoreKey.model.json in Visual Studio Code.")
-	warn("Hopefully, you should only need to do this once– if this message appears frequently, contact a Dysymmetrical developer.\n")
-	DataStoreRef = "baleful" -- Dysymmetrical default datastore for testing purposes.
+	warn("Hopefully, you should only need to do this once – if this message appears frequently, contact a Dysymmetrical developer.\n")
+	DataStoreRef = "dysymmetrical" -- Dysymmetrical default datastore for testing purposes.
 end
 
 
@@ -52,11 +53,6 @@ repeat
 until Storage or Attempt > 50
 
 local StoreKey = DataStoreKey 
-
-
-
-
-
 
 --[[
 	Function for converting a ValueObject tree into a table.
@@ -205,7 +201,7 @@ function SaveManager:Init()
 
 
 
-	-- Watches for players joining the game through a custom version of Players.PlayerAdded. See in Utils.Player for more information..
+	-- Watches for players joining the game through a custom version of Players.PlayerAdded. See in Utils.Player for more information.
 	Utils.Player.ObservePlayers(function(Player: Player)
 		
 		-- Go through players in parallel, rather than one-by-one.
@@ -214,7 +210,6 @@ function SaveManager:Init()
 			-- Grab the player's data from the datastore, place it into a table for later use 
 			self.PlayerDatas[Player.UserId] = self:Load(Player)
 			local ThisPlayerData = self.PlayerDatas[Player.UserId] -- Gets its own variable to make things easier to read. Done in this way so this variable points to the entry in the table and not to the data itself.
-
 
 			-- Go through all achievements, set them up in folders for the player in question.
 			for AchievementGroupCodeName, AchievementGroup in Achievements do
@@ -259,21 +254,17 @@ function SaveManager:Init()
 				self.PlayerLeaderstatConns[Player.UserId]:Disconnect()
 			end
 
-			self:Save(Player, self.PlayerDatas[Player.UserId])
-
 		end)
+
+		self:Save(Player, self.PlayerDatas[Player.UserId])
 	end)
 
 
 	-- Mark some global saving code to be run if the server gets manually closed for one reason or another.
 	game:BindToClose(function()
 		for _, i in Players:GetPlayers() do
-			-- Deferred so it can save every player, rather than going through and saving them one-by-one.
-			task.defer(function()
 
-				self:Save(i, self.PlayerDatas[i.UserId])
-
-			end)
+			self:Save(i, self.PlayerDatas[i.UserId])
 
 		end
 	end)
@@ -513,47 +504,52 @@ end
 
 
 
---- Saves a given player's data. **Defer any calls to this function– it may take a while.**
+--- Saves a given player's data.
 function SaveManager:Save(Player: Player, Data: Folder)
-	local SaveFile = ConvertInstanceTreeToTable(Data)
+	task.defer(function()
+		local SaveFile = ConvertInstanceTreeToTable(Data)
 
-	--i just figured out pairs and ipairs are fucking useless as generalized iteration had been implemented fairly long ago. 
-	--i want to die.
+		--i just figured out pairs and ipairs are fucking useless as generalized iteration had been implemented fairly long ago. 
+		--i want to die. -dys
 
-	-- "Oh, thats good to know, actually." – Itred
+		-- "Oh, thats good to know, actually." – Itred
 
-	-- Grab the currently equipped killer and survivor.
-	for target, equipped in { Killer = SaveFile.Equipped.Killer, Survivor = SaveFile.Equipped.Survivor } do
+		-- fun fact: ipairs is still useful because of it being done in order for numeric tables! yippee!!!
+		-- seriorusly though, remove pairs. -dys
 
-		local Module = Utils.Instance.GetCharacterModule(target, equipped)
+		-- Grab the currently equipped killer and survivor.
+		for target, equipped in { Killer = SaveFile.Equipped.Killer, Survivor = SaveFile.Equipped.Survivor } do
 
-		if not Module or Module:HasTag("PreventSave") then
-			SaveFile["Equipped"][target] = script:FindFirstChild("Equipped"):FindFirstChild(target).Value --if it's smth like a dev item it doesn't save in publics
+			local Module = Utils.Instance.GetCharacterModule(target, equipped)
+
+			if not Module or Module:HasTag("PreventSave") then
+				SaveFile["Equipped"][target] = script:FindFirstChild("Equipped"):FindFirstChild(target).Value --if it's smth like a dev item it doesn't save in publics
+			end
+
 		end
 
-	end
+		-- Give a readout if needed.
+		if workspace:GetAttribute("DebugAllowed") == true then
+			print("Saving data for: " .. Player.Name, SaveFile)
+		end
 
-	-- Give a readout if needed.
-	if workspace:GetAttribute("DebugAllowed") == true then
-		print("Saving data for: " .. Player.Name, SaveFile)
-	end
+		-- Give storing data a few tries until it goes through, as datastores are too unreliable to be one-and-done.
+		local success
+		local Attempt = 0
+		repeat 
+			Attempt += 1
 
-	-- Give storing data a few tries until it goes through, as datastores are too unreliable to be one-and-done.
-	local success
-	local Attempt = 0
-	repeat 
-		Attempt += 1
-
-		success, _ = pcall(function()
-			Storage:UpdateAsync(`{StoreKey}_{Player.UserId}`, function(_old)
-				return SaveFile
+			success, _ = pcall(function()
+				Storage:UpdateAsync(`{StoreKey}_{Player.UserId}`, function(_old)
+					return SaveFile
+				end)
 			end)
-		end)
 
-	until success or Attempt > 99
+		until success or Attempt > 99
 
-	-- Some kind of handling for if the player's data cant be saved would be epic, to prevent total corruption of savedata. Attempt cap is high to try and mitigate this, but it'd still be good practice.
-	-- i believe that if it fails, the previous data remains so it doesn't get corrupted; i'll be unmarking this as a todo but correct me if i'm wrong
+		-- Some kind of handling for if the player's data cant be saved would be epic, to prevent total corruption of savedata. Attempt cap is high to try and mitigate this, but it'd still be good practice.
+		-- i believe that if it fails, the previous data remains so it doesn't get corrupted; i'll be unmarking this as a todo but correct me if i'm wrong
+	end)
 end
 
 return SaveManager
