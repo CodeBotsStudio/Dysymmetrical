@@ -1,8 +1,11 @@
+name: Discord Commit Action
+
 on:
   push:
     branches:
       - main
   pull_request:
+
 
 jobs:
 
@@ -15,7 +18,7 @@ jobs:
       - uses: tristanbudd/discord-commit-github-action@master
         with:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
-          github-token: ${{ secrets.GIT_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
           # Remove the '#' prepending property lines to enable/disable them
           # All boolean properties (true/false) must be wrapped in quotes
