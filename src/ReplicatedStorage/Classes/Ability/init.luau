@@ -1,12 +1,46 @@
 --!nocheck
+
+--TODO: mayyyyyyybe use janitor in this and link it to the character
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local ServerScriptService = game:GetService("ServerScriptService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Signal = require(ReplicatedStorage.Utils.Signal)
+
+local UtilPaths = {
+    InputManager = "PlayerScripts.InputManager",
+    SpeedManager = "Character.PlayerAttributeScripts.SpeedManager",
+    FOVManager = "Character.PlayerAttributeScripts.FOVManager",
+    EffectManager = "Character.PlayerAttributeScripts.EffectManager",
+    EmoteManager = "Character.Miscellaneous.EmoteManager",
+    TurnToMoveDirection = "PlayerScripts.Miscellaneous.TurnToMoveDirection",
+    CommonFunctions = "ServerScriptService.System.CommonFunctions",
+}
+local function GetUtilPath(Player: Player, Name: string)
+    if not UtilPaths[Name] then
+        return
+    end
+
+    local path = UtilPaths[Name]
+
+    local FirstStep = path:split(".")[1]:lower()
+    -- not using `game:GetService()` because idfk
+    local Beginning = FirstStep == "Character" and Player.Character or (game[FirstStep] or Player[FirstStep])
+
+    local FinalPath = path:gsub(FirstStep, "", 1)
+
+    local FoundModule = Utils.Instance.FindFirstChild(Beginning, FinalPath, 0)
+    if not FoundModule or not FoundModule:IsA("ModuleScript") then
+        warn("Couldn't find script in '"..path.."'!")
+        warn(debug.traceback())
+        return
+    end
+
+    return require(FoundModule)
+end
 
 local AbilityType = {}
 
@@ -149,11 +183,18 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 --do i give a fuck? no.
                 --thanks byfron.
 
-                self.OwnerProperties = {
+                self.OwnerProperties = setmetatable({
                     Character = self.Owner.Character,
                     HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
-                    CommonFunctions = require(ServerScriptService.System.CommonFunctions),
-                }
+                }, {
+                    __index = function(props, name: string)
+                        local Util = GetUtilPath(self.Owner, name)
+                        if Util then
+                            props[name] = Util
+                        end
+                        return Util
+                    end,
+                })
 
                 table.insert(self.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
                     if player == plr and abilityName == self.Name and self:CanUse() then
@@ -210,16 +251,18 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 return
             end
 
-            self.OwnerProperties = {
+            self.OwnerProperties = setmetatable({
                 Character = self.Owner.Character,
                 HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
-                InputManager = require(self.Owner.PlayerScripts.InputManager),
-                SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
-                FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),
-                EffectManager = require(self.Owner.Character.PlayerAttributeScripts.EffectManager),
-                EmoteManager = require(self.Owner.Character.Miscellaneous.EmoteManager),
-                TurnToMoveDirection = require(self.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
-            }
+            }, {
+                __index = function(props, name: string)
+                    local Util = GetUtilPath(self.Owner, name)
+                    if Util then
+                        props[name] = Util
+                    end
+                    return Util
+                end,
+            })
 
             if #self.UseAnimation > 0 then
                 --nesting in pcall so that if there's nothing it doesn't matter
@@ -448,12 +491,111 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
     }
 end
 
+function AbilityType.GetDefaultPassiveAbilitySettings()
+    return Utils.Type.DeepTableOverwrite({
+        Passive = true,
+
+        Init = function(self: Ability, charModule: any, plr: Player)
+            self.Owner = plr
+            self.CharModule = charModule
+            self.UsesLeft = self.UseSettings.InitialUses
+            if RunService:IsServer() then
+                Utils.Misc.Print("Initting "..self.Name.." ability for "..plr.Name)
+
+                --is this exploitable? yes.
+                --do i give a fuck? no.
+                --thanks byfron.
+
+                self.OwnerProperties = setmetatable({
+                    Character = self.Owner.Character,
+                    HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
+                }, {
+                    __index = function(props, name: string)
+                        local Util = GetUtilPath(self.Owner, name)
+                        if Util then
+                            props[name] = Util
+                        end
+                        return Util
+                    end,
+                })
+
+                --clearing ability connections to dispose of this code when the player gets readded
+                table.insert(self.Connections, plr.CharacterAdded:Connect(function()
+                    self:Destroy()
+                end))
+
+                --executes any extra initialization code that the ability might need
+                if self.ExtraInit then
+                    self:ExtraInit()
+                end
+
+                return
+            end
+
+            self.OwnerProperties = setmetatable({
+                Character = self.Owner.Character,
+                HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
+            }, {
+                __index = function(props, name: string)
+                    local Util = GetUtilPath(self.Owner, name)
+                    if Util then
+                        props[name] = Util
+                    end
+                    return Util
+                end,
+            })
+
+            --clearing ability connections to dispose of this code when the player gets readded
+            table.insert(self.Connections, self.Owner.CharacterAdded:Connect(function()
+                self:Destroy()
+            end))
+
+            --executes any extra initialization code that the ability might need
+            if self.ExtraInit then
+                self:ExtraInit()
+            end
+        end,
+        ReloadAnimation = function(self: Ability, id: string)
+            warn("Ability \""..self.Name.."\" is a Passive, so no use animation can be assigned to it!")
+        end,
+        PlayUseAnimation = function(self)
+            warn("Ability \""..self.Name.."\" is a Passive, so no use animation is available!")
+        end,
+        AttemptUse = function(self: Ability)
+            warn("Ability \""..self.Name.."\" is a Passive, so it can't be used through input!")
+        end,
+        ChangeAbilityCharges = function(self: Ability, _Type: "Add" | "Set" | "Take", _amount: number)
+            warn("Ability \""..self.Name.."\" is a Passive, so charges aren't applied!")
+        end,
+
+        PlayUseAnimationOnUse = false,
+
+        Cooldown = 0,
+
+        CanUse = function(_self: Ability): boolean
+            return true
+        end,
+        UseConditions = function(_self: Ability): boolean
+            return true
+        end,
+
+        Duration = 0,
+
+        DisableOtherAbilitiesOnPerform = false,
+        DisableSlashOnPerform = false,
+    }, AbilityType.GetDefaultAbilitySettings())
+end
+
 --- Creates an ability with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function AbilityType.CreateAbility(Props: Ability): Ability
     Props = Props or {}
     
-    Utils.Type.DeepTableWrite(Props, AbilityType.GetDefaultAbilitySettings())
+    Utils.Type.DeepTableWrite(Props,
+        Props.Passive and
+            AbilityType.GetDefaultPassiveAbilitySettings() or
+            AbilityType.GetDefaultAbilitySettings()
+    )
 
     return Props
 end
