@@ -17,31 +17,33 @@ function RewardNotifications:Init()
     local AchievementPrefab = Utils.Instance.FindFirstChild(script, "AchievementNotification")
 
     Network:SetConnection("ShowRewardNotification", "REMOTE_EVENT", function(Module: ModuleScript | string, Type: string)
-        if not Type then
-            Type = "QuotedGrantedSkin"
-        end
+        Type = Type or "QuotedGrantedSkin"
 
-        local IsAchievement = Type:lower():find("achievement")
+        local TypeLower = Type:lower()
+
+        local IsAchievement = TypeLower:find("achievement")
 
         local Card = (IsAchievement and AchievementPrefab or Prefab):Clone()
         local Info = IsAchievement and Utils.Instance.GetAchievementData(Module) or require(Module)
         
         Card.ImageContainer.Render.Image = IsAchievement and Info.Icon or Info.Config.Render
 
-        local Text = (Type:lower():find("bought") and "Bought" or "Received").." \""..tostring(Info.Config.Name).."\" "
+        local Text = (TypeLower:find("bought") and "Bought" or "Received").." \""..tostring(Info.Config.Name).."\" "
 
-        if Type:lower():find("emote") then
+        if TypeLower:find("emote") then
             Text = Text.." emote"
-        elseif Type:lower():find("skin") then
+        elseif TypeLower:find("skin") then
             Text = Text.." skin"
-        elseif Type:lower():find("achievement") then
+        elseif TypeLower:find("character") then
+            Text = Text.." character"
+        elseif IsAchievement then
             Text = "Achievement granted!"
         end
 
         Card.TextContainer.RewardLabel.Text = Text
         
         local Quote = Info.Config and Info.Config.Quote or Info.Title
-        if Type:lower():find("quoted") then
+        if TypeLower:find("quoted") then
             Quote = "\""..Quote.."\""
         end
 

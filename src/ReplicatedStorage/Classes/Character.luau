@@ -101,6 +101,23 @@ export type Survivor = {
             [string]: string | {string} | {[string]: string | {string}},
         },
 
+        --[=[
+            The names of the milestones for this character, defined by the number of the level they're granted on.    
+        
+            e.g. for making a Milestone II (lvl 50), I would define it like so:
+
+            ```lua
+            [CHARACTER_VARIABLE_NAME] = Character.CreateKiller({
+                Config = {
+                    Milestones = {
+                        [50] = "CharacterMilestoneII", -- The level it's granted on -> The name of the skin's module
+                    },
+                },
+            })
+            ```
+        ]=]
+        Milestones: {[number]: string},
+
         --- Any SFX that you may want to play with the character.
         --- Voicelines go in `Voicelines`.
         Sounds: {
@@ -343,6 +360,23 @@ export type Killer = {
             --- Chase music: 15 studs (will stop when back at 60).
             L4: string,
         },
+
+        --[=[
+            The names of the milestones for this character, defined by the number of the level they're granted on.    
+        
+            e.g. for making a Milestone II (lvl 50), I would define it like so:
+
+            ```lua
+            [CHARACTER_VARIABLE_NAME] = Character.CreateKiller({
+                Config = {
+                    Milestones = {
+                        [50] = "CharacterMilestoneII", -- The level it's granted on -> The name of the skin's module
+                    },
+                },
+            })
+            ```
+        ]=]
+        Milestones: {[number]: string},
 
         --- CLIENT FUNCTION: Empty function to execute code when the killer intro initializes (loads its content).
         --- 

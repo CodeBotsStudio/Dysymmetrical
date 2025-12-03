@@ -239,6 +239,62 @@ function CommonFunctions._GrantEXPToPlayer(Player: Player, amount: number, visua
 
 	local CharValue = Utils.PlayerData.GetPlayerOwned(Player, Role.Value.."s."..CharacterName, false)
 	CharValue.Value += amount
+
+	local CharModule = require(Utils.Instance.GetCharacterModule(Role.Value, CharacterName))
+	if CharModule.Config.Milestones then
+		local CurrentLevel, _EXPRemaining, _EXPForNextLevel = Utils.Math.CalculateLevelFromEXP(CharValue.Value)
+		for Level, Skin in CharModule.Config.Milestones do
+			if Level <= CurrentLevel then
+				
+			end
+		end
+	end
+end
+
+--- Grants a character / skin to a player.
+--- 
+--- Should be called from achievements or milestone granting.
+function CommonFunctions.GrantCharacterItemToPlayer(Player: Player, Type: "Killer" | "Survivor", CharacterName: string, SkinName: string)
+	--shouldn't give anything if in a private server
+	if #game.PrivateServerId > 0 then
+		return
+	end
+
+	--checks for the parent
+	--if SkinName is available, get the Skins folder
+	--if not, get the role's folder
+	local Parent = Utils.Instance.FindFirstChild(Player, "PlayerData.Purchased."..(SkinName and "Skins" or Type.."s"), 0)
+
+	--if the value that's about to be created is already there, don't do anything
+	if Utils.Instance.FindFirstChild(Parent, CharacterName..("."..SkinName or ""), 0) then
+		return
+	end
+
+	--if the module supposedly doesn't exist, don't do anything
+	local CharacterModule = Utils.Instance.GetCharacterModule(Type, CharacterName, SkinName)
+	if not CharacterModule then
+		return
+	end
+
+	--if SkinName is available, get an existing character skins's folder or create it if non-existent, then set the result as the value's parent
+	if SkinName then
+		local CharFolder = Parent:FindFirstChild(CharacterName)
+		if not CharFolder then
+			CharFolder = Instance.new("Folder")
+			CharFolder.Name = CharacterName
+			CharFolder.Parent = Parent
+		end
+
+		Parent = CharFolder
+	end
+
+	--create the item's value
+	local Value = Instance.new("IntValue")
+	Value.Name = SkinName or CharacterName --if SkinName is available, it should be named that
+	Value.Parent = Parent
+
+	--display the reward notification
+	Network:FireClientConnection(Player, "ShowRewardNotification", "REMOTE_EVENT", CharacterModule, "QuotedGranted"..(SkinName and "Skin" or "Character"))
 end
 
 --- Updates a player's stat specified by a `string` path.
