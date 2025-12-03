@@ -1,5 +1,5 @@
 return {
-    Name = "Turn Player Into Killer/Survivor",
+    Name = "Kill Player",
     Executable = true,
     Params = {
         {
@@ -7,24 +7,9 @@ return {
             Type = "String",
             Default = "...",
         },
-        {
-            Title = "Character Type",
-            Type = "String",
-            DefaultValue = "...",
-            Cache = {
-                Options = {
-                    "Survivor",
-                    "Killer",
-                },
-            },
-        },
     },
-    Executed = function(self, Player: string, Type: "Survivor" | "Killer")
+    Executed = function(self, Player: string)
         if typeof(Player) ~= "string" then
-            return
-        end
-
-        if not table.find(self.Params[2].Cache.Options, Type) then
             return
         end
 
