@@ -4,43 +4,12 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Signal = require(ReplicatedStorage.Utils.Signal)
-
-local UtilPaths = {
-    InputManager = "PlayerScripts.InputManager",
-    SpeedManager = "Character.PlayerAttributeScripts.SpeedManager",
-    FOVManager = "Character.PlayerAttributeScripts.FOVManager",
-    EffectManager = "Character.PlayerAttributeScripts.EffectManager",
-    EmoteManager = "Character.Miscellaneous.EmoteManager",
-    TurnToMoveDirection = "PlayerScripts.Miscellaneous.TurnToMoveDirection",
-    CommonFunctions = "ServerScriptService.System.CommonFunctions",
-}
-local function GetUtilPath(Player: Player, Name: string)
-    if not UtilPaths[Name] then
-        return
-    end
-
-    local path = UtilPaths[Name]
-
-    local FirstStep = path:split(".")[1]:lower()
-    -- not using `game:GetService()` because idfk
-    local Beginning = FirstStep == "Character" and Player.Character or (game[FirstStep] or Player[FirstStep])
-
-    local FinalPath = path:gsub(FirstStep, "", 1)
-
-    local FoundModule = Utils.Instance.FindFirstChild(Beginning, FinalPath, 0)
-    if not FoundModule or not FoundModule:IsA("ModuleScript") then
-        warn("Couldn't find script in '"..path.."'!")
-        warn(debug.traceback())
-        return
-    end
-
-    return require(FoundModule)
-end
 
 local AbilityType = {}
 
@@ -183,18 +152,11 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 --do i give a fuck? no.
                 --thanks byfron.
 
-                self.OwnerProperties = setmetatable({
+                self.OwnerProperties = {
                     Character = self.Owner.Character,
                     HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
-                }, {
-                    __index = function(props, name: string)
-                        local Util = GetUtilPath(self.Owner, name)
-                        if Util then
-                            props[name] = Util
-                        end
-                        return Util
-                    end,
-                })
+                    CommonFunctions = require(ServerScriptService.System.CommonFunctions),
+                }
 
                 table.insert(self.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
                     if player == plr and abilityName == self.Name and self:CanUse() then
@@ -251,18 +213,16 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 return
             end
 
-            self.OwnerProperties = setmetatable({
+            self.OwnerProperties = {
                 Character = self.Owner.Character,
                 HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
-            }, {
-                __index = function(props, name: string)
-                    local Util = GetUtilPath(self.Owner, name)
-                    if Util then
-                        props[name] = Util
-                    end
-                    return Util
-                end,
-            })
+                InputManager = require(self.Owner.PlayerScripts.InputManager),
+                SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
+                FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),
+                EffectManager = require(self.Owner.Character.PlayerAttributeScripts.EffectManager),
+                EmoteManager = require(self.Owner.Character.Miscellaneous.EmoteManager),
+                TurnToMoveDirection = require(self.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
+            }
 
             if #self.UseAnimation > 0 then
                 --nesting in pcall so that if there's nothing it doesn't matter
@@ -506,18 +466,11 @@ function AbilityType.GetDefaultPassiveAbilitySettings()
                 --do i give a fuck? no.
                 --thanks byfron.
 
-                self.OwnerProperties = setmetatable({
+                self.OwnerProperties = {
                     Character = self.Owner.Character,
                     HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
-                }, {
-                    __index = function(props, name: string)
-                        local Util = GetUtilPath(self.Owner, name)
-                        if Util then
-                            props[name] = Util
-                        end
-                        return Util
-                    end,
-                })
+                    CommonFunctions = require(ServerScriptService.System.CommonFunctions),
+                }
 
                 --clearing ability connections to dispose of this code when the player gets readded
                 table.insert(self.Connections, plr.CharacterAdded:Connect(function()
@@ -532,18 +485,16 @@ function AbilityType.GetDefaultPassiveAbilitySettings()
                 return
             end
 
-            self.OwnerProperties = setmetatable({
+            self.OwnerProperties = {
                 Character = self.Owner.Character,
                 HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
-            }, {
-                __index = function(props, name: string)
-                    local Util = GetUtilPath(self.Owner, name)
-                    if Util then
-                        props[name] = Util
-                    end
-                    return Util
-                end,
-            })
+                InputManager = require(self.Owner.PlayerScripts.InputManager),
+                SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
+                FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),
+                EffectManager = require(self.Owner.Character.PlayerAttributeScripts.EffectManager),
+                EmoteManager = require(self.Owner.Character.Miscellaneous.EmoteManager),
+                TurnToMoveDirection = require(self.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
+            }
 
             --clearing ability connections to dispose of this code when the player gets readded
             table.insert(self.Connections, self.Owner.CharacterAdded:Connect(function()
