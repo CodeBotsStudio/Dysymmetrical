@@ -236,6 +236,7 @@ function CommonFunctions._GrantEXPToPlayer(Player: Player, amount: number, visua
 		return
 	end
 	local CharacterName = Player.Character:GetAttribute("CharacterName")
+	local SkinName = Player.Character:GetAttribute("CharacterSkinName")
 
 	local CharValue = Utils.PlayerData.GetPlayerOwned(Player, Role.Value.."s."..CharacterName, false)
 	CharValue.Value += amount
@@ -245,7 +246,7 @@ function CommonFunctions._GrantEXPToPlayer(Player: Player, amount: number, visua
 		local CurrentLevel, _EXPRemaining, _EXPForNextLevel = Utils.Math.CalculateLevelFromEXP(CharValue.Value)
 		for Level, Skin in CharModule.Config.Milestones do
 			if Level <= CurrentLevel then
-				
+				CommonFunctions.GrantCharacterItemToPlayer(Player, Role.Value, CharacterName, SkinName)
 			end
 		end
 	end
