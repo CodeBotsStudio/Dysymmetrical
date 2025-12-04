@@ -13,7 +13,7 @@ return function()
         end
 
         if EmoteFolder:FindFirstChild(emoteName) then
-            require(EmoteFolder[emoteName]):Init(plr, plr.Character.Humanoid.Animator)
+            require(EmoteFolder[emoteName]):Init(plr)
         end
     end)
 end

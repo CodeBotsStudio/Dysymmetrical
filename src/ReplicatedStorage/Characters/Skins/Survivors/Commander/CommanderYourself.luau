@@ -7,9 +7,7 @@ local RunService = game:GetService("RunService")
 local Character = require(ReplicatedStorage.Classes.Character)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
-local CommanderYourself: Character.Survivor = Utils.Type.CopyTable(require(Utils.Instance.GetCharacterModule("Survivor", "Commander")))
-
-Utils.Type.DeepTableOverwrite(CommanderYourself, {
+return Character.CreateSkin("Survivor", "Commander", {
     Config = {
         Name = "Yourself",
         Quote = "Hey, it's you!",
@@ -24,5 +22,3 @@ Utils.Type.DeepTableOverwrite(CommanderYourself, {
         Utils.Instance.FindFirstChild(Char, "Humanoid"):ApplyDescription(Players:GetHumanoidDescriptionFromUserId(self.Owner.UserId))
     end
 })
-
-return CommanderYourself

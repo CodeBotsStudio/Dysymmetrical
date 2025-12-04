@@ -541,14 +541,14 @@ end
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function AbilityType.CreateAbility(Props: Ability): Ability
     Props = Props or {}
-    
-    Utils.Type.DeepTableWrite(Props,
-        Props.Passive and
-            AbilityType.GetDefaultPassiveAbilitySettings() or
-            AbilityType.GetDefaultAbilitySettings()
-    )
 
-    return Props
+    local Final = Props.Passive and
+        AbilityType.GetDefaultPassiveAbilitySettings() or
+        AbilityType.GetDefaultAbilitySettings()
+    
+    Utils.Type.DeepTableOverwrite(Final, Props)
+
+    return Final
 end
 
 return AbilityType

@@ -114,7 +114,7 @@ function EmoteManager:ReloadAvailableContent(EquippedEmotes: Folder)
 
 		self.EmotesAvailable[emote.Value] = Utils.Type.CopyTable(require(Module))
 		Network:FireServerConnection("InitEmote", "REMOTE_EVENT", Module.Name)
-		self.EmotesAvailable[emote.Value]:Init(Players.LocalPlayer, self.Animator)
+		self.EmotesAvailable[emote.Value]:Init(Players.LocalPlayer)
 	end
 end
 

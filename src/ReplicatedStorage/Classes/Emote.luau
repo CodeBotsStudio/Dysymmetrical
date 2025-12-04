@@ -41,16 +41,6 @@ export type Emote = {
     Owner: Player,
 }
 
-local function dictLength(dict: {[string]: any}): number
-    local length = 0
-
-    for _, _ in dict do
-        length += 1
-    end
-
-    return length
-end
-
 --- Emote preset for customization.
 function EmoteClass.GetDefaultEmoteSettings(): Emote
     return {
@@ -71,9 +61,10 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
 
         AnimationTracks = {},
         --NOTE: remember to pass the player on init
-        Init = function(self: Emote, player: Player, animator: Animator)
+        Init = function(self: Emote, player: Player)
             self.Owner = player
-            self.Animator = animator
+
+            print("initting really")
 
             if RunService:IsServer() then
                 --NOTE: i just noticed that forsaken uses a whole data array to store everything from a player and get the index of it instead of checking it for everyone.
@@ -124,8 +115,10 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                 end
             end
 
+            print(self.AnimationIds, self.AnimationTracks)
+
             local char = self.Owner.Character
-            self.HumanoidRootPart = char.HumanoidRootPart
+            self.HumanoidRootPart = char.Humanoid.RootPart
             self.SpeedManager = require(char.PlayerAttributeScripts.SpeedManager)
             self.TurnToMoveDirection = require(Players.LocalPlayer.PlayerScripts.Miscellaneous.TurnToMoveDirection)
 
@@ -186,10 +179,14 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                     return
                 end
 
+                print(self.AnimationTracks)
+
                 if typeof(self.AnimationIds) == "string" then
                     self.TrackPlaying = self.AnimationTracks[self.AnimationIds]
                 else
-                    self.TrackPlaying = self.AnimationTracks[rand:NextInteger(1, dictLength(self.AnimationTracks))]
+                    local AsTable = Utils.Type.DictToTable(self.AnimationTracks)
+                    print(AsTable)
+                    self.TrackPlaying = AsTable[rand:NextInteger(1, #AsTable)]
                 end
 
                 Network:FireServerConnection("PlayEmote", "REMOTE_EVENT", self.Config.Name, self.TrackPlaying.Sound)
@@ -197,7 +194,6 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
         end,
         Behaviour = function() end,
 
-        Animator = nil,
         HumanoidRootPart = nil,
         SpeedManager = nil,
         TurnToMoveDirection = nil,
@@ -210,10 +206,11 @@ end
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function EmoteClass.CreateEmote(Props: Emote): Emote
     Props = Props or {}
+    local Final = EmoteClass.GetDefaultEmoteSettings()
     
-    Utils.Type.DeepTableWrite(Props, EmoteClass.GetDefaultEmoteSettings())
+    Utils.Type.DeepTableOverwrite(Final, Props)
 
-    return Props
+    return Final
 end
 
 return EmoteClass

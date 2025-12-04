@@ -53,7 +53,7 @@ function EmotePanel:Init()
     local function ReloadContent()
         for _, i in EmoteButtonContainer:GetChildren() do
             local EquippedEmote = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
-            local EmoteModule = EquippedEmote and #EquippedEmote > 0 and Utils:GetEmoteModule(EquippedEmote)
+            local EmoteModule = EquippedEmote and #EquippedEmote > 0 and Utils.Instance.GetEmoteModule(EquippedEmote)
             if EmoteModule then
                 i:SetAttribute("Name", EquippedEmote)
                 EmoteModule = require(EmoteModule)

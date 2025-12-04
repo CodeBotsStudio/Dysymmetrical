@@ -219,10 +219,11 @@ end
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function CharTypes.CreateSurvivor(Props: Survivor): Survivor
     Props = Props or {}
-    
-    Utils.Type.DeepTableWrite(Props, CharTypes.GetDefaultSurvivorSettings())
+    local Final = CharTypes.GetDefaultSurvivorSettings()
 
-    return Props
+    Utils.Type.DeepTableOverwrite(Final, Props)
+
+    return Final
 end
 
 --- Type used for killer characters.
@@ -516,10 +517,28 @@ end
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function CharTypes.CreateKiller(Props: Killer): Killer
     Props = Props or {}
+    local Final = CharTypes.GetDefaultKillerSettings()
     
-    Utils.Type.DeepTableWrite(Props, CharTypes.GetDefaultKillerSettings())
+    Utils.Type.DeepTableOverwrite(Final, Props)
 
-    return Props
+    return Final
+end
+
+--- Creates a skin of a character with the settings specified in `Props`.
+--- 
+--- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
+function CharTypes.CreateSkin<T>(Type: "Killer" | "Survivor", CharacterName: string, Props: T): T
+    local RootCharacter = Utils.Instance.GetCharacterModule(Type, CharacterName)
+    if not RootCharacter then
+        return
+    end
+
+    Props = Props or {}
+
+    local Final = Utils.Type.CopyTable(require(RootCharacter))
+    Utils.Type.DeepTableOverwrite(Final, Props)
+
+    return Final
 end
 
 return CharTypes

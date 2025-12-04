@@ -15,8 +15,7 @@ function SlashModule.New(Props: Ability?): Ability
 
 	-- Doesn't require you to unintuitively slot in an empty table for it to work at all– someone was confused about this a bit earlier, so I figured a fix was in order.
 	Props = Props or {}
-
-	Utils.Type.DeepTableWrite(Props, Ability.CreateAbility({
+	local Final = Ability.CreateAbility({
 		Name = "Slash",
 		InputName = "Slash",
 		Cooldown = 2,
@@ -52,9 +51,11 @@ function SlashModule.New(Props: Ability?): Ability
 		IncreaseDamage = function(self: Ability.Ability, amount: number)
 			self.Damage += amount
 		end,
-	}))
+	})
 
-	return Props
+	Utils.Type.DeepTableOverwrite(Final, Props)
+
+	return Final
 end
 
 return SlashModule
