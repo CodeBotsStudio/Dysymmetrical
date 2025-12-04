@@ -927,7 +927,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
         self.LoadedItems[Type.."s"][name] = Card
         self.ItemModules[Type.."s"][name] = Info
         Container.Interact.MouseEnter:Connect(function()
-            if CanMakePreviews then
+            if CanMakePreviews and Type ~= "Emote" then
                 TweenService:Create(Preview, TweenInfo.new(0.25), {
                     ImageTransparency = 0
                 }):Play()
@@ -941,7 +941,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end)
         Container.Interact.MouseLeave:Connect(function()
-            if CanMakePreviews then
+            if CanMakePreviews and Type ~= "Emote" then
                 TweenService:Create(Preview, TweenInfo.new(0.25), {
                     ImageTransparency = 1
                 }):Play()
