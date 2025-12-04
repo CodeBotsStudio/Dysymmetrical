@@ -1,5 +1,7 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local LERP_ALPHA = 0.25
@@ -26,14 +28,14 @@ return {
 				local torso = Utils.Instance.FindFirstChild(character, "Torso") :: BasePart
 				local head = Utils.Instance.FindFirstChild(character, "Head") :: BasePart
 
-				local joints = {
+				local joints: {[string]: Motor6D} = {
 					RootJoint = rootPart:FindFirstChild("RootJoint"),
 					Neck = torso:FindFirstChild("Neck"),
 					RightShoulder = torso:FindFirstChild("Right Shoulder"),
 					LeftShoulder = torso:FindFirstChild("Left Shoulder"),
 					RightHip = torso:FindFirstChild("Right Hip"),
 					LeftHip = torso:FindFirstChild("Left Hip"),
-				} :: {[string]: Motor6D}
+				}
 
 				local defaultC0s = {}
 				local offsets = {}
@@ -102,6 +104,10 @@ return {
 							continue
 						end
 						joint.C0 = defaultC0s[name] * offsets[name]
+					end
+
+					if player ~= Players.LocalPlayer then
+						return
 					end
 
 					local cameraLook = camera.CFrame.LookVector
