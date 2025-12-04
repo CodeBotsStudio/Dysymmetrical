@@ -27,17 +27,17 @@ local DataStoreKeyHolder = script:FindFirstChild("DataStoreKey")
 
 local DataStoreRef = DataStoreHolder.Value 
 if not DataStoreRef or DataStoreRef == "DATA_STORE_NAME_HERE" then
-	warn("[SaveManager] – WARNING: Datastore name not set!")
-	warn("Place the name of your datastore in ServerScriptService/Managers/SaveManager/DataStoreRef in Roblox Studio, or in src/ServerScriptService/Managers/SaveManager/DataStoreRef.model.json in Visual Studio Code.")
-	warn("You should only need to do this once – if this happens frequently, contact a Dysymmetrical developer.\n")
+	warn("\n[SaveManager] – WARNING: Datastore name not set!"
+		.."\nPlace the name of your datastore in ServerScriptService/Managers/SaveManager/DataStoreRef in Roblox Studio, or in src/ServerScriptService/Managers/SaveManager/DataStoreRef.model.json in Visual Studio Code."
+		.."\nYou should only need to do this once – if this happens frequently, contact a Dysymmetrical developer.")
 	DataStoreRef = "Dysymmetrical" -- Dysymmetrical default datastore for testing purposes.
 end
 
 local DataStoreKey = DataStoreKeyHolder.Value
 if not DataStoreKey or DataStoreKey == "DATA_STORE_KEY_HERE" then
-	warn("[SaveManager] – WARNING: Key for datastore '"..DataStoreRef.."' not set!")
-	warn("Make sure you have the key of your datastore in ServerScriptService/Managers/SaveManager/DataStoreKey in Roblox Studio, or in src/ServerScriptService/Managers/SaveManager/DataStoreKey.model.json in Visual Studio Code.")
-	warn("Hopefully, you should only need to do this once – if this message appears frequently, contact a Dysymmetrical developer.\n")
+	warn("\n[SaveManager] – WARNING: Key for datastore '"..DataStoreRef.."' not set!"
+		.."\nMake sure you have the key of your datastore in ServerScriptService/Managers/SaveManager/DataStoreKey in Roblox Studio, or in src/ServerScriptService/Managers/SaveManager/DataStoreKey.model.json in Visual Studio Code."
+		.."\nHopefully, you should only need to do this once – if this message appears frequently, contact a Dysymmetrical developer.")
 	DataStoreRef = "dysymmetrical" -- Dysymmetrical default datastore for testing purposes.
 end
 
