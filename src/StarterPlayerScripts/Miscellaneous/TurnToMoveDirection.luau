@@ -25,16 +25,16 @@ return {
 				end
 
 				local rootPart = humanoid.RootPart
-				local torso = Utils.Instance.FindFirstChild(character, "Torso") :: BasePart
+				local torso = Utils.Instance.FindFirstChild(character, "Torso", 0.5) or Utils.Instance.FindFirstChild(character, "LowerTorso", 0.5) :: BasePart
 				local head = Utils.Instance.FindFirstChild(character, "Head") :: BasePart
 
 				local joints: {[string]: Motor6D} = {
-					RootJoint = rootPart:FindFirstChild("RootJoint"),
-					Neck = torso:FindFirstChild("Neck"),
-					RightShoulder = torso:FindFirstChild("Right Shoulder"),
-					LeftShoulder = torso:FindFirstChild("Left Shoulder"),
-					RightHip = torso:FindFirstChild("Right Hip"),
-					LeftHip = torso:FindFirstChild("Left Hip"),
+					RootJoint = rootPart:FindFirstChild("RootJoint") or torso:FindFirstChild("Root"),
+					Neck = torso:FindFirstChild("Neck") or head:FindFirstChild("Neck"),
+					RightShoulder = torso:FindFirstChild("Right Shoulder") or Utils.Instance.FindFirstChild(character, "RightUpperArm.RightShoulder", 0),
+					LeftShoulder = torso:FindFirstChild("Left Shoulder") or Utils.Instance.FindFirstChild(character, "LeftUpperArm.LeftShoulder", 0),
+					RightHip = torso:FindFirstChild("Right Hip") or Utils.Instance.FindFirstChild(character, "RightUpperLeg.RightHip", 0),
+					LeftHip = torso:FindFirstChild("Left Hip") or Utils.Instance.FindFirstChild(character, "LeftUpperLeg.LeftHip", 0),
 				}
 
 				local defaultC0s = {}
