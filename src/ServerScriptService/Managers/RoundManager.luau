@@ -40,13 +40,13 @@ local RoundManager = {
 function RoundManager:Init()
     RoundManager.CurrentRound.Killers = {}
     TimeManager.OnTimerEnd = function()
-        RoundManager:StartRound()
+        RoundManager.StartRound()
     end
 end
 
 --- Starts the round right away. There's no more mystery to it.
 --- Chooses a killer, resets their malice, increases everyone else's in the round by 1, spawns a map, sets up all characters, sets the round time and plays the killer intro. 
-function RoundManager:StartRound()
+function RoundManager.StartRound()
     local LoadedPlayers = Utils.Player.GetLoadedPlayers(false)
     Utils.Player.Fade(LoadedPlayers, "In", 0.6, true)
     
@@ -74,7 +74,7 @@ function RoundManager:StartRound()
     --sets up every player
     for i, Player: Player in PlayersOrderedByMalice do
         local IsKiller = i <= workspace:GetAttribute("KillersAllowed")
-        RoundManager.Utils:SetupPlayer(Player, IsKiller and i or nil)
+        RoundManager.Utils.SetupPlayer(Player, IsKiller and i or nil)
 
         --if it's a survivor then add it to the PlayersRemaining list
         if RoundManager.CanSpawnKiller and IsKiller then
@@ -95,7 +95,7 @@ function RoundManager:StartRound()
     RoundState.Value = "InRound"
     TimeManager:SetTime(TimeManager.Config.RoundTime)
     TimeManager.OnTimerEnd = function()
-        RoundManager.Callables:EndRound("Survivors")
+        RoundManager.Callables.EndRound("Survivors")
     end
     workspace:SetAttribute("LMS", false)
     
@@ -107,19 +107,19 @@ function RoundManager:StartRound()
                 break
             end
 
-            RoundManager.Utils:CheckForKillerWin()
+            RoundManager.Utils.CheckForKillerWin()
         end
     end)
 
     --final call to begin the round
-    RoundManager.Callables:PlayIntro()
+    RoundManager.Callables.PlayIntro()
 end
 
 --- Function called right when starting a round to unanchor every player after the default intro duration.
 --- Also removes the black fade from all players if there's no killer.
-function RoundManager.Callables:PlayIntro()
+function RoundManager.Callables.PlayIntro()
     if not RoundManager.CanSpawnKiller then
-        Utils.Player.Fade(Utils:GetLoadedPlayers(false), "Out", 0.6, false)
+        Utils.Player.Fade(Utils.Player.GetLoadedPlayers(false), "Out", 0.6, false)
     end
     --whatever happens after since every intro lasts the same
     RoundManager.Threads["IntroEndingThread"] = task.delay(3, function()
@@ -131,7 +131,7 @@ function RoundManager.Callables:PlayIntro()
 end
 
 --- Initiates the Last Man Standing sequence (1v1). The Last Man (survivor) must be specified.
-function RoundManager.Callables:InitLMS(LastMan: Player)
+function RoundManager.Callables.InitLMS(LastMan: Player)
     --failsafe
     if not RoundManager.CanInitLMS or RoundManager.CurrentRound.StartedLMS or not RoundManager.CurrentRound.Killers[1] or not RoundManager.CurrentRound.Killers[1].Character then
         return
@@ -162,7 +162,7 @@ function RoundManager.Callables:InitLMS(LastMan: Player)
 end
 
 --- Ends the round. Whoever won is specified by the `winner` parameter.
-function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
+function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
     --cancelling threads and disconnecting connections
     RoundManager.StopLoop = true
     for _, Thread in RoundManager.Threads do
@@ -235,12 +235,12 @@ function RoundManager.Callables:EndRound(winner: "Survivors" | "Killer")
 
     --resetting TimeManager for lobby
     TimeManager.OnTimerEnd = function()
-        RoundManager:StartRound()
+        RoundManager.StartRound()
     end
     TimeManager.CanDecreaseTime = true
 end
 
-function RoundManager.Callables:_OnPlayerDeath(dead: Player, wasKiller: boolean?)
+function RoundManager.Callables._OnPlayerDeath(dead: Player, wasKiller: boolean?)
     wasKiller = wasKiller or false
 
     --disconnect all connections related to this player
@@ -277,12 +277,12 @@ function RoundManager.Callables:_OnPlayerDeath(dead: Player, wasKiller: boolean?
         PlayersRemaining[tostring(dead.UserId)]:Destroy()
     end
 
-    RoundManager.Utils:CheckForKillerWin() --also checks for lms
+    RoundManager.Utils.CheckForKillerWin() --also checks for lms
 end
 
 --- Checks which role won by seeing how many players are left in each one.
 --- Also used to check for LMS.
-function RoundManager.Utils:CheckForKillerWin()
+function RoundManager.Utils.CheckForKillerWin()
     local Count = Utils.Character.GetCharactersWithRoles()
 
     local Survivors = #Count.Survivor
@@ -290,22 +290,22 @@ function RoundManager.Utils:CheckForKillerWin()
     if RoundManager.CanSpawnKiller then
         -- if the killer leaves or dies
         if #Count.Killer <= 0 then
-            RoundManager.Callables:EndRound("Survivors")
+            RoundManager.Callables.EndRound("Survivors")
         -- lms
         elseif Survivors == 1 then
-            RoundManager.Callables:InitLMS(Utils.Player.GetPlayerFromCharacter(Count.Survivor[1]))
+            RoundManager.Callables.InitLMS(Utils.Player.GetPlayerFromCharacter(Count.Survivor[1]))
         -- if every surv is dead
         elseif #RoundManager.CurrentRound.PlayersAccepted > 1 and Survivors <= 0 then
-            RoundManager.Callables:EndRound("Killer")
+            RoundManager.Callables.EndRound("Killer")
         end
     -- never check anything killer-related if there's no killer
     elseif Survivors <= 0 then
-        RoundManager.Callables:EndRound("Killer")
+        RoundManager.Callables.EndRound("Killer")
     end
 end
 
 --- Gets a character's module depending on a player's equipped values.
-function RoundManager.Utils:GetCharacterModule(player: Player, charType: "Killer" | "Survivor")
+function RoundManager.Utils.GetCharacterModule(player: Player, charType: "Killer" | "Survivor")
     local EquippedCharacter = Utils.PlayerData.GetPlayerEquipped(player, charType)
     local EquippedSkin = Utils.PlayerData.GetPlayerEquipped(player, "Skins."..EquippedCharacter)
 
@@ -313,7 +313,7 @@ function RoundManager.Utils:GetCharacterModule(player: Player, charType: "Killer
 end
 
 --- Sets up a player in the round's player list while also spawning its character.
-function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
+function RoundManager.Utils.SetupPlayer(Player: Player, KillerIndex: number)
     local Spawns = MapManager.CurrentMap.Map.SpawnPoints
 
     local Char
@@ -337,12 +337,12 @@ function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
         --sets up connections for the round
         RoundManager.PlayerConnections[Player.UserId] = {
             Player.CharacterRemoving:Connect(function()
-                RoundManager.Callables:_OnPlayerDeath(Player, true)
+                RoundManager.Callables._OnPlayerDeath(Player, true)
             end),
         
             --checks for death to count kills n shit
             Char.Humanoid.Died:Connect(function()
-                RoundManager.Callables:_OnPlayerDeath(Player, true)
+                RoundManager.Callables._OnPlayerDeath(Player, true)
             end)
         }
 
@@ -367,14 +367,14 @@ function RoundManager.Utils:SetupPlayer(Player: Player, KillerIndex: number)
         RoundManager.PlayerConnections[Player.UserId] = {
             --should count as a death when it gets removed just in case the player leaves
             Player.CharacterRemoving:Connect(function()
-                RoundManager.Callables:_OnPlayerDeath(Player)
+                RoundManager.Callables._OnPlayerDeath(Player)
             end),
 
             --checks for death to count kills n shit
             Char.Humanoid.Died:Connect(function()
                 --if the survivor dies they lose duh
                 CommonFunctions.UpdatePlayerStat(Player, "SurvivorStats.SurvivorLosses", 1) --increasing loss stat
-                RoundManager.Callables:_OnPlayerDeath(Player)
+                RoundManager.Callables._OnPlayerDeath(Player)
             end)
         }
     end
