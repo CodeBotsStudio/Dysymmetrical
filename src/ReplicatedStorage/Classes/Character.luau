@@ -186,7 +186,7 @@ function CharTypes.GetDefaultSurvivorSettings(): Survivor
                 RunAnimation = "rbxassetid://84289923509689",
             },
 
-            AnimationTransitionTime = 0.1,
+            AnimationTransitionTime = 0.3,
 
             Voicelines = {},
 
@@ -476,7 +476,7 @@ function CharTypes.GetDefaultKillerSettings(): Killer
                 RunAnimation = "rbxassetid://139221510401164",
             },
 
-            AnimationTransitionTime = 0.1,
+            AnimationTransitionTime = 0.3,
 
             Voicelines = {},
 

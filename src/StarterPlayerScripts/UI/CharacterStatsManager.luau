@@ -1,6 +1,9 @@
 --!nocheck
 
-local CharacterStatsManager = {}
+local CharacterStatsManager = {
+    UI = nil,
+    Connection = nil,
+}
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,15 +13,22 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 function CharacterStatsManager:Init()
     local UIPrefab = Utils.Instance.FindFirstChild(script, "Stats")
     
-    LocalPlayer.CharacterAdded:Connect(function()
-        self:_InitUI(UIPrefab:Clone())
+    Utils.Character.ObserveCharacter(LocalPlayer, function(char: Model)
+        self:_InitUI(char, UIPrefab:Clone())
     end)
 end
 
-function CharacterStatsManager:_InitUI(UI: Frame)
-    if not LocalPlayer.Character or Utils.Instance.FindFirstChild(LocalPlayer.Character, "Role").Value == "Spectator" then return end
-    local Char = LocalPlayer.Character
+function CharacterStatsManager:_InitUI(Char: Model, UI: Frame)
+    if self.Connection then
+        self.Connection:Disconnect()
+    end
+    if self.UI then
+        self.UI:Destroy()
+    end
 
+    if Utils.Instance.FindFirstChild(Char, "Role").Value == "Spectator" then return end
+
+    self.UI = UI
     UI.Parent = LocalPlayer.PlayerGui.PlayerStats
     
     local Stamina = UI.Stamina
@@ -35,14 +45,12 @@ function CharacterStatsManager:_InitUI(UI: Frame)
     	MaxStamina = Char.PlayerAttributes.MaxStamina
     }
 
-    local Connection: RBXScriptConnection
-    Connection = RunService.PreRender:Connect(function(delta: number)
-        if not Char then
-	    	UI.Visible = false
-	    	Connection:Disconnect()
-	    	return
-	    end
-
+    self.Connection = RunService.PreRender:Connect(function(delta: number)
+        if not self.UI then
+            self.Connection:Disconnect()
+            return
+        end
+        
         HealthText.Text = tostring(math.round(Humanoid.Health)).."/"..tostring(Humanoid.MaxHealth)
 	    HealthBar.Size = UDim2.fromScale(Utils.Math.Lerp(HealthBar.Size.X.Scale, Humanoid.Health / Humanoid.MaxHealth, delta * 9), 1)
 	    --
