@@ -293,7 +293,7 @@ function RoundManager.Utils:CheckForKillerWin()
             RoundManager.Callables:EndRound("Survivors")
         -- lms
         elseif Survivors == 1 then
-            RoundManager.Callables:InitLMS(Utils:GetPlayerFromCharacter(Count.Survivor[1]))
+            RoundManager.Callables:InitLMS(Utils.Player.GetPlayerFromCharacter(Count.Survivor[1]))
         -- if every surv is dead
         elseif #RoundManager.CurrentRound.PlayersAccepted > 1 and Survivors <= 0 then
             RoundManager.Callables:EndRound("Killer")
