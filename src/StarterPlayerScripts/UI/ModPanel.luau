@@ -20,6 +20,12 @@ local ModPanel = {
     Initted = false,
 }
 
+local CommandOrder = {
+    "ToggleFreezeTime",
+    "ToggleAbilityCooldowns",
+    "ToggleAbilityCharges",
+}
+
 local PrefabFolder = Utils.Instance.FindFirstChild(script, "Prefabs")
 local Prefabs = {
     Bool = Utils.Instance.FindFirstChild(PrefabFolder, "BoolToggle"),
@@ -68,19 +74,23 @@ function ModPanel:Start()
         UI.Visible = UI.Size ~= Utils.UDim.Zero
     end)
 
-    for _, i in ReplicatedStorage.Security.ModeratorCommands:GetChildren() do
-        if not i:IsA("ModuleScript") then
-            continue
+    local LO = 0
+    local function SetupCmd(i)
+        if not i or not i:IsA("ModuleScript") then
+            return
         end
 
         local Command = require(i)
         Command.RankRequired = Command.RankRequired or Utils.Ranks.ServerOwner
 
         if self.Rank > Command.RankRequired or not Command.Type or not Prefabs[Command.Type] then
-            continue
+            return
         end
 
+        LO += 1
+
         local CommandFrame = Prefabs[Command.Type]:Clone()
+        CommandFrame.LayoutOrder = LO
         CommandFrame.Parent = UI.Content
 
         CommandFrame.Label.Text = Command.Name
@@ -96,6 +106,18 @@ function ModPanel:Start()
             local Value = Network:FireServerConnection("ExecuteCommand", "REMOTE_FUNCTION", i.Name)
             CommandFrame.Value.Text = "Current value: "..tostring(Value or workspace:GetAttribute(Command.DisplayedAttribute))
         end)
+    end
+
+    for _, i in CommandOrder do
+        SetupCmd(ReplicatedStorage.Security.ModeratorCommands:FindFirstChild(i))
+    end
+
+    for _, i in ReplicatedStorage.Security.ModeratorCommands:GetChildren() do
+        if table.find(CommandOrder, i.Name) then
+            continue
+        end
+
+        SetupCmd(i)
     end
 end
 

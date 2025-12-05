@@ -34,9 +34,10 @@ function updateProgress()
     end
 end
 
+local ContentProvider = game:GetService("ContentProvider")
 for index, i in assets do
     task.delay(index / (assetAmount / 0.75), function()
-        game.ContentProvider:PreloadAsync({
+        ContentProvider:PreloadAsync({
             i
         })
         table.insert(loadedAssets, i)

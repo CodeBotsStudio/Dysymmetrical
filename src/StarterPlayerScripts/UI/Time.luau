@@ -41,6 +41,12 @@ return {
         end
 
         State.Changed:Connect(Update)
+        EnoughPlayers.Changed:Connect(function()
+            Update(State.Value)
+        end)
+        Utils.Instance.ObserveAttribute(workspace, "FreezeTime", function()
+            Update(State.Value)
+        end)
         Update(State.Value)
     end,
 }
