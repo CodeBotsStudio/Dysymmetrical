@@ -136,7 +136,7 @@ function InstanceUtils.ObserveProperty(
 	instance: Instance,
 	propertyName: string,
 	callback: (value: any, propertyJanitor: Janitor.Janitor) -> (),
-	predicate: (value: any) -> boolean?
+	predicate: ((value: any) -> boolean)?
 )
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(instance)

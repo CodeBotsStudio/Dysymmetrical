@@ -70,8 +70,8 @@ function ModPanel:Start()
 
     SideBar.MenuModules["ModPanel"] = self
 
-    UI:GetPropertyChangedSignal("Size"):Connect(function()
-        UI.Visible = UI.Size ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(UI, "Size", function(value: UDim2)
+        UI.Visible = value ~= Utils.UDim.Zero
     end)
 
     local LO = 0

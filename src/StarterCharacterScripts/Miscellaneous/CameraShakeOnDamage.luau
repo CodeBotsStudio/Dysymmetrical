@@ -15,15 +15,15 @@ return {
         local Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
 
         local LastValue = Humanoid.Health
-        Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
-            if Humanoid.Health >= LastValue or LastValue - Humanoid.Health < 10 then
-                LastValue = Humanoid.Health
+        Utils.Instance.ObserveProperty(Humanoid, "Health", function(value: number)
+            if value >= LastValue or LastValue - value < 10 then
+                LastValue = value
                 return
             end
 
-            Utils.Player.ShakeCamera(1.56 * (LastValue - Humanoid.Health) / 100, 0.4)
+            Utils.Player.ShakeCamera(1.56 * (LastValue - value) / 100, 0.4)
 
-            LastValue = Humanoid.Health
+            LastValue = value
         end)
     end,
 }

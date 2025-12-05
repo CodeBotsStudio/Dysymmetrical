@@ -123,8 +123,8 @@ function Changelog:Init()
 
     UI.Label.TextLabel.Text = CurrentChangelog.MenuTitle
 
-    self.UIInstance:GetPropertyChangedSignal("Size"):Connect(function()
-        self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
+        self.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 
     for order, entry in CurrentChangelog.Entries do

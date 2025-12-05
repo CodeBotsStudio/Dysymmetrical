@@ -579,9 +579,9 @@ function Inventory:Init()
         self:ToggleInfoMenu()
     end))
 
-    table.insert(Conns, self.UIInstance:GetPropertyChangedSignal("Size"):Connect(function()
-        self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
-    end))
+    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
+        self.UIInstance.Visible = value ~= Utils.UDim.Zero
+    end)
 
     table.insert(Conns, UI.Destroying:Connect(function()
         for _, i in Conns do

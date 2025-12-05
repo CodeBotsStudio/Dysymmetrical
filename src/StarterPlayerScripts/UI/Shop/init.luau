@@ -239,8 +239,8 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
                     Utils.Character.LoadAnimationFromID(SkinModel, Info.Config.AnimationIDs.PreviewAnimation or Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
 
-                    SkinPreview:GetPropertyChangedSignal("ImageTransparency"):Connect(function()
-                        if SkinPreview.ImageTransparency < 1 then
+                    Utils.Instance.ObserveProperty(SkinPreview, "ImageTransparency", function(value: number)
+                        if value < 1 then
                             if SkinModel.Parent ~= WorldModel then
                                 SkinModel.Parent = WorldModel
                             end
@@ -624,22 +624,9 @@ function Shop:Init()
         self:ToggleInfoMenu()
     end))
 
-    table.insert(Conns, self.UIInstance:GetPropertyChangedSignal("Size"):Connect(function()
-        self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
-    end))
-    -- table.insert(Conns, InfoContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
-    --     InfoContainer.Parent.Visible = InfoContainer.Parent.Size ~= Utils.UDim.FullY
-    -- end))
-    -- table.insert(Conns, ShopContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
-    --     ShopContainer.Parent.Visible = ShopContainer.Parent.Size ~= Utils.UDim.FullY
-    -- end))
-    -- table.insert(Conns, SkinContainer.Parent:GetPropertyChangedSignal("Size"):Connect(function()
-    --     SkinContainer.Parent.Visible = SkinContainer.Parent.Size ~= Utils.UDim.FullY
-    -- end))
-    
-    -- InfoContainer.Parent.Visible = InfoContainer.Parent.Size ~= Utils.UDim.FullY
-    -- ShopContainer.Parent.Visible = ShopContainer.Parent.Size ~= Utils.UDim.FullY
-    -- SkinContainer.Parent.Visible = SkinContainer.Parent.Size ~= Utils.UDim.FullY
+    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
+        self.UIInstance.Visible = value ~= Utils.UDim.Zero
+    end)
 
     table.insert(Conns, UI.Destroying:Connect(function()
         for _, i in Conns do
@@ -904,8 +891,8 @@ function Shop:ReloadContent(CreateCards: boolean?)
 
                 Utils.Character.LoadAnimationFromID(Model, Info.Config.AnimationIDs.PreviewAnimation or Info.Config.AnimationIDs.IdleAnimation, false):Play(0)
 
-                Preview:GetPropertyChangedSignal("ImageTransparency"):Connect(function()
-                    if Preview.ImageTransparency < 1 then
+                Utils.Instance.ObserveProperty(Preview, "ImageTransparency", function(value: number)
+                    if value < 1 then
                         if Model.Parent ~= WorldModel then
                             Model.Parent = WorldModel
                         end

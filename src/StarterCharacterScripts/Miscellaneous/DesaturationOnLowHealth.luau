@@ -25,7 +25,7 @@ return {
 
             return Amount
         end
-        local function Update()
+        local function Update(value: number)
             local Magnitude = Humanoid.Health / Humanoid.MaxHealth
             local Base = GetExistingDesat()
             local Mult = math.min(0, -1 - Base)
@@ -36,7 +36,7 @@ return {
             end
         end
 
-        Humanoid:GetPropertyChangedSignal("Health"):Connect(Update)
-        Update()
+        Utils.Instance.ObserveProperty(Humanoid, "Health", Update)
+        Update(Humanoid.Health)
     end,
 }

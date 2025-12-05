@@ -85,8 +85,8 @@ function CreditsMenu:Init()
         end
     end
 
-    self.UIInstance:GetPropertyChangedSignal("Size"):Connect(function()
-        self.UIInstance.Visible = self.UIInstance.Size ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
+        self.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 end
 
