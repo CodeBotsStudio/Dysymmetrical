@@ -31,8 +31,8 @@ local LightingModule = {
 function LightingModule:Init()
     if RunService:IsServer() then
         Network:SetConnection("GetCurrentLighting", "REMOTE_FUNCTION", function(player: Player)
-            if self.CurrentLighting then
-                local Props = self.CurrentLighting:Clone()
+            if LightingModule.CurrentLighting then
+                local Props = LightingModule.CurrentLighting:Clone()
                 Props.Parent = player.PlayerGui
                 Debris:AddItem(Props, 20)
                 return Props
@@ -41,28 +41,28 @@ function LightingModule:Init()
         end)
     else
         Network:SetConnection("SetCustomLighting", "REMOTE_EVENT", function(Properties)
-            self:SetCustomLighting(Properties)
+            LightingModule.SetCustomLighting(Properties)
         end)
         Network:SetConnection("SetDefaultLighting", "REMOTE_EVENT", function()
-            self:SetDefaultLighting()
+            LightingModule.SetDefaultLighting()
         end)
-        self:SetDefaultLighting()
+        LightingModule.SetDefaultLighting()
     end
 end
 
-function LightingModule:SetAsCurrentLighting()
+function LightingModule.SetAsCurrentLighting()
     if RunService:IsServer() then
         return
     end
 
-    self:SetDefaultLighting()
+    LightingModule.SetDefaultLighting()
     local Current = Network:FireServerConnection("GetCurrentLighting", "REMOTE_FUNCTION")
     if Current then
-        self:SetCustomLighting(Current)
+        LightingModule.SetCustomLighting(Current)
     end
 end
 
-function LightingModule:SetCustomLighting(Properties: {[any]: any} | Instance)
+function LightingModule.SetCustomLighting(Properties: {[any]: any} | Instance)
     if RunService:IsServer() then
         if typeof(Properties) == "Instance" and Properties:IsA("Folder") then
             if ReplicatedStorage:FindFirstChild("CurrentReplicatedLighting") then
@@ -72,14 +72,14 @@ function LightingModule:SetCustomLighting(Properties: {[any]: any} | Instance)
             Properties.Name = "CurrentReplicatedLighting"
             Properties.Parent = ReplicatedStorage
         end
-        self.CurrentLighting = Properties
+        LightingModule.CurrentLighting = Properties
         Network:FireAllClientConnection("SetCustomLighting", "REMOTE_EVENT", Properties)
     elseif typeof(Properties) == "Instance" then
         if Properties:IsA("Folder") then
             Lighting:ClearAllChildren()
             for _, i in Properties:GetChildren() do
                 if i:IsA("ModuleScript") then
-                    self:SetCustomLighting(require(i))
+                    LightingModule.SetCustomLighting(require(i))
                 else
                     i:Clone().Parent = Lighting
                 end
@@ -91,7 +91,7 @@ function LightingModule:SetCustomLighting(Properties: {[any]: any} | Instance)
                     i:Clone().Parent = Lighting
                 end
             end
-            self:SetCustomLighting(require(Properties))
+            LightingModule.SetCustomLighting(require(Properties))
         end
     else
         local Props = Properties or {}
@@ -101,15 +101,15 @@ function LightingModule:SetCustomLighting(Properties: {[any]: any} | Instance)
     end
 end
 
-function LightingModule:SetDefaultLighting()
+function LightingModule.SetDefaultLighting()
     if RunService:IsServer() then
-        if typeof(self.CurrentLighting) == "Instance" then
-            self.CurrentLighting:Destroy()
+        if typeof(LightingModule.CurrentLighting) == "Instance" then
+            LightingModule.CurrentLighting:Destroy()
         end
-        self.CurrentLighting = nil
+        LightingModule.CurrentLighting = nil
         Network:FireAllClientConnection("SetDefaultLighting", "REMOTE_EVENT")
     else
-        self:SetCustomLighting(self.Properties)
+        LightingModule.SetCustomLighting(LightingModule.Properties)
         Lighting:ClearAllChildren()
         for _, i in script:GetChildren() do
             i:Clone().Parent = Lighting

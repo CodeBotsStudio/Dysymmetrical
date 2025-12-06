@@ -90,7 +90,7 @@ function MapManager:GetRandomMap(): Model | Folder
     end)
 
     if MapInstance:FindFirstChild("Lighting") then
-        Lighting:SetCustomLighting(MapInstance.Lighting)
+        Lighting.SetCustomLighting(MapInstance.Lighting)
     end
 
     if not MapInstance:FindFirstChild("Ingame") then
@@ -111,7 +111,7 @@ function MapManager:DestroyCurrentMap()
     if self.CurrentMap then
         self.CurrentMap:Destroy()
         self.CurrentMap = nil
-        Lighting:SetDefaultLighting()
+        Lighting.SetDefaultLighting()
     end
 end
 
