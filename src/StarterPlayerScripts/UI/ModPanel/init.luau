@@ -26,9 +26,8 @@ local CommandOrder = {
     "ToggleAbilityCharges",
 }
 
-local PrefabFolder = Utils.Instance.FindFirstChild(script, "Prefabs")
 local Prefabs = {
-    Bool = Utils.Instance.FindFirstChild(PrefabFolder, "BoolToggle"),
+    Bool = require(Utils.Instance.FindFirstChild(script, "Bool")),
 }
 
 function ModPanel:Init()
@@ -89,23 +88,8 @@ function ModPanel:Start()
 
         LO += 1
 
-        local CommandFrame = Prefabs[Command.Type]:Clone()
-        CommandFrame.LayoutOrder = LO
-        CommandFrame.Parent = UI.Content
-
-        CommandFrame.Label.Text = Command.Name
-        CommandFrame.Value.Text = "Current value: "..tostring(workspace:GetAttribute(Command.DisplayedAttribute))
-        CommandFrame.Execute.MouseEnter:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
-        end)
-        CommandFrame.Execute.MouseLeave:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
-        end)
-        CommandFrame.Execute.MouseButton1Click:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-            local Value = Network:FireServerConnection("ExecuteCommand", "REMOTE_FUNCTION", i.Name)
-            CommandFrame.Value.Text = "Current value: "..tostring(Value or workspace:GetAttribute(Command.DisplayedAttribute))
-        end)
+        local Content = Prefabs[Command.Type].New(i, UI)
+        Content.LayoutOrder = LO
     end
 
     for _, i in CommandOrder do

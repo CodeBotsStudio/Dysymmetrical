@@ -14,13 +14,12 @@ return {
     Params = {
         {
             Title = "Chosen Player",
-            Type = "String",
+            Type = "Player",
             Default = "...",
         },
         {
             Title = "Character Type",
-            Type = "String",
-            DefaultValue = "...",
+            Default = "...",
             Cache = {
                 Options = {
                     "Survivor",

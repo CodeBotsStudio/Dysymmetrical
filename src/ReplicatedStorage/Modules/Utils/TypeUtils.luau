@@ -64,7 +64,7 @@ function TypeUtils.GetCountOfDict(dictionary: {[any]: any}): number
     return Count
 end
 
-function TypeUtils.FindInDictionary<T>(Dictionary: T & {}, Item: T, Type: "Key" | "Value"): (T, T)
+function TypeUtils.FindInDictionary<K, V>(Dictionary: {[K]: V}, Item: K | V, Type: "Key" | "Value"): (K, V)
     if Type == "Key" then
         for v, i in Dictionary do
             if v == Item then
@@ -84,7 +84,7 @@ end
 
 --- Replaces or copies any values from `Source` into `Target`.
 --- If you pass in a table variable, you don't have to get anything as it'll be replaced in that variable directly.
-function TypeUtils.DeepTableOverwrite(Target: {any}, Source: {any})
+function TypeUtils.DeepTableOverwrite<T>(Target: T & {}, Source: {[any]: any}): T & {}
     if not Target or not Source then
         return
     end
@@ -99,12 +99,14 @@ function TypeUtils.DeepTableOverwrite(Target: {any}, Source: {any})
 		end
 		Target[key] = value
 	end
+
+    return Target
 end
 
 --- Copies any values from `Source` into `Target`.
 --- If you pass in a table variable, you don't have to get anything as it'll be replaced in that variable directly.
 --- Differs from `Utils:DeepTableOverwrite` in that it doesn't overwrite existing values.
-function TypeUtils.DeepTableWrite(Target: {any}, Source: {any})
+function TypeUtils.DeepTableWrite<T>(Target: T & {}, Source: {[any]: any}): T & {}
     if not Target or not Source then
         return
     end
@@ -121,6 +123,8 @@ function TypeUtils.DeepTableWrite(Target: {any}, Source: {any})
 		    Target[key] = value
         end
 	end
+
+    return Target
 end
 
 return TypeUtils
