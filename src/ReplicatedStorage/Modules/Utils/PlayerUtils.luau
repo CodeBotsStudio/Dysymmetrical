@@ -71,15 +71,15 @@ function PlayerUtils._GetMousePosition(LockToClosestPlayer: boolean): Vector3
         end
     --i honestly have no idea what i did here but it fucking works somehow
     elseif LockToClosestPlayer then
-        local ClosestPlayer = PlayerUtils.GetClosestPlayerFromPosition(Character and Character.PrimaryPart and Character.PrimaryPart.Position or Vector3.new(), {
+        local ClosestPlayers = PlayerUtils.GetClosestPlayerFromPosition(Character and Character.PrimaryPart and Character.PrimaryPart.Position or Vector3.new(), {
             PlayerSelection = "Survivor",
             ReturnTable = true,
         })
 
-        for _, i in ClosestPlayer do
-            local CPlayer = i.Player
-            local Dis = i.Distance
-            if PlayerUtils.IsOnScreen(i.Player) and Dis then
+        for _, Player in ClosestPlayers do
+            local CPlayer = Player.Player
+            local Dis = Player.Distance
+            if PlayerUtils.IsOnScreen(CPlayer) and Dis then
                 local Pos = CPlayer.PrimaryPart.Position
                 local Vel = CPlayer.PrimaryPart.AssemblyLinearVelocity
                 if Vel.Magnitude == 0 then
@@ -102,8 +102,8 @@ function PlayerUtils._GetMousePosition(LockToClosestPlayer: boolean): Vector3
             LookVector = Dir.Direction * 500
         end
         local trans = {}
-        for i, _ in PlayerUtils.TransparentParts do
-            table.insert(trans, i)
+        for index, _ in PlayerUtils.TransparentParts do
+            table.insert(trans, index)
         end
         local params = RaycastParams.new()
         params.FilterType = Enum.RaycastFilterType.Exclude
@@ -132,21 +132,20 @@ function PlayerUtils.GetClosestPlayerFromPosition(Position: Vector3, Options): (
     Options.PlayerSelection = Options.PlayerSelection or "Survivor"
     local Selection = Options.IncludedSelection or {}
     local Exclude = Options.ExcludedSelection or {}
-    for _, i in workspace.Players:GetChildren() do
-        if (Options.PlayerSelection == "All" or i.Role.Value == Options.PlayerSelection) and i.Role.Value ~= "Spectator" and not table.find(Exclude, i) then
-            if not i:GetAttribute("Undetectable") or Options.OverrideUndetectable then
-                table.insert(Selection, i)
+    for _, PlayerChar in workspace.Players:GetChildren() do
+        if (Options.PlayerSelection == "All" or PlayerChar.Role.Value == Options.PlayerSelection) and PlayerChar.Role.Value ~= "Spectator" and not table.find(Exclude, PlayerChar) then
+            if not PlayerChar:GetAttribute("Undetectable") or Options.OverrideUndetectable then
+                table.insert(Selection, PlayerChar)
             end
         end
     end
     local Close = {}
-    for _, i in Selection do
-        local Distance = i.PrimaryPart and (i.PrimaryPart.Position - Position).Magnitude
+    for _, PlayerChar in Selection do
+        local Distance =PlayerChar.PrimaryPart and (PlayerChar.PrimaryPart.Position - Position).Magnitude
 
-        if Distance and i.Humanoid.Health > 0 and (tonumber(Options.MaxDistance) or 999) >= Distance then
-
+        if Distance and PlayerChar.Humanoid.Health > 0 and (tonumber(Options.MaxDistance) or 999) >= Distance then
             table.insert(Close, {
-                Player = i,
+                Player = PlayerChar,
                 Distance = Distance,
             })
         end
@@ -180,14 +179,14 @@ function PlayerUtils.IsOnScreen(Thing: Instance): boolean
     table.insert(t, Thing)
     table.insert(t, Char)
     table.insert(t, workspace.CurrentCamera)
-    for i, _ in PlayerUtils.TransparentParts do
-        table.insert(t, i)
+    for index, _ in PlayerUtils.TransparentParts do
+        table.insert(t, index)
     end
-    local function checkVisible(i)
-        local _, pos = workspace.CurrentCamera:WorldToViewportPoint(i.Position)
+    local function checkVisible(Part: BasePart)
+        local _, pos = workspace.CurrentCamera:WorldToViewportPoint(Part.Position)
         if pos and #workspace.CurrentCamera:GetPartsObscuringTarget({
             workspace.CurrentCamera.CFrame.Position,
-            i.Position,
+            Part.Position,
         }, t) > 0 then
             return true
         else
@@ -197,9 +196,9 @@ function PlayerUtils.IsOnScreen(Thing: Instance): boolean
 
     if Thing:IsA("Model") then
         --if the entire model is invisible part-related then it's invisible duh
-        for _, i in Thing:GetChildren() do
-            if i:IsA("BasePart") and i.Transparency ~= 1 then
-                visible = checkVisible(i)
+        for _, Part in Thing:GetChildren() do
+            if Part:IsA("BasePart") and Part.Transparency ~= 1 then
+                visible = checkVisible(Part)
                 found = visible
             end
             if found then
@@ -275,8 +274,8 @@ end
 function PlayerUtils.Fade(Target: Player | {Player}, FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
     if RunService:IsServer() then
         if typeof(Target) == "table" then
-            for _, i in Target do
-                Network:FireClientConnection(i, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
+            for _, Player in Target do
+                Network:FireClientConnection(Player, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
             end
         else
             Network:FireClientConnection(Target, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
@@ -358,12 +357,12 @@ function PlayerUtils.GetLoadedPlayers(IncludeAFK: boolean?): {Player}
 
     local t: {Player} = {}
 
-    for _, i: ObjectValue in ReplicatedStorage.LoadedPlayers:GetChildren() do
-        if not IncludeAFK and PlayerDataUtils.GetPlayerSetting(i.Value, "Game.AFK") then
+    for _, Player: ObjectValue in ReplicatedStorage.LoadedPlayers:GetChildren() do
+        if not IncludeAFK and PlayerDataUtils.GetPlayerSetting(Player.Value, "Game.AFK") then
             continue
         end
 
-        table.insert(t, i.Value)
+        table.insert(t, Player.Value)
     end
 
     return t
@@ -394,18 +393,18 @@ function PlayerUtils.ShakeCamera(Magnitude: number, Duration: number)
 end
 
 --- SERVER FUNCTION: Shakes the camera of one or more players.
-function PlayerUtils.ShakeCameraOf(Player: Player | {Player}, Magnitude: number, Duration: number)
+function PlayerUtils.ShakeCameraOf(Target: Player | {Player}, Magnitude: number, Duration: number)
     if not RunService:IsServer() then
         return
     end
 
-    if typeof(Player) == "table" then
-        for _, i in Player do
-            Network:FireClientConnection(i, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
+    if typeof(Target) == "table" then
+        for _, Player in Target do
+            Network:FireClientConnection(Player, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
         end
         return
     end
-    Network:FireClientConnection(Player, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
+    Network:FireClientConnection(Target, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
 end
 
 --- Attempts to get a `Player` instance from a character `Model`.

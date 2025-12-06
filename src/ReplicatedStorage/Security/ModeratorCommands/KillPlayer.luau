@@ -14,12 +14,12 @@ return {
         end
 
         if Player:lower() == "all" then
-            for _, i in workspace.Players:GetChildren() do
-                if not i:FindFirstChildOfClass("Humanoid") then
+            for _, PlayerChar in workspace.Players:GetChildren() do
+                if not PlayerChar:FindFirstChildOfClass("Humanoid") then
                     continue
                 end
 
-                i.Humanoid.Health = 0
+                PlayerChar.Humanoid.Health = 0
             end
             return
         end

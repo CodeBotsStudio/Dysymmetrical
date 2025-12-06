@@ -183,17 +183,17 @@ local Commander = Character.CreateSurvivor({
                     
                         --Hide
                         table.insert(self.Connections, task.delay(2, function()
-                            for _, i in self.JusticeModel:GetDescendants() do
-                                if i:IsA("BasePart") then
-                                    i.Transparency = 1
+                            for _, Part in self.JusticeModel:GetDescendants() do
+                                if Part:IsA("BasePart") then
+                                    Part.Transparency = 1
                                 end
                             end
                         end))
                     
                         --Show
-                        for _, i in self.JusticeModel:GetDescendants() do
-                            if i:IsA("BasePart") and not i:HasTag("Transparent") then
-                                i.Transparency = 0
+                        for _, Part in self.JusticeModel:GetDescendants() do
+                            if Part:IsA("BasePart") and not Part:HasTag("Transparent") then
+                                Part.Transparency = 0
                             end
                         end
                     

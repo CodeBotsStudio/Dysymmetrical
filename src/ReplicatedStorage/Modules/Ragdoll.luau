@@ -31,8 +31,8 @@ function Ragdoll:Init()
 		end
 
 		workspace.DescendantAdded:Connect(AddHumRagdoll)
-		for _, i in workspace:GetDescendants() do
-			AddHumRagdoll(i)
+		for _, Descendant in workspace:GetDescendants() do
+			AddHumRagdoll(Descendant)
 		end
 		Utils.Player.ObservePlayers(function(Player: Player)
 			Utils.Character.ObserveCharacter(Player, function(Char: Model)
@@ -79,8 +79,8 @@ function Ragdoll:Init()
 			end
 		end
 		workspace.DescendantAdded:Connect(AddHumRagdoll)
-		for _, i in workspace:GetDescendants() do
-			AddHumRagdoll(i)
+		for _, Descendant in workspace:GetDescendants() do
+			AddHumRagdoll(Descendant)
 		end
 		Utils.Player.ObservePlayers(function(Player: Player)
 			Utils.Character.ObserveCharacter(Player, function(Char: Model)
@@ -104,13 +104,13 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 	local Char = Character
 	if Dupe then
 		local function HideOriginal()
-			for _, i in Character:GetDescendants() do
-				local isPart = i:IsA("BasePart")
-				if i:IsA("Decal") or isPart then
+			for _, Descendant in Character:GetDescendants() do
+				local isPart = Descendant:IsA("BasePart")
+				if Descendant:IsA("Decal") or isPart then
 					if isPart then
-						i.CollisionGroup = "DeadPlayers"
+						Descendant.CollisionGroup = "DeadPlayers"
 					end
-					i.Transparency = 1
+					Descendant.Transparency = 1
 				end
 			end
 		end
@@ -126,20 +126,20 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 			Char.PrimaryPart.Anchored = false
 		end
 		HideOriginal()
-		for _, i in Char:GetDescendants() do
-			if i:IsA("Sound") or i:IsA("ParticleEmitter") or i:IsA("Light") or i:IsA("Beam") or i:IsA("Highlight") then
-                i:Destroy()
+		for _, Descendant in Char:GetDescendants() do
+			if Descendant:IsA("Sound") or Descendant:IsA("ParticleEmitter") or Descendant:IsA("Light") or Descendant:IsA("Beam") or Descendant:IsA("Highlight") then
+                Descendant:Destroy()
             end
 		end
-		for index, i in {
+		for index, blacklisted in {
 			"LinearVelocity",
 			"Highlight"
 		} do
-			local First = Char:FindFirstChild(i, true)
+			local First = Char:FindFirstChild(blacklisted, true)
 			while First and (index > 1 or not Silly) do
 				First.Name = "ded"
 				First:Destroy()
-				First = Char:FindFirstChild(i, true)
+				First = Char:FindFirstChild(blacklisted, true)
 			end
 		end
 		task.spawn(function()
@@ -159,9 +159,9 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 		task.delay(30, function()
 			if Char.Parent then
 				Debris:AddItem(Char, 10)
-				for _, i in Char:GetDescendants() do
-					if i:IsA("BasePart") or i:IsA("Decal") then
-                        game.TweenService:Create(i, TweenInfo.new(10, Enum.EasingStyle.Linear), {
+				for _, Descendant in Char:GetDescendants() do
+					if Descendant:IsA("BasePart") or Descendant:IsA("Decal") then
+                        game.TweenService:Create(Descendant, TweenInfo.new(10, Enum.EasingStyle.Linear), {
                             Transparency = 1
                         }):Play()
                     end
@@ -170,24 +170,24 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 		end)
 	end
 
-	for _, i in Char:GetDescendants() do
-		if i:IsA("Motor6D") and i.Parent.Name ~= "HumanoidRootPart" and i.Parent.Name ~= "Head" then
+	for _, Joint in Char:GetDescendants() do
+		if Joint:IsA("Motor6D") and Joint.Parent.Name ~= "HumanoidRootPart" and Joint.Parent.Name ~= "Head" then
         	local BallSocketConstraint = Instance.new("BallSocketConstraint")
         	BallSocketConstraint.Name = "TemporaryRagdollInstance"
         	local Attachment = Instance.new("Attachment")
         	Attachment.Name = "TemporaryRagdollInstance"
         	local Attachment1 = Instance.new("Attachment")
         	Attachment1.Name = "TemporaryRagdollInstance"
-        	Attachment.Parent = i.Part0
-        	Attachment1.Parent = i.Part1
-        	BallSocketConstraint.Parent = i.Parent
+        	Attachment.Parent = Joint.Part0
+        	Attachment1.Parent = Joint.Part1
+        	BallSocketConstraint.Parent = Joint.Parent
         	BallSocketConstraint.Attachment0 = Attachment
         	BallSocketConstraint.Attachment1 = Attachment1
-        	Attachment.CFrame = i.C0
-        	Attachment1.CFrame = i.C1
+        	Attachment.CFrame = Joint.C0
+        	Attachment1.CFrame = Joint.C1
         	BallSocketConstraint.LimitsEnabled = true
         	BallSocketConstraint.TwistLimitsEnabled = true
-        	i.Enabled = false
+        	Joint.Enabled = false
         end
 	end
 	local Humanoid = Char:FindFirstChildOfClass("Humanoid")
@@ -198,12 +198,12 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
         Humanoid.JumpPower = 0
         Humanoid.JumpHeight = 0
 	end
-	for _, i in Char:GetDescendants() do
-        if i:IsA("BasePart") then
-            if not i:GetAttribute("OriginalCollision") then
-                i:SetAttribute("OriginalCollision", i.CanCollide)
+	for _, Part in Char:GetDescendants() do
+        if Part:IsA("BasePart") then
+            if not Part:GetAttribute("OriginalCollision") then
+                Part:SetAttribute("OriginalCollision", Part.CanCollide)
             end
-            i.CanCollide = false
+            Part.CanCollide = false
         end
     end
 
@@ -230,16 +230,16 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
         ["Right Arm"] = true, 
         ["Right Leg"] = true
     }
-	for _, i in Char:GetChildren() do
-        if i:IsA("BasePart") and (Limbs[i.Name] or i.Transparency < 0.25 and i.Name ~= "HumanoidRootPart" and i.Name ~= "CollisionHitbox") then
+	for _, Part in Char:GetChildren() do
+        if Part:IsA("BasePart") and (Limbs[Part.Name] or Part.Transparency < 0.25 and Part.Name ~= "HumanoidRootPart" and Part.Name ~= "CollisionHitbox") then
             task.delay(0.125, function()
-                i.CanCollide = false
+                Part.CanCollide = false
             end)
-            if i.Name == "Head" then
-                MakeFakeLimb(i, 0)
+            if Part.Name == "Head" then
+                MakeFakeLimb(Part, 0)
             else
-                MakeFakeLimb(i, -0.3)
-                MakeFakeLimb(i, 0.3)
+                MakeFakeLimb(Part, -0.3)
+                MakeFakeLimb(Part, 0.3)
             end
         end
     end
@@ -254,20 +254,20 @@ function Ragdoll:Disable(Character: Model)
 	end
 
 	Character:SetAttribute("Ragdolling", false)
-	for _, i in Character:GetDescendants() do
-		if i.Name == "TemporaryRagdollInstance" then
-            i:Destroy()
-        elseif i:IsA("Motor6D") then
-            i.Enabled = true
+	for _, Descendant in Character:GetDescendants() do
+		if Descendant.Name == "TemporaryRagdollInstance" then
+            Descendant:Destroy()
+        elseif Descendant:IsA("Motor6D") then
+            Descendant.Enabled = true
         end
 	end
 
-	for _, i in Character:GetChildren() do
-		if i.Name == "RagdollPart" then
-			i:Destroy()
+	for _, Descendant in Character:GetChildren() do
+		if Descendant.Name == "RagdollPart" then
+			Descendant:Destroy()
 		else
-			i.CanCollide = i:GetAttribute("OriginalCollision")
-			i:SetAttribute("OriginalCollision", nil)
+			Descendant.CanCollide = Descendant:GetAttribute("OriginalCollision")
+			Descendant:SetAttribute("OriginalCollision", nil)
 		end
 	end
 

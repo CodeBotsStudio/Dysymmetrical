@@ -103,11 +103,11 @@ function Shop:ReorderSkins()
     }
     local LO = 0
 
-    for n, i in self.LoadedItems.Skins do
-        if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
-            table.insert(Ordered.Owned, i)
+    for name, skin in self.LoadedItems.Skins do
+        if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..name) then
+            table.insert(Ordered.Owned, skin)
         else
-            table.insert(Ordered.Unowned, i)
+            table.insert(Ordered.Unowned, skin)
         end
     end
 
@@ -132,13 +132,13 @@ function Shop:ReorderSkins()
             or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
-    for _, i in ipairs(Ordered.Unowned) do
+    for _, skin in ipairs(Ordered.Unowned) do
         LO += 1
-        i.LayoutOrder = LO
+        skin.LayoutOrder = LO
     end
-    for _, i in ipairs(Ordered.Owned) do
+    for _, skin in ipairs(Ordered.Owned) do
         LO += 1
-        i.LayoutOrder = LO
+        skin.LayoutOrder = LO
     end
 end
 
@@ -157,9 +157,9 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
         --if there are no visible skins, return
         local VisibleSkins = Skins:GetChildren()
-        for _, i in VisibleSkins do
-            if i:HasTag("Dev") or i:HasTag("Milestone") then
-                table.remove(VisibleSkins, table.find(VisibleSkins, i))
+        for _, skin in VisibleSkins do
+            if skin:HasTag("Dev") or skin:HasTag("Milestone") then
+                table.remove(VisibleSkins, table.find(VisibleSkins, skin))
             end
         end
 
@@ -167,12 +167,12 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             return
         end
 
-        for _, i in self.LoadedItems.Skins do
-            if SkinContainer.SkinPreviewCache:FindFirstChild(i.Name) then
-                SkinContainer.SkinPreviewCache[i.Name]:Destroy()
+        for _, skin in self.LoadedItems.Skins do
+            if SkinContainer.SkinPreviewCache:FindFirstChild(skin.Name) then
+                SkinContainer.SkinPreviewCache[skin.Name]:Destroy()
             end
 
-            i:Destroy()
+            skin:Destroy()
         end
 
         table.clear(self.LoadedItems.Skins)
@@ -180,10 +180,10 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
         table.clear(self.ItemModules.Skins)
 
         local function CheckSkinOwnLabels()
-            for n, i in self.LoadedItems.Skins do
-                if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..n) then
-                    i.Container.Owned.BackgroundTransparency = 0.55
-                    i.Container.Owned.TextLabel.TextTransparency = 0
+            for name, skin in self.LoadedItems.Skins do
+                if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..name) then
+                    skin.Container.Owned.BackgroundTransparency = 0.55
+                    skin.Container.Owned.TextLabel.TextTransparency = 0
                 end
             end
         end
@@ -191,8 +191,8 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
         SkinContainer.Parent.Label.TextLabel.Text = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name)).Config.Name.." Skins"
 
         local CanMakePreviews = self.PreviewsEnabled and Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
-        for _, i in VisibleSkins do
-            local Module = Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
+        for _, Skin in VisibleSkins do
+            local Module = Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, Skin.Name)
 
             if Module:HasTag("Dev") or Module:HasTag("Milestone") then
                 continue
@@ -290,7 +290,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             Container.Interact.MouseButton1Click:Connect(function()
                 Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
                 if Container.Owned.BackgroundTransparency >= 1 then
-                    self:CreateBuyWindow(i, true, UI, Card)
+                    self:CreateBuyWindow(Skin, true, UI, Card)
                 end
 
                 CheckSkinOwnLabels()
@@ -325,9 +325,9 @@ function Shop:ToggleInfoMenu(Open: boolean?)
     end
 
     if Open then
-        for _, i in InfoContainer:GetChildren() do
-            if not i:IsA("UIComponent") then
-                i:Destroy()
+        for _, Child in InfoContainer:GetChildren() do
+            if not Child:IsA("UIComponent") then
+                Child:Destroy()
             end
         end
 
@@ -352,11 +352,11 @@ function Shop:ToggleInfoMenu(Open: boolean?)
 
             local Text = ""
             if typeof(Section.Text) == "table" then
-                for i, v in ipairs(Section.Text) do
-                    if i > 1 then
+                for index, paragraph in ipairs(Section.Text) do
+                    if index > 1 then
                         Text = Text.."\n"
                     end
-                    Text = Text..v
+                    Text = Text..paragraph
                 end
             else
                 Text = Section.Text
@@ -382,17 +382,17 @@ function Shop:ToggleInfoMenu(Open: boolean?)
             local PossibleEffects = {}
 
             local function AddEffectToList(Inst: ModuleScript | Folder)
-                for _, i in Inst:GetChildren() do
-                    if i:IsA("Folder") then
-                        AddEffectToList(i)
+                for _, Effect in Inst:GetChildren() do
+                    if Effect:IsA("Folder") then
+                        AddEffectToList(Effect)
                         continue
                     end
 
-                    if not i:IsA("ModuleScript") then
+                    if not Effect:IsA("ModuleScript") then
                         continue
                     end
 
-                    PossibleEffects[i.Name] = require(i).Description or "UNKNOWN"
+                    PossibleEffects[Effect.Name] = require(Effect).Description or "UNKNOWN"
                 end
             end
         
@@ -510,8 +510,8 @@ local function SwitchSection(sectionName: string)
         workspace.Sounds.EmotePreview:Destroy()
     end
 
-    for _, i in Sections do
-        i.Visible = i.Name == sectionName
+    for _, section in Sections do
+        section.Visible = section.Name == sectionName
     end
 
     Shop.SelectedSection = sectionName
@@ -629,8 +629,8 @@ function Shop:Init()
     end)
 
     table.insert(Conns, UI.Destroying:Connect(function()
-        for _, i in Conns do
-            i:Disconnect()
+        for _, connection in Conns do
+            connection:Disconnect()
         end
     end))
 
@@ -649,12 +649,12 @@ function Shop:Open(Time: number)
     PreviewInstances.EmotePreview.Visible = false
     ButtonsContainer.Skins.Visible = true
     ButtonsContainer.MoreInfo.Visible = true
-    for _, v in LoadedEmoteTracks do
-        if v.Animation ~= nil then
-            v.Animation:Stop(0)
+    for _, emoteTrack in LoadedEmoteTracks do
+        if emoteTrack.Animation ~= nil then
+            emoteTrack.Animation:Stop(0)
         else
-            for _, i in v do
-                i.Animation:Stop(0)
+            for _, EmoteTrack in emoteTrack do
+                EmoteTrack.Animation:Stop(0)
             end
         end
     end
@@ -752,12 +752,12 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
         if workspace.Sounds:FindFirstChild("EmotePreview") then
             workspace.Sounds.EmotePreview:Destroy()
         end
-        for _, v in LoadedEmoteTracks do
-            if v.Animation ~= nil then
-                v.Animation:Stop(0)
+        for _, emoteTrack in LoadedEmoteTracks do
+            if emoteTrack.Animation ~= nil then
+                emoteTrack.Animation:Stop(0)
             else
-                for _, i in v do
-                    i.Animation:Stop(0)
+                for _, EmoteTrack in emoteTrack do
+                    EmoteTrack.Animation:Stop(0)
                 end
             end
         end

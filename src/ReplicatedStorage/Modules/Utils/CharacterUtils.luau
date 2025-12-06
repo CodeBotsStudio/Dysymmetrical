@@ -222,9 +222,9 @@ end
 function CharacterUtils.GetLoadedCharacters(IncludeAFK: boolean?): {Model}
     local t: {Model} = {}
 
-    for _, i in PlayerUtils.GetLoadedPlayers(IncludeAFK) do
-        if i.Character then
-            table.insert(t, i.Character)
+    for _, Player in PlayerUtils.GetLoadedPlayers(IncludeAFK) do
+        if Player.Character then
+            table.insert(t, Player.Character)
         end
     end
 

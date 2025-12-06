@@ -56,9 +56,9 @@ function Sounds:GetSound(ID: string, clone: boolean?): Sound?
     else
         local final = ID:match("^%D+") or ID
         local arr = {}
-        for _, i in SoundFolder:GetDescendants() do
-            if i:IsA("Sound") and (i.Name:match("^%D+") or i.Name) == final then
-                table.insert(arr, i)
+        for _, Sound in SoundFolder:GetDescendants() do
+            if Sound:IsA("Sound") and (Sound.Name:match("^%D+") or Sound.Name) == final then
+                table.insert(arr, Sound)
             end
         end
         if #arr > 0 then
@@ -89,8 +89,8 @@ function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any
     Sound.Parent = nil --for setting the parent later
     Sound.Volume = SoundProperties.Volume or 0.5
 
-    for _, i in self.CommonlyUsedSounds do --weird hack but fuck it
-        if ID == i then
+    for _, CommonID in self.CommonlyUsedSounds do --weird hack but fuck it
+        if ID == CommonID then
             Sound.SoundGroup = SoundService.SoundGroups.Master.UI
             break
         end
@@ -191,12 +191,12 @@ end
 --- Updates every theme to play the top priority one.
 function Sounds:UpdateThemes()
     local TopMusic
-    for _, i in workspace.Themes:GetChildren() do
-        if i.Name == "Destroying" then
+    for _, Theme in workspace.Themes:GetChildren() do
+        if Theme.Name == "Destroying" then
             continue
         end
-        if not TopMusic or i:GetAttribute("Priority") > TopMusic:GetAttribute("Priority") then
-            TopMusic = i
+        if not TopMusic or Theme:GetAttribute("Priority") > TopMusic:GetAttribute("Priority") then
+            TopMusic = Theme
         end
     end
     if not TopMusic then
@@ -205,17 +205,17 @@ function Sounds:UpdateThemes()
 
     local TweenDuration = ThemeTweenDurationHolder or 0.8
     ThemeTweenDurationHolder = nil
-    for _, i in workspace.Themes:GetChildren() do
-        if i.Name == "Destroying" then
+    for _, Theme in workspace.Themes:GetChildren() do
+        if Theme.Name == "Destroying" then
             continue
         end
 
-        if i == TopMusic then
-            TweenService:Create(i, TweenInfo.new(TweenDuration), {
-                Volume = i:GetAttribute("Volume") or 1
+        if Theme == TopMusic then
+            TweenService:Create(Theme, TweenInfo.new(TweenDuration), {
+                Volume = Theme:GetAttribute("Volume") or 1
             }):Play()
         else
-            TweenService:Create(i, TweenInfo.new(TweenDuration), {
+            TweenService:Create(Theme, TweenInfo.new(TweenDuration), {
                 Volume = 0
             }):Play()
         end

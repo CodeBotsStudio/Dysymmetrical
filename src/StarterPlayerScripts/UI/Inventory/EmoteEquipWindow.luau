@@ -37,13 +37,13 @@ return {
             self.Removed:DisconnectAll()
             self.Equipped:DisconnectAll()
 
-            for _, i in self.Connections do
-                if typeof(i) == "thread" then
-                    if coroutine.status(i) ~= "running" then
-                        task.cancel(i)
+            for _, connection in self.Connections do
+                if typeof(connection) == "thread" then
+                    if coroutine.status(connection) ~= "running" then
+                        task.cancel(connection)
                     end
                 else
-                    i:Disconnect()
+                    connection:Disconnect()
                 end
             end
 
@@ -57,18 +57,18 @@ return {
         end
 
         local EmotesToInstantiate = {}
-        for _, i in Utils.PlayerData.GetPlayerOwned(Players.LocalPlayer, "Emotes", false):GetChildren() do
-            table.insert(EmotesToInstantiate, i.Name)
+        for _, Emote in Utils.PlayerData.GetPlayerOwned(Players.LocalPlayer, "Emotes", false):GetChildren() do
+            table.insert(EmotesToInstantiate, Emote.Name)
         end
         table.sort(EmotesToInstantiate, function(a, b)
             return a < b
         end)
 
-        for _, i in EmotesToInstantiate do
-            local EmoteInfo = require(Utils.Instance.GetEmoteModule(i))
+        for _, Emote in EmotesToInstantiate do
+            local EmoteInfo = require(Utils.Instance.GetEmoteModule(Emote))
 
             local Button = ButtonPrefab:Clone()
-            Button.Name = i
+            Button.Name = Emote
             Button.Render.Image = EmoteInfo.Config.Render
             Button.NameLabel.Text = EmoteInfo.Config.Name
 
@@ -76,9 +76,9 @@ return {
             Button.Parent = Window.Instance.Content
         end
         
-        for _, i in Window.Buttons do
-            table.insert(Window.Connections, i.MouseButton1Click:Connect(function()
-                Window.Equipped:Fire(Network:FireServerConnection("EquipEmote", "REMOTE_FUNCTION", Slot, i.Name))
+        for _, Button in Window.Buttons do
+            table.insert(Window.Connections, Button.MouseButton1Click:Connect(function()
+                Window.Equipped:Fire(Network:FireServerConnection("EquipEmote", "REMOTE_FUNCTION", Slot, Button.Name))
                 Window:Hide()
             end))
         end

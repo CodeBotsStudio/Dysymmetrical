@@ -170,7 +170,7 @@ script.ChildRemoved:Connect(scriptChildModified)
 local animator = if Humanoid then Humanoid:FindFirstChildOfClass("Animator") else nil
 if animator then
 	local animTracks = animator:GetPlayingAnimationTracks()
-	for i,track in ipairs(animTracks) do
+	for _, track in ipairs(animTracks) do
 		track:Stop(0)
 		track:Destroy()
 	end

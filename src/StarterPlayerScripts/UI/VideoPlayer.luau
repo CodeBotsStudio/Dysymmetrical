@@ -156,15 +156,15 @@ function module:Play(fps: number)
 		end
 	end
 	
-	for i = 1, #frames do
-		frames[i].Parent = ScreenGUI.Frames
-		frames[i].BackgroundTransparency = 0
-		frames[i].ImageTransparency = 0
-		local targetTime = spf * (i-1)
+	for frameIndex = 1, #frames do
+		frames[frameIndex].Parent = ScreenGUI.Frames
+		frames[frameIndex].BackgroundTransparency = 0
+		frames[frameIndex].ImageTransparency = 0
+		local targetTime = spf * (frameIndex - 1)
 		local actualTime = time() - startTime
 		local timeDelay =  actualTime - targetTime
 		if timeDelay > 0 then
-			task.wait(spf-timeDelay)
+			task.wait(spf - timeDelay)
 		end
 	end
 
@@ -180,8 +180,8 @@ function module:Play(fps: number)
 		music:Stop()
 	end
 
-	for _, i in frames do
-		i:Destroy()
+	for _, frame in frames do
+		frame:Destroy()
 	end
 	
 	ScreenGUI.Enabled = false

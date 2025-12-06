@@ -30,8 +30,8 @@ function FOVManager:Init()
 	end))
 
 	table.insert(self.Conns, LocalPlayer.CharacterAdded:Connect(function()
-		for _, i in self.Conns do --ends the script's execution
-			i:Disconnect()
+		for _, connection in self.Conns do --ends the script's execution
+			connection:Disconnect()
 		end
 	end))
 end

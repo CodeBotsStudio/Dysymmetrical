@@ -14,9 +14,9 @@ local Rand = Random.new()
 function MapManager:Init()
     self.MapPrefabs = ServerStorage.Maps:GetChildren()
 
-    for _, i in self.MapPrefabs do
-        if not i:IsA("Folder") and not i:IsA("Model") then
-            table.remove(self.MapPrefabs, table.find(self.MapPrefabs, i))
+    for _, Map in self.MapPrefabs do
+        if not Map:IsA("Folder") and not Map:IsA("Model") then
+            table.remove(self.MapPrefabs, table.find(self.MapPrefabs, Map))
         end
     end
 
@@ -56,14 +56,14 @@ function MapManager:GetRandomMap(): Model | Folder
     local Index = Rand:NextInteger(1, #KillerSpawns)
 
     --removes any spawn points that aren't from the set preset
-    for _, i: BasePart in KillerSpawns do
-        if i:GetAttribute("Index") == nil or i:GetAttribute("Index") ~= Index then
-            i:Destroy()
+    for _, Spawn: BasePart in KillerSpawns do
+        if Spawn:GetAttribute("Index") == nil or Spawn:GetAttribute("Index") ~= Index then
+            Spawn:Destroy()
         end
     end
-    for _, i: BasePart in SurvSpawns do
-        if i:GetAttribute("Index") == nil or i:GetAttribute("Index") ~= Index then
-            i:Destroy()
+    for _, Spawn: BasePart in SurvSpawns do
+        if Spawn:GetAttribute("Index") == nil or Spawn:GetAttribute("Index") ~= Index then
+            Spawn:Destroy()
         end
     end
 

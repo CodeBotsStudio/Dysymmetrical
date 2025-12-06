@@ -38,9 +38,9 @@ return {
         end
 
         if Player:lower() == "all" then
-            for _, i in Players:GetPlayers() do
+            for _, PlayerChar in Players:GetPlayers() do
                 task.spawn(function()
-                    ServerCharacterManager:SetupCharacter(i, Utils.PlayerData.GetPlayerEquipped(i, Type), Type)
+                    ServerCharacterManager:SetupCharacter(PlayerChar, Utils.PlayerData.GetPlayerEquipped(PlayerChar, Type), Type)
                 end)
             end
             return

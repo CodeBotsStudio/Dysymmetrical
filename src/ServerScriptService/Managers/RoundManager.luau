@@ -63,18 +63,18 @@ function RoundManager.StartRound()
     MapManager:GetRandomMap()
     
     --gets the killers for the round
-    for i = 1, workspace:GetAttribute("KillersAllowed") do
-        RoundManager.CurrentRound.Killers[i] = {
-            Player = PlayersOrderedByMalice[i],
+    for killerIndex = 1, workspace:GetAttribute("KillersAllowed") do
+        RoundManager.CurrentRound.Killers[killerIndex] = {
+            Player = PlayersOrderedByMalice[killerIndex],
             Character = nil
         }
-        RoundManager.CurrentRound.KillerIndex[PlayersOrderedByMalice[i]] = i
+        RoundManager.CurrentRound.KillerIndex[PlayersOrderedByMalice[killerIndex]] = killerIndex
     end
 
     --sets up every player
-    for i, Player: Player in PlayersOrderedByMalice do
-        local IsKiller = i <= workspace:GetAttribute("KillersAllowed")
-        RoundManager.Utils.SetupPlayer(Player, IsKiller and i or nil)
+    for index, Player: Player in PlayersOrderedByMalice do
+        local IsKiller = index <= workspace:GetAttribute("KillersAllowed")
+        RoundManager.Utils.SetupPlayer(Player, IsKiller and index or nil)
 
         --if it's a survivor then add it to the PlayersRemaining list
         if RoundManager.CanSpawnKiller and IsKiller then
@@ -85,8 +85,8 @@ function RoundManager.StartRound()
     end
 
     if RoundManager.CanSpawnKiller then --if one is testing survivor then the round'll never end
-        for _, i in RoundManager.CurrentRound.Killers do
-            table.remove(RoundManager.CurrentRound.PlayersRemaining, table.find(RoundManager.CurrentRound.PlayersRemaining, i.Player))
+        for _, killer in RoundManager.CurrentRound.Killers do
+            table.remove(RoundManager.CurrentRound.PlayersRemaining, table.find(RoundManager.CurrentRound.PlayersRemaining, killer.Player))
         end
     end
     Utils.Misc.Print(RoundManager.CurrentRound.PlayersRemaining)
@@ -141,9 +141,9 @@ function RoundManager.Callables.InitLMS(LastMan: Player)
     workspace:SetAttribute("LMS", true)
 
     --reveals auras
-    for _, i in RoundManager.CurrentRound.Killers do
-        Utils.Player.RevealPlayerAuraTo(i.Player, LastMan, 10)
-        Utils.Player.RevealPlayerAuraTo(LastMan, i.Player, 10)
+    for _, Killer in RoundManager.CurrentRound.Killers do
+        Utils.Player.RevealPlayerAuraTo(Killer.Player, LastMan, 10)
+        Utils.Player.RevealPlayerAuraTo(LastMan, Killer.Player, 10)
     end
 
     --duh
@@ -183,15 +183,15 @@ function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
 
     --checking who won and giving the proper amounts to their stats
     if winner == "Killer" then
-        for _, i in RoundManager.CurrentRound.Killers do
-            CommonFunctions.UpdatePlayerStat(i.Player, "KillerStats.KillerWins", 1)
-            CommonFunctions.GrantRewardToPlayer(i.Player, 120, 180, "winning a match as Killer")
+        for _, Killer in RoundManager.CurrentRound.Killers do
+            CommonFunctions.UpdatePlayerStat(Killer.Player, "KillerStats.KillerWins", 1)
+            CommonFunctions.GrantRewardToPlayer(Killer.Player, 120, 180, "winning a match as Killer")
         end
         --survivor losses aren't handled here since when a player dies it directly counts
         Utils.Misc.Print("killer wins")
     elseif winner == "Survivors" then
-        for _, i in RoundManager.CurrentRound.Killers do
-            CommonFunctions.UpdatePlayerStat(i.Player, "KillerStats.KillerLosses", 1)
+        for _, Killer in RoundManager.CurrentRound.Killers do
+            CommonFunctions.UpdatePlayerStat(Killer.Player, "KillerStats.KillerLosses", 1)
         end
         for _, Player: Player in RoundManager.CurrentRound.PlayersRemaining do
             CommonFunctions.UpdatePlayerStat(Player, "SurvivorStats.SurvivorWins", 1)
@@ -200,7 +200,7 @@ function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
         
         Utils.Misc.Print("survivors win")
     else
-        Utils.Misc.Print("NO ONE WON!!1! https://www.youtube.com/watch?v=L8XbI9aJOXk")
+        Utils.Misc.Print("NO ONE WON!!1!")
     end
 
     Utils.Player.Fade(Utils.Player.GetLoadedPlayers(), "In", 0.7, true)
@@ -208,9 +208,9 @@ function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
     TimeManager:SetTime(TimeManager.Config.LobbyTime)
 
     --respawning everyone left
-    for _, i in RoundManager.CurrentRound.PlayersAccepted do
-        if i.Character and i.Character.Role.Value ~= "Spectator" then
-            ServerCharacterManager:SetupCharacter(i)
+    for _, Player: Player in RoundManager.CurrentRound.PlayersAccepted do
+        if Player.Character and Player.Character.Role.Value ~= "Spectator" then
+            ServerCharacterManager:SetupCharacter(Player)
         end
     end
     
@@ -244,8 +244,8 @@ function RoundManager.Callables._OnPlayerDeath(dead: Player, wasKiller: boolean?
     wasKiller = wasKiller or false
 
     --disconnect all connections related to this player
-    for _, i in RoundManager.PlayerConnections[dead.UserId] do
-        i:Disconnect()
+    for _, Player in RoundManager.PlayerConnections[dead.UserId] do
+        Player:Disconnect()
     end
     RoundManager.PlayerConnections[dead.UserId] = nil
     --if it was a killer, remove killer from table and resort it
@@ -260,12 +260,12 @@ function RoundManager.Callables._OnPlayerDeath(dead: Player, wasKiller: boolean?
         table.sort(RoundManager.CurrentRound.Killers)
         local NewTable = {}
         --resets indexes in order
-        for _, v in ipairs(RoundManager.CurrentRound.Killers) do
-            table.insert(NewTable, v)
+        for _, killer in ipairs(RoundManager.CurrentRound.Killers) do
+            table.insert(NewTable, killer)
         end
         --sets the indexes in KillerIndex for the next killer removal
-        for i, v in ipairs(NewTable) do
-            RoundManager.CurrentRound.KillerIndex[v.Player] = i
+        for index, killer in ipairs(NewTable) do
+            RoundManager.CurrentRound.KillerIndex[killer.Player] = index
         end
         RoundManager.CurrentRound.Killers = NewTable
     else

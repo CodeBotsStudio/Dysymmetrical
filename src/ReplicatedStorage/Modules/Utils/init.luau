@@ -54,19 +54,19 @@ Credits to Dyscarn for making it! (hello!)
 
 function Utils:Init()
     if not RunService:IsServer() then
-        local function AddToR(i)
-            if i:IsA("BasePart") and i.Transparency >= 0.75 then
-                Utils.TransparentParts[i] = true
+        local function AddToR(Descendant)
+            if Descendant:IsA("BasePart") and Descendant.Transparency >= 0.75 then
+                Utils.TransparentParts[Descendant] = true
             end
         end
         task.defer(function()
-            for _, i in workspace:GetDescendants() do
-                AddToR(i)
+            for _, Descendant in workspace:GetDescendants() do
+                AddToR(Descendant)
             end
             workspace.DescendantAdded:Connect(AddToR)
-            workspace.DescendantRemoving:Connect(function(i)
-                if Utils.TransparentParts[i] then
-                    Utils.TransparentParts[i] = nil
+            workspace.DescendantRemoving:Connect(function(Descendant)
+                if Utils.TransparentParts[Descendant] then
+                    Utils.TransparentParts[Descendant] = nil
                 end
             end)
         end)
@@ -79,8 +79,8 @@ function Utils:Init()
             Utils.Player._Fade(FadeType, Duration, Yield, StartTransparency, FadeColor)
         end)
 
-        Network:SetConnection("GetMousePosition", "REMOTE_FUNCTION", function(v)
-            return Utils.Player._GetMousePosition(v)
+        Network:SetConnection("GetMousePosition", "REMOTE_FUNCTION", function(LockToClosestPlayer)
+            return Utils.Player._GetMousePosition(LockToClosestPlayer)
         end)
         Network:SetConnection("ShakeCamera", "REMOTE_EVENT", function(Magnitude: number, Duration: number)
             return Utils.Player.ShakeCamera(Magnitude, Duration)
@@ -95,8 +95,8 @@ function Utils:Init()
     Network:SetConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", function(SourcePlayer: Player, name: string)
         return Utils.PlayerData.CreateMissingPurchasedSkinValue(SourcePlayer, name)
     end)
-    Network:SetConnection("GetMousePosition", "REMOTE_FUNCTION", function(v)
-        return Utils.Player._GetMousePosition(v)
+    Network:SetConnection("GetMousePosition", "REMOTE_FUNCTION", function(LockToClosestPlayer)
+        return Utils.Player._GetMousePosition(LockToClosestPlayer)
     end)
 end
 

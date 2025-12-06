@@ -10,8 +10,8 @@ local LocalPlayer = Players.LocalPlayer
 local QueryHitboxVisibility = {}
 
 function QueryHitboxVisibility:Init()
-    Utils.Player.ObservePlayers(function(i: Player)
-        Utils.Character.ObserveCharacter(i, function(char: Model)
+    Utils.Player.ObservePlayers(function(Player: Player)
+        Utils.Character.ObserveCharacter(Player, function(char: Model)
             self:_CharSetup(char)
         end)
     end)
@@ -24,12 +24,12 @@ function QueryHitboxVisibility:_CharSetup(char: Model)
         end
 
         if Utils.Instance.FindFirstChild(char, "Hitboxes", true, 3) then
-            for _, i in char.Hitboxes:GetChildren() do
-                if not i:IsA("BasePart") then
+            for _, Hitbox in char.Hitboxes:GetChildren() do
+                if not Hitbox:IsA("BasePart") then
                     continue
                 end
 
-                i.Transparency = i:GetAttribute("VisibleTransparency") or 0.75
+                Hitbox.Transparency = Hitbox:GetAttribute("VisibleTransparency") or 0.75
             end
         end
     end)

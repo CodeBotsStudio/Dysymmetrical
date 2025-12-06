@@ -61,12 +61,12 @@ function PlayerManager:Init()
 
 				local CollisionGroup = Role.Value
 
-				for _, i in char:GetDescendants() do
-					if not i:IsA("BasePart") or i:IsDescendantOf(char.Hitboxes) then
+				for _, Part in char:GetDescendants() do
+					if not Part:IsA("BasePart") or Part:IsDescendantOf(char.Hitboxes) then
 						continue
 					end
 					
-					i.CollisionGroup = CollisionGroup
+					Part.CollisionGroup = CollisionGroup
 				end
 
 				if Role.Value ~= "Killer" then
@@ -98,12 +98,12 @@ function PlayerManager:Init()
 					Weld.Part1 = StunSP
 				end
 			else
-				for _, i in char:GetDescendants() do
-					if not i:IsA("BasePart") then
+				for _, Part in char:GetDescendants() do
+					if not Part:IsA("BasePart") then
 						continue
 					end
 					
-					i.CollisionGroup = "Spectator"
+					Part.CollisionGroup = "Spectator"
 				end
 			end
 
@@ -226,8 +226,8 @@ function PlayerManager:_SetupHitboxes(Character)
 	end
 
 	Utils.Character.ObserveOnDeath(Humanoid, function()
-		for _, i in HitboxFolder:GetDescendants() do
-			i:Destroy()
+		for _, Descendant in HitboxFolder:GetDescendants() do
+			Descendant:Destroy()
 		end
 		HitboxFolder:Destroy()
 	end)
@@ -309,8 +309,8 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	plr.Character = char
 	
 	--clones all scripts
-	for _, i in StarterCharacterScripts:GetChildren() do
-		i:Clone().Parent = char
+	for _, Child in StarterCharacterScripts:GetChildren() do
+		Child:Clone().Parent = char
 	end
 
 	--adds the char to `Players` in `workspace`

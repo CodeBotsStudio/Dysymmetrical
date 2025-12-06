@@ -208,8 +208,8 @@ function SaveManager:Init()
 		task.defer(function()
 
 			-- Grab the player's data from the datastore, place it into a table for later use 
-			self.PlayerDatas[Player.UserId] = self:Load(Player)
-			local ThisPlayerData = self.PlayerDatas[Player.UserId] -- Gets its own variable to make things easier to read. Done in this way so this variable points to the entry in the table and not to the data itself.
+			SaveManager.PlayerDatas[Player.UserId] = SaveManager.Load(Player)
+			local ThisPlayerData = SaveManager.PlayerDatas[Player.UserId] -- Gets its own variable to make things easier to read. Done in this way so this variable points to the entry in the table and not to the data itself.
 
 			-- Go through all achievements, set them up in folders for the player in question.
 			for AchievementGroupCodeName, AchievementGroup in Achievements do
@@ -250,21 +250,21 @@ function SaveManager:Init()
 		-- Deferred so it'll save playerdata parallel, instead of doing so one-at-a-time.
 		task.defer(function()
 
-			if self.PlayerLeaderstatConns[Player.UserId] then
-				self.PlayerLeaderstatConns[Player.UserId]:Disconnect()
+			if SaveManager.PlayerLeaderstatConns[Player.UserId] then
+				SaveManager.PlayerLeaderstatConns[Player.UserId]:Disconnect()
 			end
 
 		end)
-
-		self:Save(Player, self.PlayerDatas[Player.UserId])
+		
+		SaveManager.Save(Player, SaveManager.PlayerDatas[Player.UserId])
 	end)
 
 
 	-- Mark some global saving code to be run if the server gets manually closed for one reason or another.
 	game:BindToClose(function()
-		for _, i in Players:GetPlayers() do
+		for _, Player in Players:GetPlayers() do
 
-			self:Save(i, self.PlayerDatas[i.UserId])
+			SaveManager.Save(Player, SaveManager.PlayerDatas[Player.UserId])
 
 		end
 	end)
@@ -273,7 +273,7 @@ end
 
 
 --- Sets up folder for any data that has the `DisplayInLeaderstats` attribute, to display them on the leaderboard.
-function SaveManager:_SetupLeaderStats(DataFolder, parent) -- Uses its own function, so it doesn't save. 
+function SaveManager._SetupLeaderStats(DataFolder, parent) -- Uses its own function, so it doesn't save. 
 
 	for _, data in DataFolder:GetDescendants() do
 
@@ -284,7 +284,7 @@ function SaveManager:_SetupLeaderStats(DataFolder, parent) -- Uses its own funct
 			LeaderStat.Value = data.Value
 			LeaderStat.Parent = parent
 
-			self.PlayerLeaderstatConns[DataFolder.Parent.UserId] = data.Changed:Connect(function()
+			SaveManager.PlayerLeaderstatConns[DataFolder.Parent.UserId] = data.Changed:Connect(function()
 				if LeaderStat then
 					LeaderStat.Value = data.Value
 				end
@@ -298,7 +298,7 @@ end
 --- Loads a player's savedata and generates a heirarchy of folders and valuebase objects for storing, reading, and writing to and from it in-game.
 --- 
 --- ### DEFER ANY CALLS TO THIS FUNCTION, IT MAY TAKE A WHILE.
-function SaveManager:Load(Player: Player): Folder
+function SaveManager.Load(Player: Player): Folder
 
 	-- Retrieve playerdata
 	local PlayerData
@@ -318,7 +318,7 @@ function SaveManager:Load(Player: Player): Folder
 		until PlayerData or Attempt > 10
 
 	else    
-		warn("[SaveManager:Load()]: FATAL ERROR – ENTIRE DATASTORE failed to load. Handling playerdata from here is extremely hazardous. Here be dragons!")
+		warn("[SaveManager.Load()]: FATAL ERROR – ENTIRE DATASTORE failed to load. Handling playerdata from here is extremely hazardous. Here be dragons!")
 	end
 
 	local ClonedData = script.PlayerData:Clone()
@@ -331,7 +331,7 @@ function SaveManager:Load(Player: Player): Folder
 
 		if not PlayerData.Achievements then
 			ClonedData.Parent = Player
-			self:_SetupLeaderStats(ClonedData, Leaderstats)
+			SaveManager._SetupLeaderStats(ClonedData, Leaderstats)
 			Leaderstats.Parent = Player
 
 			return ClonedData
@@ -369,10 +369,10 @@ function SaveManager:Load(Player: Player): Folder
 				continue
 			end
 
-			local V = Instance.new("StringValue")
-			V.Name = skinname
-			V.Value = skin
-			V.Parent = ClonedData.Equipped.Skins
+			local Value = Instance.new("StringValue")
+			Value.Name = skinname
+			Value.Value = skin
+			Value.Parent = ClonedData.Equipped.Skins
 		end
 
 		-- Find their equipped killer and survivor
@@ -492,21 +492,24 @@ function SaveManager:Load(Player: Player): Folder
 
 
 	end
-	-- self:_CheckCheckSaveIntegrity(ClonedData)
+	-- SaveManager._CheckCheckSaveIntegrity(ClonedData)
 
 	-- Finally, nest all these instances neatly in the player for easy reference.
 	ClonedData.Parent = Player
-	self:_SetupLeaderStats(ClonedData, Leaderstats)
+	SaveManager._SetupLeaderStats(ClonedData, Leaderstats)
 	Leaderstats.Parent = Player
 
 	return ClonedData
 end
 
 
+--okay so somehow deferring it fucks up the whole thing -dys
 
 --- Saves a given player's data.
-function SaveManager:Save(Player: Player, Data: Folder)
-	task.defer(function()
+--- 
+--- ### SPAWN ANY CALLS TO THIS FUNCTION, IT MAY TAKE A WHILE.
+function SaveManager.Save(Player: Player, Data: Folder)
+	task.spawn(function()
 		local SaveFile = ConvertInstanceTreeToTable(Data)
 
 		--i just figured out pairs and ipairs are fucking useless as generalized iteration had been implemented fairly long ago. 

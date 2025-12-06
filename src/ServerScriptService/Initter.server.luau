@@ -8,30 +8,32 @@ local RSDone = false
 local totalModules = 0
 local loadTimes = {}
 
-local function InitModule(i)
-    local Scr = require(i)
+local function InitModule(Module: ModuleScript)
+    local Scr = require(Module)
     if typeof(Scr) == "table" and typeof(Scr.Init) == "function" then
         Scr:Init()
     end
 end
 
 task.spawn(function()
-    for _, i in script.Parent:GetDescendants() do
-        if i:IsA("ModuleScript") then
-            totalModules += 1
+    for _, Module in script.Parent:GetDescendants() do
+        if not Module:IsA("ModuleScript") then
+            continue
+        end
 
-            if CanBenchmark then
-                local start = os.clock()
-                pcall(InitModule, i)
-                local duration = os.clock() - start
+        totalModules += 1
 
-                table.insert(loadTimes, {
-                    name = i:GetFullName(),
-                    time = duration
-                })
-            else
-                pcall(InitModule, i)
-            end
+        if CanBenchmark then
+            local start = os.clock()
+            pcall(InitModule, Module)
+            local duration = os.clock() - start
+
+            table.insert(loadTimes, {
+                name = Module:GetFullName(),
+                time = duration
+            })
+        else
+            pcall(InitModule, Module)
         end
     end
     SSSDone = true
@@ -52,9 +54,9 @@ if CanBenchmark then
     print("Total modules loaded:", totalModules)
     print("Top 5 slowest modules:")
 
-    for i = 1, math.min(5, #loadTimes) do
-        local info = loadTimes[i]
-        print(i .. ".", info.name, string.format("(%.5f seconds)", info.time))
+    for index = 1, math.min(5, #loadTimes) do
+        local info = loadTimes[index]
+        print(index .. ".", info.name, string.format("(%.5f seconds)", info.time))
     end
 elseif not RunService:IsStudio() then
     print(require(ReplicatedStorage.Modules.Utils).Credits)

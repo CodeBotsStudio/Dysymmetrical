@@ -12,11 +12,11 @@ return function(Parent: ScreenGui, plrNames: {string})
 	local Group = G:Clone()
     Group.Parent = Parent
 
-	for _, i in Group:GetDescendants() do
-		if i:IsA("Frame") then
-			i.BackgroundTransparency = 1
-		elseif i:IsA("TextLabel") then
-			i.TextTransparency = 1
+	for _, Item in Group:GetDescendants() do
+		if Item:IsA("Frame") then
+			Item.BackgroundTransparency = 1
+		elseif Item:IsA("TextLabel") then
+			Item.TextTransparency = 1
 		end
 	end
 
@@ -33,11 +33,11 @@ return function(Parent: ScreenGui, plrNames: {string})
 		PlayerLabel.PlayerName.Text = "("..name..")"
 		PlayerLabel.Parent = Frame
 
-		for _, i in PlayerLabel:GetDescendants() do
-			if i:IsA("Frame") then
-				i.BackgroundTransparency = 1
-			elseif i:IsA("TextLabel") then
-				i.TextTransparency = 1
+		for _, Item in PlayerLabel:GetDescendants() do
+			if Item:IsA("Frame") then
+				Item.BackgroundTransparency = 1
+			elseif Item:IsA("TextLabel") then
+				Item.TextTransparency = 1
 			end
 		end
 	end
@@ -48,24 +48,24 @@ return function(Parent: ScreenGui, plrNames: {string})
 
 	task.wait(1)
 
-	for _, i in Group:GetDescendants() do
-		if i:HasTag("Transparent") then
+	for _, Item in Group:GetDescendants() do
+		if Item:HasTag("Transparent") then
 			continue
 		end
-		if i:IsA("Frame") then
-			TweenService:Create(i, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
-		elseif i:IsA("TextLabel") then
-			TweenService:Create(i, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+		if Item:IsA("Frame") then
+			TweenService:Create(Item, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
+		elseif Item:IsA("TextLabel") then
+			TweenService:Create(Item, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 		end
 	end
 
 	task.wait(3)
 
-	for _, i in Group:GetDescendants() do
-		if i:IsA("Frame") then
-			TweenService:Create(i, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
-		elseif i:IsA("TextLabel") then
-			TweenService:Create(i, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
+	for _, Item in Group:GetDescendants() do
+		if Item:IsA("Frame") then
+			TweenService:Create(Item, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+		elseif Item:IsA("TextLabel") then
+			TweenService:Create(Item, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
 		end
 	end
 

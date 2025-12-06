@@ -43,33 +43,33 @@ function InputManager:_SetupKeybind(key: Key)
     key.Pressed = Signal.new()
     key.Released = Signal.new()
 
-    UserInputService.InputBegan:Connect(function(i: InputObject, gpe: boolean)
-        if gpe or not key.Enabled then return end
+    UserInputService.InputBegan:Connect(function(inputObject: InputObject, gameProcessedEvent: boolean)
+        if gameProcessedEvent or not key.Enabled then return end
         
         if key.KeyboardKey or key.GamepadKey then
-            if i.KeyCode == key.KeyboardKey or i.KeyCode == key.GamepadKey then
+            if inputObject.KeyCode == key.KeyboardKey or inputObject.KeyCode == key.GamepadKey then
                 key.Pressed:Fire()
             end
         end
 
         if key.InputType then
-            if i.UserInputType == key.InputType then
+            if inputObject.UserInputType == key.InputType then
                 key.Pressed:Fire()
             end
         end
     end)
     
-    UserInputService.InputEnded:Connect(function(i: InputObject, gpe: boolean)
-        if gpe or not key.Enabled then return end
+    UserInputService.InputEnded:Connect(function(inputObject: InputObject, gameProcessedEvent: boolean)
+        if gameProcessedEvent or not key.Enabled then return end
         
         if key.KeyboardKey or key.GamepadKey then
-            if i.KeyCode == key.KeyboardKey or i.KeyCode == key.GamepadKey then
+            if inputObject.KeyCode == key.KeyboardKey or inputObject.KeyCode == key.GamepadKey then
                 key.Released:Fire()
             end
         end
 
         if key.InputType then
-            if i.UserInputType == key.InputType then
+            if inputObject.UserInputType == key.InputType then
                 key.Released:Fire()
             end
         end
@@ -208,12 +208,12 @@ function InputManager:Init()
             if input.Enabled ~= nil then --checking if it's a table of keys
                 input.Enabled = true
             else
-                for _, i: Key in input do
-                    if typeof(i) ~= "table" then
+                for _, key: Key in input do
+                    if typeof(key) ~= "table" then
                         continue
                     end
-                    if i.Enabled ~= nil then --checking if it's an actual key and not smth random idk lol
-                        i.Enabled = true
+                    if key.Enabled ~= nil then --checking if it's an actual key and not smth random idk lol
+                        key.Enabled = true
                     end
                 end
             end

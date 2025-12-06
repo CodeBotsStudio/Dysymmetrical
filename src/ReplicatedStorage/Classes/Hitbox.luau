@@ -480,8 +480,8 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                         -- If the hitbox applies effects, apply them.
                         if Config.EffectsToApply then
-                            for _, i in Config.EffectsToApply do
-					            CommonFunctions.ApplyEffect(Humanoid, i.Name, i.Level, i.Duration, i.Subfolder)
+                            for _, Effect in Config.EffectsToApply do
+					            CommonFunctions.ApplyEffect(Humanoid, Effect.Name, Effect.Level, Effect.Duration, Effect.Subfolder)
 				            end
                         end
 

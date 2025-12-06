@@ -4,9 +4,9 @@ local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
-local GlobalPrefab = Utils.Instance.FindFirstChild(script, "Enum")
-local ValuePrefab = Utils.Instance.FindFirstChild(script, "EnumValue")
--- local OptionPrefab = Utils.Instance.FindFirstChild(script, "EnumOption")
+local GlobalPrefab = Utils.Instance.FindFirstChild(script, "Enum", 0)
+local ValuePrefab = Utils.Instance.FindFirstChild(script, "EnumValue", 0)
+-- local OptionPrefab = Utils.Instance.FindFirstChild(script, "EnumOption", 0)
 
 local Dropdown = {}
 

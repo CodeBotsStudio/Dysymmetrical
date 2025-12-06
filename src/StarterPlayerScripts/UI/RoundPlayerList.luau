@@ -25,9 +25,9 @@ function RoundPlayerList:Init()
         if self.UI then
             self.UI:Destroy()
         end
-        for _, i in self.Conns do
-            for _, v in i do
-                v:Disconnect()
+        for _, ConnectionList in self.Conns do
+            for _, Connection in ConnectionList do
+                Connection:Disconnect()
             end
         end
         self.Conns = {}
@@ -87,8 +87,8 @@ function RoundPlayerList:_InitUI(Char: Model)
 
                     Card.PlayerHealth.TextTransparency = 1
 
-                    for _, i in PlayerConns do
-                        i:Disconnect()
+                    for _, Connection in PlayerConns do
+                        Connection:Disconnect()
                     end
                     return
                 end

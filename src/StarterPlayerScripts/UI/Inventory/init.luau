@@ -93,8 +93,8 @@ function Inventory:ReorderSkins()
     local Ordered = {}
     local LO = 0
 
-    for _, i in self.LoadedItems.Skins do
-        table.insert(Ordered, i)
+    for _, Skin in self.LoadedItems.Skins do
+        table.insert(Ordered, Skin)
     end
 
     table.sort(Ordered, function(a, b)
@@ -108,9 +108,9 @@ function Inventory:ReorderSkins()
             or Modules.A.Config.Price < Modules.B.Config.Price
     end)
 
-    for _, i in Ordered do
+    for _, Skin in Ordered do
         LO += 1
-        i.LayoutOrder = LO
+        Skin.LayoutOrder = LO
     end
 end
 
@@ -128,15 +128,15 @@ function Inventory:CheckEquipLabels()
         end
     end
 
-    for n, f in self.LoadedItems do
-        if n == "Skins" then
+    for name, Type in self.LoadedItems do
+        if name == "Skins" then
             continue
         end
-        for _, i in f do
-            if i.Name == Equipped["Equipped"..n:sub(1, #n - 1)].Value then
-                ShowEquippedLabel(i)
+        for _, Item in Type do
+            if Item.Name == Equipped["Equipped"..name:sub(1, #name - 1)].Value then
+                ShowEquippedLabel(Item)
             else
-                RemoveEquippedLabel(i)
+                RemoveEquippedLabel(Item)
             end
         end
     end
@@ -166,25 +166,25 @@ local function SwitchSection(sectionName: string)
         Inventory.EmoteWindow = nil
     end
 
-    for _, i in Sections do
-        i.Visible = i.Name == sectionName
+    for _, Section in Sections do
+        Section.Visible = Section.Name == sectionName
     end
 
     Inventory.SelectedSection = sectionName
 end
 
 function Inventory:ReloadEquippedEmotes()
-    for _, i in EmoteContainer.EmoteContainer:GetChildren() do
-        local Value = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
+    for _, EmoteSlot in EmoteContainer.EmoteContainer:GetChildren() do
+        local Value = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes."..EmoteSlot.Name)
         if #Value <= 0 then
-            i.Render.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-            i.NameLabel.Text = ""
+            EmoteSlot.Render.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+            EmoteSlot.NameLabel.Text = ""
             continue
         end
 
         local EmoteInfo = require(Utils.Instance.GetEmoteModule(Value))
-        i.Render.Image = EmoteInfo.Config.Render
-        i.NameLabel.Text = EmoteInfo.Config.Name
+        EmoteSlot.Render.Image = EmoteInfo.Config.Render
+        EmoteSlot.NameLabel.Text = EmoteInfo.Config.Name
     end
 end
 
@@ -198,8 +198,8 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
     end
     
     if Open then
-        for _, i in self.LoadedItems.Skins do
-            i:Destroy()
+        for _, Skin in self.LoadedItems.Skins do
+            Skin:Destroy()
         end
         table.clear(self.LoadedItems.Skins)
         self.ItemModules.Skins = self.ItemModules.Skins or {}
@@ -209,21 +209,21 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
         local EquippedSkin = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Skins."..charName, false)
 
         local function CheckSkinEquipLabels()
-            for _, i in self.LoadedItems.Skins do
-                if #EquippedSkin.Value < 0 or EquippedSkin.Value ~= i.Name then
-                    if i.Container.Equipped.ImageTransparency ~= 1 then
-                        TweenService:Create(i.Container.Equipped, TweenInfo.new(0.2), {ImageTransparency = 1}):Play()
+            for _, Skin in self.LoadedItems.Skins do
+                if #EquippedSkin.Value < 0 or EquippedSkin.Value ~= Skin.Name then
+                    if Skin.Container.Equipped.ImageTransparency ~= 1 then
+                        TweenService:Create(Skin.Container.Equipped, TweenInfo.new(0.2), {ImageTransparency = 1}):Play()
                     end
                 else
-                    if i.Container.Equipped.ImageTransparency ~= 0 then
-                        TweenService:Create(i.Container.Equipped, TweenInfo.new(0.2), {ImageTransparency = 0}):Play()
+                    if Skin.Container.Equipped.ImageTransparency ~= 0 then
+                        TweenService:Create(Skin.Container.Equipped, TweenInfo.new(0.2), {ImageTransparency = 0}):Play()
                     end
                 end
             end
         end
 
-        for _, i in (LocalPlayer.PlayerData.Purchased.Skins:FindFirstChild(self.SelectedItem.Name) or Network:FireServerConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", self.SelectedItem.Name)):GetChildren() do
-            local Module = Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, i.Name)
+        for _, Skin in (LocalPlayer.PlayerData.Purchased.Skins:FindFirstChild(self.SelectedItem.Name) or Network:FireServerConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", self.SelectedItem.Name)):GetChildren() do
+            local Module = Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, Skin.Name)
             local Info = require(Module)
             local name = Module.Name
 
@@ -295,9 +295,9 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
     end
 
     if Open then
-        for _, i in InfoContainer:GetChildren() do
-            if not i:IsA("UIComponent") then
-                i:Destroy()
+        for _, Child in InfoContainer:GetChildren() do
+            if not Child:IsA("UIComponent") then
+                Child:Destroy()
             end
         end
 
@@ -322,11 +322,11 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
 
             local Text = ""
             if typeof(Section.Text) == "table" then
-                for i, v in ipairs(Section.Text) do
-                    if i > 1 then
+                for index, paragraph in ipairs(Section.Text) do
+                    if index > 1 then
                         Text = Text.."\n"
                     end
-                    Text = Text..v
+                    Text = Text..paragraph
                 end
             else
                 Text = Section.Text
@@ -352,17 +352,17 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
             local PossibleEffects = {}
 
             local function AddEffectToList(Inst: ModuleScript | Folder)
-                for _, i in Inst:GetChildren() do
-                    if i:IsA("Folder") then
-                        AddEffectToList(i)
+                for _, Effect in Inst:GetChildren() do
+                    if Effect:IsA("Folder") then
+                        AddEffectToList(Effect)
                         continue
                     end
 
-                    if not i:IsA("ModuleScript") then
+                    if not Effect:IsA("ModuleScript") then
                         continue
                     end
 
-                    PossibleEffects[i.Name] = require(i).Description or "UNKNOWN"
+                    PossibleEffects[Effect.Name] = require(Effect).Description or "UNKNOWN"
                 end
             end
         
@@ -584,26 +584,26 @@ function Inventory:Init()
     end)
 
     table.insert(Conns, UI.Destroying:Connect(function()
-        for _, i in Conns do
-            i:Disconnect()
+        for _, connection in Conns do
+            connection:Disconnect()
         end
     end))
 
-    for _, i: Frame in EmoteContainer.EmoteContainer:GetChildren() do
-        table.insert(Conns, i.Button.MouseEnter:Connect(function()
+    for _, EmoteSlot: Frame in EmoteContainer.EmoteContainer:GetChildren() do
+        table.insert(Conns, EmoteSlot.Button.MouseEnter:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end))
-        table.insert(Conns, i.Button.MouseLeave:Connect(function()
+        table.insert(Conns, EmoteSlot.Button.MouseLeave:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
         end))
-        table.insert(Conns, i.Button.MouseButton1Click:Connect(function()
+        table.insert(Conns, EmoteSlot.Button.MouseButton1Click:Connect(function()
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
 
             if self.EmoteWindow then
                 return
             end
 
-            local Slot = i.Name:gsub("Emote", "")
+            local Slot = EmoteSlot.Name:gsub("Emote", "")
             self.EmoteWindow = EmoteEquipWindow.New(tonumber(Slot), InventoryContainer)
             self.EmoteWindow.Equipped:Connect(function()
                 self:ReloadEquippedEmotes()

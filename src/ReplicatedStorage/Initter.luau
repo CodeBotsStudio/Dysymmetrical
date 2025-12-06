@@ -6,13 +6,13 @@ local Initter = {
 function Initter:Init()
     self.CurrentlyInitting = "DysNetworking"
     require(script.Parent.Modules.Network):Init()
-    for _, i in ipairs(script.Parent.Modules:GetDescendants()) do
-        if i.Name == "Network" then
+    for _, Module in ipairs(script.Parent.Modules:GetDescendants()) do
+        if Module.Name == "Network" then
             continue
         end
-        if i:IsA("ModuleScript") and not i:HasTag("PreventInit") then
-            self.CurrentlyInitting = i.Name
-            local Code = require(i)
+        if Module:IsA("ModuleScript") and not Module:HasTag("PreventInit") then
+            self.CurrentlyInitting = Module.Name
+            local Code = require(Module)
             if Code.Init ~= nil and typeof(Code.Init) == "function" then
                 Code:Init()
             end

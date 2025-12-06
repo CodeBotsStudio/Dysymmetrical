@@ -35,24 +35,24 @@ local BarButtonPrefabs = {
 }
 
 local function TweenInverted(BarButton, Inverted: boolean)
-    for _, i in BarButton:GetChildren() do
-        if #i:GetChildren() > 0 then
-            TweenInverted(i, Inverted)
+    for _, Child in BarButton:GetChildren() do
+        if #Child:GetChildren() > 0 then
+            TweenInverted(Child, Inverted)
         end
 
-        if i:IsA("TextLabel") then
+        if Child:IsA("TextLabel") then
             local Value = Inverted and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
-            TweenService:Create(i, InvertedInfo, {TextColor3 = Value}):Play()
-        elseif i:IsA("ImageLabel") or i:IsA("ImageButton") then
+            TweenService:Create(Child, InvertedInfo, {TextColor3 = Value}):Play()
+        elseif Child:IsA("ImageLabel") or Child:IsA("ImageButton") then
             local Value = not Inverted and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
             local Transp = 0
-            if i.Name:lower():find("inverted") then
+            if Child.Name:lower():find("inverted") then
                 Transp = Inverted and 0 or 1
-            elseif i.Parent.Name ~= "Holder" then
+            elseif Child.Parent.Name ~= "Holder" then
                 continue
             end
 
-            TweenService:Create(i, InvertedInfo, {ImageTransparency = Transp, BackgroundColor3 = Value}):Play()
+            TweenService:Create(Child, InvertedInfo, {ImageTransparency = Transp, BackgroundColor3 = Value}):Play()
         end
     end
 end

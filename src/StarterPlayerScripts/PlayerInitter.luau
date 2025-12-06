@@ -18,15 +18,17 @@ function PlayerInitter:Init()
 
     Player:SetAttribute("BaseFOV", 70)
 
-    for _, i in script.Parent:GetDescendants() do
-        if i:IsA("ModuleScript") and i ~= PlayerModule and not i:IsDescendantOf(PlayerModule) and not i:IsDescendantOf(ServerScripts) then
-            if i.Name ~= "ModPanel" then
-                self.CurrentlyInitting = i.Name
-            end
-    		local Scr = require(i)
-    		if type(Scr) == "table" and Scr.Init and type(Scr.Init) == "function" then
-    			Scr:Init()
-    		end
+    for _, Module in script.Parent:GetDescendants() do
+        if not (Module:IsA("ModuleScript") and Module ~= PlayerModule and not Module:IsDescendantOf(PlayerModule) and not Module:IsDescendantOf(ServerScripts)) then
+            continue
+    	end
+
+        if Module.Name ~= "ModPanel" then
+            self.CurrentlyInitting = Module.Name
+        end
+    	local Scr = require(Module)
+    	if type(Scr) == "table" and Scr.Init and type(Scr.Init) == "function" then
+    		Scr:Init()
     	end
     end
 

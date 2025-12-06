@@ -68,12 +68,12 @@ function Spectate:Init()
 
         if Role.Value == "Spectator" then
 
-            local I = table.find(self.PlayersAvailable, Player.Name)
-            if I then
+            local FoundPlayer = table.find(self.PlayersAvailable, Player.Name)
+            if FoundPlayer then
 
-                table.remove(self.PlayersAvailable, I)
+                table.remove(self.PlayersAvailable, FoundPlayer)
 
-                if self.CurSelected <= I then
+                if self.CurSelected <= FoundPlayer then
                     self:ChangeSelection(-1)
                 end
 

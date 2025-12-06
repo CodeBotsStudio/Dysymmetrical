@@ -89,7 +89,7 @@ function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 		Char.Killer.Value = sourcePlayer
 	end
 	
-	reason = reason or "HAHAHA https://www.youtube.com/watch?v=L8XbI9aJOXk" --OnlyIvo
+	reason = reason or "HAHAHA" --OnlyIvo
 
 	if Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0) then
 		inflictedDamage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
@@ -365,8 +365,8 @@ function CommonFunctions.CompleteAchievement(Player: Player, AchievementPath: st
 		AValue.Name = SplitPath[#SplitPath]
 		AValue.Value = true
 		local InstPath = SplitPath[1]
-		for i, step in SplitPath do
-			if i == 1 or i == #SplitPath then
+		for index, step in SplitPath do
+			if index == 1 or index == #SplitPath then
 				continue
 			end
 
@@ -381,9 +381,9 @@ end
 --- Gets a player's permission rank.
 function CommonFunctions.GetPlayerPermissionRank(Player: Player): number
 	local HighestPlayerRank = Utils.Ranks.DefaultPlayer
-	for _, i in CommonFunctions.AdminPerms do
-		if i.UserId == Player.UserId then
-			local Value = Utils.Ranks[i.Rank] or tonumber(i.Rank) or Utils.Ranks.DefaultPlayer
+	for _, Permission in CommonFunctions.AdminPerms do
+		if Permission.UserId == Player.UserId then
+			local Value = Utils.Ranks[Permission.Rank] or tonumber(Permission.Rank) or Utils.Ranks.DefaultPlayer
 			if Value < HighestPlayerRank then
 				HighestPlayerRank = Value
 			end

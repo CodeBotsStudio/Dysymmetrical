@@ -332,11 +332,11 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             if self.OnRemove then
                 self:OnRemove()
             end
-            for _, i in self.Connections do
-                if typeof(i) == "thread" then
-                    task.cancel(i)
+            for _, connection in self.Connections do
+                if typeof(connection) == "thread" then
+                    task.cancel(connection)
                 else
-                    i:Disconnect()
+                    connection:Disconnect()
                 end
             end
             table.clear(self.Connections)

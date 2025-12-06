@@ -30,8 +30,8 @@ function EmoteManager:Init()
 		self:ReloadAvailableContent(EquippedEmotes)
 	end))
 
-	for _, i in EquippedEmotes:GetChildren() do
-		table.insert(self.Connections, i.Changed:Connect(function()
+	for _, Emote in EquippedEmotes:GetChildren() do
+		table.insert(self.Connections, Emote.Changed:Connect(function()
 			self:ReloadAvailableContent(EquippedEmotes)
 		end))
 	end
@@ -49,12 +49,12 @@ function EmoteManager:Init()
 	end))
 
 	table.insert(self.Connections, LocalPlayer.CharacterAdded:Connect(function()
-		for _, i in self.EmotesAvailable do
-			self:StopEmote(i.Config.Name)
+		for _, Emote in self.EmotesAvailable do
+			self:StopEmote(Emote.Config.Name)
 		end
 		self.Char:SetAttribute("Emoting", false)
-		for _, i in self.Connections do
-			i:Disconnect() --ends the script's execution
+		for _, connection in self.Connections do
+			connection:Disconnect() --ends the script's execution
 		end
 	end))
 
@@ -64,8 +64,8 @@ end
 function EmoteManager:PlayEmote(name: string)
 	if not self.EmotesAvailable[name] or not self.Hum or self.Hum.Health <= 0 then return end
 
-	for _, i in self.EmotesAvailable do
-		self:StopEmote(i.Config.Name or i)
+	for _, Emote in self.EmotesAvailable do
+		self:StopEmote(Emote.Config.Name or Emote)
 	end
 
 	self.CurrentlyPlayingEmote = self.EmotesAvailable[name]

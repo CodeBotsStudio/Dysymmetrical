@@ -40,8 +40,8 @@ function EffectManager:Init()
     end))
 
 	table.insert(self.Connections, Players.LocalPlayer.CharacterAdded:Connect(function()
-		for _, i in self.Connections do
-			i:Disconnect() --ends the script's execution
+		for _, connection in self.Connections do
+			connection:Disconnect() --ends the script's execution
 		end
 	end))
 end

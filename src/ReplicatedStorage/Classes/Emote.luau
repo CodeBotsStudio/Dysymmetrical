@@ -91,8 +91,8 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                 end))
 
                 table.insert(self.Connections, self.Owner.CharacterAdded:Connect(function()
-                    for _, i in self.Connections do
-                        i:Disconnect()
+                    for _, connection in self.Connections do
+                        connection:Disconnect()
                     end
                 end))
 
@@ -166,8 +166,8 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
             end))
 
             table.insert(self.Connections, self.Owner.CharacterAdded:Connect(function()
-                for _, i in self.Connections do
-                    i:Disconnect()
+                for _, connection in self.Connections do
+                    connection:Disconnect()
                 end
             end))
         end,

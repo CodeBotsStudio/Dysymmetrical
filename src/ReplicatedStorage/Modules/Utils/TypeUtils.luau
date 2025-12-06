@@ -14,11 +14,11 @@ function TypeUtils.CopyTable<T>(CloneThis: T & {}) : T & {}
 	local MetaTable = getmetatable(CloneThis)
 	local NewTable = (MetaTable and setmetatable({}, MetaTable :: {}?) or {}) :: typeof(CloneThis)
 
-	for i, v in CloneThis do
-		if typeof(v) == "table" then
-			NewTable[i] = TypeUtils.CopyTable(v)
+	for Key, Value in CloneThis do
+		if typeof(Value) == "table" then
+			NewTable[Key] = TypeUtils.CopyTable(Value)
 		else
-			NewTable[i] = v
+			NewTable[Key] = Value
 		end
 	end
 
@@ -26,17 +26,17 @@ function TypeUtils.CopyTable<T>(CloneThis: T & {}) : T & {}
 end
 
 --- Shuffles a table to make it have a random order.
-function TypeUtils.ShuffleTable<T>(t: T & {}): T & {}
-    local j, temp
+function TypeUtils.ShuffleTable<T>(TableToShuffle: T & {}): T & {}
+    local currentShuffledIndex, shufflingItem
 
-	for i = #t, 1, -1 do
-		j = Rand:NextInteger(1, i)
-		temp = t[i]
-		t[i] = t[j]
-		t[j] = temp
+	for index = #TableToShuffle, 1, -1 do
+		currentShuffledIndex = Rand:NextInteger(1, index)
+		shufflingItem = TableToShuffle[index]
+		TableToShuffle[index] = TableToShuffle[currentShuffledIndex]
+		TableToShuffle[currentShuffledIndex] = shufflingItem
 	end
 	
-	return t
+	return TableToShuffle
 end
 
 --- Turns a dictionary into a table, removing the keys and making them numbers.
@@ -66,15 +66,15 @@ end
 
 function TypeUtils.FindInDictionary<K, V>(Dictionary: {[K]: V}, Item: K | V, Type: "Key" | "Value"): (K, V)
     if Type == "Key" then
-        for v, i in Dictionary do
-            if v == Item then
-                return v, i
+        for Key, Value in Dictionary do
+            if Key == Item then
+                return Key, Value
             end
         end
     elseif Type == "Value" then
-        for v, i in Dictionary do
-            if i == Item then
-                return v, i
+        for Key, Value in Dictionary do
+            if Value == Item then
+                return Key, Value
             end
         end
     end

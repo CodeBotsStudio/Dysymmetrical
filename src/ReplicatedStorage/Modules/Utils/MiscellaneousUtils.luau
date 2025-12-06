@@ -14,8 +14,8 @@ function MiscellaneousUtils.PreloadAssets(assets: string | {string})
 
         local function Fetch(assetsToFetch: any)
             if typeof(assetsToFetch) == "table" then
-                for _, i in assetsToFetch do
-                    pcall(Fetch, i)
+                for _, asset in assetsToFetch do
+                    pcall(Fetch, asset)
                 end
                 return
             end

@@ -74,12 +74,12 @@ function ModPanel:Start()
     end)
 
     local LO = 0
-    local function SetupCmd(i)
-        if not i or not i:IsA("ModuleScript") then
+    local function SetupCmd(Cmd)
+        if not Cmd or not Cmd:IsA("ModuleScript") then
             return
         end
 
-        local Command = require(i)
+        local Command = require(Cmd)
         Command.RankRequired = Command.RankRequired or Utils.Ranks.ServerOwner
 
         if self.Rank > Command.RankRequired or not Command.Type or not Prefabs[Command.Type] then
@@ -88,20 +88,20 @@ function ModPanel:Start()
 
         LO += 1
 
-        local Content = Prefabs[Command.Type].New(i, UI)
+        local Content = Prefabs[Command.Type].New(Cmd, UI)
         Content.LayoutOrder = LO
     end
 
-    for _, i in CommandOrder do
-        SetupCmd(ReplicatedStorage.Security.ModeratorCommands:FindFirstChild(i))
+    for _, Command in CommandOrder do
+        SetupCmd(ReplicatedStorage.Security.ModeratorCommands:FindFirstChild(Command))
     end
 
-    for _, i in ReplicatedStorage.Security.ModeratorCommands:GetChildren() do
-        if table.find(CommandOrder, i.Name) then
+    for _, Command in ReplicatedStorage.Security.ModeratorCommands:GetChildren() do
+        if table.find(CommandOrder, Command.Name) then
             continue
         end
 
-        SetupCmd(i)
+        SetupCmd(Command)
     end
 end
 

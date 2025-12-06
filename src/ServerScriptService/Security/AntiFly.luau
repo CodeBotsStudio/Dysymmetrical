@@ -53,10 +53,9 @@ function AntiFly:_IsCharacterNotFlying(root: BasePart, Params: RaycastParams): b
         return true
     end
 
-    for v = -1, 1 do
-        for i = -1, 1 do
-            local Origin = root.Position + (root.CFrame.RightVector * i) + (root.CFrame.LookVector * v)
-            -- local Origin = root.Position + Vector3.new(i, 0, 0)
+    for frontIndex = -1, 1 do
+        for sideIndex = -1, 1 do
+            local Origin = root.Position + (root.CFrame.RightVector * sideIndex) + (root.CFrame.LookVector * frontIndex)
             local RayHeight = (root.Size.Y / 2) + (root.Parent:FindFirstChild("Right Leg") and root.Parent["Right Leg"].Size.Y or 2) + 1.25
 
             local Cast = workspace:Raycast(Origin, Vector3.new(0, -RayHeight, 0), Params)

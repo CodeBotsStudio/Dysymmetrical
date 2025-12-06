@@ -217,12 +217,12 @@ function Sprinting:Init()
 		if self.RecoveryThread then
 			task.cancel(self.RecoveryThread)
 		end
-		for _, i in self.Connections do
-			if typeof(i) == "thread" then
-				task.cancel(i)
+		for _, connection in self.Connections do
+			if typeof(connection) == "thread" then
+				task.cancel(connection)
 				continue
 			end
-			i:Disconnect() --ends the script's execution
+			connection:Disconnect() --ends the script's execution
 		end
 	end))
 end

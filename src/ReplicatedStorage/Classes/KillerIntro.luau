@@ -125,18 +125,18 @@ function KillerIntroClass.New2DIntro(Config: IntroSettings, IntroModule: ModuleS
         Destroy = function(self: UiIntro)
             self.VideoPlayer:Reset()
 
-            for _, i in self.Connections do
-                if typeof(i) == "thread" then
-                    if coroutine.status(i) ~= "running" then
-                        task.cancel(i)
+            for _, connection in self.Connections do
+                if typeof(connection) == "thread" then
+                    if coroutine.status(connection) ~= "running" then
+                        task.cancel(connection)
                     end
                 else
-                    i:Disconnect()
+                    connection:Disconnect()
                 end
             end
 
-            for _, i in self.Disposables do
-                i:Destroy()
+            for _, disposable in self.Disposables do
+                disposable:Destroy()
             end
         end,
     }
@@ -186,12 +186,12 @@ function KillerIntroClass.New3DIntro(Config: IntroSettings): AnimatedIntro
                 Module.Config:OnIntroInit(self, KillerRig, CameraRig)
             end
 
-            for _, i in {
+            for _, Rig in {
                 "KillerRig",
                 "CameraRig",
             } do
-                if Module.Config.AnimationIDs[i] then
-                    self.Animations[i] = Utils.Character.LoadAnimationFromID(i:find("Killer") and KillerRig or CameraRig, Module.Config.AnimationIDs[i])
+                if Module.Config.AnimationIDs[Rig] then
+                    self.Animations[Rig] = Utils.Character.LoadAnimationFromID(Rig:find("Killer") and KillerRig or CameraRig, Module.Config.AnimationIDs[Rig])
                 end
             end
         end,
@@ -221,8 +221,8 @@ function KillerIntroClass.New3DIntro(Config: IntroSettings): AnimatedIntro
                 Camera.CameraSubject = Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
             end))
 
-            for _, i in self.Animations do
-                i:play(0)
+            for _, Anim in self.Animations do
+                Anim:Play(0)
             end
 
             if self.Module.Config.Sounds.IntroSound then
@@ -239,16 +239,16 @@ function KillerIntroClass.New3DIntro(Config: IntroSettings): AnimatedIntro
         end,
 
         Destroy = function(self: AnimatedIntro)
-            for _, i in self.Connections do
-                if typeof(i) == "thread" then
-                    task.cancel(i)
+            for _, connection in self.Connections do
+                if typeof(connection) == "thread" then
+                    task.cancel(connection)
                 else
-                    i:Disconnect()
+                    connection:Disconnect()
                 end
             end
 
-            for _, i in self.Disposables do
-                i:Destroy()
+            for _, disposable in self.Disposables do
+                disposable:Destroy()
             end
         end,
     }

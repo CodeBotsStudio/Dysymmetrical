@@ -51,31 +51,31 @@ function EmotePanel:Init()
     end
 
     local function ReloadContent()
-        for _, i in EmoteButtonContainer:GetChildren() do
-            local EquippedEmote = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes."..i.Name)
+        for _, EmoteSlot in EmoteButtonContainer:GetChildren() do
+            local EquippedEmote = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes."..EmoteSlot.Name)
             local EmoteModule = EquippedEmote and #EquippedEmote > 0 and Utils.Instance.GetEmoteModule(EquippedEmote)
             if EmoteModule then
-                i:SetAttribute("Name", EquippedEmote)
+                EmoteSlot:SetAttribute("Name", EquippedEmote)
                 EmoteModule = require(EmoteModule)
-                i:SetAttribute("DisplayName", EmoteModule.Config.Name)
+                EmoteSlot:SetAttribute("DisplayName", EmoteModule.Config.Name)
 
-                i.Render.Image = EmoteModule.Config.Render
-                i.NameLabel.Text = EmoteModule.Config.Name
+                EmoteSlot.Render.Image = EmoteModule.Config.Render
+                EmoteSlot.NameLabel.Text = EmoteModule.Config.Name
 
-                i.Render.ImageTransparency = 0
-                i.NameLabel.TextTransparency = 0
+                EmoteSlot.Render.ImageTransparency = 0
+                EmoteSlot.NameLabel.TextTransparency = 0
             else
-                i:SetAttribute("Name", "")
-                i:SetAttribute("DisplayName", "")
-                i.Render.ImageTransparency = 1
-                i.NameLabel.TextTransparency = 1
+                EmoteSlot:SetAttribute("Name", "")
+                EmoteSlot:SetAttribute("DisplayName", "")
+                EmoteSlot.Render.ImageTransparency = 1
+                EmoteSlot.NameLabel.TextTransparency = 1
             end
         end
     end
 
     ReloadContent()
-    for _, i in Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes", false):GetChildren() do
-        i.Changed:Connect(ReloadContent)
+    for _, Emote in Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes", false):GetChildren() do
+        Emote.Changed:Connect(ReloadContent)
     end
 
     RunService.PreRender:Connect(function()

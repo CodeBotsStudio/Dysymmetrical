@@ -41,8 +41,8 @@ function SpeedManager:Init()
 	end))
 
 	table.insert(self.Conns, game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
-		for _, i in self.Conns do
-			i:Disconnect()
+		for _, connection in self.Conns do
+			connection:Disconnect()
 		end
 	end))
 end

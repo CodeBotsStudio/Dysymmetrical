@@ -17,9 +17,9 @@ return {
         local function GetExistingDesat(): number
             local Amount = 0
 
-            for _, i in Lighting:GetChildren() do
-                if i:IsA("ColorCorrectionEffect") and i.Name ~= "HealthDesat" and not i:GetAttribute("IgnoredByHealthDesat") then
-                    Amount += i.Saturation
+            for _, FX in Lighting:GetChildren() do
+                if FX:IsA("ColorCorrectionEffect") and FX.Name ~= "HealthDesat" and not FX:GetAttribute("IgnoredByHealthDesat") then
+                    Amount += FX.Saturation
                 end
             end
 

@@ -15,9 +15,9 @@ task.wait(1)
 
 local assets = {}
 local loadedAssets = {}
-local function addAssetsToLoad(tmp)
-    for _, i in tmp do
-        table.insert(assets, i)
+local function addAssetsToLoad(assetList)
+    for _, asset in assetList do
+        table.insert(assets, asset)
     end
 end
 addAssetsToLoad(workspace:GetDescendants())
@@ -35,12 +35,12 @@ function updateProgress()
 end
 
 local ContentProvider = game:GetService("ContentProvider")
-for index, i in assets do
+for index, asset in assets do
     task.delay(index / (assetAmount / 0.75), function()
         ContentProvider:PreloadAsync({
-            i
+            asset
         })
-        table.insert(loadedAssets, i)
+        table.insert(loadedAssets, asset)
         updateProgress()
     end)
 end

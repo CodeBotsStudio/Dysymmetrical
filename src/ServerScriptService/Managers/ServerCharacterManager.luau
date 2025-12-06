@@ -111,8 +111,8 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
                     task.wait(1)
                 end
 
-                for _, i in Connections do
-                    i:Disconnect()
+                for _, connection in Connections do
+                    connection:Disconnect()
                 end
             end)
 
@@ -136,8 +136,8 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
                         task.wait(math.random(10, 25))
                     end
                 
-                    for _, i in Connections do
-                        i:Disconnect()
+                    for _, connection in Connections do
+                        connection:Disconnect()
                     end
                 end)
             end

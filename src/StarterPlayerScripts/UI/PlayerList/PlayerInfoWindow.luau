@@ -181,13 +181,13 @@ return {
             self.Removed:Fire()
             self.Removed:DisconnectAll()
 
-            for _, i in self.Connections do
-                if typeof(i) == "thread" then
-                    if coroutine.status(i) ~= "running" then
-                        task.cancel(i)
+            for _, connection in self.Connections do
+                if typeof(connection) == "thread" then
+                    if coroutine.status(connection) ~= "running" then
+                        task.cancel(connection)
                     end
                 else
-                    i:Disconnect()
+                    connection:Disconnect()
                 end
             end
 

@@ -75,10 +75,12 @@ function AntiNoclip:Init()
                         end
                     end
 
-                    for _, i in workspace:GetDescendants() do
-                        if i:IsA("BasePart") and (not i.CanCollide or not PhysicsService:CollisionGroupsAreCollidable(HumanoidRootPart.CollisionGroup, i.CollisionGroup)) then
-                            table.insert(Filter, i)
+                    for _, Part in workspace:GetDescendants() do
+                        if not Part:IsA("BasePart") or Part.CanCollide or PhysicsService:CollisionGroupsAreCollidable(HumanoidRootPart.CollisionGroup, Part.CollisionGroup) then
+							continue
                         end
+                        
+						table.insert(Filter, Part)
                     end
 
                     RayParams.FilterDescendantsInstances = Filter --i have to change this every time for no reason??????

@@ -41,22 +41,22 @@ return Effect.CreateEffect({
 
         table.clear(own.TransparentInstances)
         local handleIndex = 1
-        for _, i in char:GetDescendants() do
-            if i:IsA("BasePart") then
-                local nameToUse = i.Name
-                if i.Name == "Handle" then
+        for _, Part in char:GetDescendants() do
+            if Part:IsA("BasePart") then
+                local nameToUse = Part.Name
+                if Part.Name == "Handle" then
                     nameToUse = "Handle"..tostring(handleIndex)
                     handleIndex += 1
                 end
                 own.TransparentInstances[nameToUse] = {
-                    Instance = i,
-                    Transparency = i.Transparency,
-                    CastShadow = i.CastShadow,
+                    Instance = Part,
+                    Transparency = Part.Transparency,
+                    CastShadow = Part.CastShadow,
                 }
-            elseif i:IsA("Decal") then
-                own.TransparentInstances[i.Name] = {
-                    Instance = i,
-                    Transparency = i.Transparency,
+            elseif Part:IsA("Decal") then
+                own.TransparentInstances[Part.Name] = {
+                    Instance = Part,
+                    Transparency = Part.Transparency,
                 }
             end
         end

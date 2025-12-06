@@ -4,9 +4,9 @@ local SoundService = game:GetService("SoundService")
 
 function SoundServiceResetter:Init()
     game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
-        for _, i in SoundService.SoundGroups:GetDescendants() do
-            if not i:IsA("SoundGroup") then
-                i:Destroy()
+        for _, Descendant in SoundService.SoundGroups:GetDescendants() do
+            if not Descendant:IsA("SoundGroup") then
+                Descendant:Destroy()
             end
         end
     end)

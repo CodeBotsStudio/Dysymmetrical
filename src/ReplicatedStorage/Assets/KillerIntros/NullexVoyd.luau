@@ -28,12 +28,12 @@ return {
     
     	task.wait(2.5)
     
-    	for _, i in Group:GetDescendants() do
-    		-- if i:IsA("Frame") then
-    		-- 	TweenService:Create(i, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-    		-- elseif i:IsA("TextLabel") then
-			if i:IsA("TextLabel") then
-    			TweenService:Create(i, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    	for _, Item in Group:GetDescendants() do
+    		-- if Item:IsA("Frame") then
+    		-- 	TweenService:Create(Item, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
+    		-- elseif Item:IsA("TextLabel") then
+			if Item:IsA("TextLabel") then
+    			TweenService:Create(Item, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
     		end
     	end
     

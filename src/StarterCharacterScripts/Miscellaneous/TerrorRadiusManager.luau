@@ -80,36 +80,36 @@ function TerrorRadiusManager:Init()
         until RoundState.Value == "InRound"
     end
 
-    for _, i in workspace.Players:GetChildren() do
-        if not i:FindFirstChild("Role") or i.Role.Value ~= "Killer" then
+    for _, PlayerChar in workspace.Players:GetChildren() do
+        if not PlayerChar:FindFirstChild("Role") or PlayerChar.Role.Value ~= "Killer" then
             continue
         end
 
-        local F = Instance.new("Folder")
-        F.Name = i.Name
-        F.Parent = self.ThemeFolder
+        local PlayerLayerFolder = Instance.new("Folder")
+        PlayerLayerFolder.Name = PlayerChar.Name
+        PlayerLayerFolder.Parent = self.ThemeFolder
 
-        local ChaseThemes = require(Utils.Instance.GetCharacterModule("Killer", i:GetAttribute("CharacterName"), i:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
-        for l, v in ChaseThemes do
+        local ChaseThemes = require(Utils.Instance.GetCharacterModule("Killer", PlayerChar:GetAttribute("CharacterName"), PlayerChar:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
+        for layerName, ID in ChaseThemes do
             local Sound = Instance.new("Sound")
-            Sound.Name = l
-            Sound.SoundId = v
+            Sound.Name = layerName
+            Sound.SoundId = ID
             Sound.Volume = 0
             Sound.Looped = true
             Sound.SoundGroup = SoundService.SoundGroups.Master.Music
-            Sound.Parent = F
+            Sound.Parent = PlayerLayerFolder
 
 	    	if not Sound.IsLoaded then
 	    		Sound.Loaded:Wait()
 	    	end
 
-            self:SetLayerMagnitude(Sound, i.Name, Radiuses[l])
+            self:SetLayerMagnitude(Sound, PlayerChar.Name, Radiuses[layerName])
         end
     end
 
-    for _, i in self.ThemeFolder:GetDescendants() do
-        if i:IsA("Sound") and i.Name ~= "L4" then
-            i:Play()
+    for _, Theme in self.ThemeFolder:GetDescendants() do
+        if Theme:IsA("Sound") and Theme.Name ~= "L4" then
+            Theme:Play()
         end
     end
 
@@ -177,34 +177,34 @@ end
 
 function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
     local PlayersFound = {}
-    for _, i in workspace.Players:GetChildren() do
-        if not self.ThemeFolder:FindFirstChild(i.Name) and i:FindFirstChild("Role") and i.Role.Value == "Killer" then
-            local F = Instance.new("Folder")
-            F.Name = i.Name
-            F.Parent = self.ThemeFolder
+    for _, PlayerChar in workspace.Players:GetChildren() do
+        if not self.ThemeFolder:FindFirstChild(PlayerChar.Name) and PlayerChar:FindFirstChild("Role") and PlayerChar.Role.Value == "Killer" then
+            local PlayerThemeFolder = Instance.new("Folder")
+            PlayerThemeFolder.Name = PlayerChar.Name
+            PlayerThemeFolder.Parent = self.ThemeFolder
 
-            local ChaseThemes = require(Utils:GetCharacterModule("Killer", i:GetAttribute("CharacterName"), i:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
-            for l, v in ChaseThemes do
+            local ChaseThemes = require(Utils:GetCharacterModule("Killer", PlayerChar:GetAttribute("CharacterName"), PlayerChar:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
+            for layerName, ID in ChaseThemes do
                 local Sound = Instance.new("Sound")
-                Sound.Name = l
-                Sound.SoundId = v
+                Sound.Name = layerName
+                Sound.SoundId = ID
                 Sound.Volume = 0
                 Sound.Looped = true
                 Sound.SoundGroup = SoundService.SoundGroups.Master.Music
-                Sound.Parent = F
+                Sound.Parent = PlayerThemeFolder
 
 	        	if not Sound.IsLoaded then
 	        		Sound.Loaded:Wait()
 	        	end
 
-                self:SetLayerMagnitude(Sound, i.Name, Radiuses[l])
+                self:SetLayerMagnitude(Sound, PlayerChar.Name, Radiuses[layerName])
             end
         end
-        table.insert(PlayersFound, i.Name)
+        table.insert(PlayersFound, PlayerChar.Name)
     end
-    for _, i in self.ThemeFolder:GetChildren() do
-        if not table.find(PlayersFound, i.Name) then
-            i:Destroy()
+    for _, Theme in self.ThemeFolder:GetChildren() do
+        if not table.find(PlayersFound, Theme.Name) then
+            Theme:Destroy()
         end
     end
 
@@ -216,15 +216,15 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
         end
     end
     if not CurrentKillerChosen then
-        for _, i in workspace.Players:GetChildren() do
-            if not i:FindFirstChild("Role") or i.Role.Value ~= "Killer" then
+        for _, PlayerChar in workspace.Players:GetChildren() do
+            if not PlayerChar:FindFirstChild("Role") or PlayerChar.Role.Value ~= "Killer" then
                 continue
             end
 
-            local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - i:FindFirstChild("HumanoidRootPart").Position).Magnitude or 50000
+            local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - PlayerChar:FindFirstChild("HumanoidRootPart").Position).Magnitude or 50000
             if Distance <= Radiuses["L1"] and (not CurrentKillerChosen or Distance <= CurrentKillerChosen.Distance) then
                 CurrentKillerChosen = {
-                    Player = i,
+                    Player = PlayerChar,
                     Distance = Distance,
                 }
             end
@@ -243,47 +243,47 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
     local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 50000
 
     local Playing = false
-    for n, i in self.LayerMagnitudes do
-        if tostring(n) == tostring(CurrentKillerChosen) then
-            for r, s in i do
-                local Upcoming = Radiuses[s.Name.."Upcoming"] or -1e10
+    for Killer, Layers in self.LayerMagnitudes do
+        if tostring(Killer) == tostring(CurrentKillerChosen) then
+            for radius, sound in Layers do
+                local Upcoming = Radiuses[sound.Name.."Upcoming"] or -1e10
 
                 if self.InChase then
                     if Distance < Radiuses["L1"] and not Utils.Instance.FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
-                        if s.Name == "L4" then
+                        if sound.Name == "L4" then
                             Playing = true
-                            self:TweenVolume(s, Distance < 55 and 0.5 or CalculateSound(Distance), delta)
+                            self:TweenVolume(sound, Distance < 55 and 0.5 or CalculateSound(Distance), delta)
                         else
-                            self:TweenVolume(s, 0, delta)
+                            self:TweenVolume(sound, 0, delta)
                         end
                     else
                         self.InChase = false
-                        if s.Name == "L4" then
+                        if sound.Name == "L4" then
                             self.Playing = false
-                            self:TweenVolume(s, 0, delta)
+                            self:TweenVolume(sound, 0, delta)
                         end
                     end
                 else
-                    if Distance <= r and Distance > Upcoming and not Utils.Instance.FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
-                        if s.Name == "L4" then
+                    if Distance <= radius and Distance > Upcoming and not Utils.Instance.FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
+                        if sound.Name == "L4" then
                             Playing = true
                             self.InChase = true
                             self:PlayLayer4(tostring(CurrentKillerChosen), delta)
-                            self:TweenVolume(s, 0.5, delta)
+                            self:TweenVolume(sound, 0.5, delta)
                         else
                             Playing = true
-                            self:TweenVolume(s, CalculateSound(Distance), delta)
+                            self:TweenVolume(sound, CalculateSound(Distance), delta)
                         end
                     else
-                        self:TweenVolume(s, 0, delta)
+                        self:TweenVolume(sound, 0, delta)
                     end
                 end
             end
             continue
         end
         
-        for _, s in i do
-            self:TweenVolume(s, 0, delta)
+        for _, sound in Killer do
+            self:TweenVolume(sound, 0, delta)
         end
     end
 

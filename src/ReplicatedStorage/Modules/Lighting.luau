@@ -77,18 +77,18 @@ function LightingModule.SetCustomLighting(Properties: {[any]: any} | Instance)
     elseif typeof(Properties) == "Instance" then
         if Properties:IsA("Folder") then
             Lighting:ClearAllChildren()
-            for _, i in Properties:GetChildren() do
-                if i:IsA("ModuleScript") then
-                    LightingModule.SetCustomLighting(require(i))
+            for _, Child in Properties:GetChildren() do
+                if Child:IsA("ModuleScript") then
+                    LightingModule.SetCustomLighting(require(Child))
                 else
-                    i:Clone().Parent = Lighting
+                    Child:Clone().Parent = Lighting
                 end
             end
         elseif Properties:IsA("ModuleScript") then
             if #Properties:GetChildren() > 0 then
                 Lighting:ClearAllChildren()
-                for _, i in Properties:GetChildren() do
-                    i:Clone().Parent = Lighting
+                for _, Child in Properties:GetChildren() do
+                    Child:Clone().Parent = Lighting
                 end
             end
             LightingModule.SetCustomLighting(require(Properties))
@@ -111,8 +111,8 @@ function LightingModule.SetDefaultLighting()
     else
         LightingModule.SetCustomLighting(LightingModule.Properties)
         Lighting:ClearAllChildren()
-        for _, i in script:GetChildren() do
-            i:Clone().Parent = Lighting
+        for _, Child in script:GetChildren() do
+            Child:Clone().Parent = Lighting
         end
     end
 end
