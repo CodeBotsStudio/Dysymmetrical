@@ -208,9 +208,12 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                             self.Signals.Used:Fire()
                         end)
                         Network:FireClientConnection(self.Owner, "UsePlayerAbility", "REMOTE_EVENT", self.Name)
-                        if self.Behaviour then
-                            self:Behaviour()
-                        end
+
+                        task.spawn(function()
+                            if self.Behaviour then
+                                self:Behaviour()
+                            end
+                        end)
                     end
                 end))
 
