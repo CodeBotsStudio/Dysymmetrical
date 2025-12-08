@@ -23,7 +23,6 @@ local TerrorRadiusManager = {
     AbleToInit = true,
     LayerMagnitudes = {},
     InChase = false,
-    PlayerClose = false,
     Playing = false,
     ThemeFolder = nil,
     LocalPlayerProps = {
@@ -244,11 +243,12 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
     local Playing = false
     for Killer, Layers in self.LayerMagnitudes do
         if tostring(Killer) == tostring(CurrentKillerChosen) then
+            local HasUndetectable = Utils.Instance.FindFirstChild(CurrentKillerChosen, "Effects.Undetectable", 0)
             for radius, sound in Layers do
                 local Upcoming = Radiuses[sound.Name.."Upcoming"] or -1e10
 
                 if self.InChase then
-                    if Distance < Radiuses["L1"] and not Utils.Instance.FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
+                    if Distance <= Radiuses["L1"] and not HasUndetectable then
                         if sound.Name == "L4" then
                             Playing = true
                             self:TweenVolume(sound, Distance < 55 and 0.5 or CalculateSound(Distance), delta)
@@ -263,7 +263,7 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
                         end
                     end
                 else
-                    if Distance <= radius and Distance > Upcoming and not Utils.Instance.FindFirstChild(KillerHRP.Parent, "Effects.Undetectable", false) then
+                    if Distance <= radius and Distance >= Upcoming and not HasUndetectable then
                         if sound.Name == "L4" then
                             Playing = true
                             self.InChase = true
@@ -310,7 +310,7 @@ function TerrorRadiusManager:_CheckAsKiller(delta: number)
         if char ~= self.LocalPlayerProps.Char
         and char:FindFirstChild("Role") and char.Role.Value == "Survivor"
         and char:FindFirstChildOfClass("Humanoid").Health > 0
-        and not Utils.Instance.FindFirstChild(char, "Effects.Undetectable", false) then
+        and not Utils.Instance.FindFirstChild(char, "Effects.Undetectable", 0) then
             
             local Distance = (Utils.Instance.FindFirstChild(char, "HumanoidRootPart").Position - self.LocalPlayerProps.HRP.Position).Magnitude
             if ClosestDistance > Distance then
@@ -319,12 +319,11 @@ function TerrorRadiusManager:_CheckAsKiller(delta: number)
         end
     end
 
-    self.PlayerClose = ClosestDistance <= Radiuses.L1
-    self.InChase = self.InChase and ClosestDistance <= Radiuses.L2 or ClosestDistance <= Radiuses.L4
+    self.InChase = if self.InChase then ClosestDistance <= Radiuses.L1 else ClosestDistance <= Radiuses.L4
 
     for r: number, s: Sound in self.LayerMagnitudes[self.LocalPlayerProps.Char.Name] do
         if s.Name == "L4" then
-            self:TweenVolume(s, (self.PlayerClose and self.InChase) and 0.5 or 0, delta)
+            self:TweenVolume(s, self.InChase and 0.5 or 0, delta)
         end
     end
 
