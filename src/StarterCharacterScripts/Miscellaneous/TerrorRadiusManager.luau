@@ -7,6 +7,7 @@ local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local LocalPlayer = Players.LocalPlayer
 local RoundState: StringValue = ReplicatedStorage.RoundInfo.CurrentState
@@ -21,7 +22,6 @@ local Radiuses = {
 local TerrorRadiusManager = {
     AbleToInit = true,
     LayerMagnitudes = {},
-    Connections = {},
     InChase = false,
     PlayerClose = false,
     Playing = false,
@@ -35,6 +35,7 @@ local TerrorRadiusManager = {
     MapAmbience = nil,
     MapAmbienceVolume = 0,
     MapAmbienceTweenState = "Play",
+    Janitor = nil,
 }
 
 local function CalculateSound(Distance)
@@ -64,16 +65,6 @@ function TerrorRadiusManager:Init()
     ThemeFolder.Name = "ChaseThemes"
     ThemeFolder.Parent = SoundService
     self.ThemeFolder = ThemeFolder
-
-    --slow down on death fx
-    table.insert(self.Connections, self.LocalPlayerProps.Humanoid.Died:Connect(function()
-        for _, s in self.ThemeFolder:GetDescendants() do
-            if not s:IsA("Sound") then
-                continue
-            end
-            TweenService:Create(s, TweenInfo.new(0.4), {PlaybackSpeed = 0}):Play()
-        end
-    end))
 
     if RoundState.Value ~= "InRound" then
         repeat task.wait()
@@ -113,22 +104,31 @@ function TerrorRadiusManager:Init()
         end
     end
 
-    table.insert(self.Connections, RunService.PreRender:Connect(function(delta: number)
+    local TerrorRadiusJanitor = Janitor.new()
+
+    --slow down on death fx
+    TerrorRadiusJanitor:Add(self.LocalPlayerProps.Humanoid.Died:Connect(function()
+        for _, s in self.ThemeFolder:GetDescendants() do
+            if not s:IsA("Sound") then
+                continue
+            end
+            TweenService:Create(s, TweenInfo.new(0.4), {PlaybackSpeed = 0}):Play()
+        end
+    end))
+
+    TerrorRadiusJanitor:Add(RunService.PreRender:Connect(function(delta: number)
         self:CheckInRadius(delta)
     end))
 
-    table.insert(self.Connections, LocalPlayer.CharacterAdded:Connect(function()
-        self:Destroy()
-    end))
-end
+    TerrorRadiusJanitor:Add(function()
+        if self.ThemeFolder then
+            self.ThemeFolder:Destroy()
+        end
+    end, true)
 
-function TerrorRadiusManager:Destroy()
-    if self.ThemeFolder then
-        self.ThemeFolder:Destroy()
-    end
-    for _, c in self.Connections do
-        c:Disconnect()
-    end
+    TerrorRadiusJanitor:LinkToInstance(Char)
+
+    self.Janitor = TerrorRadiusJanitor
 end
 
 function TerrorRadiusManager:SetLayerMagnitude(SoundInstance: Sound, Parent: string, Radius: number)
@@ -163,12 +163,11 @@ function TerrorRadiusManager:PlayLayer4(Subfolder: string, delta: number)
             s:Play()
             self:TweenVolume(s, 0.5, delta)
             local conn
-            conn = s.Changed:Connect(function()
+            conn = self.Janitor:Add(s.Changed:Connect(function()
                 if s.Volume <= 0 then
                     conn:Disconnect()
                 end
-            end)
-            table.insert(self.Connections, conn)
+            end))
         else
             self:TweenVolume(s, 0, delta)
         end
