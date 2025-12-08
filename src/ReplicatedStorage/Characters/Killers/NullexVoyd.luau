@@ -45,8 +45,6 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
 
                 Cooldown = 3,
 
-                Description = "On first use, Nullex Voyd sets up a small device on the floor. When used again, Nullex Voyd gets teleported to that device and it gets destroyed, leaving a longer cooldown.",
-                
                 InputName = "FirstAbility",
 
                 PlayUseAnimationOnUse = false,
@@ -66,7 +64,7 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                                 self.TeleporterInstance:Destroy()
                             end
                         
-                            self.PositionInfo = CFrame.new()
+                            self.PositionInfo = nil
                             self.Setup = false
                         else
                             self.Setup = true
@@ -100,7 +98,7 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                             self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0)
                         
                             self:PlayUseAnimation()
-                            self:AddConnection(task.delay(self.UseAnimationTrack.Length + 0.4, function()
+                            self:AddConnection(task.delay((self.UseAnimationTrack.Length or 1.7) + 0.4, function()
                                 self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
                             end))
                         end
@@ -110,7 +108,6 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
 
             CallbackPing = Ability.CreateAbility({
                 Name = "Callback Ping",
-                Description = "Allows Nullex Voyd to see every single alive player's aura for 3 seconds. He gets extremely slowed down while performed.",
                 Duration = 3,
                 InputName = "ThirdAbility",
                 Cooldown = 32.5,
@@ -173,7 +170,6 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
 
             Overcharge = Ability.CreateAbility({
                 Name = "Overcharge",
-                Description = "Increases walk speed for a very short time but removes the ability to use any ability apart from the slash. When it ends, it lowers his walk speed under default and prevents him from using his abilities for a very very short time (stun).",
                 Cooldown = 45,
                 InputName = "FourthAbility",
                 SpeedDuration = 3.2,
@@ -206,7 +202,7 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "NULLEX VOYD",
+        Text = NullexVoyd.Config.Name:upper(),
     },
     {
         Type = "Quote",
@@ -242,7 +238,7 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "SLASH",
+        Text = NullexVoyd.GameplayConfig.Abilities.Slash.Name:upper(),
     },
     {
         Type = "Text",
@@ -251,7 +247,7 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "CALLBACK PING",
+        Text = NullexVoyd.GameplayConfig.Abilities.CallbackPing.Name:upper(),
     },
     {
         Type = "Text",
@@ -259,7 +255,7 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "DATA ANCHOR",
+        Text = NullexVoyd.GameplayConfig.Abilities.DataAnchor.Name:upper(),
     },
     {
         Type = "Text",
@@ -270,7 +266,7 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "OVERCHARGE",
+        Text = NullexVoyd.GameplayConfig.Abilities.Overcharge.Name:upper(),
     },
     {
         Type = "Text",

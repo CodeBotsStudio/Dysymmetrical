@@ -23,7 +23,7 @@ local Commander = Character.CreateSurvivor({
         Abilities = {
             BodyArmor = Ability.CreateAbility({
                 Name = "Body Armor",
-                Description = "Every time Commander gets damaged, he receives Resistance V for 1 second, acting as invincibility frames.",
+                -- Description = "Every time Commander gets damaged, he receives Resistance V for 1 second, acting as invincibility frames.",
                 Passive = true,
             }),
 
@@ -36,7 +36,7 @@ local Commander = Character.CreateSurvivor({
                 FlashRadius = 6,
                 ThrowForce = 60,
 
-                Description = "Commander picks up a flashbang grenade and throws it after 3.5 seconds, triggering it after 3.5 seconds and flashing the killer for 3.5 seconds if they're in a 6 stud radius.",
+                -- Description = "Commander picks up a flashbang grenade and throws it after 3.5 seconds, triggering it after 3.5 seconds and flashing the killer for 3.5 seconds if they're in a 6 stud radius.",
 
                 Cooldown = 30,
                 InputName = "FirstAbility",
@@ -109,7 +109,7 @@ local Commander = Character.CreateSurvivor({
                 Cooldown = 40,
                 InputName = "SecondAbility",
                 SlownessLevel = 3,
-                Description = "Commander reloads his gun. He takes 5 seconds to do so and gets Slowness III while reloading.",
+                -- Description = "Commander reloads his gun. He takes 5 seconds to do so and gets Slowness III while reloading.",
                 Behaviour = function(self)
                     if RunService:IsServer() then
                         self:AddConnection(task.delay(self.Duration, function()
@@ -196,8 +196,6 @@ local Commander = Character.CreateSurvivor({
                                 Part.Transparency = 0
                             end
                         end
-                    
-                        return
                     else
                         self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0.3)
                         self:AddConnection(task.delay(self.UseAnimationTrack.Length, function()
@@ -223,7 +221,7 @@ Commander.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "COMMANDER",
+        Text = Commander.Config.Name:upper(),
     },
     {
         Type = "Quote",
@@ -258,7 +256,7 @@ Commander.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "BODY ARMOR",
+        Text = Commander.GameplayConfig.Abilities.BodyArmor.Name:upper(),
     },
     {
         Type = "Quote",
@@ -275,7 +273,7 @@ Commander.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "BLINDSIDE",
+        Text = Commander.GameplayConfig.Abilities.Blindside.Name:upper(),
     },
     {
         Type = "Text",
@@ -287,7 +285,7 @@ Commander.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "RELOAD",
+        Text = Commander.GameplayConfig.Abilities.Reload.Name:upper(),
     },
     {
         Type = "Text",
@@ -296,7 +294,7 @@ Commander.Config.Description = {
     },
     {
         Type = "Header",
-        Text = "JUSTICE",
+        Text = Commander.GameplayConfig.Abilities.Justice.Name:upper(),
     },
     {
         Type = "Text",

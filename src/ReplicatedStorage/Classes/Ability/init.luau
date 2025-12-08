@@ -16,8 +16,6 @@ local AbilityType = {}
 export type Ability = {
     --- The display name.
     Name: string,
-    --- The description used in the character's info.
-    Description: string,
     --- The image of the ability in the GUI when playing.
     RenderImage: string,
     --- If the image should have a UICorner just in case it's not round.
@@ -141,7 +139,6 @@ export type Ability = {
 function AbilityType.GetDefaultAbilitySettings(): Ability
     return {
         Name = "Ability",
-        Description = "Does something",
         RenderImage = "rbxassetid://9759886280",
         UICorner = true,
         Passive = false,
