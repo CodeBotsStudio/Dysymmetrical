@@ -1,7 +1,5 @@
 --!nocheck
 
---TODO: mayyyyyyybe use janitor in this and link it to the character
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -9,6 +7,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 local Signal = require(ReplicatedStorage.Utils.Signal)
 
 local AbilityType = {}
@@ -100,10 +99,16 @@ export type Ability = {
         Used: Signal.Signal,
     },
 
-    --- Connections and threads that make the ability work. Add any `task.delay()`s or `RBXScriptConnection`s here.
-    Connections: {RBXScriptConnection | thread},
+    --- Adds a connection / thread to the ability's janitor to be disposed of when the owner's character is destroyed.
+    --- 
+    --- Use this to make connections and threads.
+    AddConnection: <T>(self: Ability, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
     --- The owner of the ability.
     Owner: Player,
+    --- The ability's Janitor instance.
+    --- 
+    --- Used to make cleanups easier.
+    Janitor: Janitor,
     --- The properties of this ability's owner.
     OwnerProperties: {
         --this is hybrid (client & server)
@@ -145,6 +150,15 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             self.Owner = plr
             self.CharModule = charModule
             self.UsesLeft = self.UseSettings.InitialUses
+
+            self.Janitor = Janitor.new()
+            self.Janitor:LinkToInstance(self.Owner.Character)
+
+            --clearing ability stuff to dispose of this code when the player gets readded
+            self.Janitor:Add(function()
+                self:Destroy()
+            end, true)
+
             if RunService:IsServer() then
                 Utils.Misc.Print("Initting "..self.Name.." ability for "..plr.Name)
 
@@ -158,7 +172,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                     CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
-                table.insert(self.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
+                self:AddConnection(Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
                     if player == plr and abilityName == self.Name and self:CanUse() then
                         task.defer(function()
                             if self.CharModule.Config.Voicelines and self.CharModule.Config.Voicelines[self.Name] then
@@ -200,11 +214,6 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                     end
                 end))
 
-                --clearing ability connections to dispose of this code when the player gets readded
-                table.insert(self.Connections, plr.CharacterAdded:Connect(function()
-                    self:Destroy()
-                end))
-
                 --executes any extra initialization code that the ability might need
                 if self.ExtraInit then
                     self:ExtraInit()
@@ -234,12 +243,12 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             end
 
             if self.OwnerProperties.InputManager.DefaultActions[self.InputName] ~= nil then
-                table.insert(self.Connections, self.OwnerProperties.InputManager.DefaultActions[self.InputName].Pressed:Connect(function()
+                self:AddConnection(self.OwnerProperties.InputManager.DefaultActions[self.InputName].Pressed:Connect(function()
                     self:AttemptUse()
-                end))
+                end), "Disconnect")
             end
 
-            table.insert(self.Connections, Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(abilityName: string)
+            self:AddConnection(Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(abilityName: string)
                 if abilityName == self.Name then
                     --disables ability keys for preventing the usage of a different ability while using it
                     if self.DisableOtherAbilitiesOnPerform then
@@ -250,7 +259,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                                 table.insert(inputsToCancelLater, input)
                             end
                         end
-                        table.insert(self.Connections, task.delay(if self.UseAnimationTrack then self.UseAnimationTrack.Length else self.Duration, function()
+                        self:AddConnection(task.delay(if self.UseAnimationTrack then self.UseAnimationTrack.Length else self.Duration, function()
                             for _, input in inputsToCancelLater do
                                 input.Enabled = true
                             end
@@ -290,15 +299,10 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 end
             end))
 
-            table.insert(self.Connections, Network:SetConnection("ChangeAbilityCharges", "REMOTE_EVENT", function(abilityName: string, Type: "Set" | "Add" | "Take", amount: number)
+            self:AddConnection(Network:SetConnection("ChangeAbilityCharges", "REMOTE_EVENT", function(abilityName: string, Type: "Set" | "Add" | "Take", amount: number)
                 if abilityName == self.Name then
                     self:ChangeAbilityCharges(Type, amount)
                 end
-            end))
-
-            --clearing ability connections to dispose of this code when the player gets readded
-            table.insert(self.Connections, self.Owner.CharacterAdded:Connect(function()
-                self:Destroy()
             end))
 
             --executes any extra initialization code that the ability might need
@@ -332,14 +336,6 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             if self.OnRemove then
                 self:OnRemove()
             end
-            for _, connection in self.Connections do
-                if typeof(connection) == "thread" then
-                    task.cancel(connection)
-                else
-                    connection:Disconnect()
-                end
-            end
-            table.clear(self.Connections)
 
             self.CooldownTimer = 0
             self.OnCooldown = false
@@ -369,6 +365,15 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             if RunService:IsServer() then
                 Network:FireClientConnection(self.Owner, "ChangeAbilityCharges", "REMOTE_EVENT", self.Name, Type, amount)
             end
+        end,
+
+        AddConnection = function<T>(self: Ability, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
+            self.Janitor:Add(Connection,
+                if typeof(Connection) == "thread" then
+                    true
+                else
+                    nil
+            )
         end,
 
         InputName = "FirstAbility",
@@ -446,8 +451,6 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             ChargesChanged = Signal.new(),
             Used = Signal.new(),
         },
-
-        Connections = {},
     }
 end
 
@@ -459,6 +462,15 @@ function AbilityType.GetDefaultPassiveAbilitySettings()
             self.Owner = plr
             self.CharModule = charModule
             self.UsesLeft = self.UseSettings.InitialUses
+
+            self.Janitor = Janitor.new()
+            self.Janitor:LinkToInstance(self.Owner.Character)
+
+            --clearing ability stuff to dispose of this code when the player gets readded
+            self.Janitor:Add(function()
+                self:Destroy()
+            end, true)
+
             if RunService:IsServer() then
                 Utils.Misc.Print("Initting "..self.Name.." ability for "..plr.Name)
 
@@ -471,11 +483,6 @@ function AbilityType.GetDefaultPassiveAbilitySettings()
                     HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
                     CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
-
-                --clearing ability connections to dispose of this code when the player gets readded
-                table.insert(self.Connections, plr.CharacterAdded:Connect(function()
-                    self:Destroy()
-                end))
 
                 --executes any extra initialization code that the ability might need
                 if self.ExtraInit then
@@ -495,11 +502,6 @@ function AbilityType.GetDefaultPassiveAbilitySettings()
                 EmoteManager = require(self.Owner.Character.Miscellaneous.EmoteManager),
                 TurnToMoveDirection = require(self.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
             }
-
-            --clearing ability connections to dispose of this code when the player gets readded
-            table.insert(self.Connections, self.Owner.CharacterAdded:Connect(function()
-                self:Destroy()
-            end))
 
             --executes any extra initialization code that the ability might need
             if self.ExtraInit then
@@ -542,13 +544,13 @@ end
 function AbilityType.CreateAbility(Props: Ability): Ability
     Props = Props or {}
 
-    local Final = Props.Passive and
-        AbilityType.GetDefaultPassiveAbilitySettings() or
-        AbilityType.GetDefaultAbilitySettings()
-    
-    Utils.Type.DeepTableOverwrite(Final, Props)
+    return Utils.Type.DeepTableOverwrite(
+        Props.Passive and
+            AbilityType.GetDefaultPassiveAbilitySettings() or
+            AbilityType.GetDefaultAbilitySettings(),
 
-    return Final
+        Props
+    )
 end
 
 return AbilityType
