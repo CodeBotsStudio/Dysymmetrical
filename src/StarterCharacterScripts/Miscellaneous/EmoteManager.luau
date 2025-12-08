@@ -4,11 +4,12 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local EmoteManager = {
 	EmotesAvailable = {},
 	CurrentlyPlayingEmote = nil,
-	Connections = {},
+	Janitor = Janitor.new(),
 }
 
 function EmoteManager:Init()
@@ -22,41 +23,42 @@ function EmoteManager:Init()
 
 	self.Animator = self.Char:FindFirstChildOfClass("Humanoid"):FindFirstChildOfClass("Animator")
 
-	table.insert(self.Connections, EquippedEmotes.DescendantAdded:Connect(function(_descendant: ObjectValue)
+	self.Janitor:LinkToInstance(self.Char)
+
+	self.Janitor:Add(EquippedEmotes.DescendantAdded:Connect(function(_descendant: ObjectValue)
 		self:ReloadAvailableContent(EquippedEmotes)
 	end))
 
-	table.insert(self.Connections, EquippedEmotes.DescendantRemoving:Connect(function(_descendant: ObjectValue)
+	self.Janitor:Add(EquippedEmotes.DescendantRemoving:Connect(function(_descendant: ObjectValue)
 		self:ReloadAvailableContent(EquippedEmotes)
 	end))
 
 	for _, Emote in EquippedEmotes:GetChildren() do
-		table.insert(self.Connections, Emote.Changed:Connect(function()
+		self.Janitor:Add(Emote.Changed:Connect(function()
 			self:ReloadAvailableContent(EquippedEmotes)
 		end))
 	end
 
-	table.insert(self.Connections, require(LocalPlayer.PlayerScripts.InputManager).Miscellaneous.StopEmote.Pressed:Connect(function()
+	self.Janitor:Add(require(LocalPlayer.PlayerScripts.InputManager).Miscellaneous.StopEmote.Pressed:Connect(function()
+		if self.CurrentlyPlayingEmote then
+			self:StopEmote(self.CurrentlyPlayingEmote)
+		end
+	end), "Disconnect")
+
+	self.Janitor:Add(Utils.Instance.FindFirstChild(self.Char, "Humanoid").Died:Connect(function()
 		if self.CurrentlyPlayingEmote then
 			self:StopEmote(self.CurrentlyPlayingEmote)
 		end
 	end))
 
-	table.insert(self.Connections, Utils.Instance.FindFirstChild(self.Char, "Humanoid").Died:Connect(function()
-		if self.CurrentlyPlayingEmote then
-			self:StopEmote(self.CurrentlyPlayingEmote)
-		end
-	end))
-
-	table.insert(self.Connections, LocalPlayer.CharacterAdded:Connect(function()
+	self.Janitor:Add(function()
 		for _, Emote in self.EmotesAvailable do
 			self:StopEmote(Emote.Config.Name)
 		end
-		self.Char:SetAttribute("Emoting", false)
-		for _, connection in self.Connections do
-			connection:Disconnect() --ends the script's execution
+		if self.Char then
+			self.Char:SetAttribute("Emoting", false)
 		end
-	end))
+	end, true)
 
 	self:ReloadAvailableContent(EquippedEmotes)
 end

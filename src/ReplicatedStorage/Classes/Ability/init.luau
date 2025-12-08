@@ -108,7 +108,7 @@ export type Ability = {
     --- The ability's Janitor instance.
     --- 
     --- Used to make cleanups easier.
-    Janitor: Janitor,
+    Janitor: Janitor.Janitor,
     --- The properties of this ability's owner.
     OwnerProperties: {
         --this is hybrid (client & server)
@@ -337,6 +337,10 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 self:OnRemove()
             end
 
+            for _, signal in self.Signals do
+                signal:DisconnectAll()
+            end
+
             self.CooldownTimer = 0
             self.OnCooldown = false
         end,
@@ -372,7 +376,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 if typeof(Connection) == "thread" then
                     true
                 else
-                    nil
+                    "Disconnect"
             )
         end,
 
@@ -536,6 +540,8 @@ function AbilityType.GetDefaultPassiveAbilitySettings()
 
         DisableOtherAbilitiesOnPerform = false,
         DisableSlashOnPerform = false,
+
+        Signals = {},
     }, AbilityType.GetDefaultAbilitySettings())
 end
 

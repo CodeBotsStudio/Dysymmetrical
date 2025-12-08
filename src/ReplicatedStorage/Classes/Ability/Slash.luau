@@ -43,7 +43,7 @@ function SlashModule.New(Props: Ability?): Ability
 				end)
 			else
 				self.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor("Slash")
-				table.insert(self.Connections, task.delay(self.UseAnimationTrack.Length - (1/20 * 2), function()
+				self:AddConnection(task.delay(self.UseAnimationTrack.Length - (1/20 * 2), function()
 					self.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor("Slash")
 				end))
 			end

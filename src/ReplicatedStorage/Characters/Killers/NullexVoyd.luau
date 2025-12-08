@@ -71,7 +71,7 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                         else
                             self.Setup = true
                         
-                            table.insert(self.Connections, task.delay(0.75, function()
+                            self:AddConnection(task.delay(0.75, function()
                                 self.DevicePosition = self.OwnerProperties.Character.HumanoidRootPart.Position - Vector3.new(0, 3 * self.OwnerProperties.Character:GetScale(), 0)
                                 Sounds:PlaySound(self.PlaceSound, {
                                     Position = self.DevicePosition,
@@ -81,7 +81,7 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                                     SoundGroup = SoundService.SoundGroups.Master.SFX,
                                 })
                             end))
-                            table.insert(self.Connections, task.delay(0.917, function()
+                            self:AddConnection(task.delay(0.917, function()
                                 local TpInstance = self.CharModule.Config.TeleporterPrefab:Clone()
                                 TpInstance:PivotTo(CFrame.new(self.DevicePosition))
                                 TpInstance.Parent = workspace.Map.InGame
@@ -100,7 +100,7 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                             self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0)
                         
                             self:PlayUseAnimation()
-                            table.insert(self.Connections, task.delay(self.UseAnimationTrack.Length + 0.4, function()
+                            self:AddConnection(task.delay(self.UseAnimationTrack.Length + 0.4, function()
                                 self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
                             end))
                         end
@@ -149,16 +149,16 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                         Equalizer.Parent = MasterSoundGroup
                         TweenService:Create(Equalizer, Info, {LowGain = 10, MidGain = -15, HighGain = -80}):Play()
 
-                        task.delay(self.Duration, function() --must not go in self.Connections for it to never stay like that (might change it later)
+                        self:AddConnection(task.delay(self.Duration, function()
                             TweenService:Create(Equalizer, Info, {LowGain = 0, MidGain = 0, HighGain = 0}):Play()
                         
-                            task.delay(1, function()
+                            self:AddConnection(task.delay(1, function()
                                 Equalizer:Destroy()
-                            end)
-                        end)
+                            end))
+                        end))
                     end)
 
-                    table.insert(self.Connections, task.delay(self.Duration, function()
+                    self:AddConnection(task.delay(self.Duration, function()
                         self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
                         self.OwnerProperties.FOVManager:RemoveFOVFactor(self.Name)
                         self.OwnerProperties.Character:SetAttribute("PreventSlash", false)
@@ -186,7 +186,7 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                     if RunService:IsServer() then
                         CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Speed", self.SpeedLevel, self.SpeedDuration)
 
-                        table.insert(self.Connections, task.delay(self.SpeedDuration, function()
+                        self:AddConnection(task.delay(self.SpeedDuration, function()
                             CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", self.SlownessLevel, self.SlownessDuration)
                         end))
                     

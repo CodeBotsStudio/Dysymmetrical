@@ -47,7 +47,7 @@ local Commander = Character.CreateSurvivor({
                         local AnimatedGrenade = self.OwnerProperties.Character:FindFirstChild("Grenade")
                         AnimatedGrenade.Transparency = 0
 
-                        table.insert(self.Connections, task.delay(self.ThrowDelay, function()
+                        self:AddConnection(task.delay(self.ThrowDelay, function()
                             local FunctionalGrenade = AnimatedGrenade:Clone()
                             local Joint = FunctionalGrenade:FindFirstChildOfClass("JointInstance")
                             if Joint then
@@ -61,7 +61,7 @@ local Commander = Character.CreateSurvivor({
 
                             AnimatedGrenade.Transparency = 1
                         
-                            table.insert(self.Connections, task.delay(self.TriggerDelay, function()
+                            self:AddConnection(task.delay(self.TriggerDelay, function()
                                 task.spawn(function()
                                     Hitbox.New(self.Owner, {
                                         CFrame = CFrame.new(FunctionalGrenade.Position),
@@ -89,7 +89,7 @@ local Commander = Character.CreateSurvivor({
                             
                                 FunctionalGrenade:FindFirstChildOfClass("ParticleEmitter"):Emit(80)
                             
-                                table.insert(self.Connections, task.delay(0.1, function()
+                                self:AddConnection(task.delay(0.1, function()
                                     FunctionalGrenade.Transparency = 1
                                     Light.Enabled = false
                                 
@@ -112,7 +112,7 @@ local Commander = Character.CreateSurvivor({
                 Description = "Commander reloads his gun. He takes 5 seconds to do so and gets Slowness III while reloading.",
                 Behaviour = function(self)
                     if RunService:IsServer() then
-                        table.insert(self.Connections, task.delay(self.Duration, function()
+                        self:AddConnection(task.delay(self.Duration, function()
                             self:ChangeAbilityCharges("Set", 1)
                         end))
 
@@ -147,7 +147,7 @@ local Commander = Character.CreateSurvivor({
                 Behaviour = function(self)
                     if RunService:IsServer() then
                         --Shot Sound & Hitbox
-                        table.insert(self.Connections, task.delay(1.17, function()
+                        self:AddConnection(task.delay(1.17, function()
                             task.spawn(function()
                                 Hitbox.New(self.Owner, {
                                     CFrameOffset = CFrame.new(0, 0, -(self.HitboxLength / 2)),
@@ -182,7 +182,7 @@ local Commander = Character.CreateSurvivor({
                         end))
                     
                         --Hide
-                        table.insert(self.Connections, task.delay(2, function()
+                        self:AddConnection(task.delay(2, function()
                             for _, Part in self.JusticeModel:GetDescendants() do
                                 if Part:IsA("BasePart") then
                                     Part.Transparency = 1
@@ -200,7 +200,7 @@ local Commander = Character.CreateSurvivor({
                         return
                     else
                         self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0.3)
-                        table.insert(self.Connections, task.delay(self.UseAnimationTrack.Length, function()
+                        self:AddConnection(task.delay(self.UseAnimationTrack.Length, function()
                             self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
                         end))
                     end

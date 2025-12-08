@@ -59,7 +59,6 @@ function CharacterUtils.ObserveOnDeath(humanoid: Humanoid, callback: () -> ())
 		onDied()
 	end))
 	mainJanitor:Add(humanoid.Died:Connect(onDied))
-	-- mainJanitor:Add(onDied)
 
 	return mainJanitor
 end

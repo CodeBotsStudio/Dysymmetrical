@@ -1,28 +1,32 @@
 --!nocheck
 
-local EffectManager = {
-    Effects = {},
-    Connections = {},
-}
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Type = require(ReplicatedStorage.Classes.Effect)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
+
+local EffectManager = {
+    Effects = {},
+    Janitor = Janitor.new(),
+}
 
 function EffectManager:Init()
+    local Char = Players.LocalPlayer.Character
+    self.Janitor:LinkToInstance(Char)
+
     --visual
-    table.insert(self.Connections, RunService.PreSimulation:Connect(function(delta: number)
+    self.Janitor:Add(RunService.PreSimulation:Connect(function(delta: number)
         for _, effect: Type.Effect in self.Effects do
             effect.TimeLeft -= delta
         end
     end))
 
-    local Effects = Utils.Instance.FindFirstChild(Players.LocalPlayer.Character, "Effects")
+    local Effects = Utils.Instance.FindFirstChild(Char, "Effects")
 
-    table.insert(self.Connections, Effects.ChildAdded:Connect(function(EffectValue: Instance)
+    self.Janitor:Add(Effects.ChildAdded:Connect(function(EffectValue: Instance)
         if EffectValue:IsA("NumberValue") then
             if EffectValue:GetAttribute("Duration") == nil then
                 repeat task.wait()
@@ -33,17 +37,11 @@ function EffectManager:Init()
         end
     end))
 
-    table.insert(self.Connections, Effects.ChildRemoved:Connect(function(EffectValue: Instance)
+    self.Janitor:Add(Effects.ChildRemoved:Connect(function(EffectValue: Instance)
         if EffectValue:IsA("NumberValue") then
             self:RemoveEffect(EffectValue.Name)
         end
     end))
-
-	table.insert(self.Connections, Players.LocalPlayer.CharacterAdded:Connect(function()
-		for _, connection in self.Connections do
-			connection:Disconnect() --ends the script's execution
-		end
-	end))
 end
 
 function EffectManager:AddEffect(Effect: ModuleScript, level: number?, duration: number?)

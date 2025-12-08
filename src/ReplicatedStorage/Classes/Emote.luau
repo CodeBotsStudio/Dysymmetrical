@@ -7,6 +7,7 @@ local rand = Random.new()
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 local Network = require(game:GetService("ReplicatedStorage").Modules.Network)
 
 local EmoteClass = {}
@@ -36,9 +37,10 @@ export type Emote = {
     TurnToMoveDirection: {any},
 
     TrackPlaying: AnimationTrack,
-    Connections: {RBXScriptConnection},
+    AddConnection: <T>(self: Emote, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
 
     Owner: Player,
+    Janitor: Janitor.Janitor,
 }
 
 --- Emote preset for customization.
@@ -57,19 +59,26 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
         SpeedMultiplier = 0,
         BaseBehaviourAllowed = true,
 
-        Connections = {},
+        AddConnection = function<T>(self: Emote, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
+            self.Janitor:Add(Connection,
+                if typeof(Connection) == "thread" then
+                    true
+                else
+                    nil
+            )
+        end,
 
         AnimationTracks = {},
         --NOTE: remember to pass the player on init
         Init = function(self: Emote, player: Player)
             self.Owner = player
-
-            print("initting really")
+            self.Janitor = Janitor.new()
+            self.Janitor:LinkToInstance(self.Owner.Character)
 
             if RunService:IsServer() then
                 --NOTE: i just noticed that forsaken uses a whole data array to store everything from a player and get the index of it instead of checking it for everyone.
                 --it makes more sense.
-                table.insert(self.Connections, Network:SetConnection("PlayEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string, soundId: string)
+                self:AddConnection(Network:SetConnection("PlayEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string, soundId: string)
                     if plr == self.Owner and emoteName == self.Config.Name and not self.Owner.Character:GetAttribute("Emoting") then
                         if soundId and #soundId > 0 then
                             Sounds:PlaySound(soundId, {Name = "Emote", Parent = self.Owner.Character:FindFirstChild("HumanoidRootPart"), Looped = true})
@@ -79,7 +88,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                         Network:FireClientConnection(plr, "PlayEmote", "REMOTE_EVENT", emoteName)
                     end
                 end))
-                table.insert(self.Connections, Network:SetConnection("StopEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string)
+                self:AddConnection(Network:SetConnection("StopEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string)
 					if plr == self.Owner and emoteName == self.Config.Name then
                         if self.Owner.Character:FindFirstChild("HumanoidRootPart") and self.Owner.Character.HumanoidRootPart:FindFirstChild("Emote") then
                             self.Owner.Character.HumanoidRootPart.Emote:Destroy()
@@ -87,12 +96,6 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                         self.Owner.Character:SetAttribute("Emoting", false)
 
                         Network:FireClientConnection(plr, "StopEmote", "REMOTE_EVENT", emoteName)
-                    end
-                end))
-
-                table.insert(self.Connections, self.Owner.CharacterAdded:Connect(function()
-                    for _, connection in self.Connections do
-                        connection:Disconnect()
                     end
                 end))
 
@@ -115,8 +118,6 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                 end
             end
 
-            print(self.AnimationIds, self.AnimationTracks)
-
             local char = self.Owner.Character
             self.HumanoidRootPart = char.Humanoid.RootPart
             self.SpeedManager = require(char.PlayerAttributeScripts.SpeedManager)
@@ -138,7 +139,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                 end
             end
 
-            table.insert(self.Connections, Network:SetConnection("PlayEmote", "REMOTE_EVENT", function(emoteName: string)
+            self:AddConnection(Network:SetConnection("PlayEmote", "REMOTE_EVENT", function(emoteName: string)
                 if self.Config.Name == emoteName then
                     if self.TrackPlaying and self.TrackPlaying.Animation.IsPlaying then
                         return
@@ -154,7 +155,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                 end
             end))
 
-            table.insert(self.Connections, Network:SetConnection("StopEmote", "REMOTE_EVENT", function(emoteName: string)
+            self:AddConnection(Network:SetConnection("StopEmote", "REMOTE_EVENT", function(emoteName: string)
                 if emoteName == self.Config.Name and self.TrackPlaying and self.TrackPlaying.Animation then
                     self.TrackPlaying.Animation:Stop(0)
                     self.SpeedManager:RemoveSpeedFactor("Emoting")
@@ -162,12 +163,6 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                         self.TurnToMoveDirection:RemoveHeadPreventionFactor("Emoting")
                     end
                     self.TrackPlaying = nil
-                end
-            end))
-
-            table.insert(self.Connections, self.Owner.CharacterAdded:Connect(function()
-                for _, connection in self.Connections do
-                    connection:Disconnect()
                 end
             end))
         end,
@@ -179,13 +174,10 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                     return
                 end
 
-                print(self.AnimationTracks)
-
                 if typeof(self.AnimationIds) == "string" then
                     self.TrackPlaying = self.AnimationTracks[self.AnimationIds]
                 else
                     local AsTable = Utils.Type.DictToTable(self.AnimationTracks)
-                    print(AsTable)
                     self.TrackPlaying = AsTable[rand:NextInteger(1, #AsTable)]
                 end
 
@@ -207,11 +199,8 @@ end
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
 function EmoteClass.CreateEmote(Props: Emote): Emote
     Props = Props or {}
-    local Final = EmoteClass.GetDefaultEmoteSettings()
-    
-    Utils.Type.DeepTableOverwrite(Final, Props)
 
-    return Final
+    return Utils.Type.DeepTableOverwrite(EmoteClass.GetDefaultEmoteSettings(), Props)
 end
 
 return EmoteClass

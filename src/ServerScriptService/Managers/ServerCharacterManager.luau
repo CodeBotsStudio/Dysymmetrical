@@ -6,6 +6,7 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local PlayerManager = require(script.Parent.PlayerManager)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local ServerCharacterManager = {}
 
@@ -105,16 +106,8 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
                 return
             end
 
-            local Connections = {}
-            task.defer(function()
-                while player.Character and Char and player.Character == Char and Primary do
-                    task.wait(1)
-                end
-
-                for _, connection in Connections do
-                    connection:Disconnect()
-                end
-            end)
+            local VoicelineJanitor = Janitor.new()
+            VoicelineJanitor:LinkToInstance(Char)
 
             if module.Config.Voicelines.Stunned then
                 Char.Effects.ChildAdded:Connect(function(newChild)
@@ -135,15 +128,11 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
                         end
                         task.wait(math.random(10, 25))
                     end
-                
-                    for _, connection in Connections do
-                        connection:Disconnect()
-                    end
                 end)
             end
 
             if module.Config.Voicelines.LMS then
-                table.insert(Connections, Network:SetConnection("LMSVoiceline", "BINDABLE_EVENT", function(LastMan: Player)
+                VoicelineJanitor:Add(Network:SetConnection("LMSVoiceline", "BINDABLE_EVENT", function(LastMan: Player)
                     local Voiceline =
                         module.Config.Voicelines.LMS[LastMan:GetAttribute("CharacterSkinName") and LastMan:GetAttribute("CharacterSkinName")..LastMan:GetAttribute("CharacterName") or LastMan:GetAttribute("CharacterName")]
                         or module.Config.Voicelines.LMS["Default"]
