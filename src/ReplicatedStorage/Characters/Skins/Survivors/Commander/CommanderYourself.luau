@@ -20,5 +20,5 @@ return Character.CreateSkin("Survivor", "Commander", {
         end
     
         Utils.Instance.FindFirstChild(Char, "Humanoid"):ApplyDescription(Players:GetHumanoidDescriptionFromUserId(self.Owner.UserId))
-    end
+    end,
 })

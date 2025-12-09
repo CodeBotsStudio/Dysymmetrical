@@ -42,6 +42,11 @@ local function CalculateSound(Distance)
 end
 
 function TerrorRadiusManager:Init()
+    local ThemeFolder = SoundService:FindFirstChild("ChaseThemes")
+    if ThemeFolder then
+        ThemeFolder:Destroy()
+    end
+
     if not self.AbleToInit then
         return
     end
@@ -60,7 +65,7 @@ function TerrorRadiusManager:Init()
     self.MapAmbience = workspace.Themes:FindFirstChild("MapAmbience")
     self.MapAmbienceVolume = self.MapAmbience and self.MapAmbience.Volume or 0
 
-    local ThemeFolder = Instance.new("Folder")
+    ThemeFolder = Instance.new("Folder")
     ThemeFolder.Name = "ChaseThemes"
     ThemeFolder.Parent = SoundService
     self.ThemeFolder = ThemeFolder

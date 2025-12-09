@@ -180,19 +180,26 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                         --cooldown stuffs
                         self.OnCooldown = true
                         self.CooldownTimer = self.Cooldown
-                        task.spawn(function()
-                            --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
-                            while self.CooldownTimer > 0 do
-                                -- gets the amount the server waits
-                                local WaitAmount = task.wait(0.1)
-                                -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
-                                WaitAmount = math.floor(WaitAmount * 10) / 10
-                                -- reduces cooldown timer
-                                self.CooldownTimer -= WaitAmount
-                            end
+
+                        -- task.spawn(function()
+                        --     --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
+                        --     while self.CooldownTimer > 0 do
+                        --         -- gets the amount the server waits
+                        --         local WaitAmount = task.wait(0.1)
+                        --         -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
+                        --         WaitAmount = math.floor(WaitAmount * 10) / 10
+                        --         -- reduces cooldown timer
+                        --         self.CooldownTimer -= WaitAmount
+                        --     end
+                        --     self.CooldownTimer = 0
+                        --     self.OnCooldown = false
+                        -- end)
+
+                        --so this is obv more optimized but that removes the ability to read cooldown amounts on server, might work on it later
+                        table.insert(self.Connections, task.delay(self.Cooldown, function()
                             self.CooldownTimer = 0
                             self.OnCooldown = false
-                        end)
+                        end))
 
                         --decreasing uses left if it's supposed to be limited
                         if self.UseSettings.Limited then
