@@ -39,6 +39,10 @@ export type HitboxSettings = {
     FriendlyFire: boolean?,
     --- Reason ID for custom behaviours on hit. Please assign this.
     Reason: string?,
+    --- The shape of the hitbox.
+    --- 
+    --- Read `Enum.PartType`.
+    Shape: Enum.PartType?,
     --- The specific execution animation to use if `ExecuteOnKill` is `true`.
     --- 
     --- Will be looked up automatically if this isn't set.
@@ -113,6 +117,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
         IsProjectile = Config.IsProjectile or false,
         FriendlyFire = Config.FriendlyFire or false,
         Reason = Config.Reason or "Slash Attack",
+        Shape = Config.Shape or Enum.PartType.Block,
         ExecutionAnimation = Config.ExecutionAnimation or nil,
         EffectsToApply = Config.EffectsToApply or {},
         Connections = Config.Connections or {},
@@ -197,6 +202,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
         Part.CastShadow = false
         Part.Anchored = true
         Part.Size = Config.Size
+        Part.Shape = Config.Shape
 
         while not Props.Cancelled and Props.TimePast < Config.Time do
             local Damaged = Props.HumanoidsHit

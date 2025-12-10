@@ -38,7 +38,7 @@ if not DataStoreKey or DataStoreKey == "DATA_STORE_KEY_HERE" then
 	warn("\n[SaveManager] – WARNING: Key for datastore '"..DataStoreRef.."' not set!"
 		.."\nMake sure you have the key of your datastore in ServerScriptService/Managers/SaveManager/DataStoreKey in Roblox Studio, or in src/ServerScriptService/Managers/SaveManager/DataStoreKey.model.json in Visual Studio Code."
 		.."\nHopefully, you should only need to do this once – if this message appears frequently, contact a Dysymmetrical developer.")
-	DataStoreRef = "dysymmetrical" -- Dysymmetrical default datastore for testing purposes.
+	DataStoreKey = "dysymmetrical" -- Dysymmetrical default datastore for testing purposes.
 end
 
 
@@ -50,9 +50,7 @@ repeat
 	_, Storage = pcall(function()
 		return DataStoreService:GetDataStore(DataStoreRef) 
 	end)
-until Storage or Attempt > 50
-
-local StoreKey = DataStoreKey 
+until Storage or Attempt > 50 
 
 --[[
 	Function for converting a ValueObject tree into a table.
@@ -310,7 +308,7 @@ function SaveManager.Load(Player: Player): Folder
 			Attempt += 1
 
 			pcall(function() 
-				PlayerData = Storage:GetAsync(`{StoreKey}_{Player.UserId}`)
+				PlayerData = Storage:GetAsync(`{DataStoreKey}_{Player.UserId}`)
 			end)
 			
 			task.wait()
@@ -543,7 +541,7 @@ function SaveManager.Save(Player: Player, Data: Folder)
 			Attempt += 1
 
 			success, _ = pcall(function()
-				Storage:UpdateAsync(`{StoreKey}_{Player.UserId}`, function(_old)
+				Storage:UpdateAsync(`{DataStoreKey}_{Player.UserId}`, function(_old)
 					return SaveFile
 				end)
 			end)

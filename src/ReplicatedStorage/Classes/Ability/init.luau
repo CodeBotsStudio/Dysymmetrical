@@ -196,7 +196,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                         -- end)
 
                         --so this is obv more optimized but that removes the ability to read cooldown amounts on server, might work on it later
-                        table.insert(self.Connections, task.delay(self.Cooldown, function()
+                        self:AddConnection(task.delay(self.Cooldown, function()
                             self.CooldownTimer = 0
                             self.OnCooldown = false
                         end))
