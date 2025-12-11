@@ -101,13 +101,16 @@ function PlayerUtils._GetMousePosition(LockToClosestPlayer: boolean): Vector3
             Pos = Dir.Origin
             LookVector = Dir.Direction * 500
         end
-        local trans = {}
+        local Exceptions = {}
         for index, _ in PlayerUtils.TransparentParts do
-            table.insert(trans, index)
+            table.insert(Exceptions, index)
+        end
+        if LocalPlayer.Character then
+            table.insert(Exceptions, LocalPlayer.Character)
         end
         local params = RaycastParams.new()
         params.FilterType = Enum.RaycastFilterType.Exclude
-        params.FilterDescendantsInstances = trans
+        params.FilterDescendantsInstances = Exceptions
         params.IgnoreWater = true
 
         local cast = workspace:Raycast(Pos, LookVector, params)

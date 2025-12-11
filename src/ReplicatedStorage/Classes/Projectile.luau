@@ -1,5 +1,7 @@
 --!nocheck
 
+-- TODO: fix MODEL projectiles since only BasePart projectiles work properly
+
 local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -38,15 +40,15 @@ export type Projectile = {
     DestroyOnCollision: boolean,
 
     --- Callback fired when the projectile is about to be destroyed by `Projectile:Destroy()` when it gets called from colliding with something when `DestroyOnCollision` is `true`.
-    OnHitDestroy: (self: any) -> ()?,
+    OnHitDestroy: (self: Projectile, Details: ProjectileDetails) -> ("PreventDestruction"?)?,
     --- Callback fired when the projectile is about to be destroyed by `Projectile:Destroy()`.
-    OnDestroy: (self: any) -> ()?,
+    OnDestroy: (self: Projectile, Details: ProjectileDetails) -> ()?,
 }
 
 
 export type ProjectileDetails = {
     --- The model of the projectile.
-    Model: Model?,
+    Model: (Model | BasePart)?,
     --- The hitbox associated to this projectile.
     Hitbox: {
         --- The humanoids the hitbox has already hit.
@@ -101,9 +103,13 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
         ThrowType = ProjectileSettings.ThrowType or "Forward",
         HitboxSettings = ProjectileSettings.HitboxSettings or {},
         DestroyOnCollision = ProjectileSettings.DestroyOnCollision or false,
+        OnHitDestroy = ProjectileSettings.OnHitDestroy,
+        OnDestroy = ProjectileSettings.OnDestroy,
     }
     ProjectileSettings.HitboxSettings.IsProjectile = true
+    ProjectileSettings.HitboxSettings.PredictVelocity = false
     ProjectileSettings.HitboxSettings.HitMultiple = ProjectileSettings.HitboxSettings.HitMultiple ~= nil and ProjectileSettings.HitboxSettings.HitMultiple or true
+    ProjectileSettings.HitboxSettings.Time = ProjectileSettings.Lifetime
 
     -- Make a new table for throwing this all into an instance.
     local ProjectileInstance: ProjectileDetails = {}
@@ -114,17 +120,17 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
 
     -- Find the provided CFrame; if it doesn't exist, grab it from the instance's own CFrame or the model's worldpivot, whichever is applicable.
     ProjectileSettings.HitboxSettings.CFrame = ProjectileSettings.HitboxSettings.CFrame or function(): CFrame
-        return ProjectileInstance.Model.CFrame or ProjectileInstance.Model.WorldPivot -- "Clever! Though, couldn't one have this normally within the conditional statement above? I'd imagine not if you're doing it this way, I suppose." – Itred
+        return ProjectileInstance.Model:IsA("Model") and ProjectileInstance.Model.WorldPivot or ProjectileInstance.Model.CFrame -- "Clever! Though, couldn't one have this normally within the conditional statement above? I'd imagine not if you're doing it this way, I suppose." – Itred
     end
 
     -- Create a new hitbox instance with these settings
-    ProjectileInstance.Hitbox = Hitbox:New(ProjectileSettings.SourcePlayer, ProjectileSettings.HitboxSettings)
+    ProjectileInstance.Hitbox = Hitbox.New(ProjectileSettings.SourcePlayer, ProjectileSettings.HitboxSettings)
 
     -- Define a function and some properties for stopping the projectile in its tracks, when needed.
     local Cancel = false
     function ProjectileInstance:Destroy()
         if ProjectileSettings.OnDestroy then
-            ProjectileSettings:OnDestroy()
+            ProjectileSettings:OnDestroy(ProjectileInstance)
         end
         Cancel = true
         ProjectileInstance.Model:Destroy()
@@ -149,7 +155,7 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
 
     -- Math out the goal position, and start to tween the projectile from the start to that goal position.
     local Goal = ProjectileSettings.StartingCFrame * CFrame.new(0, 0, -ProjectileSettings.Speed * ProjectileSettings.Lifetime) * ProjectileSettings.FinalRotation
-    TweenService:Create(ProjectileInstance.Model:IsA("Model") and ProjectileInstance.Model.Pivot or ProjectileInstance.Model, TweenInfo.new(ProjectileSettings.Lifetime), {
+    TweenService:Create(ProjectileInstance.Model:IsA("Model") and ProjectileInstance.Model.WorldPivot or ProjectileInstance.Model, TweenInfo.new(ProjectileSettings.Lifetime), {
         CFrame = Goal,
     }):Play()
 
@@ -165,25 +171,20 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
 
         task.defer(function() -- Use task.defer here to avoid conflicts with wedging things into the task scheduler
 
-            -- Starting from 0, count up to the maximum lifetime of the projectile in increments of 0.1
-            for _ = 0, ProjectileSettings.Lifetime, 0.1 do
-
-                -- If the projectile got cancelled, the instance stops existing, or the hitbox within the instance stops existing, stop these checks
-                if Cancel or not ProjectileInstance.Model or not ProjectileInstance.Model:FindFirstChild("CollisionBox") then
-                    break
-                end
+            -- Starting from 0, count up to the maximum lifetime of the projectile
+            -- If the projectile got cancelled, the instance stops existing, or the hitbox within the instance stops existing, stop these checks
+            while not (Cancel or not ProjectileInstance.Model or not ProjectileInstance.Model:FindFirstChild("CollisionBox")) do
 
                 -- Find anything just ahead of the projectile with a shapecast
                 local Touching = workspace:Shapecast(ProjectileInstance.Model.CollisionBox, ProjectileInstance.Model.CollisionBox.CFrame.LookVector, DestroyParams)
 
                 -- If the shapecast returned a hit, and the hit is an existing instance, fire the OnHitDestroy callback and destroy the projectile soon after.
                 if Touching and Touching.Instance then
-                    task.delay(0.04, function()
-                        if ProjectileSettings.OnHitDestroy then
-                            ProjectileSettings:OnHitDestroy()
-                        end
+                    local PreventDestruction = if ProjectileSettings.OnHitDestroy then ProjectileSettings:OnHitDestroy(ProjectileInstance) == "PreventDestruction" else false
+                    
+                    if not PreventDestruction then
                         ProjectileInstance:Destroy()
-                    end)
+                    end
                     
                     break
                 end
