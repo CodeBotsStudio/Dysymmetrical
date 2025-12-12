@@ -40,7 +40,9 @@ export type Ability = {
     AttemptUse: (self: Ability) -> (),
     --- Modifies the `UsesLeft` property in both client and server.
     --- 
-    --- SHOULD ONLY BE USED IN SERVER.
+    --- Any `Type` other from `"Set"` can be inconsistent in some very rare ping cases.
+    --- 
+    --- <b>SHOULD ONLY BE USED IN SERVER.</b>
     ChangeAbilityCharges: (self: Ability, Type: "Set" | "Add" | "Take", amount: number) -> (),
 
     --- The name of the input used for the ability, set up in `InputManager`.
