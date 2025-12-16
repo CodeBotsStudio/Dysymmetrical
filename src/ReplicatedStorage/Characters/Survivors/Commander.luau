@@ -17,6 +17,11 @@ local Commander = Character.CreateSurvivor({
         Name = "Commander",
         Quote = "*pyro noises*",
         Render = "rbxassetid://108440668883002",
+
+        Origin = {
+            TooltipText = "Originates from Project Terminus!",
+            Icon = "rbxasset://textures/ui/GuiImagePlaceholder.png",
+        },
     },
 
     GameplayConfig = {

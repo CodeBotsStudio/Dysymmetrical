@@ -295,6 +295,21 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
                 CheckSkinOwnLabels()
             end)
+
+            if Info.Config.Origin and Info.Config.Origin.Icon then
+                Container.Origin.Visible = true
+                Container.Origin.Image = Info.Config.Origin.Icon
+                Container.Origin.MouseEnter:Connect(function()
+                    Tooltip.New(Info.Config.Origin.TooltipText)
+                    Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+                end)
+                Container.Origin.MouseLeave:Connect(function()
+                    Tooltip.New()
+                    Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+                end)
+            else
+                Container.Origin.Visible = false
+            end
         end
 
         CheckSkinOwnLabels()
@@ -948,6 +963,30 @@ function Shop:ReloadContent(CreateCards: boolean?)
             Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
             self:OnCharButtonPress(name, Info, Module, Type, Card)
         end)
+
+        if Info.Config.Origin and Info.Config.Origin.Icon then
+            Container.Origin.Visible = true
+            Container.Origin.Image = Info.Config.Origin.Icon
+
+            local TooltipAvailable = Info.Config.Origin.TooltipText ~= nil
+
+            Container.Origin.MouseEnter:Connect(function()
+                if TooltipAvailable then
+                    Tooltip.New(Info.Config.Origin.TooltipText)
+                end
+
+                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+            end)
+            Container.Origin.MouseLeave:Connect(function()
+                if TooltipAvailable then
+                    Tooltip.New()
+                end
+
+                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+            end)
+        else
+            Container.Origin.Visible = false
+        end
     end
 
     local function SortTableByPriceAndName(TableToSort)

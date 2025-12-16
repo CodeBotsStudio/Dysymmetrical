@@ -12,6 +12,8 @@ return Character.CreateSkin("Survivor", "Commander", {
         Name = "Yourself",
         Quote = "Hey, it's you!",
         Price = 99999999,
+
+        Origin = {},
     },
 
     OnInit = function(self: Character.Survivor, Char: Model)

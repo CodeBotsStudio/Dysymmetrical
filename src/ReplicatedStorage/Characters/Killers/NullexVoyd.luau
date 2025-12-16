@@ -26,6 +26,11 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
         Render = "rbxassetid://139883756028491",
         Price = 1308,
 
+        Origin = {
+            TooltipText = "Originates from Project Terminus!",
+            Icon = "rbxasset://textures/ui/GuiImagePlaceholder.png",
+        },
+
         TeleporterPrefab = script.NullexTeleporter,
     },
     

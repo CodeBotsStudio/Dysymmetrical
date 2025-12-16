@@ -45,6 +45,20 @@ export type Survivor = {
         --- A possible quote from the character that'll show up when you buy it.
         Quote: string,
 
+        --- Information on where this character / skin originates from.
+        --- 
+        --- Anything set on here will be displayed in the character's / skin's card in the shop and in the inventory.
+        Origin: {
+            --- The text displayed on a tooltip when hovering over the icon.
+            --- 
+            --- Example: `"Originates from Die of Death!"`
+            TooltipText: string?,
+            --- The ID of the icon displayed in the character's / skin's card.
+            --- 
+            --- Should be the icon of the place it originates from.
+            Icon: string?,
+        }?,
+
         --- The price of this character in the shop.
         Price: number,
         --- The render image / portrait ID of this character.
@@ -178,7 +192,7 @@ function CharTypes.GetDefaultSurvivorSettings(): Survivor
             Quote = "hello",
 
             Price = 0,
-            Render = "rbxassetid://18831151594",
+            Render = "",
 
             AnimationIDs = {
                 IdleAnimation = "rbxassetid://128254839975087",
@@ -250,6 +264,20 @@ export type Killer = {
         },
         --- A possible quote from the character that'll show up when you buy it.
         Quote: string,
+
+        --- Information on where this character / skin originates from.
+        --- 
+        --- Anything set on here will be displayed in the character's / skin's card in the shop and in the inventory.
+        Origin: {
+            --- The text displayed on a tooltip when hovering over the icon.
+            --- 
+            --- Example: `"Originates from Die of Death!"`
+            TooltipText: string?,
+            --- The ID of the icon displayed in the character's / skin's card.
+            --- 
+            --- Should be the icon of the place it originates from.
+            Icon: string?,
+        }?,
 
         --- The price of this character in the shop.
         Price: number,
@@ -465,7 +493,7 @@ function CharTypes.GetDefaultKillerSettings(): Killer
             Quote = "hello",
 
             Price = 0,
-            Render = "rbxassetid://18831151594",
+            Render = "",
 
             LastManStandingTheme = "rbxassetid://125799740823318",
             SpecialLastManStandings = {},
