@@ -266,7 +266,7 @@ function PlayerUtils.RevealPlayerAuraTo(Player: Player | Model, RevealedPlayer: 
         return
     end
     if Player and Player:IsA("Model") then
-        Player = PlayerUtils.GetPlayerFromCharacter(Player)
+        Player = Players:GetPlayerFromCharacter(Player)
     end
     Network:FireClientConnection(Player, "RevealPlayerAura", "REMOTE_EVENT", RevealedPlayer, Duration, Color)
 end
@@ -408,19 +408,6 @@ function PlayerUtils.ShakeCameraOf(Target: Player | {Player}, Magnitude: number,
         return
     end
     Network:FireClientConnection(Target, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
-end
-
---- Attempts to get a `Player` instance from a character `Model`.
---- Usually runs better than `Players:GetPlayerFromCharacter()` as this one just looks for a player with the same name as the character in `Players`.
---- This is assured to return a player if the character is tied to one as they're both named the same.
---- When using this, pass a character from `workspace.Players` as the `Character` param to make sure this works.
---- Take into account that if the player isn't found, `Players:GetPlayerFromCharacter()` WILL be used as a fallback.
-function PlayerUtils.GetPlayerFromCharacter(Character: Model): Player
-    local Player = InstanceUtils.FindFirstChild(Players, Character.Name, 0)
-    if not Player then
-        Player = Players:GetPlayerFromCharacter(Character)
-    end
-    return Player
 end
 
 return PlayerUtils

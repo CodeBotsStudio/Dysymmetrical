@@ -118,7 +118,7 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 		if not RagdollFolder then
 			return
 		end
-		local Silly = Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer or Utils.Player.GetPlayerFromCharacter(Char), "Advanced.SillyRagdolls")
+		local Silly = Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer or Players:GetPlayerFromCharacter(Char), "Advanced.SillyRagdolls")
 		--handle ragdoll limit option
 		Char = Character:Clone()
 		Char.Parent = RagdollFolder

@@ -159,7 +159,7 @@ function Spectate:_Update()
     local Humanoid = Utils.Instance.FindFirstChild(Char, "Humanoid")
     workspace.CurrentCamera.CameraSubject = Humanoid
 
-    self.UIInstance.PlayerText.DisplayName.Text = Utils.Player.GetPlayerFromCharacter(Char).DisplayName
+    self.UIInstance.PlayerText.DisplayName.Text = Players:GetPlayerFromCharacter(Char).DisplayName
     self.UIInstance.PlayerText.Username.Text = Char.Name
 
     local CharText = Char:GetAttribute("CharacterName")

@@ -30,6 +30,7 @@ local CommonFunctions = {
 }
 
 local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
@@ -73,7 +74,7 @@ function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
     local Char = targetHumanoid.Parent
 	local HRP: BasePart = Char.HumanoidRootPart
     local targetPos = HRP.Position
-	local Player = Utils.Player.GetPlayerFromCharacter(Char)
+	local Player = Players:GetPlayerFromCharacter(Char)
 
 	-- leaving these comments here as memories from may 2025 lol -dys
 	--decided to remove server-side checking because BRO. THEY DON'T DO THAT IN FORSAKEN.
