@@ -11,7 +11,7 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local SlashModule = {}
 
 --- Creates a new Slash ability instance. Use this in every killer that you want to have a slash ability in.
-function SlashModule.New(Props: Ability?): Ability
+function SlashModule.New(Props: Ability.Ability?): Ability.Ability
 
 	-- Doesn't require you to unintuitively slot in an empty table for it to work at all– someone was confused about this a bit earlier, so I figured a fix was in order.
 	Props = Props or {}

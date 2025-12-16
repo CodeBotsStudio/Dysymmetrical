@@ -306,6 +306,8 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	Role.Value = RigType
 	Role.Parent = char
 	
+	char:PivotTo(plr.Character and plr.Character.WorldPivot or CFrame.new(0, 10, 0))
+	
 	plr.Character = char
 	
 	--clones all scripts

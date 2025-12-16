@@ -32,7 +32,7 @@ function AntiFly:_SetupCharacter(player: Player, char: Model)
         while root and root.Parent and char and char.Parent do
             task.wait(self.TimeBetweenChecks)
             
-            if self:_IsCharacterNotFlying(root, Params) then
+            if self:_IsCharacterNotFlying(char, root, Params) then
                 lastTouched = time()
                 continue --used to not check anything else during this check
             end
@@ -45,8 +45,8 @@ function AntiFly:_SetupCharacter(player: Player, char: Model)
     end)
 end
 
-function AntiFly:_IsCharacterNotFlying(root: BasePart, Params: RaycastParams): boolean
-    if not (root and root.Parent) then
+function AntiFly:_IsCharacterNotFlying(model: Model, root: BasePart, Params: RaycastParams): boolean
+    if not (model and root and root.Parent) then
         return true
     end
     if math.abs(root.AssemblyLinearVelocity.Y) > 45 then --if the player is flung it's obv gonna be false positive (DAMN YOU SHITTY ROBLOX PHYSICS!!!)
@@ -56,7 +56,8 @@ function AntiFly:_IsCharacterNotFlying(root: BasePart, Params: RaycastParams): b
     for frontIndex = -1, 1 do
         for sideIndex = -1, 1 do
             local Origin = root.Position + (root.CFrame.RightVector * sideIndex) + (root.CFrame.LookVector * frontIndex)
-            local RayHeight = (root.Size.Y / 2) + (root.Parent:FindFirstChild("Right Leg") and root.Parent["Right Leg"].Size.Y or 2) + 1.25
+            local _, BoundSize = model:GetBoundingBox()
+            local RayHeight = BoundSize.Y / 2 + 1.25
 
             local Cast = workspace:Raycast(Origin, Vector3.new(0, -RayHeight, 0), Params)
 

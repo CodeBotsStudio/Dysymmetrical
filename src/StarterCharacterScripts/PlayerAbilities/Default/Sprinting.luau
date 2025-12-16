@@ -10,6 +10,7 @@ local Sprinting = {
 	TweenSpeed = true,
 	SpeedApplied = true,
 	SprintMultiplier = 2.66666,
+	CanGainStamina = true,
 }
 --
 local RunService = game:GetService("RunService")
@@ -154,7 +155,7 @@ function Sprinting:Init()
 				end
 				if found then
 					self:_DrainStamina(delta)
-				else
+				elseif self.CanGainStamina then
 					self:_GainStaminaLegally(delta)
 				end
 			else
@@ -172,7 +173,9 @@ function Sprinting:Init()
 				self.SpeedApplied = false
 			end
 
-			self:_GainStaminaLegally(delta)
+			if self.CanGainStamina then
+				self:_GainStaminaLegally(delta)
+			end
 
 		end
 

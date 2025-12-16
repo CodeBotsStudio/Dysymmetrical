@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local Character = require(script.Parent.Character)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
@@ -65,14 +66,29 @@ export type Ability = {
     Cooldown: number,
     --- The timer for the cooldown to finish. Don't tamper with this unless you know what you're doing!
     CooldownTimer: number,
-    --- Will be true if the ability is on cooldown.
+    --- Will be `true` if the ability is on cooldown.
     OnCooldown: boolean,
+    --- If `true`, the cooldown of this ability will be automatically applied when using it.
+    AutomaticCooldown: boolean,
     --- Utility to check if the ability can legally be used.
     CanUse: (self: Ability) -> boolean,
     --- Extra, custom conditions to add to `Ability:CanUse()` instead of replacing the latter.
     --- 
     --- Must return a `boolean`.
     UseConditions: (self: Ability) -> boolean,
+    --- Activates this ability's cooldown.
+    --- 
+    --- A custom cooldown can be specified in `duration`.
+    --- If there's nothing set, it'll use `Ability.Cooldown`.
+    SetOnCooldown: (self: Ability, duration: number?) -> (),
+    --- <b>CLIENT FUNCTION:</b> Disables the input of every ability
+    --- 
+    --- The duration of the ability disabling is set by the `Duration` parameter. If it's `nil`, it'll fallback to `Ability.Duration`.
+    --- 
+    --- Will disable the Slash ability if it exists depending on `Ability.DisableSlashOnPerform`, which can be overriden by `DisableSlash`.
+    --- 
+    --- Won't take `DisableOtherAbilitiesOnPerform` into account as that's what calls this function automatically.
+    DisableAllAbilities: (self: Ability, Duration: number?, DisableSlash: boolean?) -> (),
 
     --- The duration of the ability. Mainly used to disable input until it finishes. Doesn't need to be the literal length.
     Duration: number,
@@ -97,12 +113,23 @@ export type Ability = {
     Signals: {
         ChargesChanged: Signal.Signal,
         Used: Signal.Signal,
+        CooldownSet: Signal.Signal,
     },
 
     --- Adds a connection / thread to the ability's janitor to be disposed of when the owner's character is destroyed.
     --- 
     --- Use this to make connections and threads.
     AddConnection: <T>(self: Ability, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
+    --- Adds a connection / thread to the ability's janitor to be disposed of when the owner's character is destroyed.
+    --- 
+    --- Differs from `Ability:AddConnection()` in that the connections added through this function will be cancelled when the character gets stunned.
+    --- 
+    --- Use this to make connections and threads that can be cancelled when the character is stunned.
+    AddStunnableConnection: <T>(self: Ability, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
+    --- The table containing all connections currently instanced that can be cancelled through a stun.
+    --- 
+    --- Should only be used internally.
+    StunnableConnections: {RBXScriptConnection | thread},
     --- The owner of the ability.
     Owner: Player,
     --- The ability's Janitor instance.
@@ -132,9 +159,11 @@ export type Ability = {
         EmoteManager: any,
         --- See `StarterCharacterScripts.Miscellaneous.TurnToMoveDirection`.
         TurnToMoveDirection: any,
+        --- See `StarterCharacterScripts.PlayerAbilities.Default.Sprinting`.
+        Sprinting: any,
     },
     --- The source module where the ability comes from. Contains all character info.
-    CharModule: any,
+    CharModule: Character.Killer | Character.Survivor,
 }
 
 --- Ability preset for customization.
@@ -158,6 +187,22 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 self:Destroy()
             end, true)
 
+            if plr.Character:FindFirstChild("Effects") then
+                self:AddConnection(plr.Character:FindFirstChild("Effects").ChildAdded:Connect(function(newChild: Instance)
+                    if newChild.Name == "Stunned" then
+                        for _, Connection in self.StunnableConnections do
+                            if typeof(Connection) == "thread" then
+                                if coroutine.running() ~= Connection then
+                                    task.cancel(Connection)
+                                end
+                            else
+                                Connection:Disconnect()
+                            end
+                        end
+                    end
+                end))
+            end
+
             if RunService:IsServer() then
                 Utils.Misc.Print("Initting "..self.Name.." ability for "..plr.Name)
 
@@ -180,29 +225,8 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                         end)
 
                         --cooldown stuffs
-                        if workspace:GetAttribute("CooldownsEnabled") then
-                            self.OnCooldown = true
-                            self.CooldownTimer = self.Cooldown
-
-                            -- task.spawn(function()
-                            --     --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
-                            --     while self.CooldownTimer > 0 do
-                            --         -- gets the amount the server waits
-                            --         local WaitAmount = task.wait(0.1)
-                            --         -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
-                            --         WaitAmount = math.floor(WaitAmount * 10) / 10
-                            --         -- reduces cooldown timer
-                            --         self.CooldownTimer -= WaitAmount
-                            --     end
-                            --     self.CooldownTimer = 0
-                            --     self.OnCooldown = false
-                            -- end)
-
-                            --so this is obv more optimized but that removes the ability to read cooldown amounts on server, might work on it later
-                            self:AddConnection(task.delay(self.Cooldown, function()
-                                self.CooldownTimer = 0
-                                self.OnCooldown = false
-                            end))
+                        if self.AutomaticCooldown then
+                            self:SetOnCooldown()
                         end
 
                         --decreasing uses left if it's supposed to be limited
@@ -242,6 +266,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 EffectManager = require(self.Owner.Character.PlayerAttributeScripts.EffectManager),
                 EmoteManager = require(self.Owner.Character.Miscellaneous.EmoteManager),
                 TurnToMoveDirection = require(self.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
+                Sprinting = require(self.Owner.Character.PlayerAbilities.Default.Sprinting),
             }
 
             if #self.UseAnimation > 0 then
@@ -263,37 +288,12 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 if abilityName == self.Name then
                     --disables ability keys for preventing the usage of a different ability while using it
                     if self.DisableOtherAbilitiesOnPerform then
-                        local inputsToCancelLater = {}
-                        for _, input in self.OwnerProperties.InputManager.DefaultActions do
-                            if input.Name:lower():find("ability") or (input.Name:lower():find("slash") and self.DisableSlashOnPerform) then
-                                input.Enabled = false
-                                table.insert(inputsToCancelLater, input)
-                            end
-                        end
-                        self:AddConnection(task.delay(if self.UseAnimationTrack then self.UseAnimationTrack.Length else self.Duration, function()
-                            for _, input in inputsToCancelLater do
-                                input.Enabled = true
-                            end
-                        end))
+                        self:DisableAllAbilities()
                     end
 
                     --cooldown stuffs
-                    if workspace:GetAttribute("CooldownsEnabled") then
-                        self.OnCooldown = true
-                        self.CooldownTimer = self.Cooldown
-                        task.spawn(function()
-                            --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
-                            while self.CooldownTimer > 0 do
-                                -- gets the amount the client waits
-                                local WaitAmount = task.wait(0.1)
-                                -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
-                                WaitAmount = math.floor(WaitAmount * 10) / 10
-                                -- reduces cooldown timer
-                                self.CooldownTimer -= WaitAmount
-                            end
-                            self.CooldownTimer = 0
-                            self.OnCooldown = false
-                        end)
+                    if self.AutomaticCooldown then
+                        self:SetOnCooldown()
                     end
                     --plays any existant use animation
                     task.defer(function()
@@ -384,6 +384,83 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 Network:FireClientConnection(self.Owner, "ChangeAbilityCharges", "REMOTE_EVENT", self.Name, Type, amount)
             end
         end,
+        
+        DisableAllAbilities = function(self: Ability, Duration: number?, DisableSlash: boolean?)
+            if RunService:IsServer() then
+                return
+            end
+            
+            Duration = Duration or self.Duration
+            if DisableSlash == nil then
+                DisableSlash = self.DisableSlashOnPerform
+            end
+            local inputsToCancelLater = {}
+            for _, input in self.OwnerProperties.InputManager.DefaultActions do
+                if input.Name:lower():find("ability") or (input.Name:lower():find("slash") and DisableSlash) then
+                    input.Enabled = false
+                    table.insert(inputsToCancelLater, input)
+                end
+            end
+            self:AddConnection(task.delay(Duration or (self.UseAnimationTrack and self.UseAnimationTrack.Length or 1), function()
+                for _, input in inputsToCancelLater do
+                    input.Enabled = true
+                end
+            end))
+        end,
+
+        SetOnCooldown = function(self: Ability, duration: number?)
+            if not workspace:GetAttribute("CooldownsEnabled") then
+                return
+            end
+
+            duration = duration or self.Cooldown
+
+            if self.OnCooldown then
+                self.CooldownTimer = duration
+                return
+            end
+
+            self.OnCooldown = true
+            self.CooldownTimer = duration
+
+            if RunService:IsServer() then
+                -- task.spawn(function()
+                --     --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
+                --     while self.CooldownTimer > 0 do
+                --         -- gets the amount the server waits
+                --         local WaitAmount = task.wait(0.1)
+                --         -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
+                --         WaitAmount = math.floor(WaitAmount * 10) / 10
+                --         -- reduces cooldown timer
+                --         self.CooldownTimer -= WaitAmount
+                --     end
+                --     self.CooldownTimer = 0
+                --     self.OnCooldown = false
+                -- end)
+
+                --so this is obv more optimized but that removes the ability to read cooldown amounts on server, might work on it later
+                self:AddConnection(task.delay(duration, function()
+                    self.CooldownTimer = 0
+                    self.OnCooldown = false
+                end))
+            else
+                task.spawn(function()
+                    --NOTE: this is still network stability dependant in the way that you may have to wait 0.1s more for the ability to not be on cooldown because e.g. if it waits 0.19s because of framerate or anything it will reduce 0.1s and wait another 0.1s but the change is so little i can't care enough to change it back
+                    while self.CooldownTimer > 0 do
+                        -- gets the amount the client waits
+                        local WaitAmount = task.wait(0.1)
+                        -- floors that onto how much it's been waiting to e.g. drain 0.1s if it waits 0.12s and 0.2s if it waits more than 0.21s
+                        WaitAmount = math.floor(WaitAmount * 10) / 10
+                        -- reduces cooldown timer
+                        self.CooldownTimer -= WaitAmount
+                    end
+                    self.CooldownTimer = 0
+                    self.OnCooldown = false
+                end)
+            end
+
+            self.Signals.CooldownSet:Fire()
+        end,
 
         AddConnection = function<T>(self: Ability, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
             self.Janitor:Add(Connection,
@@ -392,6 +469,15 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 else
                     "Disconnect"
             )
+
+            return Connection
+        end,
+
+        AddStunnableConnection = function<T>(self: Ability, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
+            self:AddConnection(Connection)
+            table.insert(self.StunnableConnections, Connection)
+
+            return Connection
         end,
 
         InputName = "FirstAbility",
@@ -405,6 +491,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
         Cooldown = 5,
         CooldownTimer = 0,
         OnCooldown = false,
+        AutomaticCooldown = true,
 
         --read
         CanUse = function(self: Ability): boolean
@@ -468,6 +555,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
         Signals = {
             ChargesChanged = Signal.new(),
             Used = Signal.new(),
+            CooldownSet = Signal.new(),
         },
     }
 end

@@ -86,7 +86,7 @@ function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	end
 
 	local Role = Utils.Instance.FindFirstChild(Char, "Role", 0.2)
-	if Role and Role.Value == "Survivor" then
+	if Char:FindFirstChild("Killer") and Role and Role.Value == "Survivor" then
 		Char.Killer.Value = sourcePlayer
 	end
 	
@@ -130,7 +130,10 @@ function CommonFunctions.ApplyEffect(hum: Humanoid, name: string, level: number?
 
 	local char = hum.Parent
 
-	local CharEffects = Utils.Instance.FindFirstChild(char, "Effects")
+	local CharEffects = char:FindFirstChild("Effects")
+	if not CharEffects then
+		return
+	end
 
 	if name == "Stunned" then
 		if CharEffects:FindFirstChild("SpawnProtection") then
@@ -174,7 +177,10 @@ end
 function CommonFunctions.RemoveEffect(char: Model | Humanoid, name: string)
 	char = char:IsA("Model") and char or char.Parent
 
-	local CharEffects = Utils.Instance.FindFirstChild(char, "Effects")
+	local CharEffects = char:FindFirstChild("Effects")
+	if not CharEffects then
+		return
+	end
 
 	local EffectInst = CharEffects:FindFirstChild(name)
 	if not EffectInst then

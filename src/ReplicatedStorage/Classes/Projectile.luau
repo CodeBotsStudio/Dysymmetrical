@@ -20,7 +20,7 @@ export type Projectile = {
     --- It has to have a `CollisionBox` part inside of it that acts as a hitbox for `DestroyOnCollision` if it's `true`.
     --- If it's a model, make a `Pivot` part inside it that represents the center and make it the `PrimaryPart` property.
     --- Then, weld every other part in the model to it.
-    Model: Model,
+    Model: (Model | BasePart),
     --- The initial position of the projectile.
     StartingCFrame: CFrame,
     --- The speed of the projectile.
@@ -49,6 +49,8 @@ export type Projectile = {
 export type ProjectileDetails = {
     --- The model of the projectile.
     Model: (Model | BasePart)?,
+    --- The tween that acts as the projectile's movement.
+    Tween: Tween,
     --- The hitbox associated to this projectile.
     Hitbox: {
         --- The humanoids the hitbox has already hit.
@@ -116,7 +118,7 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
 
     -- Clone the model into the workspace for use with the projectile.
     ProjectileInstance.Model = ProjectileSettings.Model:Clone()
-    ProjectileInstance.Model.Parent = workspace.Map and workspace.Map.Ingame or workspace.TempObjectFolders
+    ProjectileInstance.Model.Parent = workspace:FindFirstChild("Map") and workspace.Map.Ingame or workspace.TempObjectFolders
 
     -- Find the provided CFrame; if it doesn't exist, grab it from the instance's own CFrame or the model's worldpivot, whichever is applicable.
     ProjectileSettings.HitboxSettings.CFrame = ProjectileSettings.HitboxSettings.CFrame or function(): CFrame
@@ -155,15 +157,15 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
 
     -- Math out the goal position, and start to tween the projectile from the start to that goal position.
     local Goal = ProjectileSettings.StartingCFrame * CFrame.new(0, 0, -ProjectileSettings.Speed * ProjectileSettings.Lifetime) * ProjectileSettings.FinalRotation
-    TweenService:Create(ProjectileInstance.Model:IsA("Model") and ProjectileInstance.Model.WorldPivot or ProjectileInstance.Model, TweenInfo.new(ProjectileSettings.Lifetime), {
+    ProjectileInstance.Tween = TweenService:Create(ProjectileInstance.Model:IsA("Model") and ProjectileInstance.Model.WorldPivot or ProjectileInstance.Model, TweenInfo.new(ProjectileSettings.Lifetime), {
         CFrame = Goal,
-    }):Play()
+    })
+    ProjectileInstance.Tween:Play()
 
     -- Configure a raycast for collision detection
     local DestroyParams = RaycastParams.new()
     DestroyParams.FilterType = Enum.RaycastFilterType.Exclude
     DestroyParams.FilterDescendantsInstances = {ProjectileSettings.SourcePlayer.Character}
-    DestroyParams.CollisionGroup = "KillerPassthrough"
     DestroyParams.RespectCanCollide = true
 
     -- If the projectile is set to be destroyed on collision, start looking ahead of it for such collision.

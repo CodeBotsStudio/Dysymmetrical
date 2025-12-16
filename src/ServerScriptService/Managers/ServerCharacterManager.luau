@@ -20,7 +20,7 @@ end
 function ServerCharacterManager:SetupCharacter(player: Player, charName: string, charType: "Survivor" | "Killer", skinName: string?, cf: CFrame?)
     local Char: Model = PlayerManager:_RespawnPlayer(player, charName, charType, skinName)
     if cf then
-        Char:PivotTo(cf or player.Character.WorldPivot)
+        Char:PivotTo(cf)
     end
 
     if charType == "Survivor" then

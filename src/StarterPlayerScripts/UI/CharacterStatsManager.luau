@@ -51,12 +51,20 @@ function CharacterStatsManager:_InitUI(Char: Model, UI: Frame)
             return
         end
         
-        HealthText.Text = tostring(math.round(Humanoid.Health)).."/"..tostring(Humanoid.MaxHealth)
 	    HealthBar.Size = UDim2.fromScale(Utils.Math.Lerp(HealthBar.Size.X.Scale, Humanoid.Health / Humanoid.MaxHealth, delta * 9), 1)
 	    --
-	    StaminaText.Text = tostring(math.abs(math.round(StaminaAttributes.Stamina.Value))).."/"..tostring(StaminaAttributes.MaxStamina.Value)
 	    StaminaBar.Size = UDim2.fromScale(Utils.Math.Lerp(StaminaBar.Size.X.Scale, StaminaAttributes.Stamina.Value / StaminaAttributes.MaxStamina.Value, delta * 9), 1)
     end)
+
+    Utils.Instance.ObserveProperty(Humanoid, "Health", function(value: number)
+        HealthText.Text = tostring(math.round(Humanoid.Health)).."/"..tostring(Humanoid.MaxHealth)
+    end)
+
+    local function UpdateStaminaText()
+        StaminaText.Text = tostring(math.abs(math.round(StaminaAttributes.Stamina.Value))).."/"..tostring(StaminaAttributes.MaxStamina.Value)
+    end
+    Utils.Instance.ObserveProperty(StaminaAttributes.Stamina, "Value", UpdateStaminaText)
+    Utils.Instance.ObserveProperty(StaminaAttributes.MaxStamina, "Value", UpdateStaminaText)
 end
 
 return CharacterStatsManager
