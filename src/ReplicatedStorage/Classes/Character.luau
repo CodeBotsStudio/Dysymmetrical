@@ -1,5 +1,5 @@
 --!nocheck
---asdjl;klksdalhjk.adshjnklasdjklasdjasdjadsjkl;'ajl;k'fas
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -561,7 +561,7 @@ end
 --- Creates a skin of a character with the settings specified in `Props`.
 --- 
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
-function CharTypes.CreateSkin<T>(Type: "Killer" | "Survivor", CharacterName: string, Props: T): T
+function CharTypes.CreateSkin<T>(Type: "Killer" | "Survivor", CharacterName: string, Props: T & (Killer | Survivor)): T & (Killer | Survivor)
     local RootCharacter = Utils.Instance.GetCharacterModule(Type, CharacterName)
     if not RootCharacter then
         return
@@ -569,7 +569,7 @@ function CharTypes.CreateSkin<T>(Type: "Killer" | "Survivor", CharacterName: str
 
     Props = Props or {}
 
-    local Final = Utils.Type.CopyTable(require(RootCharacter))
+    local Final: T & (Survivor | Killer) = Utils.Type.CopyTable(require(RootCharacter))
     Utils.Type.DeepTableOverwrite(Final, Props)
 
     return Final
