@@ -210,11 +210,11 @@ function CharTypes.GetDefaultSurvivorSettings(): Survivor
         GameplayConfig = {
             Health = 100,
             BaseSpeed = 10.5,
-            SprintSpeedMultiplier = 2.66666,
+            SprintSpeedMultiplier = 26 / 10.5,
             StaminaProperties = {
                 MaxStamina = 100,
                 StaminaDrain = 10,
-                StaminaGain = 30,
+                StaminaGain = 20,
             },
 
             Abilities = {},
@@ -521,11 +521,11 @@ function CharTypes.GetDefaultKillerSettings(): Killer
         GameplayConfig = {
             Health = 1200,
             BaseSpeed = 10.5,
-            SprintSpeedMultiplier = 2.66666,
+            SprintSpeedMultiplier = 26 / 10.5,
             StaminaProperties = {
                 MaxStamina = 110,
-                StaminaDrain = 8,
-                StaminaGain = 32,
+                StaminaDrain = 10.5,
+                StaminaGain = 21,
             },
 
             Abilities = {},

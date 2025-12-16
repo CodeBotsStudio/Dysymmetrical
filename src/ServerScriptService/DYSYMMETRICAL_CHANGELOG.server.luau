@@ -86,6 +86,10 @@
     ------21/11/2025------
     * Made the Attackable collision group collidable with every group but Items, KillerPassthrough, NonCollidable and Ragdolls
 
+    ------16/12/2025------
+    * Removed Forsaken equipped labels (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Inventory/Templates/CardTemplate` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    * Added origin labels (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Inventory/Templates/CardTemplate` & `StarterPlayer/StarterPlayerScripts/UI/Shop/Templates/CardTemplate` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()
