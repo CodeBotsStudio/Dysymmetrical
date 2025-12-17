@@ -53,10 +53,29 @@ export type Survivor = {
             --- 
             --- Example: `"Originates from Die of Death!"`
             TooltipText: string?,
-            --- The ID of the icon displayed in the character's / skin's card.
-            --- 
-            --- Should be the icon of the place it originates from.
+            --[=[
+                The ID of the icon displayed in the character's / skin's card.
+            
+                Should be the icon of the place it originates from.
+            ]=]
             Icon: string?,
+        }?,
+        --[=[
+            Some properties of this character's card outline in the shop and inventory.
+            
+            Commonly used for achievement-only items to tell them apart from shop items.
+            
+            May also be used in more interesting ways.
+        ]=]
+        CardFrame: {
+            --- The image ID of the outline.
+            Image: string?,
+            --[=[
+                The size of the outline.
+
+                `UDim2.fromScale()` should be used and its values should be similar to `{1, 1}`.
+            ]=]
+            Size: UDim2?,
         }?,
 
         --- The price of this character in the shop.
@@ -87,23 +106,27 @@ export type Survivor = {
         --- Will be overriden by abilities if their `Ability.AnimationTransitionTime` exists, but will still work for idle, walk and run animations.
         AnimationTransitionTime: number,
 
-        --- Any voicelines this character might have. It's built with strings as keys, and either strings or string dictionaries as values for random voicelines.
-        --- 
-        --- For killers, use `Kill` to set the kill voicelines.
-        --- 
-        --- In it set a `Default` value for any survivor.
-        --- 
-        --- You may set customs for skins and characters using `"[SkinName][CharacterName]"` format.
-        --- 
-        --- Remove `[SkinName]` to make it for a survivor in general.
+        --[=[
+            Any voicelines this character might have. It's built with strings as keys, and either strings or string dictionaries as values for random voicelines.
+            
+            For killers, use `Kill` to set the kill voicelines.
+            
+            In it set a `Default` value for any survivor.
+            
+            You may set customs for skins and characters using `"[SkinName][CharacterName]"` format.
+            
+            Remove `[SkinName]` to make it for a survivor in general.
+        ]=]
         Voicelines: {
             --- The voiceline (s) that'll play at random times while the character isn't saying any other voiceline.
             Idle: (string | {string} | {[string]: string | {string}})?,
-            --- The voiceline (s) that'll play when LMS starts.
-            --- 
-            --- If there's any character that you want this character to have a custom voiceline for, add its codename here.
-            --- 
-            --- If there's a specific skin, add the skin's codename at the beginning and *then* add the character's codename (e.g. `[SkinName][CharacterName]`, without spaces).
+            --[=[
+                The voiceline (s) that'll play when LMS starts.
+                
+                If there's any character that you want this character to have a custom voiceline for, add its codename here.
+                
+                If there's a specific skin, add the skin's codename at the beginning and *then* add the character's codename (e.g. `[SkinName][CharacterName]`, without spaces).
+            ]=]
             LMS: {
                 --- The default voiceline (s).
                 Default: string | {string} | {[string]: string | {string}},
@@ -276,10 +299,29 @@ export type Killer = {
             --- 
             --- Example: `"Originates from Die of Death!"`
             TooltipText: string?,
-            --- The ID of the icon displayed in the character's / skin's card.
-            --- 
-            --- Should be the icon of the place it originates from.
+            --[=[
+                The ID of the icon displayed in the character's / skin's card.
+            
+                Should be the icon of the place it originates from.
+            ]=]
             Icon: string?,
+        }?,
+        --[=[
+            Some properties of this character's card outline in the shop and inventory.
+            
+            Commonly used for achievement-only items to tell them apart from shop items.
+            
+            May also be used in more interesting ways.
+        ]=]
+        CardFrame: {
+            --- The image ID of the outline.
+            Image: string?,
+            --[=[
+                The size of the outline.
+
+                `UDim2.fromScale()` should be used and its values should be similar to `{1, 1}`.
+            ]=]
+            Size: UDim2?,
         }?,
 
         --- The price of this character in the shop.
@@ -343,21 +385,27 @@ export type Killer = {
         --- Will be overriden by abilities if their `Ability.AnimationTransitionTime` exists, but will still work for idle, walk and run animations.
         AnimationTransitionTime: number,
 
-        --- Any voicelines this character might have. It's built with strings as keys, and either strings or string dictionaries as values for random voicelines.
-        --- 
-        --- For killers, use `Kill` to set the kill voicelines.
-        --- 
-        --- In it set a `Default` value for any survivor.
-        --- 
-        --- You may set customs for skins and characters using `"[SkinName][CharacterName]"` format.
-        --- 
-        --- Remove `[SkinName]` to make it for a survivor in general.
+        
+
+        --[=[
+            Any voicelines this character might have. It's built with strings as keys, and either strings or string dictionaries as values for random voicelines.
+            
+            For killers, use `Kill` to set the kill voicelines.
+            
+            In it set a `Default` value for any survivor.
+            
+            You may set customs for skins and characters using `"[SkinName][CharacterName]"` format.
+            
+            Remove `[SkinName]` to make it for a survivor in general.
+        ]=]
         Voicelines: {
-            --- The voiceline (s) that'll play when this character kills a survivor.
-            --- 
-            --- If there's any character that you want this character to have a custom voiceline for, add its codename here.
-            --- 
-            --- If there's a specific skin, add the skin's codename at the beginning and *then* add the character's codename (e.g. `[SkinName][CharacterName]`, without spaces).
+            --[=[
+                The voiceline (s) that'll play when this character kills a survivor.
+                
+                If there's any character that you want this character to have a custom voiceline for, add its codename here.
+                
+                If there's a specific skin, add the skin's codename at the beginning and *then* add the character's codename (e.g. `[SkinName][CharacterName]`, without spaces).
+            ]=]
             Kill: {
                 --- The default voiceline (s).
                 Default: (string | {string}),
@@ -365,11 +413,13 @@ export type Killer = {
             }?,
             --- The voiceline (s) that'll play at random times while the character isn't saying any other voiceline.
             Idle: (string | {string} | {[string]: string | {string}})?,
-            --- The voiceline (s) that'll play when LMS starts.
-            --- 
-            --- If there's any character that you want this character to have a custom voiceline for, add its codename here.
-            --- 
-            --- If there's a specific skin, add the skin's codename at the beginning and *then* add the character's codename (e.g. `[SkinName][CharacterName]`, without spaces).
+            --[=[
+                The voiceline (s) that'll play when LMS starts.
+                
+                If there's any character that you want this character to have a custom voiceline for, add its codename here.
+                
+                If there's a specific skin, add the skin's codename at the beginning and *then* add the character's codename (e.g. `[SkinName][CharacterName]`, without spaces).
+            ]=]
             LMS: {
                 --- The default voiceline (s).
                 Default: string | {string} | {[string]: string | {string}},

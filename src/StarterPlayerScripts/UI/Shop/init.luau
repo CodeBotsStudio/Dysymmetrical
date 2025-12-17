@@ -209,6 +209,11 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             Container.CharacterRender.Image = Info.Config.Render
             Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).."$" or "FREE"
 
+            if Info.Config.CardFrame then
+                Container.Outline.Image = Info.Config.CardFrame.Image or Container.Outline.Image
+                Container.Outline.Size = Info.Config.CardFrame.Size or Container.Outline.Size
+            end
+
             local SkinPreview = Container.Preview.ViewportFrame
             if CanMakePreviews then
                 task.defer(function()
@@ -875,6 +880,11 @@ function Shop:ReloadContent(CreateCards: boolean?)
         Container.Title.Text = Info.Config.Name
         Container.CharacterRender.Image = Info.Config.Render
         Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).."$" or "FREE"
+
+        if Info.Config.CardFrame then
+            Container.Outline.Image = Info.Config.CardFrame.Image or Container.Outline.Image
+            Container.Outline.Size = Info.Config.CardFrame.Size or Container.Outline.Size
+        end
 
         local Preview = Container.Preview.ViewportFrame
         if CanMakePreviews and Type ~= "Emote" then

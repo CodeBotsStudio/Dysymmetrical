@@ -234,6 +234,11 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
             Container.Title.Text = Info.Config.Name
             Container.CharacterRender.Image = Info.Config.Render
 
+            if Info.Config.CardFrame then
+                Container.Outline.Image = Info.Config.CardFrame.Image or Container.Outline.Image
+                Container.Outline.Size = Info.Config.CardFrame.Size or Container.Outline.Size
+            end
+
             self.LoadedItems.Skins[name] = Card
             self.ItemModules.Skins[name] = Info
 
@@ -748,6 +753,11 @@ function Inventory:ReloadContent()
 		Card.Parent = Type == "Killer" and KillerContainer or SurvivorContainer
 		Container.Title.Text = Info.Config.Name
 		Container.CharacterRender.Image = Info.Config.Render
+
+        if Info.Config.CardFrame then
+            Container.Outline.Image = Info.Config.CardFrame.Image or Container.Outline.Image
+            Container.Outline.Size = Info.Config.CardFrame.Size or Container.Outline.Size
+        end
 
         self.ItemModules[Type.."s"] = self.ItemModules[Type.."s"] or {}
 
