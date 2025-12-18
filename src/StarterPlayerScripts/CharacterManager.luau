@@ -100,9 +100,24 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
             if CharacterAbilities.Animations.Stunned then
                 CharacterAbilities.Animations.Stunned:Play(0)
             end
-            task.wait(0.2)
+            if CharacterAbilities.Animations.StunnedLoop then
+                task.delay(CharacterAbilities.Animations.Stunned.Length - 0.1, function()
+                    if (CharacterAbilities.Animations.Stunned :: AnimationTrack).IsPlaying then
+                        CharacterAbilities.Animations.Stunned:Stop(0)
+                    end
+                    if not CharacterAbilities.Animations.StunnedEnd.IsPlaying then
+                        CharacterAbilities.Animations.StunnedLoop:Play(0)
+                    end
+                end)
+            end
             if CharacterAbilities.Animations.StunnedEnd then
-                task.delay(newChild:GetAttribute("Duration") - 0.2 - CharacterAbilities.Animations.StunnedEnd.Length, function()
+                task.delay((newChild:GetAttribute("Duration") < 0.2 and 0.2 or newChild:GetAttribute("Duration")) - 0.2 - CharacterAbilities.Animations.StunnedEnd.Length, function()
+                    if CharacterAbilities.Animations.Stunned then
+                        CharacterAbilities.Animations.Stunned:Stop(0)
+                    end
+                    if CharacterAbilities.Animations.StunnedLoop then
+                        CharacterAbilities.Animations.StunnedLoop:Stop(0)
+                    end
                     CharacterAbilities.Animations.StunnedEnd:Play(0)
                 end)
             end

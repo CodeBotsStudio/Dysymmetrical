@@ -93,6 +93,8 @@ export type Survivor = {
             RunAnimation: string,
             --- The animation that'll play on stun.
             Stunned: string?,
+            --- The animation that'll play after `Stunned` if the stun is longer than the duration of `Stunned` and `StunnedEnd` combined.
+            StunnedLoop: string?,
             --- The animation that'll play before a stun ends.
             StunnedEnd: string?,
             --- The animation that'll play in the character model's preview in the shop.
@@ -351,6 +353,8 @@ export type Killer = {
             RunAnimation: string,
             --- The animation that'll play on stun.
             Stunned: string?,
+            --- The animation that'll play after `Stunned` if the stun is longer than the duration of `Stunned` and `StunnedEnd` combined.
+            StunnedLoop: string?,
             --- The animation that'll play before a stun ends.
             StunnedEnd: string?,
             --- The animation that'll play in the character model's preview in the shop.
