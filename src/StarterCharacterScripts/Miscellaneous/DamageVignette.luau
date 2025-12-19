@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 return {
     Init = function(_self)
@@ -11,7 +12,10 @@ return {
 
         local Humanoid = Utils.Instance.FindFirstChild(Players.LocalPlayer.Character, "Humanoid")
 
-        RunService.PreRender:Connect(function(delta: number)
+        local JanitorInstance = Janitor.new()
+        JanitorInstance:LinkToInstance(Humanoid)
+
+        JanitorInstance:Add(RunService.PreRender:Connect(function(delta: number)
             local Target = Humanoid.Health < Humanoid.MaxHealth * 0.45 and 
                 math.clamp(
                     Humanoid.Health / Humanoid.MaxHealth / 2 + 0.65,
@@ -23,11 +27,11 @@ return {
                 Target,
                 delta * 9.8
             )
-        end)
+        end))
 
         --heartbeat
-        task.spawn(function()
-            while true do
+        JanitorInstance:Add(task.defer(function()
+            while not JanitorInstance.CurrentlyCleaning and Humanoid and Humanoid.Parent do
                 if Humanoid.Health <= 0 or Humanoid.Health >= Humanoid.MaxHealth * 0.45 then
                     task.wait(0.05)
                     continue
@@ -40,6 +44,12 @@ return {
                 Vignette.ImageTransparency *= 0.8
                 task.wait(WaitTime * 2)
             end
-        end)
+        end))
+
+        JanitorInstance:Add(function()
+            if Vignette then
+                Vignette:Destroy()
+            end
+        end, true)
     end,
 }
