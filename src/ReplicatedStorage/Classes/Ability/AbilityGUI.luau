@@ -75,9 +75,9 @@ function AbilityGUI.InitGUI()
 
         --it would be stupid to not add this (again). -Dyscarn
         -- uses label
-        if Ability.Uses and Ability.ModuleCode.UseSettings.Limited then
-            table.insert(Conns, Ability.ModuleCode.Signals.ChargesChanged:Connect(function(chargeAmount: number)
-                Ability.Uses.Text = Ability.ModuleCode.UsesLeft
+        if Ability.Uses then
+            table.insert(Conns, Ability.ModuleCode.Signals.ChargesChanged:Connect(function(amount: number)
+                Ability.Uses.Text = tostring(amount)
             end))
         end
 
@@ -85,7 +85,7 @@ function AbilityGUI.InitGUI()
             Ability.Timer.TextTransparency = 1
         end
 
-        table.insert(Conns, Ability.ModuleCode.Signals.CooldownSet:Connect(function()
+        table.insert(Conns, Ability.ModuleCode.Signals.CooldownSet:Connect(function(_cooldownSet: number)
             Ability.Timer.TextTransparency = 0
             while Ability.ModuleCode.CooldownTimer > 0 do
                 -- failsafe if the ui gets destroyed for any reason

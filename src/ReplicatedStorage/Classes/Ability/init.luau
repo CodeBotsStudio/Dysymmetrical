@@ -111,9 +111,9 @@ export type Ability = {
     },
 
     Signals: {
-        ChargesChanged: Signal.Signal,
-        Used: Signal.Signal,
-        CooldownSet: Signal.Signal,
+        ChargesChanged: Signal.Signal<number>,
+        Used: Signal.Signal<>,
+        CooldownSet: Signal.Signal<number>,
     },
 
     --- Adds a connection / thread to the ability's janitor to be disposed of when the owner's character is destroyed.
@@ -370,7 +370,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             end
         end,
 
-        ChangeAbilityCharges = function(self: Ability, Type:"Add" | "Set" | "Take", amount: number)
+        ChangeAbilityCharges = function(self: Ability, Type: "Add" | "Set" | "Take", amount: number)
             if Type == "Set" then
                 self.UsesLeft = amount
             elseif Type == "Add" then
@@ -379,7 +379,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 self.UsesLeft -= amount
             end
 
-            self.Signals.ChargesChanged:Fire(self.UsesLeft)
+            self.Signals.ChargesChanged:Fire(amount)
             if RunService:IsServer() then
                 Network:FireClientConnection(self.Owner, "ChangeAbilityCharges", "REMOTE_EVENT", self.Name, Type, amount)
             end
@@ -459,7 +459,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                 end)
             end
 
-            self.Signals.CooldownSet:Fire()
+            self.Signals.CooldownSet:Fire(duration)
         end,
 
         AddConnection = function<T>(self: Ability, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
@@ -549,7 +549,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
 
         UseSettings = {
             Limited = false,
-            InitialUses = 1,
+            InitialUses = 5,
         },
 
         Signals = {

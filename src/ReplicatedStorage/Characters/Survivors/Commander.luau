@@ -118,7 +118,7 @@ local Commander = Character.CreateSurvivor({
                 Behaviour = function(self)
                     if RunService:IsServer() then
                         self:AddConnection(task.delay(self.Duration, function()
-                            self:ChangeAbilityCharges("Set", 1)
+                            self.CharModule.GameplayConfig.Abilities.Justice:ChangeAbilityCharges("Set", 1)
                         end))
 
                         CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", 3, 5)
@@ -203,7 +203,7 @@ local Commander = Character.CreateSurvivor({
                         end
                     else
                         self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0.3)
-                        self:AddConnection(task.delay(self.UseAnimationTrack.Length, function()
+                        self:AddConnection(task.delay(self.UseAnimationTrack and self.UseAnimationTrack.Length or self.Duration, function()
                             self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
                         end))
                     end
