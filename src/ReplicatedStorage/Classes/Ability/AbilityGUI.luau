@@ -10,6 +10,7 @@ type Ability = {
     Keybind: TextLabel,
     Timer: TextLabel,
     Uses: TextLabel?,
+    Interactor: ImageButton,
 }
 
 local AbilityGUI = {
@@ -100,6 +101,10 @@ function AbilityGUI.InitGUI()
                 Ability.Timer.TextTransparency = 1
             end
         end))
+
+        table.insert(Conns, Ability.Interactor.MouseButton1Click:Connect(function()
+            Ability.ModuleCode:AttemptUse()
+        end))
     end
 
     --kids, remember to disconnect your useless crap!
@@ -143,6 +148,7 @@ function AbilityGUI._SetupAbilityFrame(Ability): Ability
         ModuleCode = Ability.Module,
         Keybind = AbilityContainer:FindFirstChild("Keybind"),
         Timer = CooldownTimer,
+        Interactor = AbilityContainer:FindFirstChild("Interactor"),
     }
 
     --it would be stupid to not add this. -Dyscarn

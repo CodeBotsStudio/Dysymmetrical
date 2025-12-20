@@ -281,7 +281,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             if self.OwnerProperties.InputManager.DefaultActions[self.InputName] ~= nil then
                 self:AddConnection(self.OwnerProperties.InputManager.DefaultActions[self.InputName].Pressed:Connect(function()
                     self:AttemptUse()
-                end), "Disconnect")
+                end))
             end
 
             self:AddConnection(Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(abilityName: string)

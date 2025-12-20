@@ -90,6 +90,8 @@
     * Removed Forsaken equipped labels (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Inventory/Templates/CardTemplate` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
     * Added origin labels (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/Inventory/Templates/CardTemplate` & `StarterPlayer/StarterPlayerScripts/UI/Shop/Templates/CardTemplate` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------20/12/2025------
+    * Actually made ability buttons work (MAKE SURE TO GO INTO `ReplicatedStorage/Classes/Ability/AbilityGUI` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 ]]
 
 script:Destroy()
