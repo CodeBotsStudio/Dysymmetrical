@@ -92,11 +92,11 @@ function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	
 	reason = reason or "HAHAHA" --OnlyIvo
 
-	if Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0) then
+	if Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0) and inflictedDamage > 0 then
 		inflictedDamage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
 
-	targetHumanoid.Health -= inflictedDamage
+	targetHumanoid:TakeDamage(inflictedDamage)
 
 	Network:FireClientConnection(sourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, inflictedDamage)
 	if Utils.PlayerData.GetPlayerSetting(sourcePlayer, "Miscellaneous.ImageFlashOnHit") then
@@ -110,7 +110,7 @@ function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 	--printing
 	local targetName = Char.Name or "Dummy"
     if workspace:GetAttribute("DebugAllowed") then
-		Utils.Misc.Print("[DamageDealt] Target: "..targetName.." || InflictedDamage: "..tostring(inflictedDamage).." || Reason: "..tostring(reason))
+		Utils.Misc.Print("[DamageDealt] Target: "..targetName.." || InflictedDamage: "..tostring(inflictedDamage).." || Reason: "..reason)
 	end
 
 	if Player then
