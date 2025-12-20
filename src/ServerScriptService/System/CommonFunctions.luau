@@ -95,7 +95,7 @@ function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Huma
 		inflictedDamage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
 
-	targetHumanoid:TakeDamage(inflictedDamage)
+	targetHumanoid.Health -= inflictedDamage
 
 	Network:FireClientConnection(sourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, inflictedDamage)
 	if Utils.PlayerData.GetPlayerSetting(sourcePlayer, "Miscellaneous.ImageFlashOnHit") then
