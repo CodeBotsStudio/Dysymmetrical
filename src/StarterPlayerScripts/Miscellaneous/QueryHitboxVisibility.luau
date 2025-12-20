@@ -7,10 +7,15 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local LocalPlayer = Players.LocalPlayer
 
-local QueryHitboxVisibility = {}
+local QueryHitboxVisibility = {
+    ShowOtherPlayersHitbox = false,
+}
 
 function QueryHitboxVisibility:Init()
     Utils.Player.ObservePlayers(function(Player: Player)
+        if not self.ShowOtherPlayersHitbox and Player ~= Players.LocalPlayer then
+            return
+        end
         Utils.Character.ObserveCharacter(Player, function(char: Model)
             self:_CharSetup(char)
         end)
@@ -23,7 +28,7 @@ function QueryHitboxVisibility:_CharSetup(char: Model)
             return
         end
 
-        if Utils.Instance.FindFirstChild(char, "Hitboxes", true, 3) then
+        if Utils.Instance.FindFirstChild(char, "Hitboxes", 3) then
             for _, Hitbox in char.Hitboxes:GetChildren() do
                 if not Hitbox:IsA("BasePart") then
                     continue
