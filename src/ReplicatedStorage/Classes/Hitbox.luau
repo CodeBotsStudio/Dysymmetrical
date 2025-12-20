@@ -484,6 +484,11 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                             CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason, CheckPart.CFrame.LookVector, Config.Knockback)
                         end
 
+                        -- If the hitbox deals NEGATIVE damage, do the exact same function cause this is fucking stupid
+                        if Damage < 0 then
+                            CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason)
+                        end
+
                         -- If the hitbox applies effects, apply them.
                         if Config.EffectsToApply then
                             for _, Effect in Config.EffectsToApply do
