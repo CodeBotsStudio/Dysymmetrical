@@ -241,6 +241,10 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                     -- Determine whether or not the part in question belongs to a character by searching for a "humanoid" object sibling.
                     local Humanoid = collidedpart.Parent:FindFirstChildOfClass("Humanoid")
 
+                    if not Humanoid or table.find(Props.HumanoidsHit, Humanoid) then
+                        continue
+                    end
+
                     -- Proceed if the following conditions are met:
                         -- If the humanoid exists, 
                         -- has more than 0 health, 
@@ -248,7 +252,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                         -- is not executing (for killers), 
                         -- has not already been hit by this attack (so one doesn't take 300 damage from getting their arms, legs, and torso all within the same hitbox),
                         -- and if they're either not on the same team as the user, or if the hitbox has friendly fire enabled.
-                    if Humanoid and Humanoid.Health > 0 and not Humanoid.Parent:GetAttribute("Invincible") and not Humanoid.Parent:GetAttribute("Executing") and not Damaged[Humanoid] and (workspace:GetAttribute("FriendlyFire") or Config.FriendlyFire or (collidedpart.Parent:FindFirstChild("Role") and collidedpart.Parent.Role.Value or Char.Role.Value)) ~= Char.Role.Value then
+                    if Humanoid.Health > 0 and not Humanoid.Parent:GetAttribute("Invincible") and not Humanoid.Parent:GetAttribute("Executing") and not Damaged[Humanoid] and (workspace:GetAttribute("FriendlyFire") or Config.FriendlyFire or (collidedpart.Parent:FindFirstChild("Role") and collidedpart.Parent.Role.Value or Char.Role.Value)) ~= Char.Role.Value then
                        
                         -- If the hitbox has no preset anchor, the anchor its using is the HumanoidRootPart of the user– perform some sanity checks to ensure the target isn't getting hit through a wall or similar.
                         if not Config.CFrame then
