@@ -62,7 +62,7 @@ local Commander = Character.CreateSurvivor({
                             FunctionalGrenade.CanCollide = true
                             FunctionalGrenade.CollisionGroup = "Items"
                             FunctionalGrenade.AssemblyLinearVelocity = (self.OwnerProperties.Character.HumanoidRootPart.CFrame.LookVector + Vector3.new(0, 0.5, 0)) * self.ThrowForce
-                            FunctionalGrenade.Parent = workspace.Map.InGame
+                            FunctionalGrenade.Parent = workspace:FindFirstChild("Map") and workspace.Map.InGame or workspace.TempObjectFolders
 
                             AnimatedGrenade.Transparency = 1
                         
@@ -73,6 +73,7 @@ local Commander = Character.CreateSurvivor({
                                         Size = Vector3.new(35, 35, 35),
                                         Damage = 0,
                                         Time = 1/40 * 3,
+                                        Shape = Enum.PartType.Ball,
                                         EffectsToApply = {
                                             {
                                                 Name = "Blindness",
