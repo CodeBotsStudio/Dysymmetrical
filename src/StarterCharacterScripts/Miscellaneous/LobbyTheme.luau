@@ -10,9 +10,9 @@ return {
 
         local function ToggleTheme(role: string)
             if role == "Spectator" then
-                Sounds:PlayTheme("rbxassetid://75034945737494", {Priority = 1, Volume = 0.2})
+                Sounds.PlayTheme("rbxassetid://75034945737494", {Priority = 1, Volume = 0.2})
             else
-                Sounds:StopTheme("rbxassetid://75034945737494")
+                Sounds.StopTheme("rbxassetid://75034945737494")
             end
         end
 

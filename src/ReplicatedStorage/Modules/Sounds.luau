@@ -21,28 +21,33 @@ local Sounds = {
 
 function Sounds:Init()
     if not RunService:IsServer() then
-        Utils.Misc.PreloadAssets(self.CommonlyUsedSounds)
+        Utils.Misc.PreloadAssets(Sounds.CommonlyUsedSounds)
     end
     workspace.Themes.ChildAdded:Connect(function()
-        self:UpdateThemes()
+        Sounds.UpdateThemes()
     end)
     workspace.Themes.ChildRemoved:Connect(function()
-        self:UpdateThemes()
+        Sounds.UpdateThemes()
     end)
 end
 
 --- Returns a sound with the ID `ID` originating from the sound folder in `ReplicatedStorage` for proper preloading.
+--- 
 --- Will return a clone of the sound instead if `clone` is `true`.
-function Sounds:GetSound(ID: string, clone: boolean?): Sound?
+function Sounds.GetSound(ID: string, clone: boolean?): Sound?
     if clone == nil then --not using `clone = clone or true` because if you pass in `false` it gets turned to `true`
+        --clone it by default for obvious reasons
         clone = true
     end
 
     if ID:find("rbxassetid://") then
         local Sound = SoundFolder:FindFirstChild(ID)
+        --return it if it already exists
         if Sound then
+            --return a clone if stated
             return clone and Sound:Clone() or Sound
         else
+            --set all props
             Sound = Instance.new("Sound")
             Sound.Name = ID
             Sound.SoundId = ID
@@ -51,16 +56,23 @@ function Sounds:GetSound(ID: string, clone: boolean?): Sound?
             Sound.RollOffMinDistance = 12
             Sound.RollOffMaxDistance = 60
             Sound.Parent = SoundFolder
+            --return a clone if stated
             return clone and Sound:Clone() or Sound
         end
     else
+        --strip numbers off of the end of `ID`
+        -- * `^` gets the characters from the beginning
+        -- * `%D` is the opposite of %d which means any characters except for digits
+        -- * `+` mandatorily matches 1 and possibly matches more occurences of non-digit characters
         local final = ID:match("^%D+") or ID
         local arr = {}
+        --search for every `Sound` in the SoundFolder that has a matching name to `final` by also stripping off its numbers
         for _, Sound in SoundFolder:GetDescendants() do
             if Sound:IsA("Sound") and (Sound.Name:match("^%D+") or Sound.Name) == final then
                 table.insert(arr, Sound)
             end
         end
+        --return the sound if it found one or a random one from the list if it found multiple
         if #arr > 0 then
             return #arr > 1 and arr[math.random(1, #arr)] or arr[1]
         end
@@ -70,26 +82,28 @@ function Sounds:GetSound(ID: string, clone: boolean?): Sound?
 end
 
 --- Plays a sound with the ID `ID`.
+--- 
 --- Check `Sound`'s properties for further usage.
-function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any?}?): Sound?
+function Sounds.PlaySound(ID: string | {string}, SoundProperties: {[string]: any?}?): Sound?
     if typeof(ID) ~= "string" and typeof(ID) ~= "table" then
         return
     end
 
     if typeof(ID) == "table" then
-        return self:PlaySound(ID[Rand:NextInteger(1, #ID)], SoundProperties)
+        return Sounds.PlaySound(ID[Rand:NextInteger(1, #ID)], SoundProperties)
     elseif #ID <= 0 then
         return
     end
 
-    local Sound = self:GetSound(ID, true)
+    --the sound SHOULD be preloaded if `ID` isn't an actual `rbxassetid://xxxxxxxxxx` string
+    local Sound = Sounds.GetSound(ID, true)
     if not Sound then
         return
     end
     Sound.Parent = nil --for setting the parent later
     Sound.Volume = SoundProperties.Volume or 0.5
 
-    for _, CommonID in self.CommonlyUsedSounds do --weird hack but fuck it
+    for _, CommonID in Sounds.CommonlyUsedSounds do --weird hack but fuck it
         if ID == CommonID then
             Sound.SoundGroup = SoundService.SoundGroups.Master.UI
             break
@@ -98,32 +112,36 @@ function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any
 
     local Part = nil
     if SoundProperties then
-        for name, value in SoundProperties do
-            if name == "Position" then
-                Part = Utils.Instance.GetInvisPart(typeof(value) == "Vector3" and CFrame.new(value) or value)
-                Part.Name = Sound.Name
-                Part.Parent = workspace.Sounds
-                Sound.Parent = Part
-            elseif name:lower():find("pitch") then
-                continue
-            else
-                Sound[name] = value
-            end
+        --instancing a part for the position stated in the props
+        if SoundProperties.Position then
+            Part = Utils.Instance.GetInvisPart(typeof(SoundProperties.Position) == "Vector3" and CFrame.new(SoundProperties.Position) or SoundProperties.Position)
+            Part.Name = Sound.Name
+            Part.Parent = workspace.Sounds
+            Sound.Parent = Part
         end
+        --removing properties to not conflict with DeepTableOverwrite
+        SoundProperties.Position = nil
 
+        --adding pitch shifting if the pitch has a range
         if SoundProperties.MinPitch or SoundProperties.MaxPitch then
             local PitchShifter = Instance.new("PitchShiftSoundEffect")
             PitchShifter.Parent = Sound
             PitchShifter.Octave = Rand:NextNumber(SoundProperties.MinPitch or 1, SoundProperties.MaxPitch or 1)
         end
+        --removing properties to not conflict with DeepTableOverwrite
+        SoundProperties.MinPitch = nil
+        SoundProperties.MaxPitch = nil
+
+        --fun fact: DeepTableOverwrite can also be used with `Instance`s!
+        Utils.Type.DeepTableOverwrite(Sound, SoundProperties)
     end
     
+    --setting a parent as a default value
     if not Sound.Parent then
         Sound.Parent = workspace.Sounds
     end
-
-    Sound:Play()
-    --also auto-destroys the sound on end
+    
+    --auto-destroys the sound on end
     Sound.Ended:Connect(function()
         task.wait()
         Sound:Destroy()
@@ -132,142 +150,158 @@ function Sounds:PlaySound(ID: string | {string}, SoundProperties: {[string]: any
         end
     end)
 
+    Sound:Play()
+
     return Sound
 end
 
 local ThemeTweenDurationHolder = 0.8
 
---- Plays a theme using `Sounds:PlaySound()`.
---- It's better for background music than straight up using `Sounds:PlaySound()` due to it being managed between every other theme playing.
-function Sounds:PlayTheme(ID: string | Instance, properties: {[string]: any}): Sound
+--- Plays a theme using `Sounds.PlaySound()`.
+--- 
+--- It's better for background music than straight up using `Sounds.PlaySound()` due to it being managed between every other theme playing.
+--- 
+--- @return The correspondant `Sound` instance if the `ID` parameter is correct.
+--- @return A `boolean` indicating if `ID` already existed in the Themes folder.
+function Sounds.PlayTheme(ID: string | Instance, properties: {[string]: any}): (Sound, boolean)
     local name = tostring(ID)
     if typeof(ID) ~= "Instance" and typeof(ID) ~= "string" then
-        return
+        return nil, false
     elseif workspace.Themes:FindFirstChild(name) then
         return workspace.Themes:FindFirstChild(name), true
     else
+        local DefaultProperties = {
+            Name = name,
+            Parent = workspace.Themes,
+            SoundGroup = SoundService.SoundGroups.Master.Music,
+            Looped = true,
+            Priority = 1,
+            TweenTime = 0.8,
+            Volume = 0.5,
+        }
         if not properties then
-            properties = {}
-        end
-        if not properties.Name then
-            properties.Name = name
-        end
-        if not properties.SoundGroup then
-            properties.SoundGroup = SoundService.SoundGroups.Master.Music
-        end
-        if properties.Looped == nil then
-            properties.Looped = true
+            properties = DefaultProperties
+        else
+            Utils.Type.DeepTableWrite(properties, DefaultProperties)
         end
 
-        properties = Utils.CopyTable(properties)
+        ThemeTweenDurationHolder = properties.TweenTime
 
-        local Priority = properties.Priority or 1
-        properties.Priority = nil
-
-        ThemeTweenDurationHolder = properties.TweenTime or 0.8
-        properties.TweenTime = nil
-
-        local Volume = properties.Volume or 0.5
-        properties.Volume = nil
-
-        local SoundInstance = self:PlaySound(name, properties)
+        local SoundInstance = Sounds.PlaySound(name, properties)
 
         if SoundInstance then
             if properties.TimePosition then
                 SoundInstance.TimePosition = properties.TimePosition
             end
             
-            SoundInstance:SetAttribute("Priority", Priority)
-            SoundInstance:SetAttribute("Volume", Volume)
+            SoundInstance:SetAttribute("Priority", properties.Priority)
+            SoundInstance:SetAttribute("Volume", properties.Volume)
             SoundInstance:SetAttribute("ServerMade", RunService:IsServer())
-
-            SoundInstance.Parent = properties.Parent or workspace.Themes
         end
 
-        return SoundInstance
+        return SoundInstance, false
     end
 end
 
 --- Updates every theme to play the top priority one.
-function Sounds:UpdateThemes()
+function Sounds.UpdateThemes()
+    --if there are no existing themes don't do anything
+    local ExistingThemes = workspace.Themes:GetChildren()
+    if #ExistingThemes <= 0 then
+        return
+    end
+
     local TopMusic
-    for _, Theme in workspace.Themes:GetChildren() do
-        if Theme.Name == "Destroying" then
+    local ChosenThemes = {}
+
+    --check if there are any eligible ones and save the top one
+    for _, Theme in ExistingThemes do
+        if Theme.Name:lower() == "destroying" then
             continue
         end
+        
+        --adds it to a diff table to not re-check the ones named `Destroying` after
+        table.insert(ChosenThemes, Theme)
+
+        --checks if the priority of the currently indexed theme is higher than the current top one
         if not TopMusic or Theme:GetAttribute("Priority") > TopMusic:GetAttribute("Priority") then
             TopMusic = Theme
         end
     end
-    if not TopMusic then
+
+    --if there are no eligible themes then don't do anything
+    if #ChosenThemes <= 0 or not TopMusic then
         return
     end
 
+    --cool sauce
     local TweenDuration = ThemeTweenDurationHolder or 0.8
     ThemeTweenDurationHolder = nil
-    for _, Theme in workspace.Themes:GetChildren() do
-        if Theme.Name == "Destroying" then
-            continue
-        end
 
-        if Theme == TopMusic then
-            TweenService:Create(Theme, TweenInfo.new(TweenDuration), {
-                Volume = Theme:GetAttribute("Volume") or 1
-            }):Play()
-        else
-            TweenService:Create(Theme, TweenInfo.new(TweenDuration), {
-                Volume = 0
-            }):Play()
-        end
+    --tweening every chosen theme to 0 if it's not the top priority one
+    for _, Theme in ChosenThemes do
+        TweenService:Create(Theme, TweenInfo.new(TweenDuration), {
+            Volume = Theme == TopMusic and (Theme:GetAttribute("Volume") or 1) or 0
+        }):Play()
     end
 end
 
 --- Stops a playing theme with the ID `ID`.
-function Sounds:StopTheme(ID: string, FadeOut: number?, UpdateThemes: boolean?)
+function Sounds.StopTheme(ID: string, FadeOut: number?, UpdateThemes: boolean?)
     if typeof(ID) ~= "string" then
         return
     end
 
-    if type(FadeOut) ~= "number" then
-        FadeOut = 0.8
-    end
-    local First = workspace.Themes:FindFirstChild(ID)
-    if First and not (First:GetAttribute("ServerMade") and not RunService:IsServer()) then
-        First.Name = "Destroying"
-        First:SetAttribute("Priority", -999)
-        if UpdateThemes ~= false then
-            self:UpdateThemes()
+    --fadeout default value
+    FadeOut = FadeOut and typeof(FadeOut) == "number" and FadeOut or 0.8
+
+    --if the theme exists then do cool stuff
+    local ThemeToRemove = workspace.Themes:FindFirstChild(ID)
+    if ThemeToRemove and not (ThemeToRemove:GetAttribute("ServerMade") and not RunService:IsServer()) then
+        --mark it to be destroyed with impossible to reach priority
+        ThemeToRemove.Name = "Destroying"
+        ThemeToRemove:SetAttribute("Priority", -999)
+
+        --update all themes
+        if UpdateThemes then
+            Sounds.UpdateThemes()
         end
-        TweenService:Create(First, TweenInfo.new(FadeOut), {Volume = 0}):Play()
-        game.Debris:AddItem(First, FadeOut + 0.1)
+
+        --tween it out and queue it for removal
+        TweenService:Create(ThemeToRemove, TweenInfo.new(FadeOut), {Volume = 0}):Play()
+        Debris:AddItem(ThemeToRemove, FadeOut + 0.1)
     end
-    return First
+
+    return ThemeToRemove
 end
 
---- Plays a voice line inside of a rig. Used instead of `Sounds:PlaySound()` since it has a priority system.
-function Sounds:PlayVoiceline(Rig: Model, ID: string | {[string]: string | {string}}, SoundSettings: {[string]: any}?)
-    local Primary = Rig.PrimaryPart or Rig:FindFirstChild("HumanoidRootPart")
+--- Plays a voice line inside of a rig. Used instead of `Sounds.PlaySound()` since it has a priority system.
+function Sounds.PlayVoiceline(Rig: Model, ID: string | {[string]: string | {string}}, SoundSettings: {[string]: any}?)
+    --get the root
+    local Primary = Rig.PrimaryPart or Rig:FindFirstChildWhichIsA("Humanoid").RootPart or Rig:FindFirstChild("HumanoidRootPart")
     if not Primary then
         return
     end
 
+    local Defaults = {
+        Name = "Voiceline",
+        Parent = Primary,
+        SoundGroup = SoundService.SoundGroups.Master.VoiceLines,
+        Volume = 0.5,
+        Priority = 1,
+    }
+
+    --set default values in non-existent ones
     if not SoundSettings then
-        SoundSettings = {}
+        SoundSettings = Defaults
+    else
+        Utils.Type.DeepTableWrite(SoundSettings, Defaults)
     end
-    if not SoundSettings.Name then
-        SoundSettings.Name = "Voiceline"
-    end
-    if not SoundSettings.Parent then
-        SoundSettings.Parent = Primary
-    end
-    if not SoundSettings.SoundGroup then
-        SoundSettings.SoundGroup = SoundService.SoundGroups.Master.VoiceLines
-    end
-    local Priority = SoundSettings.Priority or 1
+
+    --make priority a local variable to not pass it to `Sounds.PlaySound` later
+    local Priority = SoundSettings.Priority
     SoundSettings.Priority = nil
-    if not SoundSettings.Volume then
-        SoundSettings.Volume = 0.5
-    end
+
     local Voiceline = Primary:FindFirstChild("Voiceline")
     
     if Voiceline then
@@ -294,7 +328,7 @@ function Sounds:PlayVoiceline(Rig: Model, ID: string | {[string]: string | {stri
         ID = ID[1] ~= nil and ID or next(ID)
     end
 
-    local SoundInstance = self:PlaySound(ID, SoundSettings)
+    local SoundInstance = Sounds.PlaySound(ID, SoundSettings)
     if SoundInstance then
         SoundInstance:SetAttribute("Priority", Priority)
     end

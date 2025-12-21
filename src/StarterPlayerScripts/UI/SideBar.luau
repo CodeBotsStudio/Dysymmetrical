@@ -83,7 +83,7 @@ function SideBar:CloseAll(Remaining: any)
 end
 
 function SideBar:OpenMenu(Menu)
-    Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+    Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
     if not Menu.Opened then
         if Menu:Open(self.ToggleDuration) == "Prevented" then
             return
@@ -218,7 +218,7 @@ function SideBar:Init()
 
         local OriginalYLabelBound = BarButton.Title.Holder.Label.AbsoluteSize.Y
         BarButton.MouseEnter:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
             TweenService:Create(BarButton, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = HoverSize}):Play()
             -- Why does `TextLabel.AutomaticSize` not fucking work with `TextLabel.TextScaled`? No idea! I'm mentally insane! :D
             -- `TextLabel.TextSize` doesn't either. What world are we living in?
@@ -228,7 +228,7 @@ function SideBar:Init()
             }):Play()
         end)
         BarButton.MouseLeave:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
             TweenService:Create(BarButton, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = OriginalSize}):Play()
             TweenService:Create(BarButton.Title.Holder, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                 Position = UDim2.new(0, 0, 0.5, 0)

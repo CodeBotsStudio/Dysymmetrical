@@ -112,7 +112,7 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
             if module.Config.Voicelines.Stunned then
                 Char.Effects.ChildAdded:Connect(function(newChild)
                     if newChild.Name == "Stunned" then
-                        Sounds:PlayVoiceline(Char, module.Config.Voicelines.Stunned)
+                        Sounds.PlayVoiceline(Char, module.Config.Voicelines.Stunned)
                     end
                 end)
             end
@@ -122,7 +122,7 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
                     task.wait(math.random(10, 25))
                     while player.Character and Char and player.Character == Char and Primary do
                         if module.Config.Voicelines.Idle then
-                            Sounds:PlayVoiceline(Char, module.Config.Voicelines.Idle, {
+                            Sounds.PlayVoiceline(Char, module.Config.Voicelines.Idle, {
                                 Priority = 0,
                             })
                         end
@@ -138,7 +138,7 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
                         or module.Config.Voicelines.LMS["Default"]
                         or module.Config.Voicelines.LMS
 
-                    Sounds:PlayVoiceline(Char, Voiceline, {
+                    Sounds.PlayVoiceline(Char, Voiceline, {
                         Priority = 999,
                     })
                 end))

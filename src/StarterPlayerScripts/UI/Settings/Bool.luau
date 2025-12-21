@@ -16,13 +16,13 @@ function BoolSetting:New(Bool: BoolValue, ExistingCheckbox: Frame?, Callback: (V
     BoolTable.Instance = ExistingCheckbox or script.Checkbox:Clone()
     BoolTable.Instance.CheckboxButton.Checked.Visible = Bool.Value
     BoolTable.Instance.CheckboxButton.MouseEnter:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end)
     BoolTable.Instance.CheckboxButton.MouseLeave:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end)
     BoolTable.Instance.CheckboxButton.MouseButton1Click:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
         if Callback then
             task.spawn(Callback, not Bool.Value)
         end

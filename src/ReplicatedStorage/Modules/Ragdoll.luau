@@ -45,7 +45,7 @@ function Ragdoll:Init()
 				repeat task.wait()
 				until time() >= (WaitTime or 0)
 			end
-			local rag = Ragdoll:Enable(Character, true)
+			local rag = Ragdoll.Enable(Character, true)
 			if rag and rag.PrimaryPart then
 				if Position then
 					rag:PivotTo(Position)
@@ -73,7 +73,7 @@ function Ragdoll:Init()
 				Desc.Died:Connect(function()
 					task.wait()
 					if not Primary.Anchored then
-						Ragdoll:Enable(Parent, true)
+						Ragdoll.Enable(Parent, true)
 					end
 				end)
 			end
@@ -94,7 +94,7 @@ end
 --- Makes a character ragdoll.
 --- If `Dupe` is true, it'll make a dupe of the character and use that as a ragdoll, useful to DEATH.
 --- Used when people die. Of death. I'm funny.
-function Ragdoll:Enable(Character: Model, Dupe: boolean)
+function Ragdoll.Enable(Character: Model, Dupe: boolean)
 	if Character:GetAttribute("CantRagdoll") or Character:GetAttribute("Ragdolling") then
 		return
 	end
@@ -102,6 +102,7 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 	Character:SetAttribute("Ragdolling", true)
 
 	local Char = Character
+	local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
 	if Dupe then
 		local function HideOriginal()
 			for _, Descendant in Character:GetDescendants() do
@@ -143,16 +144,11 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 			end
 		end
 		task.spawn(function()
-			local Humanoid = Utils.Instance.FindFirstChild(Char, "Humanoid")
 			if Humanoid then
 				Humanoid.Health = 1
 				Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
 				if RunService:IsClient() and Players.LocalPlayer.Character == Character then
-					if Humanoid and Humanoid.BreakJointsOnDeath then
-						workspace.CurrentCamera.CameraSubject = Char:FindFirstChild("Head") or Humanoid
-					else
-						workspace.CurrentCamera.CameraSubject = Humanoid
-					end
+					workspace.CurrentCamera.CameraSubject = Humanoid.BreakJointsOnDeath and (Char:FindFirstChild("Head") or Humanoid) or Humanoid
 				end
 			end
 		end)
@@ -190,7 +186,6 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
         	Joint.Enabled = false
         end
 	end
-	local Humanoid = Char:FindFirstChildOfClass("Humanoid")
 	if Humanoid then
         Char:SetAttribute("OriginalJumpInfo", ("%*|%*"):format(Humanoid.JumpPower, Humanoid.JumpHeight))
         Humanoid.RequiresNeck = false
@@ -223,15 +218,15 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
     end
 
 	local Limbs = {
-        Head = true, 
-        Torso = true, 
-        ["Left Arm"] = true, 
-        ["Left Leg"] = true, 
-        ["Right Arm"] = true, 
-        ["Right Leg"] = true
+        "Head",
+        "Torso",
+        "Left Arm",
+        "Left Leg",
+        "Right Arm",
+        "Right Leg",
     }
 	for _, Part in Char:GetChildren() do
-        if Part:IsA("BasePart") and (Limbs[Part.Name] or Part.Transparency < 0.25 and Part.Name ~= "HumanoidRootPart" and Part.Name ~= "CollisionHitbox") then
+        if Part:IsA("BasePart") and (table.find(Limbs, Part.Name) or Part.Transparency < 0.25 and Part.Name ~= "HumanoidRootPart" and Part.Name ~= "CollisionHitbox") then
             task.delay(0.125, function()
                 Part.CanCollide = false
             end)
@@ -248,7 +243,7 @@ function Ragdoll:Enable(Character: Model, Dupe: boolean)
 end
 
 --- Unragdolls a specific character if they're ragdolling.
-function Ragdoll:Disable(Character: Model)
+function Ragdoll.Disable(Character: Model)
 	if Character:GetAttribute("CantRagdoll") or not Character.Parent or not Character:FindFirstChildOfClass("Humanoid") then
 		return
 	end

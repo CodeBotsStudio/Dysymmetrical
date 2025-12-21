@@ -276,7 +276,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
                 TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                     Size = UDim2.fromScale(1.065, 1.065)
                 }):Play()
-                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+                Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
             end)
             Container.Interact.MouseLeave:Connect(function()
                 if CanMakePreviews then
@@ -290,10 +290,10 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
                 TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                     Size = Utils.UDim.Full
                 }):Play()
-                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+                Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
             end)
             Container.Interact.MouseButton1Click:Connect(function()
-                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+                Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
                 if Container.Owned.BackgroundTransparency >= 1 then
                     self:CreateBuyWindow(Skin, true, UI, Card)
                 end
@@ -306,11 +306,11 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
                 Container.Origin.Image = Info.Config.Origin.Icon
                 Container.Origin.MouseEnter:Connect(function()
                     Tooltip.New(Info.Config.Origin.TooltipText)
-                    Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+                    Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
                 end)
                 Container.Origin.MouseLeave:Connect(function()
                     Tooltip.New()
-                    Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+                    Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
                 end)
             else
                 Container.Origin.Visible = false
@@ -561,13 +561,13 @@ function Shop:Init()
     for _, button in Container.ShopContainer.Topbar:GetChildren() do
         if button:IsA("ImageButton") and button.Visible then
             button.MouseEnter:Connect(function()
-                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+                Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
             end)
             button.MouseLeave:Connect(function()
-                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+                Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
             end)
             button.MouseButton1Click:Connect(function()
-                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+                Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
                 SwitchSection(button.Name)
             end)
         end
@@ -599,13 +599,13 @@ function Shop:Init()
     local Conns = {}
 
     table.insert(Conns, Buttons.Purchase.MouseEnter:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end))
     table.insert(Conns, Buttons.Purchase.MouseLeave:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end))
     table.insert(Conns, Buttons.Purchase.MouseButton1Click:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
         if not Utils.PlayerData.GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
             if self.SelectedItem.Type == "Emote" then
                 self:CreateBuyWindow(Utils.Instance.GetEmoteModule(self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
@@ -617,13 +617,13 @@ function Shop:Init()
     end))
 
     table.insert(Conns, Buttons.Skins.MouseEnter:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end))
     table.insert(Conns, Buttons.Skins.MouseLeave:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end))
     table.insert(Conns, Buttons.Skins.MouseButton1Click:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
 
         TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play() --assuring the sidebar is open
 
@@ -631,13 +631,13 @@ function Shop:Init()
     end))
 
     table.insert(Conns, Buttons.Info.MouseEnter:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end))
     table.insert(Conns, Buttons.Info.MouseLeave:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end))
     table.insert(Conns, Buttons.Info.MouseButton1Click:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
 
         TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play() --assuring the sidebar is open
 
@@ -823,10 +823,10 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
         if not AnimTrack.Animation then
             local Selected = AnimTrack[math.random(1, #AnimTrack)]
             Selected.Animation:Play(0)
-            Sounds:PlaySound(Selected.Sound, {Name = "EmotePreview"})
+            Sounds.PlaySound(Selected.Sound, {Name = "EmotePreview"})
         else
             AnimTrack.Animation:Play(0)
-            Sounds:PlaySound(AnimTrack.Sound, {Name = "EmotePreview"})
+            Sounds.PlaySound(AnimTrack.Sound, {Name = "EmotePreview"})
         end
     else
         PreviewInstances.EmotePreview.Visible = false
@@ -950,7 +950,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
             TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                 Size = UDim2.fromScale(1.065, 1.065)
             }):Play()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end)
         Container.Interact.MouseLeave:Connect(function()
             if CanMakePreviews and Type ~= "Emote" then
@@ -964,13 +964,13 @@ function Shop:ReloadContent(CreateCards: boolean?)
             TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                 Size = Utils.UDim.Full
             }):Play()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
         end)
         Container.Interact.MouseButton1Click:Connect(function()
             if self.SkinMenu.Open then
                 return
             end
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
             self:OnCharButtonPress(name, Info, Module, Type, Card)
         end)
 
@@ -985,14 +985,14 @@ function Shop:ReloadContent(CreateCards: boolean?)
                     Tooltip.New(Info.Config.Origin.TooltipText)
                 end
 
-                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+                Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
             end)
             Container.Origin.MouseLeave:Connect(function()
                 if TooltipAvailable then
                     Tooltip.New()
                 end
 
-                Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+                Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
             end)
         else
             Container.Origin.Visible = false

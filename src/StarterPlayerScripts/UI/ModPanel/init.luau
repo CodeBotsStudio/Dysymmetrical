@@ -59,7 +59,7 @@ function ModPanel:Start()
     TopbarButton:setLabel("Command Panel")
     TopbarButton:setTextFont(Enum.Font.Bodoni)
     TopbarButton:bindEvent("deselected", function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
         if self.Opened then
             self:Close(SideBar.ToggleDuration)
         else

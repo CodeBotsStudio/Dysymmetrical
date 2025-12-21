@@ -30,7 +30,7 @@ function SlashModule.New(Props: Ability.Ability?): Ability.Ability
 		HitboxOffset = CFrame.new(0, 0, -2.5),
 		Behaviour = function(self: Ability.Ability)
 			if RunService:IsServer() then
-				Sounds:PlaySound(self.UseSound, {Parent = self.OwnerProperties.HRP})
+				Sounds.PlaySound(self.UseSound, {Parent = self.OwnerProperties.HRP})
 				task.delay(self.Delay, function()
 					Hitbox.New(self.Owner, {
 						CFrameOffset = self.HitboxOffset,

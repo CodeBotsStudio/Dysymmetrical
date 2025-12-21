@@ -81,7 +81,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                 self:AddConnection(Network:SetConnection("PlayEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string, soundId: string)
                     if plr == self.Owner and emoteName == self.Config.Name and not self.Owner.Character:GetAttribute("Emoting") then
                         if soundId and #soundId > 0 then
-                            Sounds:PlaySound(soundId, {Name = "Emote", Parent = self.Owner.Character:FindFirstChild("HumanoidRootPart"), Looped = true})
+                            Sounds.PlaySound(soundId, {Name = "Emote", Parent = self.Owner.Character:FindFirstChild("HumanoidRootPart"), Looped = true})
                         end
                         self.Owner.Character:SetAttribute("Emoting", true)
 

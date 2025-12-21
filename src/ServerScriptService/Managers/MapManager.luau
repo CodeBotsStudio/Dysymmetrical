@@ -75,7 +75,7 @@ function MapManager:GetRandomMap(): Model | Folder
         local Props = Config.AmbienceProperties or {}
         Props.Priority = Props.Priority or 0.5
         Props.Name = "MapAmbience"
-        Sounds:PlayTheme(Config.Ambience, Props)
+        Sounds.PlayTheme(Config.Ambience, Props)
     end
 
     MapInstance.Name = "Map"
@@ -86,7 +86,7 @@ function MapManager:GetRandomMap(): Model | Folder
     end
     MapInstance.Parent = workspace
     MapInstance.AncestryChanged:Connect(function()
-        Sounds:StopTheme("MapAmbience")
+        Sounds.StopTheme("MapAmbience")
     end)
 
     if MapInstance:FindFirstChild("Lighting") then

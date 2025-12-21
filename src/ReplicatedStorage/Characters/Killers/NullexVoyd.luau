@@ -76,7 +76,7 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                         
                             self:AddConnection(task.delay(0.75, function()
                                 self.DevicePosition = self.OwnerProperties.Character.HumanoidRootPart.Position - Vector3.new(0, 3 * self.OwnerProperties.Character:GetScale(), 0)
-                                Sounds:PlaySound(self.PlaceSound, {
+                                Sounds.PlaySound(self.PlaceSound, {
                                     Position = self.DevicePosition,
                                     RollOffMaxDistance = 35,
                                     RollOffMinDistance = 12,

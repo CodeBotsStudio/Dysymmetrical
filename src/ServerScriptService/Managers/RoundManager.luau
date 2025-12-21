@@ -159,7 +159,7 @@ function RoundManager.Callables.InitLMS(LastMan: Player)
     local Specials = SpecialLMS[LastMan.Character:GetAttribute("CharacterName")]
     
     local Theme = Specials and (Specials[LastMan.Character:GetAttribute("CharacterSkinName")] or Specials["Default"] or Mod.Config.LastManStandingTheme) or Mod.Config.LastManStandingTheme
-    Sounds:PlayTheme(Theme, {Name = "LMS", Priority = 999999, TweenTime = 0, Volume = 1, TimePosition = 0})
+    Sounds.PlayTheme(Theme, {Name = "LMS", Priority = 999999, TweenTime = 0, Volume = 1, TimePosition = 0})
 end
 
 --- Ends the round. Whoever won is specified by the `winner` parameter.
@@ -171,7 +171,7 @@ function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
     end
     table.clear(RoundManager.Threads)
     --no more music!!1!
-    Sounds:StopTheme("LMS", 0)
+    Sounds.StopTheme("LMS", 0)
 
     workspace:SetAttribute("LMS", false)
 

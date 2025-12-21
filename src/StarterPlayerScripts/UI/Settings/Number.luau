@@ -18,13 +18,13 @@ function NumberSetting:New(NumberValue: NumberValue, ExistingInput: TextBox?, Ca
     NumberTable.Instance.Input.Text = tostring(NumberTable.Value)
 
     NumberTable.Instance.Input.MouseEnter:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end)
     NumberTable.Instance.Input.MouseLeave:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end)
     NumberTable.Instance.Input.FocusLost:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
     end)
 
     local Bounds = {

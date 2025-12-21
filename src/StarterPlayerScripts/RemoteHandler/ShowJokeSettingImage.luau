@@ -70,7 +70,7 @@ return function()
         TweenService:Create(Image, TweenInfo.new(1.2), {
             ImageTransparency = 1
         }):Play()
-        Sounds:PlaySound(UsedSoundTable)
+        Sounds.PlaySound(UsedSoundTable)
 
         Debris:AddItem(Image, 1.5)
     end)

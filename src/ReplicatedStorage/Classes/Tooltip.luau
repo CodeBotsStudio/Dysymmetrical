@@ -31,7 +31,7 @@ function TooltipClass.New(Text: string)
             BackgroundTransparency = 1,
         }):Play()
         Debris:AddItem(Tooltip, 0.15)
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
 
         Tooltip = nil
         return
@@ -57,7 +57,7 @@ function TooltipClass.New(Text: string)
         Tooltip.Title.Size = UDim2.fromOffset(Tooltip.Title.AbsoluteSize.X + 64, Tooltip.Title.AbsoluteSize.Y + 50)
         Tooltip.Background.Size = UDim2.fromOffset(Tooltip.Title.AbsoluteSize.X + 64, Tooltip.Title.AbsoluteSize.Y + 50)
         Tooltip.Parent = UI
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         task.spawn(function()
             while task.wait() and Tooltip do
                 local MousePos = UserInputService:GetMouseLocation() - GuiService:GetGuiInset()

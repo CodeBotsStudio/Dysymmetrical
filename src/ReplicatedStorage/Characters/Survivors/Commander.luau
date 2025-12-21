@@ -182,7 +182,7 @@ local Commander = Character.CreateSurvivor({
                             FirePart.Front:Emit(12)
                             FirePart.Smoke:Emit(8)
                             FirePart.Flash:Emit(3)
-                            Sounds:PlaySound(self.ShotSound, {Volume = 2}, {
+                            Sounds.PlaySound(self.ShotSound, {Volume = 2}, {
                                 Position = FirePart.Position,
                             })
                         end))

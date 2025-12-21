@@ -18,13 +18,13 @@ function StringSetting:New(StringValue: StringValue, ExistingInput: TextBox?, Ca
     StringTable.Instance.Input.Text = StringTable.Value
 
     StringTable.Instance.Input.MouseEnter:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end)
     StringTable.Instance.Input.MouseLeave:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end)
     StringTable.Instance.Input.FocusLost:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
     end)
 
     local TextBox: TextBox = StringTable.Instance.Input

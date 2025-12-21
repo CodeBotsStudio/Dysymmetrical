@@ -220,7 +220,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
                     if player == plr and abilityName == self.Name and self:CanUse() then
                         task.defer(function()
                             if self.CharModule.Config.Voicelines and self.CharModule.Config.Voicelines[self.Name] then
-                                Sounds:PlayVoiceline(self.Owner.Character, self.CharModule.Config.Voicelines[self.Name])
+                                Sounds.PlayVoiceline(self.Owner.Character, self.CharModule.Config.Voicelines[self.Name])
                             end
                         end)
 

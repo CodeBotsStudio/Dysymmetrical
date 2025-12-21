@@ -24,7 +24,7 @@ function PlayerList:Init()
     local Open = true
     local function Toggle(Force: boolean?)
         Open = Force ~= nil and Force or not Open
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
 
         ToggleButton.Text = Open and ">" or "<"
         TweenService:Create(UI, TweenInfo.new(0.245, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Position = UDim2.fromScale(Open and 1 or 1.148, 0.065)}):Play()
@@ -64,13 +64,13 @@ function PlayerList:Init()
         end)
 
         Container.MouseEnter:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end)
         Container.MouseLeave:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
         end)
         Container.MouseButton1Click:Connect(function()
-            Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
             if CurrentPlayerWindow then
                 local ClickedSame = CurrentPlayerWindow.PlayerShown == Player
                 CurrentPlayerWindow:Hide()
@@ -105,10 +105,10 @@ function PlayerList:Init()
         Toggle()
     end)
     ToggleButton.MouseEnter:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end)
     ToggleButton.MouseLeave:Connect(function()
-        Sounds:PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end)
     ToggleButton.MouseButton1Click:Connect(function()
         Toggle()

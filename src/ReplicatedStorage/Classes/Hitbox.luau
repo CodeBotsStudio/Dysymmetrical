@@ -358,7 +358,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                                 -- Finally, play the voiceline.
                                 if Voiceline then
-                                    Sounds:PlayVoiceline(Char, Voiceline)
+                                    Sounds.PlayVoiceline(Char, Voiceline)
                                 end
                             end
 
@@ -463,7 +463,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                                         KillerAnim:Play(0)
                                         SurvivorAnim:Play(0)
                                         if ExSound then
-                                            Sounds:PlaySound(ExSound, {
+                                            Sounds.PlaySound(ExSound, {
                                                 Parent = Root,
                                             })
                                         end
