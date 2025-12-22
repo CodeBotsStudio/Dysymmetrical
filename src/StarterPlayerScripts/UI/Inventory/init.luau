@@ -14,6 +14,7 @@ local Types = require(ReplicatedStorage.Classes.Character)
 local Tooltip = require(ReplicatedStorage.Classes.Tooltip)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -551,33 +552,34 @@ function Inventory:Init()
     Equipped.EquippedKiller = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Killer", false)
     Equipped.EquippedSurvivor = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Survivor", false)
 
-    local Conns = {}
+    local JanitorInstance = Janitor.new()
+    JanitorInstance:LinkToInstance(UI)
 
     local BoughtItems: Folder = LocalPlayer.PlayerData.Purchased
-    table.insert(Conns, BoughtItems.DescendantAdded:Connect(function(_descendant: Instance)
+    JanitorInstance:Add(BoughtItems.DescendantAdded:Connect(function(_descendant: Instance)
         self:ReloadContent()
     end))
-    table.insert(Conns, BoughtItems.DescendantRemoving:Connect(function(_descendant: Instance)
+    JanitorInstance:Add(BoughtItems.DescendantRemoving:Connect(function(_descendant: Instance)
         self:ReloadContent()
     end))
 
-    table.insert(Conns, Buttons.Equip.MouseEnter:Connect(function()
+    JanitorInstance:Add(Buttons.Equip.MouseEnter:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end))
-    table.insert(Conns, Buttons.Equip.MouseLeave:Connect(function()
+    JanitorInstance:Add(Buttons.Equip.MouseLeave:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end))
-    table.insert(Conns, Buttons.Equip.MouseButton1Click:Connect(function()
+    JanitorInstance:Add(Buttons.Equip.MouseButton1Click:Connect(function()
         self:EquipItem()
     end))
 
-    table.insert(Conns, Buttons.Skins.MouseEnter:Connect(function()
+    JanitorInstance:Add(Buttons.Skins.MouseEnter:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end))
-    table.insert(Conns, Buttons.Skins.MouseLeave:Connect(function()
+    JanitorInstance:Add(Buttons.Skins.MouseLeave:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end))
-    table.insert(Conns, Buttons.Skins.MouseButton1Click:Connect(function()
+    JanitorInstance:Add(Buttons.Skins.MouseButton1Click:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
 
         TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play() --assuring the sidebar is open
@@ -585,13 +587,13 @@ function Inventory:Init()
         self:ToggleSkinsMenu()
     end))
 
-    table.insert(Conns, Buttons.Info.MouseEnter:Connect(function()
+    JanitorInstance:Add(Buttons.Info.MouseEnter:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end))
-    table.insert(Conns, Buttons.Info.MouseLeave:Connect(function()
+    JanitorInstance:Add(Buttons.Info.MouseLeave:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end))
-    table.insert(Conns, Buttons.Info.MouseButton1Click:Connect(function()
+    JanitorInstance:Add(Buttons.Info.MouseButton1Click:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
 
         TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play() --assuring the sidebar is open
@@ -603,20 +605,14 @@ function Inventory:Init()
         self.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 
-    table.insert(Conns, UI.Destroying:Connect(function()
-        for _, connection in Conns do
-            connection:Disconnect()
-        end
-    end))
-
     for _, EmoteSlot: Frame in EmoteContainer.EmoteContainer:GetChildren() do
-        table.insert(Conns, EmoteSlot.Button.MouseEnter:Connect(function()
+        JanitorInstance:Add(EmoteSlot.Button.MouseEnter:Connect(function()
             Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         end))
-        table.insert(Conns, EmoteSlot.Button.MouseLeave:Connect(function()
+        JanitorInstance:Add(EmoteSlot.Button.MouseLeave:Connect(function()
             Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
         end))
-        table.insert(Conns, EmoteSlot.Button.MouseButton1Click:Connect(function()
+        JanitorInstance:Add(EmoteSlot.Button.MouseButton1Click:Connect(function()
             Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
 
             if self.EmoteWindow then

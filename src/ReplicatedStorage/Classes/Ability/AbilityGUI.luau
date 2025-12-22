@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Ability = require(script.Parent)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 type Ability = {
     ModuleCode: Ability.Ability,
@@ -64,20 +65,22 @@ function AbilityGUI.InitGUI()
         table.insert(Abilities, AbilityGUI._SetupAbilityFrame(AbilityT))
     end
 
-    local Conns = {
-        InputManager.SchemeChanged:Connect(function(CurrentScheme: string)
-            for _, Ability: Ability in Abilities do
-                AbilityGUI._UpdateAbilityFrameInput(Ability, InputManager, CurrentScheme)
-            end
-        end),
-    }
+    local JanitorInstance = Janitor.new()
+    JanitorInstance:LinkToInstance(Container)
+
+    JanitorInstance:Add(InputManager.SchemeChanged:Connect(function(CurrentScheme: string)
+        for _, Ability: Ability in Abilities do
+            AbilityGUI._UpdateAbilityFrameInput(Ability, InputManager, CurrentScheme)
+        end
+    end), "Disconnect")
+
     for _, Ability: Ability in Abilities do
         AbilityGUI._UpdateAbilityFrameInput(Ability, InputManager, InputManager.CurrentControlScheme)
 
         --it would be stupid to not add this (again). -Dyscarn
         -- uses label
         if Ability.Uses then
-            table.insert(Conns, Ability.ModuleCode.Signals.ChargesChanged:Connect(function(amount: number)
+            JanitorInstance:Add(Ability.ModuleCode.Signals.ChargesChanged:Connect(function(amount: number)
                 Ability.Uses.Text = tostring(amount)
             end))
         end
@@ -86,7 +89,7 @@ function AbilityGUI.InitGUI()
             Ability.Timer.TextTransparency = 1
         end
 
-        table.insert(Conns, Ability.ModuleCode.Signals.CooldownSet:Connect(function(_cooldownSet: number)
+        JanitorInstance:Add(Ability.ModuleCode.Signals.CooldownSet:Connect(function(_cooldownSet: number)
             Ability.Timer.TextTransparency = 0
             while Ability.ModuleCode.CooldownTimer > 0 do
                 -- failsafe if the ui gets destroyed for any reason
@@ -102,17 +105,10 @@ function AbilityGUI.InitGUI()
             end
         end))
 
-        table.insert(Conns, Ability.Interactor.MouseButton1Click:Connect(function()
+        JanitorInstance:Add(Ability.Interactor.MouseButton1Click:Connect(function()
             Ability.ModuleCode:AttemptUse()
         end))
     end
-
-    --kids, remember to disconnect your useless crap!
-    Container.Destroying:Connect(function()
-        for _, Conn in Conns do
-            Conn:Disconnect()
-        end
-    end)
 end
 
 --this is so messy wth
