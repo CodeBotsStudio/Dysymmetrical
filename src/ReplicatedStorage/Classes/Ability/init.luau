@@ -473,6 +473,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             return Connection
         end,
 
+        StunnableConnections = {},
         AddStunnableConnection = function<T>(self: Ability, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
             self:AddConnection(Connection)
             table.insert(self.StunnableConnections, Connection)
