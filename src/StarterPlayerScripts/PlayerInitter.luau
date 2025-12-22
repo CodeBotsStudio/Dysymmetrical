@@ -14,6 +14,8 @@ function PlayerInitter:Init()
         return
     end
 
+    debug.setmemorycategory("PlayerScriptLoader")
+
     self.Initting = true
 
     Player:SetAttribute("BaseFOV", 70)
@@ -26,11 +28,14 @@ function PlayerInitter:Init()
         if Module.Name ~= "ModPanel" then
             self.CurrentlyInitting = Module.Name
         end
+        debug.setmemorycategory(Module.Name)
     	local Scr = require(Module)
     	if type(Scr) == "table" and Scr.Init and type(Scr.Init) == "function" then
     		Scr:Init()
     	end
     end
+
+    debug.setmemorycategory("Default")
 
     self.Loaded = true
 end

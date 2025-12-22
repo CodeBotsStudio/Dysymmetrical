@@ -1,7 +1,6 @@
 --!nocheck
 
 local Sprinting = {
-	Connections = {},
 	AttemptingSprint = false,
 	PressingSprintWhileRecovering = false,
 	Recovering = false,
@@ -11,65 +10,51 @@ local Sprinting = {
 	SpeedApplied = true,
 	SprintMultiplier = 2.66666,
 	CanGainStamina = true,
+	Janitor = nil,
 }
---
+
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
---
+
 local LocalPlayer = Players.LocalPlayer
 local PlayerScripts = LocalPlayer.PlayerScripts
---
+
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 local InputManager = require(PlayerScripts.InputManager)
---
-local char = LocalPlayer.Character
-local HumanoidRootPart: BasePart = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
-local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
-local Role: StringValue = Utils.Instance.FindFirstChild(char, "Role")
-local AnimationTransitionTime = Utils.Instance.FindFirstChild(char, "PlayerAttributes.AnimationTransitionTime")
-local playersFolder = workspace.Players
---
-local PlayerAttributeScripts = char.PlayerAttributeScripts
 
-local SpeedManager = require(PlayerAttributeScripts.SpeedManager)
-local FOVManager = require(PlayerAttributeScripts.FOVManager)
---
+local playersFolder = workspace.Players
+
 local FootstepPlayer = require(LocalPlayer.PlayerScripts.Miscellaneous.FootstepPlayer)
---
-local SprintValue = char.PlayerAttributes.Sprinting
---
+
 local FactorName = "Sprint"
---
-local MaxStamina = char.PlayerAttributes.MaxStamina
-local StaminaDrainRate = char.PlayerAttributes.StaminaDrain --10
-local StaminaRegenRate = char.PlayerAttributes.StaminaGain --30
-local StaminaValue = char.PlayerAttributes.Stamina
+
 local RecoverDelay = 0.75
 local RecoverExhaustionDelay = 2
 
 local FOVFactorName = "Sprint"
 local SprintFOVMultiplier = 1.2
---
+
 local MovementAnimSpeedDiv = 30
---
+
 function Sprinting:ReloadAnimation(animId: string)
 	if self.FootstepConnection then
 		self.FootstepConnection:Disconnect()
 	end
-	self.SprintTrack = Utils.Character.LoadAnimationFromID(char, animId)
+	self.SprintTrack = Utils.Character.LoadAnimationFromID(self.Char, animId)
 	self.FootstepConnection = self.SprintTrack:GetMarkerReachedSignal("Footstep"):Connect(function()
-		FootstepPlayer:PlayFootstep(LocalPlayer, HumanoidRootPart)
+		FootstepPlayer:PlayFootstep(LocalPlayer, self.HRP)
 	end)
 end
 
 function Sprinting:_Stop(StopExhausted: boolean)
-	FOVManager:RemoveFOVFactor(FOVFactorName)
+	self.FOVManager:RemoveFOVFactor(FOVFactorName)
 	self.Recovering = true
 
 	if self.SprintTrack and self.SprintTrack.IsPlaying then
-		self.SprintTrack:Stop(AnimationTransitionTime.Value)
+		self.SprintTrack:Stop(self.AnimationTransitionTime.Value)
 	end
 
 	if StopExhausted then
@@ -88,12 +73,12 @@ function Sprinting:_Stop(StopExhausted: boolean)
 end
 
 function Sprinting:_DrainStamina(delta: number)
-	self.Stamina -= StaminaDrainRate.Value * delta
+	self.Stamina -= self.StaminaDrainRate.Value * delta
 end
 
 function Sprinting:_GainStaminaLegally(delta: number)
-	if not self.Recovering and not self.Exhausted and self.Stamina <= MaxStamina.Value then
-		self.Stamina = math.clamp(self.Stamina + StaminaRegenRate.Value * delta, 0, MaxStamina.Value)
+	if not self.Recovering and not self.Exhausted and self.Stamina <= self.MaxStamina.Value then
+		self.Stamina = math.clamp(self.Stamina + self.StaminaRegenRate.Value * delta, 0, self.MaxStamina.Value)
 	end
 end
 
@@ -102,22 +87,47 @@ function Sprinting:Init()
 		repeat task.wait()
 		until InputManager.DefaultActions and InputManager.DefaultActions.Sprint
 	end
+	
+	local char = LocalPlayer.Character
+	local HumanoidRootPart: BasePart = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
+	local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
+
+	self.Char = char
+
+	self.Janitor = Janitor.new()
+	self.Janitor:LinkToInstance(char)
+
+	self.AnimationTransitionTime = Utils.Instance.FindFirstChild(char, "PlayerAttributes.AnimationTransitionTime")
+
+	local PlayerAttributeScripts = char.PlayerAttributeScripts
+	local SpeedManager = require(PlayerAttributeScripts.SpeedManager)
+	local FOVManager = require(PlayerAttributeScripts.FOVManager)
+	self.FOVManager = FOVManager
+
+	local Role = Utils.Instance.FindFirstChild(char, "Role")
+	
+	local StaminaValue = char.PlayerAttributes.Stamina
+	self.MaxStamina = char.PlayerAttributes.MaxStamina
+	self.StaminaRegenRate = char.PlayerAttributes.StaminaGain
+	self.StaminaDrainRate = char.PlayerAttributes.StaminaDrain
+	
+	local SprintValue = char.PlayerAttributes.Sprinting
 
 	SpeedManager:AddSpeedFactor(FactorName, 1)
 
-	table.insert(self.Connections, InputManager.DefaultActions.Sprint.Pressed:Connect(function()
+	self.Janitor:Add(InputManager.DefaultActions.Sprint.Pressed:Connect(function()
 		self.AttemptingSprint = true
 		if self.Exhausted then
 			self.PressingSprintWhileRecovering = true
 		end
-	end))
+	end), "Disconnect")
 
-	table.insert(self.Connections, InputManager.DefaultActions.Sprint.Released:Connect(function()
+	self.Janitor:Add(InputManager.DefaultActions.Sprint.Released:Connect(function()
 		self.AttemptingSprint = false
 		self.PressingSprintWhileRecovering = false
-	end))
+	end), "Disconnect")
 
-	table.insert(self.Connections, RunService.PreSimulation:Connect(function(delta: number)
+	self.Janitor:Add(RunService.PreSimulation:Connect(function(delta: number)
 		local DirectionOfMovement = HumanoidRootPart.CFrame:VectorToObjectSpace(HumanoidRootPart.AssemblyLinearVelocity)
 		local HumanoidDirectionOfMovement = Vector3.new(Humanoid.MoveDirection.X, 0, Humanoid.MoveDirection.Z)
 		local Moving = not HumanoidRootPart.Anchored and Humanoid.WalkSpeed > 0 and DirectionOfMovement.Magnitude > 0.1 and HumanoidDirectionOfMovement.Magnitude > 0
@@ -131,7 +141,7 @@ function Sprinting:Init()
 			end
 
 			if self.SprintTrack and not self.SprintTrack.IsPlaying then
-				self.SprintTrack:Play(AnimationTransitionTime.Value)
+				self.SprintTrack:Play(self.AnimationTransitionTime.Value)
 			end
 
 			if self.RecoveryThread then
@@ -207,27 +217,15 @@ function Sprinting:Init()
 			end
 		end
 	end))
-	
-	--why the fuck???? this just makes this script more exploitable than it already is!!!
-	-- table.insert(self.Connections, MaxStamina.Changed:Connect(function(value: number)
-	-- 	self.Stamina = value
-	-- end))
 
-	table.insert(self.Connections, char.Destroying:Connect(function()
+	self.Janitor:Add(function()
 		if self.FootstepConnection then
 			self.FootstepConnection:Disconnect()
 		end
 		if self.RecoveryThread then
 			task.cancel(self.RecoveryThread)
 		end
-		for _, connection in self.Connections do
-			if typeof(connection) == "thread" then
-				task.cancel(connection)
-				continue
-			end
-			connection:Disconnect() --ends the script's execution
-		end
-	end))
+	end, true)
 end
 
 return Sprinting

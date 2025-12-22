@@ -186,6 +186,9 @@ function Sounds.PlayTheme(ID: string | Instance, properties: {[string]: any}): (
         end
 
         ThemeTweenDurationHolder = properties.TweenTime
+        properties.TweenTime = nil
+        local Priority = properties.Priority
+        properties.Priority = nil
 
         local SoundInstance = Sounds.PlaySound(name, properties)
 
@@ -194,7 +197,7 @@ function Sounds.PlayTheme(ID: string | Instance, properties: {[string]: any}): (
                 SoundInstance.TimePosition = properties.TimePosition
             end
             
-            SoundInstance:SetAttribute("Priority", properties.Priority)
+            SoundInstance:SetAttribute("Priority", Priority)
             SoundInstance:SetAttribute("Volume", properties.Volume)
             SoundInstance:SetAttribute("ServerMade", RunService:IsServer())
         end

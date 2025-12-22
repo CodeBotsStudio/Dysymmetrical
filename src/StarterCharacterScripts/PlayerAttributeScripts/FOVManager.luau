@@ -1,19 +1,23 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Utils = require(ReplicatedStorage.Modules.Utils)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
+
+local Camera = workspace.CurrentCamera
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
 local FOVManager = {
 	FOVFactors = {},
 	DeltaMultiplier = 4, --6.5
 	CanUpdateFOV = true,
-	Conns = {},
+	Janitor = nil,
 }
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local Utils = require(ReplicatedStorage.Modules.Utils)
---
-local Camera = workspace.CurrentCamera
-local LocalPlayer = game:GetService("Players").LocalPlayer
-
 function FOVManager:Init()
-	table.insert(self.Conns, RunService.PreRender:Connect(function(delta)
+	self.Janitor = Janitor.new()
+	self.Janitor:LinkToInstance(LocalPlayer.Character)
+
+	self.Janitor:Add(RunService.PreRender:Connect(function(delta)
 		if self.CanUpdateFOV then
 			local FOV = LocalPlayer:GetAttribute("BaseFOV") or 70
 
@@ -26,12 +30,6 @@ function FOVManager:Init()
 				FOV,
 				delta * self.DeltaMultiplier
 			)
-		end
-	end))
-
-	table.insert(self.Conns, LocalPlayer.CharacterAdded:Connect(function()
-		for _, connection in self.Conns do --ends the script's execution
-			connection:Disconnect()
 		end
 	end))
 end

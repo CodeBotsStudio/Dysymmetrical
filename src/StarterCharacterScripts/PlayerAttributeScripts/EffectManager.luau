@@ -10,11 +10,12 @@ local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local EffectManager = {
     Effects = {},
-    Janitor = Janitor.new(),
+    Janitor = nil,
 }
 
 function EffectManager:Init()
     local Char = Players.LocalPlayer.Character
+    self.Janitor = Janitor.new()
     self.Janitor:LinkToInstance(Char)
 
     --visual

@@ -9,6 +9,7 @@ local totalModules = 0
 local loadTimes = {}
 
 local function InitModule(Module: ModuleScript)
+    debug.setmemorycategory(Module.Name)
     local Scr = require(Module)
     if typeof(Scr) == "table" and typeof(Scr.Init) == "function" then
         Scr:Init()
@@ -36,6 +37,7 @@ task.spawn(function()
             pcall(InitModule, Module)
         end
     end
+    debug.setmemorycategory("Default")
     SSSDone = true
 end)
 

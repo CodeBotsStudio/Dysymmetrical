@@ -5,8 +5,11 @@ for _, Module in script.Parent:GetDescendants() do
 		continue
 	end
 
+	debug.setmemorycategory(Module.Name)
 	local Scr = require(Module)
 	if type(Scr) == "table" and Scr["Init"] and type(Scr["Init"]) == "function" then
 		Scr:Init()
 	end
 end
+
+debug.setmemorycategory("Default")
