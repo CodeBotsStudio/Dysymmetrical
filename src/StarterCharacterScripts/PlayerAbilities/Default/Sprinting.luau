@@ -90,6 +90,7 @@ function Sprinting:Init()
 	
 	local char = LocalPlayer.Character
 	local HumanoidRootPart: BasePart = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
+	self.HRP = HumanoidRootPart
 	local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
 
 	self.Char = char
