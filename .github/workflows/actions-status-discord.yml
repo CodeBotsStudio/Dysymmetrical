@@ -21,3 +21,5 @@ jobs:
 
           title: "Dysymmetrical Activity Notification"
           color: 0x999999
+
+          noprefix: true
