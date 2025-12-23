@@ -13,31 +13,11 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: tristanbudd/discord-commit-github-action@master
+      - uses: sarisia/actions-status-discord@v1.15.5
         with:
-          webhook-url: ${{ secrets.WEBHOOK_URL }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          webhook: ${{ secrets.WEBHOOK_URL }}
 
-          # Remove the '#' prepending property lines to enable/disable them
-          # All boolean properties (true/false) must be wrapped in quotes
+          url: "https://github.com/CodeBotsStudio/Dysymmetrical"
 
-          # text-content: "" # Message displayed above the embed
-          embed-title: "Dysymmetrical Activity Notification" # Title/heading for the embed
-          # embed-description: "" # Description/body for the embed
-          embed-colour: "#999999" # Border color for the embed in hexadecimal, prefixed by a "#" within the string
-          # embed-author-name: "" # Author splash text for the embed
-          # embed-author-icon-url: "" # Link-to-an-image-asset-from-github-repo, in raw format
-          # embed-author-url: "" # A link to the home of the repositroy itself
-          # embed-thumbnail-url: "" # Link-to-an-image-asset-from-github-repo, in raw format
-          # embed-image-url: "" # Link-to-an-image-asset-from-github-repo, in raw format
-          # embed-footer-text: "" # Embed footer, little blurb of text that appears near the bottom of the embed
-          # embed-footer-icon-url: "" # Similar to other image asset, appears on the bottom-left of the embed
-          # embed-footer-timestamp: "" # "true" or "false", yes, in quotes.
-          # show-commit-message: "" # Whether or not to show the commit message, I'd keep this at true
-          # colour-changes: "true" # Uncertain
-          show-changed-files: "true" # Whether or not to show what files were changed
-          # show-commit-branch: "false" # Whether or not to specify what branch was changed
-          show-commit-author: "true" # Whether or not to show who made the commit
-          show-commit-link: "false" # Whether or not to display a link to the commit itself
+          title: "Dysymmetrical Activity Notification"
+          color: 0x999999
