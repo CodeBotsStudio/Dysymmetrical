@@ -21,7 +21,6 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - uses: sarisia/actions-status-discord@v1.15.5
-        if: always()
         with:
           webhook: ${{ secrets.WEBHOOK_URL }}
           url: "https://github.com/CodeBotsStudio/Dysymmetrical"
@@ -30,4 +29,4 @@ jobs:
           description: ${{ env.COMMIT_LIST }}
             
           color: 0x999999
-          noprefix: true
+          nodetail: true
