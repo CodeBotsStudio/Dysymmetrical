@@ -17,20 +17,17 @@ jobs:
         if: github.event_name == 'push'
         run: |
           echo "COMMIT_LIST<<EOF" >> $GITHUB_ENV
-          jq -r '.commits[] | "• \(.message | split("\n")[0]) - **\(.author.name)**"' "$GITHUB_EVENT_PATH" >> $GITHUB_ENV
+          jq -r '.commits[] | "[`\(.id | .[0:7])`](\(.url)) \(.message | split("\n")[0])"' "$GITHUB_EVENT_PATH" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - uses: sarisia/actions-status-discord@v1.15.5
-        if: always() # Ensures notification sends even if previous steps fail
+        if: always()
         with:
           webhook: ${{ secrets.WEBHOOK_URL }}
           url: "https://github.com/CodeBotsStudio/Dysymmetrical"
           title: "Dysymmetrical Activity Notification"
           
-          description: |
-            ${{ env.COMMIT_LIST }}
-            
-            [View Changes](${{ github.event.compare }})
+          description: ${{ env.COMMIT_LIST }}
             
           color: 0x999999
           noprefix: true
