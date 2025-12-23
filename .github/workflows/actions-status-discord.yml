@@ -13,25 +13,28 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate Commit List
-        id: commits
         if: github.event_name == 'push'
         run: |
           echo "COMMIT_LIST<<EOF" >> $GITHUB_ENV
           
-          jq -r '
-            .commits[] | 
-            (
-              "[`" + (.id | .[0:7]) + "`](" + .url + ") " + (.message | split("\n")[0]) + " - [**" + .author.name + "**](https://github.com/" + .author.username + ")\n" +
-              
-              (if (.added | length) > 0 then "**Added:** " + (.added | join(", ")) + "\n" else "" end) +
-              
-              (if (.modified | length) > 0 then "**Modified:** " + (.modified | join(", ")) + "\n" else "" end) +
-              
-              (if (.removed | length) > 0 then "**Removed:** " + (.removed | join(", ")) + "\n" else "" end) +
-              
-              "\n" 
-            )
-          ' "$GITHUB_EVENT_PATH" >> $GITHUB_ENV
+          for commit in $(jq -r '.commits[].id' "$GITHUB_EVENT_PATH"); do
+            short=$(echo "$commit" | cut -c1-7)
+            msg=$(git log -1 --pretty=%s "$commit")
+            author=$(git log -1 --pretty=%an "$commit")
+            url="https://github.com/${{ github.repository }}/commit/$commit"
+          
+            echo "[\`$short\`]($url) $msg - **$author**" >> $GITHUB_ENV
+          
+            files=$(git diff-tree --no-commit-id --name-status -r "$commit")
+          
+            if [ -n "$files" ]; then
+              echo '```diff' >> $GITHUB_ENV
+              echo "$files" >> $GITHUB_ENV
+              echo '```' >> $GITHUB_ENV
+            fi
+          
+            echo "" >> $GITHUB_ENV
+          done
           
           echo "EOF" >> $GITHUB_ENV
 
