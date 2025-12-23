@@ -17,7 +17,22 @@ jobs:
         if: github.event_name == 'push'
         run: |
           echo "COMMIT_LIST<<EOF" >> $GITHUB_ENV
-          jq -r '.commits[] | "[`\(.id | .[0:7])`](\(.url)) \(.message | split("\n")[0]) - [**\(.author.name)**](https://github.com/\(.author.username))"' "$GITHUB_EVENT_PATH" >> $GITHUB_ENV
+          
+          jq -r '
+            .commits[] | 
+            (
+              "[`" + (.id | .[0:7]) + "`](" + .url + ") " + (.message | split("\n")[0]) + " - [**" + .author.name + "**](https://github.com/" + .author.username + ")\n" +
+              
+              (if (.added | length) > 0 then "**Added:** " + (.added | join(", ")) + "\n" else "" end) +
+              
+              (if (.modified | length) > 0 then "**Modified:** " + (.modified | join(", ")) + "\n" else "" end) +
+              
+              (if (.removed | length) > 0 then "**Removed:** " + (.removed | join(", ")) + "\n" else "" end) +
+              
+              "\n" 
+            )
+          ' "$GITHUB_EVENT_PATH" >> $GITHUB_ENV
+          
           echo "EOF" >> $GITHUB_ENV
 
       - uses: sarisia/actions-status-discord@v1.15.5
