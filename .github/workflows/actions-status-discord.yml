@@ -56,7 +56,6 @@ jobs:
           description: |
             **Commit List**
             ${{ env.COMMIT_LIST }}
-
             **Branch**
             ${{ github.ref_name }}
             
