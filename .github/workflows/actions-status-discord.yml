@@ -24,9 +24,10 @@ jobs:
             msg=$(git log -1 --pretty=%s "$commit")
             author=$(git log -1 --pretty=%an "$commit")
             url="https://github.com/${{ github.repository }}/commit/$commit"
-          
-            echo "[\`$short\`]($url) $msg - **$author**" >> $GITHUB_ENV
-          
+            author_url="https://github.com/$author"
+
+            echo "[\`$short\`]($url) $msg - [**$author**]($author_url)" >> $GITHUB_ENV
+
             files=$(git diff-tree --no-commit-id --name-status -r "$commit" | awk '
               {
                 if ($1 ~ /^A/) print "Added: " $2
@@ -37,7 +38,7 @@ jobs:
             ')
           
             if [ -n "$files" ]; then
-              echo '```diff' >> $GITHUB_ENV
+              echo '```' >> $GITHUB_ENV
               echo "$files" >> $GITHUB_ENV
               echo '```' >> $GITHUB_ENV
             fi
