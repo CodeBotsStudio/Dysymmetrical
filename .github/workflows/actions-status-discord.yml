@@ -17,16 +17,23 @@ jobs:
         if: github.event_name == 'push'
         run: |
           echo "COMMIT_LIST<<EOF" >> $GITHUB_ENV
-          jq -r '.commits[] | "[`\(.id | .[0:7])`](\(.url)) \(.message | split("\n")[0])"' "$GITHUB_EVENT_PATH" >> $GITHUB_ENV
+          jq -r '.commits[] | "[`\(.id | .[0:7])`](\(.url)) \(.message | split("\n")[0]) - **\(.author.name)**"' "$GITHUB_EVENT_PATH" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - uses: sarisia/actions-status-discord@v1.15.5
+        # this is not useful to me!
+        # if: always()
         with:
           webhook: ${{ secrets.WEBHOOK_URL }}
           url: "https://github.com/CodeBotsStudio/Dysymmetrical"
           title: "Dysymmetrical Activity Notification"
           
-          description: ${{ env.COMMIT_LIST }}
+          description: |
+            **Commit List**
+            ${{ env.COMMIT_LIST }}
+
+            **Branch**
+            ${{ github.ref_name }}
             
           color: 0x999999
-          nodetail: true
+          noprefix: true
