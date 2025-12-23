@@ -12,7 +12,7 @@ end
 --- Makes a copy of an entire table.
 function TypeUtils.CopyTable<T>(CloneThis: T & {}) : T & {}
 	local MetaTable = getmetatable(CloneThis)
-	local NewTable = (MetaTable and setmetatable({}, MetaTable :: {}?) or {}) :: typeof(CloneThis)
+	local NewTable = (MetaTable and setmetatable({}, MetaTable) or {}) :: typeof(CloneThis)
 
 	for Key, Value in CloneThis do
 		if typeof(Value) == "table" then
