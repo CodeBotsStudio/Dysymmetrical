@@ -18,7 +18,7 @@ local HitmarkerFolder = workspace.TempObjectFolders.Hitmarkers
 
 local SoundGroup: SoundGroup = SoundService.SoundGroups.Master.UI
 
-function HitmarkerCreator:ShowHitmarker(position: Vector3, dmgAmount: number, playSound: boolean?)
+function HitmarkerCreator.ShowHitmarker(position: Vector3, dmgAmount: number, playSound: boolean?)
 	playSound = playSound or true
 
 	local Hitmarker = HitmarkerPrefab:Clone()

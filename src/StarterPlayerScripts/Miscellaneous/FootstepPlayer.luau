@@ -11,10 +11,10 @@ local FootstepPlayer = {
 	ControlledCharacters = {},
 }
 
-function FootstepPlayer:PlayFootstep(player: Player, Anchor: BasePart)
+function FootstepPlayer.PlayFootstep(player: Player, Anchor: BasePart)
 	if Anchor:FindFirstChildOfClass("LinearVelocity") or Anchor.Parent:GetAttribute("Emoting") then return end
 	
-	Sounds.PlaySound(self.ControlledCharacters[player.UserId] or self.DefaultSFXID, {
+	Sounds.PlaySound(FootstepPlayer.ControlledCharacters[player.UserId] or FootstepPlayer.DefaultSFXID, {
 		MinPitch = 0.9,
 		MaxPitch = 1.05,
 	}, {
@@ -22,7 +22,7 @@ function FootstepPlayer:PlayFootstep(player: Player, Anchor: BasePart)
 	})
 end
 
-function FootstepPlayer:_SetupChar(player: Player, character: Model)
+function FootstepPlayer._SetupChar(player: Player, character: Model)
 	local HRP = Utils.Instance.FindFirstChild(character, "HumanoidRootPart")
 	if not HRP then
 		return
@@ -35,7 +35,7 @@ function FootstepPlayer:_SetupChar(player: Player, character: Model)
 	if character:GetAttribute("CharacterName") then
 		local CharModule = require(Utils.Instance.GetCharacterModule(character.Role.Value, character:GetAttribute("CharacterName"), character:GetAttribute("CharacterSkinName")))
 		if CharModule.Config.Sounds.FootstepSounds then
-			self.ControlledCharacters[player.UserId] = CharModule.Config.Sounds.FootstepSounds
+			FootstepPlayer.ControlledCharacters[player.UserId] = CharModule.Config.Sounds.FootstepSounds
 		end
 	end
 
@@ -44,7 +44,7 @@ function FootstepPlayer:_SetupChar(player: Player, character: Model)
 			if (character.PlayerAttributes.Sprinting and character.PlayerAttributes.Sprinting.Value) or Humanoid.FloorMaterial == Enum.Material.Air or HRP.Anchored then
 				return
 			end
-			self:PlayFootstep(player, HRP)
+			FootstepPlayer.PlayFootstep(player, HRP)
 		end)
 	end)
 end
@@ -52,12 +52,12 @@ end
 function FootstepPlayer:Init()
 	Utils.Player.ObservePlayers(function(plr: Player)
 		Utils.Character.ObserveCharacter(plr, function(newChar: Model)
-			self:_SetupChar(plr, newChar)
+			FootstepPlayer._SetupChar(plr, newChar)
 		end)
 	end)
 	Players.PlayerRemoving:Connect(function(plr: Player)
-		if self.ControlledCharacters[plr.UserId] then
-			self.ControlledCharacters[plr.UserId] = nil
+		if FootstepPlayer.ControlledCharacters[plr.UserId] then
+			FootstepPlayer.ControlledCharacters[plr.UserId] = nil
 		end
 	end)
 end

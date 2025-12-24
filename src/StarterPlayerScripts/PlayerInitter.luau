@@ -14,8 +14,6 @@ function PlayerInitter:Init()
         return
     end
 
-    debug.setmemorycategory("PlayerScriptLoader")
-
     self.Initting = true
 
     Player:SetAttribute("BaseFOV", 70)

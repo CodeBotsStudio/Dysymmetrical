@@ -17,12 +17,12 @@ function QueryHitboxVisibility:Init()
             return
         end
         Utils.Character.ObserveCharacter(Player, function(char: Model)
-            self:_CharSetup(char)
+            self._CharSetup(char)
         end)
     end)
 end
 
-function QueryHitboxVisibility:_CharSetup(char: Model)
+function QueryHitboxVisibility._CharSetup(char: Model)
     task.defer(function()
         if not Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Advanced.ShowPlayerHitboxes") then
             return

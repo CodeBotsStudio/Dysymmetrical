@@ -18,7 +18,7 @@ end
 --- Sets up a player's character specified by its name, its type, and a possible skin.
 --- Can also take a `CFrame` parameter to pivot the character there.
 function ServerCharacterManager:SetupCharacter(player: Player, charName: string, charType: "Survivor" | "Killer", skinName: string?, cf: CFrame?)
-    local Char: Model = PlayerManager:_RespawnPlayer(player, charName, charType, skinName)
+    local Char: Model = PlayerManager._RespawnPlayer(player, charName, charType, skinName)
     if cf then
         Char:PivotTo(cf)
     end

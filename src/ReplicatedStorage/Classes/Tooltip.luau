@@ -54,8 +54,6 @@ function TooltipClass.New(Text: string)
         Tooltip.Title.Text = Text
         Tooltip.Title.Position = UDim2.fromOffset(InitialMousePos.X, InitialMousePos.Y - 30)
         Tooltip.Background.Position = UDim2.fromOffset(InitialMousePos.X, InitialMousePos.Y - 30 - Tooltip.Title.AbsoluteSize.Y + 40)
-        Tooltip.Title.Size = UDim2.fromOffset(Tooltip.Title.AbsoluteSize.X + 64, Tooltip.Title.AbsoluteSize.Y + 50)
-        Tooltip.Background.Size = UDim2.fromOffset(Tooltip.Title.AbsoluteSize.X + 64, Tooltip.Title.AbsoluteSize.Y + 50)
         Tooltip.Parent = UI
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
         task.spawn(function()

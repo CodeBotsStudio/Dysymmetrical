@@ -33,14 +33,21 @@ function PlayerManager:Init()
 
 	if #game.PrivateServerId > 0 then
 		table.insert(CommonFunctions.AdminPerms, {
-			Name = Players:GetPlayerByUserId(game.PrivateServerOwnerId),
+			Name = Players:GetPlayerByUserId(game.PrivateServerOwnerId).Name,
 			UserId = game.PrivateServerOwnerId,
 			Rank = "ServerOwner",
 		})
-		print(CommonFunctions.AdminPerms)
 	end
 
 	Utils.Player.ObservePlayers(function(plr: Player)
+		if RunService:IsStudio() then
+			table.insert(CommonFunctions.AdminPerms, {
+				Name = plr.Name,
+				UserId = plr.UserId,
+				Rank = "Owner",
+			})
+		end
+
 		Utils.Character.ObserveCharacter(plr, function(char)
 			AntiFly:_SetupCharacter(plr, char)
 			
@@ -57,7 +64,7 @@ function PlayerManager:Init()
 
 			local KillerValue
 			if Role.Value ~= "Spectator" then
-				self:_SetupHitboxes(char)
+				PlayerManager._SetupHitboxes(char)
 
 				local CollisionGroup = Role.Value
 
@@ -147,14 +154,14 @@ function PlayerManager:Init()
 				end
 				
         	    threads[plr.UserId] = task.delay(3, function()
-					self:_RespawnPlayer(plr)
+					PlayerManager._RespawnPlayer(plr)
         	        threads[plr.UserId] = nil
         	    end)
         	end)
 		end)
 
 		task.delay(2, function()
-			self:_RespawnPlayer(plr)
+			PlayerManager._RespawnPlayer(plr)
 		end)
 		
 		task.defer(function()
@@ -191,12 +198,12 @@ function PlayerManager:Init()
 	end)
 
     Network:SetConnection("CancelAutoRespawn", "REMOTE_EVENT", function(plr: Player)
-        self:CancelAutoRespawn(plr)
+        PlayerManager.CancelAutoRespawn(plr)
     end)
 end
 
 --- Cancels a player's automatic respawn if they died.
-function PlayerManager:CancelAutoRespawn(plr: Player)
+function PlayerManager.CancelAutoRespawn(plr: Player)
     if threads[plr.UserId] then
 		pcall(function()
         	task.cancel(threads[plr.UserId])
@@ -206,7 +213,7 @@ function PlayerManager:CancelAutoRespawn(plr: Player)
 end
 
 --- Internal: Creates all hitboxes available for a character.
-function PlayerManager:_SetupHitboxes(Character)
+function PlayerManager._SetupHitboxes(Character)
 	local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
 	local HumanoidRootPart = Humanoid.RootPart
 	local HitboxFolder = Instance.new("Folder")
@@ -234,8 +241,8 @@ function PlayerManager:_SetupHitboxes(Character)
 end
 
 --- Internal: Respawns a player with a possibility to add a custom character rig from `ServerStorage.Assets.Characters`.
-function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("Killer" | "Survivor")?, skinName: string?) --: Model
-	self:CancelAutoRespawn(plr)
+function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("Killer" | "Survivor")?, skinName: string?) --: Model
+	PlayerManager.CancelAutoRespawn(plr)
 	if plr.Character then
 		plr.Character:Destroy()
 	end
@@ -290,7 +297,7 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	FindChar("ReplicatedStorage", RigName, RigType, skinName)
 
 	if not char then
-		warn("[PlayerManager:_RespawnPlayer()]: Can't find character rig! Loading player character instead...")
+		warn("[PlayerManager._RespawnPlayer()]: Can't find character rig! Loading player character instead...")
 		warn(debug.traceback())
 
 		return LoadEmpty()
@@ -319,7 +326,7 @@ function PlayerManager:_RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	char.Parent = PlayerFolder
 
 	--failsafe
-	self:CancelAutoRespawn(plr)
+	PlayerManager.CancelAutoRespawn(plr)
 
 	Network:FireAllClientConnection("SetupLocalRagdoll", "REMOTE_EVENT", plr)
 

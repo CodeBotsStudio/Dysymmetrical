@@ -23,13 +23,13 @@ local AnimLoadPrevented = {
 function CharManager:Init()
     Utils.Character.ObserveCharacter(LocalPlayer, function(Char: Model)
         if Utils.Instance.FindFirstChild(Char, "Role").Value ~= "Spectator" then
-            self:LoadCharacter(Char:GetAttribute("CharacterName"), Char.Role.Value, Char:GetAttribute("CharacterSkinName"))
+            CharManager.LoadCharacter(Char:GetAttribute("CharacterName"), Char.Role.Value, Char:GetAttribute("CharacterSkinName"))
         end
     end)
 end
 
 --- Initializes a character's client abilities.
-function CharManager:_InitCharacterAbilities(Module)
+function CharManager._InitCharacterAbilities(Module)
     local CharacterAbilities = require(LocalPlayer.Character.PlayerAbilities.CharacterAbilities)
 
     CharacterAbilities.CharacterModule = Module
@@ -63,7 +63,7 @@ function CharManager:_InitCharacterAbilities(Module)
 end
 
 --- Loads a specific character's client stuff. The character itself is spawned in in `ServerScriptService.Managers.ServerCharacterManager`.
-function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Killer", skinName: string?)
+function CharManager.LoadCharacter(charName: string, charType: "Survivor" | "Killer", skinName: string?)
     task.delay(5, function()
         StarterGui:SetCore("ResetButtonCallback", true)
     end)
@@ -93,7 +93,7 @@ function CharManager:LoadCharacter(charName: string, charType: "Survivor" | "Kil
         end
     end)
 
-    local CharacterAbilities = self:_InitCharacterAbilities(CharModule)
+    local CharacterAbilities = CharManager._InitCharacterAbilities(CharModule)
 
     Char.Effects.ChildAdded:Connect(function(newChild)
         if newChild.Name == "Stunned" then

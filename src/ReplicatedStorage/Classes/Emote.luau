@@ -29,7 +29,9 @@ export type Emote = {
     AnimationTracks: { [string]: {AnimationTrack} },
     Init: (self: Emote, owner: Player, animator: Animator) -> (),
     BaseBehaviour: (self: Emote) -> (),
-    Behaviour: (self: Emote) -> (),
+    Behaviour: ((self: Emote, character: Model) -> ())?,
+    --- Callback for when the emote stops.
+    OnStop: ((self: Emote, character: Model) -> ())?,
 
     Animator: Animator,
     HumanoidRootPart: BasePart,
@@ -86,6 +88,10 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                         self.Owner.Character:SetAttribute("Emoting", true)
 
                         Network:FireClientConnection(plr, "PlayEmote", "REMOTE_EVENT", emoteName)
+
+                        if self.Behaviour then
+                            self:Behaviour(self.Owner.Character)
+                        end
                     end
                 end))
                 self:AddConnection(Network:SetConnection("StopEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string)
@@ -96,6 +102,10 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                         self.Owner.Character:SetAttribute("Emoting", false)
 
                         Network:FireClientConnection(plr, "StopEmote", "REMOTE_EVENT", emoteName)
+                        
+                        if self.OnStop then
+                            self:OnStop(self.Owner.Character)
+                        end
                     end
                 end))
 
@@ -151,7 +161,9 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                         self.TurnToMoveDirection:AddHeadPreventionFactor("Emoting")
                     end
 
-                    self:Behaviour()
+                    if self.Behaviour then
+                        self:Behaviour(self.Owner.Character)
+                    end
                 end
             end))
 
@@ -159,10 +171,16 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                 if emoteName == self.Config.Name and self.TrackPlaying and self.TrackPlaying.Animation then
                     self.TrackPlaying.Animation:Stop(0)
                     self.SpeedManager:RemoveSpeedFactor("Emoting")
+                    
                     if self.TurnToMoveDirection.RemoveHeadPreventionFactor then
                         self.TurnToMoveDirection:RemoveHeadPreventionFactor("Emoting")
                     end
+
                     self.TrackPlaying = nil
+
+                    if self.OnStop then
+                        self:OnStop(self.Owner.Character)
+                    end
                 end
             end))
         end,
@@ -185,6 +203,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
             end
         end,
         Behaviour = function() end,
+        OnStop = nil,
 
         HumanoidRootPart = nil,
         SpeedManager = nil,

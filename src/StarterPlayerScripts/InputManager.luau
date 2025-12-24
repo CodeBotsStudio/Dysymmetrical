@@ -39,7 +39,7 @@ local InputManager = {
     SchemeChanged = Signal.new(),
 }
 
-function InputManager:_SetupKeybind(key: Key)
+function InputManager._SetupKeybind(key: Key)
     key.Pressed = Signal.new()
     key.Released = Signal.new()
 
@@ -87,7 +87,7 @@ end
 
 function InputManager:Init()
     --DEFAULT ACTIONS--
-    InputManager:_SetupKeybind({
+    InputManager._SetupKeybind({
         Name = "Sprint",
         Subgroup = "DefaultActions",
 
@@ -96,7 +96,7 @@ function InputManager:Init()
         KeyboardKey = Enum.KeyCode.LeftShift,
         GamepadKey = Enum.KeyCode.ButtonL2,
     })
-    InputManager:_SetupKeybind({
+    InputManager._SetupKeybind({
         Name = "FirstAbility",
         Subgroup = "DefaultActions",
 
@@ -105,7 +105,7 @@ function InputManager:Init()
         KeyboardKey = Enum.KeyCode.Q,
         GamepadKey = Enum.KeyCode.ButtonL1,
     })
-    InputManager:_SetupKeybind({
+    InputManager._SetupKeybind({
         Name = "SecondAbility",
         Subgroup = "DefaultActions",
 
@@ -114,7 +114,7 @@ function InputManager:Init()
         KeyboardKey = Enum.KeyCode.E,
         GamepadKey = Enum.KeyCode.ButtonR1,
     })
-    InputManager:_SetupKeybind({
+    InputManager._SetupKeybind({
         Name = "ThirdAbility",
         Subgroup = "DefaultActions",
 
@@ -134,7 +134,7 @@ function InputManager:Init()
     })
 
     --KILLER--
-    InputManager:_SetupKeybind({
+    InputManager._SetupKeybind({
         Name = "Slash",
         Subgroup = "DefaultActions",
 
@@ -146,7 +146,7 @@ function InputManager:Init()
     })
 
     --MISC--
-    InputManager:_SetupKeybind({
+    InputManager._SetupKeybind({
         Name = "EmotePanel",
         Subgroup = "Miscellaneous",
 
@@ -155,7 +155,7 @@ function InputManager:Init()
         KeyboardKey = Enum.KeyCode.G,
         GamepadKey = Enum.KeyCode.DPadDown,
     })
-    InputManager:_SetupKeybind({
+    InputManager._SetupKeybind({
         Name = "StopEmote",
         Subgroup = "Miscellaneous",
 
@@ -165,7 +165,7 @@ function InputManager:Init()
         GamepadKey = Enum.KeyCode.ButtonA,
     })
 
-    InputManager:_SetupKeybind({
+    InputManager._SetupKeybind({
         Name = "TogglePlayerList",
         Subgroup = "Miscellaneous",
 
