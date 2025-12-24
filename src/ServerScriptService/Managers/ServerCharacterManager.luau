@@ -17,7 +17,7 @@ end
 
 --- Sets up a player's character specified by its name, its type, and a possible skin.
 --- Can also take a `CFrame` parameter to pivot the character there.
-function ServerCharacterManager:SetupCharacter(player: Player, charName: string, charType: "Survivor" | "Killer", skinName: string?, cf: CFrame?)
+function ServerCharacterManager.SetupCharacter(player: Player, charName: string, charType: "Survivor" | "Killer", skinName: string?, cf: CFrame?)
     local Char: Model = PlayerManager._RespawnPlayer(player, charName, charType, skinName)
     if cf then
         Char:PivotTo(cf)
@@ -34,13 +34,13 @@ function ServerCharacterManager:SetupCharacter(player: Player, charName: string,
         return Char
     end
 
-    self:_InitCharacter(player, Utils.Instance.GetCharacterModule(charType, charName, skinName))
+    ServerCharacterManager._InitCharacter(player, Utils.Instance.GetCharacterModule(charType, charName, skinName))
 
     return Char
 end
 
 --- Inits a character's abilities and sets its properties accordingly as specified in its `GameplayConfig`.
-function ServerCharacterManager:_InitCharacter(player: Player, charModule: ModuleScript)
+function ServerCharacterManager._InitCharacter(player: Player, charModule: ModuleScript)
     local module = Utils.Type.CopyTable(require(charModule))
     module.Owner = player
 
@@ -54,7 +54,7 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
     Animate.walk.WalkAnim.AnimationId = module.Config.AnimationIDs.WalkAnimation
     Animate.run.RunAnim.AnimationId = module.Config.AnimationIDs.RunAnimation
 
-    local Humanoid = Utils.Instance.FindFirstChild(Char, "Humanoid")
+    local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
     Humanoid.MaxHealth = module.GameplayConfig.Health
     Humanoid.Health = module.GameplayConfig.Health
     Humanoid.JumpPower = 0
@@ -63,88 +63,97 @@ function ServerCharacterManager:_InitCharacter(player: Player, charModule: Modul
     Utils.Misc.PreloadAssets(module.Config)
 
     for name, value in module.GameplayConfig.StaminaProperties do
-        Char.PlayerAttributes:FindFirstChild(name).Value = value
+        local Property = Char.PlayerAttributes:FindFirstChild(name)
+        if not Property then
+            continue
+        end
+
+        Property.Value = value
     end
 
     for _, Ability in module.GameplayConfig.Abilities do
-        if Ability.Init then
-            Ability:Init(module, player)
-        end
+        Ability:Init(module, player)
         CharacterAbilities.Abilities[Ability] = Ability
-    end
-
-    if module.OnInit then
-        module:OnInit(Char)
     end
 
     task.defer(function()
         -- loading all execution animations
         task.defer(function()
-            for N, s in module.Config.AnimationIDs do
-                if not N:lower():find("execution") then
+            for rootName, _ in module.Config.AnimationIDs do
+                if not rootName:lower():find("execution") then
                     continue
                 end
 
-                module.GameplayConfig.Cache.Animations[N] = {}
+                module.GameplayConfig.Cache.Animations[rootName] = {}
 
-                for name, anims in module.Config.AnimationIDs[N] do
-                    module.GameplayConfig.Cache.Animations[N][name] = {}
-                    for n, anim in anims do
-                        if n:lower() ~= "killer" then
+                for name, anims in module.Config.AnimationIDs[rootName] do
+                    module.GameplayConfig.Cache.Animations[rootName][name] = {}
+                    for animName, anim in anims do
+                        if animName:lower() ~= "killer" then
                             continue
                         end
 
-                        module.GameplayConfig.Cache.Animations[N][name][n] = Utils.Character.LoadAnimationFromID(Char, anim)
+                        module.GameplayConfig.Cache.Animations[rootName][name][animName] = Utils.Character.LoadAnimationFromID(Char, anim)
                     end
                 end
             end
         end)
 
-        if module.Config.Voicelines then
-            local Primary = Char.PrimaryPart or Char:FindFirstChild("HumanoidRootPart")
-            if not Primary then
+        if not module.Config.Voicelines then
+            return
+        end
+
+        local Primary = Char.PrimaryPart or Char:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
+        if not Primary then
+            return
+        end
+
+        local VoicelineJanitor = Janitor.new()
+        VoicelineJanitor:LinkToInstance(Char)
+
+        if module.Config.Voicelines.Stunned then
+            Char.Effects.ChildAdded:Connect(function(newChild)
+                if newChild.Name == "Stunned" then
+                    Sounds.PlayVoiceline(Char, module.Config.Voicelines.Stunned)
+                end
+            end)
+        end
+
+        task.defer(function()
+            if not module.Config.Voicelines.Idle then
                 return
             end
 
-            local VoicelineJanitor = Janitor.new()
-            VoicelineJanitor:LinkToInstance(Char)
-
-            if module.Config.Voicelines.Stunned then
-                Char.Effects.ChildAdded:Connect(function(newChild)
-                    if newChild.Name == "Stunned" then
-                        Sounds.PlayVoiceline(Char, module.Config.Voicelines.Stunned)
-                    end
-                end)
-            end
-
-            if module.Config.Voicelines.Idle then
-                task.defer(function()
-                    task.wait(math.random(10, 25))
-                    while player.Character and Char and player.Character == Char and Primary do
-                        if module.Config.Voicelines.Idle then
-                            Sounds.PlayVoiceline(Char, module.Config.Voicelines.Idle, {
-                                Priority = 0,
-                            })
-                        end
-                        task.wait(math.random(10, 25))
-                    end
-                end)
-            end
-
-            if module.Config.Voicelines.LMS then
-                VoicelineJanitor:Add(Network:SetConnection("LMSVoiceline", "BINDABLE_EVENT", function(LastMan: Player)
-                    local Voiceline =
-                        module.Config.Voicelines.LMS[LastMan:GetAttribute("CharacterSkinName") and LastMan:GetAttribute("CharacterSkinName")..LastMan:GetAttribute("CharacterName") or LastMan:GetAttribute("CharacterName")]
-                        or module.Config.Voicelines.LMS["Default"]
-                        or module.Config.Voicelines.LMS
-
-                    Sounds.PlayVoiceline(Char, Voiceline, {
-                        Priority = 999,
+            task.wait(math.random(10, 25))
+            while player.Character and Char and player.Character == Char and Primary do
+                if module.Config.Voicelines.Idle then
+                    Sounds.PlayVoiceline(Char, module.Config.Voicelines.Idle, {
+                        Priority = 0,
                     })
-                end))
+                end
+                task.wait(math.random(10, 25))
             end
+        end)
+
+        if not module.Config.Voicelines.LMS then
+            return
         end
+
+        VoicelineJanitor:Add(Network:SetConnection("LMSVoiceline", "BINDABLE_EVENT", function(LastMan: Player)
+            local Voiceline =
+                module.Config.Voicelines.LMS[LastMan:GetAttribute("CharacterSkinName") and LastMan:GetAttribute("CharacterSkinName")..LastMan:GetAttribute("CharacterName") or LastMan:GetAttribute("CharacterName")]
+                or module.Config.Voicelines.LMS["Default"]
+                or module.Config.Voicelines.LMS
+
+            Sounds.PlayVoiceline(Char, Voiceline, {
+                Priority = 999,
+            })
+        end))
     end)
+
+    if module.OnInit then
+        module:OnInit(Char)
+    end
 end
 
 return ServerCharacterManager

@@ -14,14 +14,17 @@ local Rand = Random.new()
 function MapManager:Init()
     self.MapPrefabs = ServerStorage.Maps:GetChildren()
 
-    for _, Map in self.MapPrefabs do
-        if not Map:IsA("Folder") and not Map:IsA("Model") then
-            table.remove(self.MapPrefabs, table.find(self.MapPrefabs, Map))
-        end
-    end
+    -- iterating backwards to not have to do `table.find()` every single time i want to remove a map from the table
+	for i = #self.MapPrefabs, 1, -1 do
+		local Map = self.MapPrefabs[i]
+		if not Map:IsA("Folder") and not Map:IsA("Model") then
+			table.remove(self.MapPrefabs, i)
+		end
+	end
 
-    self.CurrentMap = nil
-    self.LastMap = nil
+    -- this was fucking useless -dys
+    -- self.CurrentMap = nil
+    -- self.LastMap = nil
 end
 
 --- Picks a random map from `ServerStorage.Assets.Maps` and inits everything related to it, setting it as `Map` in `workspace`.
@@ -30,9 +33,10 @@ function MapManager:GetRandomMap(): Model | Folder
     --chooses a random map
     local SelectedMap = self.MapPrefabs[Rand:NextInteger(1, #self.MapPrefabs)]
     --if it's the same as the one before it chooses a different one
-    if not self.CanRepeatMap and self.LastMap and self.LastMap == SelectedMap then
-        repeat SelectedMap = self.MapPrefabs[Rand:NextInteger(1, #self.MapPrefabs)]
-        until self.LastMap ~= SelectedMap
+    if not self.CanRepeatMap and self.LastMap and #self.MapPrefabs > 1 and self.LastMap == SelectedMap then
+        while SelectedMap == SelectedMap do
+            SelectedMap = self.MapPrefabs[Rand:NextInteger(1, #self.MapPrefabs)]
+        end
     end
     --sets the "last map" as the current map for not repeating it next time
     self.LastMap = SelectedMap
@@ -70,12 +74,15 @@ function MapManager:GetRandomMap(): Model | Folder
     --i think this is used idk lol but it's useful
     self.CurrentMap = MapInstance
     
-    local Config = require(MapInstance.Config)
-    if Config.Ambience then
-        local Props = Config.AmbienceProperties or {}
-        Props.Priority = Props.Priority or 0.5
-        Props.Name = "MapAmbience"
-        Sounds.PlayTheme(Config.Ambience, Props)
+    local ConfigModule = MapInstance:FindFirstChild("Config")
+    if ConfigModule then
+        local Config = require(ConfigModule)
+        if Config.Ambience then
+            local Props = Config.AmbienceProperties or {}
+            Props.Priority = Props.Priority or 0.5
+            Props.Name = "MapAmbience"
+            Sounds.PlayTheme(Config.Ambience, Props)
+        end
     end
 
     MapInstance.Name = "Map"
@@ -89,18 +96,17 @@ function MapManager:GetRandomMap(): Model | Folder
         Sounds.StopTheme("MapAmbience")
     end)
 
-    if MapInstance:FindFirstChild("Lighting") then
-        Lighting.SetCustomLighting(MapInstance.Lighting)
+    local LightingModule = MapInstance:FindFirstChild("Lighting")
+    if LightingModule then
+        Lighting.SetCustomLighting(LightingModule)
     end
 
-    if not MapInstance:FindFirstChild("Ingame") then
-        local Ingame = Instance.new("Folder")
-        Ingame.Name = "Ingame"
-        Ingame.Parent = MapInstance
-    end
-
-    if MapInstance:FindFirstChild("Behaviour") then
-        require(MapInstance.Behaviour):Init()
+    local BehaviourModule = MapInstance:FindFirstChild("Behaviour")
+    if BehaviourModule then
+        local Behaviour = require(MapInstance.Behaviour)
+        if Behaviour.Init and typeof(Behaviour.Init) == "function" then
+            Behaviour:Init()
+        end
     end
 
     --returns the map instance for usage

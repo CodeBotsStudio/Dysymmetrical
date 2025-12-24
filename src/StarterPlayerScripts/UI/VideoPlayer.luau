@@ -35,9 +35,8 @@ function module:LoadVideo(assetids: {string})
 		table.insert(frames, label)
 		local thread = task.spawn(function()
 			--Wait until loaded
-			if not label.IsLoaded then
-				repeat task.wait()
-				until label.IsLoaded
+			while not label.IsLoaded do
+				task.wait()
 			end
 
 			label.BackgroundTransparency = 1

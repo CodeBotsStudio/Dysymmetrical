@@ -83,9 +83,8 @@ function Sprinting:_GainStaminaLegally(delta: number)
 end
 
 function Sprinting:Init()
-	if not InputManager.DefaultActions or not InputManager.DefaultActions.Sprint then
-		repeat task.wait()
-		until InputManager.DefaultActions and InputManager.DefaultActions.Sprint
+	while not (InputManager.DefaultActions and InputManager.DefaultActions.Sprint) do
+		task.wait()
 	end
 	
 	local char = LocalPlayer.Character

@@ -7,9 +7,9 @@ local Skip = Main:WaitForChild("Skip")
 
 LoadingGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
-repeat
+while not game:IsLoaded() do
     task.wait()
-until game:IsLoaded()
+end
 
 task.wait(1)
 
@@ -113,30 +113,32 @@ task.delay(10, function()
     end
 end)
 
-repeat
+while #loadedAssets < #assets - 100 or loaded do
     task.wait()
-until #loadedAssets >= #assets - 100 or loaded
+end
 
 local function InitScripts(module: ModuleScript)
     local ModuleCode = require(module)
     task.spawn(function()
         ModuleCode:Init()
     end)
-    repeat
+
+    while not ModuleCode.Loaded do
         if ModuleCode.CurrentlyInitting then
             CurrentlyInitting.Text = "Initializing "..ModuleCode.CurrentlyInitting.."..."
         else
             CurrentlyInitting.Text = ""
         end
         task.wait()
-    until ModuleCode.Loaded
+    end
 end
 
 InitScripts(game:GetService("ReplicatedStorage").Initter)
 InitScripts(game:GetService("Players").LocalPlayer.PlayerScripts.PlayerInitter)
 
-repeat task.wait()
-until workspace:GetAttribute("ServerLoaded")
+while not workspace:GetAttribute("ServerLoaded") do
+    task.wait()
+end
 
 if loaded then return end
 

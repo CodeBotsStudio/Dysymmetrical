@@ -86,8 +86,12 @@ function RoundManager.StartRound()
     end
 
     if RoundManager.CanSpawnKiller then --if one is testing survivor then the round'll never end
-        for _, killer in RoundManager.CurrentRound.Killers do
-            table.remove(RoundManager.CurrentRound.PlayersRemaining, table.find(RoundManager.CurrentRound.PlayersRemaining, killer.Player))
+        for playerIndex = #RoundManager.CurrentRound.PlayersRemaining, 1, -1 do
+            if not table.find(RoundManager.CurrentRound.Killers, RoundManager.CurrentRound.PlayersRemaining[playerIndex]) then
+                continue
+            end
+
+            table.remove(RoundManager.CurrentRound.PlayersRemaining, playerIndex)
         end
     end
     Utils.Misc.Print(RoundManager.CurrentRound.PlayersRemaining)
@@ -211,7 +215,7 @@ function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
     --respawning everyone left
     for _, Player: Player in RoundManager.CurrentRound.PlayersAccepted do
         if Player.Character and Player.Character.Role.Value ~= "Spectator" then
-            ServerCharacterManager:SetupCharacter(Player)
+            ServerCharacterManager.SetupCharacter(Player)
         end
     end
     
@@ -328,7 +332,7 @@ function RoundManager.Utils.SetupPlayer(Player: Player, KillerIndex: number)
         local EquippedKillerName = Utils.PlayerData.GetPlayerEquipped(Player, "Killer")
 
         --spawns the character
-        Char = ServerCharacterManager:SetupCharacter(Player,
+        Char = ServerCharacterManager.SetupCharacter(Player,
             EquippedKillerName,
             "Killer",
             Utils.PlayerData.GetPlayerEquipped(Player, "Skins."..EquippedKillerName),
@@ -357,7 +361,7 @@ function RoundManager.Utils.SetupPlayer(Player: Player, KillerIndex: number)
         local EquippedSurvivorName = Utils.PlayerData.GetPlayerEquipped(Player, "Survivor")
 
         --spawns the character
-        Char = ServerCharacterManager:SetupCharacter(Player,
+        Char = ServerCharacterManager.SetupCharacter(Player,
             EquippedSurvivorName,
             "Survivor",
             Utils.PlayerData.GetPlayerEquipped(Player, "Skins."..EquippedSurvivorName),

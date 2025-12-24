@@ -43,9 +43,8 @@ function RoundPlayerList:_InitUI(Char: Model)
     local UI = Prefabs.UI:Clone()
     self.UI = UI
 
-    if RoundState.Value ~= "InRound" then
-        repeat task.wait()
-        until RoundState.Value == "InRound"
+    while RoundState.Value ~= "InRound" do
+        task.wait()
     end
 
     local Conns: {[string]: RBXScriptConnection} = {}

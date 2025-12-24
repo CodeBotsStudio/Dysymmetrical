@@ -46,7 +46,9 @@ task.spawn(function()
     RSDone = true
 end)
 
-repeat task.wait() until SSSDone and RSDone
+while not (SSSDone and RSDone) do
+    task.wait()
+end
 
 if CanBenchmark then
     table.sort(loadTimes, function(a, b)

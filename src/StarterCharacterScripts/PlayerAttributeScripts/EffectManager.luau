@@ -29,9 +29,8 @@ function EffectManager:Init()
 
     self.Janitor:Add(Effects.ChildAdded:Connect(function(EffectValue: Instance)
         if EffectValue:IsA("NumberValue") then
-            if EffectValue:GetAttribute("Duration") == nil then
-                repeat task.wait()
-                until EffectValue:GetAttribute("Duration") ~= nil
+            while EffectValue:GetAttribute("Duration") == nil do
+                task.wait()
             end
 
             self:AddEffect(Utils.Instance.GetEffectModule(EffectValue.Name, EffectValue:GetAttribute("Subfolder"), true), EffectValue.Value, EffectValue:GetAttribute("Duration"))

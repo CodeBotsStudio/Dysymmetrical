@@ -25,8 +25,31 @@ function TypeUtils.CopyTable<T>(CloneThis: T & {}) : T & {}
 	return NewTable
 end
 
+--- Checks if a table is either a dictionary or a numeric table.
+--- 
+--- Mixed tables (containing numbers and others as keys) will be treated as dictionaries as well.
+--- 
+--- This util is useless if the table is empty for obvious reasons.
+function TypeUtils.IsTableADictionary<T>(Target: T & {}): boolean
+    for key, _ in Target do
+        if typeof(key) ~= "number" then
+            return true
+        end
+    end
+    
+    return false
+end
+
 --- Shuffles a table to make it have a random order.
+--- 
+--- Dictionaries won't be accepted in this function as they already don't have a specific order.
 function TypeUtils.ShuffleTable<T>(TableToShuffle: T & {}): T & {}
+    if TypeUtils.IsTableADictionary(TableToShuffle) then
+        warn("[TypeUtils.ShuffleTable()]: Can't shuffle table! A dictionary, which can't be reordered, has been passed!")
+
+        return TableToShuffle
+    end
+
     local currentShuffledIndex, shufflingItem
 
 	for index = #TableToShuffle, 1, -1 do
@@ -40,8 +63,13 @@ function TypeUtils.ShuffleTable<T>(TableToShuffle: T & {}): T & {}
 end
 
 --- Turns a dictionary into a table, removing the keys and making them numbers.
+--- 
 --- Primarily used for randomness as it isn't ordered in any way.
 function TypeUtils.DictToTable<T>(Dictionary: {[any]: T}): {T}
+    if TypeUtils.IsTableADictionary(Dictionary) then
+        return Dictionary
+    end
+
     local NewTable = {}
 
     for _, item in Dictionary do
@@ -52,6 +80,8 @@ function TypeUtils.DictToTable<T>(Dictionary: {[any]: T}): {T}
 end
 
 --- Returns the amount of items there are in a dictionary.
+--- 
+--- Also works with tables but you can just do `#TableName` instead.
 function TypeUtils.GetCountOfDict(dictionary: {[any]: any}): number
     local Count = 0
 
@@ -64,6 +94,9 @@ function TypeUtils.GetCountOfDict(dictionary: {[any]: any}): number
     return Count
 end
 
+--- Attempts to find a certain key or value in a dictionary.
+--- 
+--- May also work with numeric tables.
 function TypeUtils.FindInDictionary<K, V>(Dictionary: {[K]: V}, Item: K | V, Type: "Key" | "Value"): (K, V)
     if Type == "Key" then
         for Key, Value in Dictionary do
@@ -125,6 +158,27 @@ function TypeUtils.DeepTableWrite<T>(Target: T & {}, Source: {[any]: any}): T & 
 	end
 
     return Target
+end
+
+--- Gets a random item from the provided table.
+--- 
+--- This also works with dictionaries.
+function TypeUtils.GetRandomItemFromTable<T>(Target: T & {}): any
+    -- turn into a table if it's a dictionary
+    local UsedTable = TypeUtils.DictToTable(Target)
+
+    -- if it's empty return nothing
+    if #UsedTable <= 0 then
+        return
+    end
+
+    -- if it only has one item just return the item
+    if #UsedTable == 1 then
+        return UsedTable[1]
+    end
+
+    -- return a random index from the table
+    return UsedTable[Rand:NextInteger(1, #UsedTable)]
 end
 
 return TypeUtils

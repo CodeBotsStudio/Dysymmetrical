@@ -6,9 +6,8 @@ local TextChatService = game:GetService("TextChatService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
-local success
 repeat
-	success = pcall(function()
+	local success = pcall(function()
 		StarterGui:SetCore("ResetButtonCallback", false)
 	end)
 	task.wait()

@@ -88,8 +88,9 @@ function Network:Init()
         end
 
         if not script:FindFirstChild("InstanceCreator") then
-            repeat task.wait()
-            until script.InstanceCreator
+            while not script.InstanceCreator do
+                task.wait()
+            end
         end
 
         self.InstanceCreator = script.InstanceCreator
@@ -151,9 +152,8 @@ end
 --- @param Callback                (`function`):    The code that will run when the connection is fired.
 --- @return `RBXScriptConnection`                   The set connection for further usage in the script from where this is called.
 function Network:SetConnection(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION" | "BINDABLE_EVENT", Callback: (...any) -> (...any)): RBXScriptConnection
-    if not self:IsLive() then
-        repeat task.wait()
-        until self:IsLive()
+    while not self:IsLive() do
+        task.wait()
     end
     local instance
     if RunService:IsServer() then
@@ -186,9 +186,8 @@ end
 --- @param Type    (`string`):  The type of instance to fire the connections of
 --- @param ...                  Any parameters to pass to the connection
 function Network:FireClientConnection(target: Player | {Player}, name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION", ...): any | nil
-    if not self:IsLive() then
-        repeat task.wait()
-        until self:IsLive()
+    while not self:IsLive() do
+        task.wait()
     end
     if not RunService:IsServer() or not self.Folders[Type]:FindFirstChild(name) then return end
 
@@ -219,9 +218,8 @@ end
 --- @param Type    (`string`):  The type of the event (Reliable / Unreliable)
 --- @param ...                  Any parameters to pass to the connection
 function Network:FireAllClientConnection(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION", ...)
-    if not self:IsLive() then
-        repeat task.wait()
-        until self:IsLive()
+    while not self:IsLive() do
+        task.wait()
     end
     if not RunService:IsServer() or Type == "REMOTE_FUNCTION" or not self.Folders[Type]:FindFirstChild(name) then return end
 
@@ -233,9 +231,8 @@ end
 --- @param Type    (`string`):  The type of instance to fire the connections of
 --- @param ...                  Any parameters to pass to the connection
 function Network:FireServerConnection(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION", ...): any | nil
-    if not self:IsLive() then
-        repeat task.wait()
-        until self:IsLive()
+    while not self:IsLive() do
+        task.wait()
     end
     if not RunService:IsClient() or not self.Folders[Type]:FindFirstChild(name) then return end
 
@@ -252,9 +249,8 @@ end
 --- @param name (`string`): The name of the desired BindableEvent
 --- @param ...              Any parameters to pass to the connection
 function Network:FireConnection(name: string, ...)
-    if not self:IsLive() then
-        repeat task.wait()
-        until self:IsLive()
+    while not self:IsLive() do
+        task.wait()
     end
     if not self.Folders["BINDABLE_EVENT"]:FindFirstChild(name) then return end
 
@@ -266,9 +262,8 @@ end
 --- @param Type    (`string`):    The type of the desired instance inside of the script (e. g. "REMOTE_EVENT")
 --- @return `any`                 May return the desired instance
 function Network:GetInstance(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION" | "BINDABLE_EVENT")
-    if not self:IsLive() then
-        repeat task.wait()
-        until self:IsLive()
+    while not self:IsLive() do
+        task.wait()
     end
     if not self.Folders[Type]:FindFirstChild(name) then return end
     return self.Folders[Type]:FindFirstChild(name)

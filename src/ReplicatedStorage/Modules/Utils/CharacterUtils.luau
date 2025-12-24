@@ -182,10 +182,10 @@ function CharacterUtils.LoadAnimationFromID(Rig: Model, ID: string | {string} | 
     local Animator = Rig:FindFirstChild("Animator", true)
     if not Animator then
         local timeout = 0
-        repeat
+		while not (Animator or timeout > 30) do
             timeout += task.wait(0.1)
             Animator = Rig:FindFirstChild("Animator", true)
-        until Animator or timeout > 30
+		end
     end
 
     local AnimInstances = Rig:FindFirstChild("AnimationInstances")
@@ -208,8 +208,9 @@ function CharacterUtils.LoadAnimationFromID(Rig: Model, ID: string | {string} | 
 
         local Timeout = 0
         if YieldUntilLoad and Track.Length <= 0 then
-            repeat Timeout += task.wait()
-            until Track.Length > 0 or Timeout >= 25
+			while not (Track.Length > 0 or Timeout >= 25) do
+				Timeout += task.wait()
+			end
         end
 
         return Track

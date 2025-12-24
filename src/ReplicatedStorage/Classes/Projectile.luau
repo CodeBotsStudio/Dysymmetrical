@@ -127,7 +127,7 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
     }
 
     -- Clone the model into the workspace for use with the projectile.
-    ProjectileInstance.Model.Parent = workspace:FindFirstChild("Map") and workspace.Map.Ingame or workspace.TempObjectFolders
+    ProjectileInstance.Model.Parent = workspace:FindFirstChild("Map") and workspace.Map.InGame or workspace.TempObjectFolders
 
     -- Find the provided CFrame; if it doesn't exist, grab it from the instance's own CFrame or the model's worldpivot, whichever is applicable.
     ProjectileSettings.HitboxSettings.CFrame = ProjectileSettings.HitboxSettings.CFrame or function(): CFrame

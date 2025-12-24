@@ -158,10 +158,13 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
         --if there are no visible skins, return
         local VisibleSkins = Skins:GetChildren()
-        for _, skin in VisibleSkins do
-            if skin:HasTag("Dev") or skin:HasTag("Milestone") then
-                table.remove(VisibleSkins, table.find(VisibleSkins, skin))
+        for skinIndex = #VisibleSkins, 1, -1 do
+            local skin = VisibleSkins[skinIndex]
+            if not (skin:HasTag("Dev") or skin:HasTag("Milestone")) then
+                continue
             end
+
+            table.remove(VisibleSkins[skinIndex])
         end
 
         if #VisibleSkins <= 0 then

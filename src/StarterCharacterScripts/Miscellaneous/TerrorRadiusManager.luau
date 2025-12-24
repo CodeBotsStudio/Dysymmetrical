@@ -70,9 +70,8 @@ function TerrorRadiusManager:Init()
     ThemeFolder.Parent = SoundService
     self.ThemeFolder = ThemeFolder
 
-    if RoundState.Value ~= "InRound" then
-        repeat task.wait()
-        until RoundState.Value == "InRound"
+    while RoundState.Value ~= "InRound" do
+        task.wait()
     end
 
     for _, PlayerChar in workspace.Players:GetChildren() do

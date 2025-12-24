@@ -42,8 +42,9 @@ function Ragdoll:Init()
 	else
 		Network:SetConnection("Ragdoll", "REMOTE_EVENT", function(Character: Model, WaitTime: number?, Force: string, Position: CFrame?)
 			if WaitTime then
-				repeat task.wait()
-				until time() >= (WaitTime or 0)
+				while time() < WaitTime do
+					task.wait()
+				end
 			end
 			local rag = Ragdoll.Enable(Character, true)
 			if rag and rag.PrimaryPart then
