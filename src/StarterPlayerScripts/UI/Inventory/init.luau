@@ -605,6 +605,16 @@ function Inventory:Init()
         self.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 
+    Utils.Instance.ObserveProperty(InfoContainer.Parent, "Size", function(value: UDim2)
+        if not self.InfoMenu.Open and value.X.Scale < 0.05 and #InfoContainer:GetChildren() > 0 then
+            for _, Child in InfoContainer:GetChildren() do
+                if not Child:IsA("UIComponent") then
+                    Child:Destroy()
+                end
+            end
+        end
+    end)
+
     for _, EmoteSlot: Frame in EmoteContainer.EmoteContainer:GetChildren() do
         JanitorInstance:Add(EmoteSlot.Button.MouseEnter:Connect(function()
             Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})

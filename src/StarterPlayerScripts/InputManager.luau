@@ -123,7 +123,7 @@ function InputManager:Init()
         KeyboardKey = Enum.KeyCode.R,
         GamepadKey = Enum.KeyCode.ButtonY,
     })
-    InputManager:_SetupKeybind({
+    InputManager._SetupKeybind({
         Name = "FourthAbility",
         Subgroup = "DefaultActions",
 

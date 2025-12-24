@@ -651,13 +651,17 @@ function Shop:Init()
     end)
 
     Utils.Instance.ObserveProperty(InfoContainer.Parent, "Size", function(value: UDim2)
-        if value == Utils.UDim.FullY and #InfoContainer:GetChildren() > 0 then
+        if not self.InfoMenu.Open and value.X.Scale < 0.05 and #InfoContainer:GetChildren() > 0 then
             for _, Child in InfoContainer:GetChildren() do
                 if not Child:IsA("UIComponent") then
                     Child:Destroy()
                 end
             end
         end
+    end)
+    
+    Utils.Instance.ObserveProperty(SkinContainer.Parent, "Size", function(value: UDim2)
+        SkinContainer.Parent.Label.TextLabel.Visible = value.X.Scale >= 0.05
     end)
 
     self:ReloadContent(true)
