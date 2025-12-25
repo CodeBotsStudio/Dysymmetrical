@@ -27,8 +27,6 @@ jobs:
             author_url="https://github.com/$author"
 
             echo "[\`$short\`]($url) $msg - [**$author**]($author_url)" >> $GITHUB_ENV
-          
-            echo "" >> $GITHUB_ENV
           done
           
           echo "EOF" >> $GITHUB_ENV
@@ -42,6 +40,7 @@ jobs:
           description: |
             **Commit List**
             ${{ env.COMMIT_LIST }}
+            
             **Branch**
             ${{ github.ref_name }}
             
