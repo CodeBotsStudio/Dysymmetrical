@@ -68,108 +68,132 @@ function CommonFunctions.Init()
     end)
 end
 
+type DamagePlayerSettings = {
+	--- The `Player` that's inflicting the damage.
+	SourcePlayer: Player,
+	--- The `Humanoid` receiving the damage.
+	TargetHumanoid: Humanoid,
+	--- The damage to be inflicted (base).
+	Damage: number,
+	--- A reason tag for the source of the damage.
+	Reason: string?,
+	--- The direction of any knockback to be applied.
+	KnockbackDirection: Vector3?,
+	--- The magnitude of any knockback to be applied.
+	KnockbackMagnitude: number?,
+}
 --- Function that should be used to damage a player from another player's attack.
 --- Handles resistance, weakness...
-function CommonFunctions.DamagePlayer(sourcePlayer: Player, targetHumanoid: Humanoid, inflictedDamage: number, reason: string?, knockbackDirection: Vector3?, knockbackMagnitude: number?)
-    local Char = targetHumanoid.Parent
-	local HRP: BasePart = Char.HumanoidRootPart
+function CommonFunctions.DamagePlayer(DamageSettings: DamagePlayerSettings)
+    local Char = DamageSettings.TargetHumanoid.Parent
+	local HRP: BasePart = Char:FindFirstChild("HumanoidRootPart") or DamageSettings.TargetHumanoid.RootPart
     local targetPos = HRP.Position
-	local Player = Players:GetPlayerFromCharacter(Char)
+	local TargetPlayer = Players:GetPlayerFromCharacter(Char)
 
 	-- leaving these comments here as memories from may 2025 lol -dys
 	--decided to remove server-side checking because BRO. THEY DON'T DO THAT IN FORSAKEN.
 	--correction: the hitboxes in Forsaken are FULLY server-handled, but it doesn't lag because THEIR GAME SOMEHOW DOESN'T LAG AT ALL. WHAT????
 	--quick thing: hitboxes are now fully server-sided. yup. i had to. :(
 
-	if Utils.Instance.FindFirstChild(Char, "Effects.StunSpawnProtection", 0) and not sourcePlayer.Character:GetAttribute("BypassStunProtection") then
+	if Utils.Instance.FindFirstChild(Char, "Effects.StunSpawnProtection", 0) and not DamageSettings.SourcePlayer.Character:GetAttribute("BypassStunProtection") then
 		return
 	end
 
 	local Role = Utils.Instance.FindFirstChild(Char, "Role", 0.2)
 	if Char:FindFirstChild("Killer") and Role and Role.Value == "Survivor" then
-		Char.Killer.Value = sourcePlayer
+		Char.Killer.Value = DamageSettings.SourcePlayer
 	end
 	
-	reason = reason or "HAHAHA" --OnlyIvo
+	DamageSettings.Reason = DamageSettings.Reason or "HAHAHA" --OnlyIvo
 
-	if Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0) and inflictedDamage > 0 then
-		inflictedDamage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
+	if Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0) and DamageSettings.Damage > 0 then
+		DamageSettings.Damage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
 	end
 
-	targetHumanoid:TakeDamage(inflictedDamage)
+	DamageSettings.TargetHumanoid:TakeDamage(DamageSettings.Damage)
 
-	Network:FireClientConnection(sourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, inflictedDamage)
-	if Utils.PlayerData.GetPlayerSetting(sourcePlayer, "Miscellaneous.ImageFlashOnHit") then
-		Network:FireClientConnection(sourcePlayer, "ShowJokeSettingImage", "REMOTE_EVENT", false, sourcePlayer.Character.Role.Value)
+	Network:FireClientConnection(DamageSettings.SourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, DamageSettings.Damage)
+	if Utils.PlayerData.GetPlayerSetting(DamageSettings.SourcePlayer, "Miscellaneous.ImageFlashOnHit") then
+		Network:FireClientConnection(DamageSettings.SourcePlayer, "ShowJokeSettingImage", "REMOTE_EVENT", false, DamageSettings.SourcePlayer.Character.Role.Value)
 	end
 
-	knockbackDirection = knockbackDirection or Vector3.zero
-	knockbackMagnitude = knockbackMagnitude or 1
-	CommonFunctions.RigImpulse(HRP, knockbackMagnitude, knockbackDirection)
+	DamageSettings.KnockbackDirection = DamageSettings.KnockbackDirection or Vector3.zero
+	DamageSettings.KnockbackMagnitude = DamageSettings.KnockbackMagnitude or 1
+	CommonFunctions.RigImpulse(HRP, DamageSettings.KnockbackMagnitude, DamageSettings.KnockbackDirection)
 
 	--printing
-	local targetName = Char.Name or "Dummy"
+	local targetName = Char.Name
     if workspace:GetAttribute("DebugAllowed") then
-		Utils.Misc.Print("[DamageDealt] Target: "..targetName.." || InflictedDamage: "..tostring(inflictedDamage).." || Reason: "..reason)
+		Utils.Misc.Print("[DamageDealt] Target: "..targetName.." || InflictedDamage: "..tostring(DamageSettings.Damage).." || Reason: "..DamageSettings.Reason)
 	end
 
-	if Player then
-		Network:FireClientConnection(Player, "DamagePlayer", "REMOTE_EVENT", sourcePlayer, reason)
-		if Utils.PlayerData.GetPlayerSetting(Player, "Miscellaneous.ImageFlashOnHit") then
-			Network:FireClientConnection(Player, "ShowJokeSettingImage", "REMOTE_EVENT", true, Role and Role.Value or "Survivor")
+	if TargetPlayer then
+		Network:FireClientConnection(TargetPlayer, "DamagePlayer", "REMOTE_EVENT", DamageSettings.SourcePlayer, DamageSettings.Reason)
+		if Utils.PlayerData.GetPlayerSetting(TargetPlayer, "Miscellaneous.ImageFlashOnHit") then
+			Network:FireClientConnection(TargetPlayer, "ShowJokeSettingImage", "REMOTE_EVENT", true, Role and Role.Value or "Survivor")
 		end
 	end
-	Network:FireClientConnection(sourcePlayer, "DamagedPlayer", "REMOTE_EVENT", Player, targetHumanoid, reason)
+	Network:FireClientConnection(DamageSettings.SourcePlayer, "DamagedPlayer", "REMOTE_EVENT", TargetPlayer, DamageSettings.TargetHumanoid, DamageSettings.Reason)
 end
 
+type ApplyEffectSettings = {
+	TargetHumanoid: Humanoid,
+	EffectSettings: {
+		Name: string,
+		Level: number?,
+		Duration: number?,
+		Subfolder: string?,
+	},
+	OverwriteExistingEffect: boolean?,
+}
 --- Applies an effect on a specific humanoid. It can be a player or an NPC, it doesn't matter.
-function CommonFunctions.ApplyEffect(hum: Humanoid, name: string, level: number?, duration: number?, subfolder: string?, overwriteExisting: boolean?) : NumberValue?
-	if overwriteExisting == nil then
-		overwriteExisting = true
+function CommonFunctions.ApplyEffect(EffectSettings: ApplyEffectSettings) : NumberValue?
+	if EffectSettings.OverwriteExistingEffect == nil then
+		EffectSettings.OverwriteExistingEffect = true
 	end
 
-	local char = hum.Parent
+	local char = EffectSettings.TargetHumanoid.Parent
 
 	local CharEffects = char:FindFirstChild("Effects")
 	if not CharEffects then
 		return
 	end
 
-	if name == "Stunned" then
+	if EffectSettings.EffectSettings.Name == "Stunned" then
 		if CharEffects:FindFirstChild("SpawnProtection") then
 			return
 		end
 	end
 
-	local ExistingEffect = CharEffects:FindFirstChild(name)
+	local ExistingEffect = CharEffects:FindFirstChild(EffectSettings.EffectSettings.Name)
 	if ExistingEffect then
-		if not overwriteExisting then
+		if not EffectSettings.OverwriteExistingEffect then
 			return
 		end
 
 		ExistingEffect:Destroy()
 	end
 	
-	local EffectModule = Utils.Instance.GetEffectModule(name, subfolder)
+	local EffectModule = Utils.Instance.GetEffectModule(EffectSettings.EffectSettings.Name, EffectSettings.EffectSettings.Subfolder)
 
 	local EffectValue = Instance.new("NumberValue")
 
-	EffectValue.Name = name
-	EffectValue.Value = level or EffectModule.Level
-	if subfolder and #subfolder > 0 then
-		EffectValue:SetAttribute("Subfolder", subfolder)
+	EffectValue.Name = EffectSettings.EffectSettings.Name
+	EffectValue.Value = EffectSettings.EffectSettings.Level or EffectModule.Level
+	if EffectSettings.EffectSettings.Subfolder and #EffectSettings.EffectSettings.Subfolder > 0 then
+		EffectValue:SetAttribute("Subfolder", EffectSettings.EffectSettings.Subfolder)
 	end
-	EffectValue:SetAttribute("Duration", duration or EffectModule.Duration)
+	EffectValue:SetAttribute("Duration", EffectSettings.EffectSettings.Duration or EffectModule.Duration)
 
 	EffectValue.Parent = CharEffects
 	
-	task.delay(duration, function()
+	task.delay(EffectSettings.EffectSettings.Duration or EffectModule.Duration, function()
 		if EffectValue then
 			EffectModule:Remove(char)
 			EffectValue:Destroy()
 		end
 	end)
-	EffectModule:Apply(level, char, duration or EffectModule.Duration)
+	EffectModule:Apply(EffectSettings.EffectSettings.Level or EffectModule.Level, char, EffectSettings.EffectSettings.Duration or EffectModule.Duration)
 
 	return EffectValue
 end
@@ -192,16 +216,21 @@ function CommonFunctions.RemoveEffect(char: Model | Humanoid, name: string)
 	EffectInst:Destroy()
 end
 
+type GrantedReward = {
+	Money: number?,
+	EXP: number?,
+	Reason: string?,
+}
 --- Grants money and/or EXP to a player and displays a notification showing it.
 --- The `Reason` parameter is the source of the reward to display in the UI locally.
-function CommonFunctions.GrantRewardToPlayer(Player: Player, Money: number?, EXP: number?, Reason: string?)
+function CommonFunctions.GrantRewardToPlayer(Player: Player, Reward: GrantedReward)
 	--shouldn't give anything if in a private server
 	if #game.PrivateServerId > 0 then
 		return
 	end
 
-	local MoneyGranted = Money ~= nil and Money > 0 and Money or 0
-	local EXPGranted = EXP ~= nil and EXP > 0 and EXP or 0
+	local MoneyGranted = Reward.Money ~= nil and Reward.Money > 0 and Reward.Money or 0
+	local EXPGranted = Reward.EXP ~= nil and Reward.EXP > 0 and Reward.EXP or 0
 	
 	--if none are granted somehow
 	if MoneyGranted <= 0 and EXPGranted <= 0 then
@@ -210,32 +239,37 @@ function CommonFunctions.GrantRewardToPlayer(Player: Player, Money: number?, EXP
 
 	--if only EXP is granted
 	if MoneyGranted <= 0 then
-		CommonFunctions._GrantEXPToPlayer(Player, EXP, true, Reason)
+		CommonFunctions._GrantEXPToPlayer(Player, {Reward = Reward.EXP, Visual = true, Reason = Reward.Reason})
 		return
 	end
 
 	--if only money is granted
 	if EXPGranted <= 0 then
 		CommonFunctions.UpdatePlayerStat(Player, "Currency.Money", MoneyGranted)
-		Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, 0, Reason)
+		Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, 0, Reward.Reason)
 		return
 	end
 
 	--if both are granted
 	CommonFunctions.UpdatePlayerStat(Player, "Currency.Money", MoneyGranted)
-	CommonFunctions._GrantEXPToPlayer(Player, EXPGranted, false, Reason)
-	Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, EXPGranted, Reason)
+	CommonFunctions._GrantEXPToPlayer(Player, {Amount = EXPGranted, Visual = false, Reason = Reward.Reason})
+	Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", MoneyGranted, EXPGranted, Reward.Reason)
 end
 
+type EXPGrantSettings = {
+	Amount: number,
+	Visual: boolean,
+	Reason: string?,
+}
 --- INTERNAL FUNCTION: Function used to grant EXP to a player in `CommonFunctions.GrantRewardToPlayer()`. Use that one instead.
-function CommonFunctions._GrantEXPToPlayer(Player: Player, amount: number, visual: boolean, Reason: string?)
+function CommonFunctions._GrantEXPToPlayer(Player: Player, GrantSettings: EXPGrantSettings)
 	--shouldn't give anything if in a private server
 	if #game.PrivateServerId > 0 then
 		return
 	end
 	
-	if visual then
-		Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", 0, amount, Reason)
+	if GrantSettings.Visual then
+		Network:FireClientConnection(Player, "GrantReward", "REMOTE_EVENT", 0, GrantSettings.Amount, GrantSettings.Reason)
 	end
 
 	local Role = Player.Character:FindFirstChild("Role")
@@ -246,7 +280,7 @@ function CommonFunctions._GrantEXPToPlayer(Player: Player, amount: number, visua
 	local SkinName = Player.Character:GetAttribute("CharacterSkinName")
 
 	local CharValue = Utils.PlayerData.GetPlayerOwned(Player, Role.Value.."s."..CharacterName, false)
-	CharValue.Value += amount
+	CharValue.Value += GrantSettings.Amount
 
 	local CharModule = require(Utils.Instance.GetCharacterModule(Role.Value, CharacterName))
 	if CharModule.Config.Milestones then

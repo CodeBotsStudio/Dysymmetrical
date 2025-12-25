@@ -128,7 +128,7 @@ function PlayerManager:Init()
                 			Network:FireConnection("KilledPlayer", KillerValue.Value, plr)
 						end
 
-            	    	CommonFunctions.GrantRewardToPlayer(KillerValue.Value, 7, 20, "making a Survivor ragequit")
+            	    	CommonFunctions.GrantRewardToPlayer(KillerValue.Value, {Money = 7, EXP = 20, Reason = "making a Survivor ragequit"})
 
 						--i'm leaving this because it's funny to have double the extra time when someone ragequits lol -Dyscarn
 						TimeManager:SetTime(TimeManager.CurrentTime + 35)
@@ -148,7 +148,7 @@ function PlayerManager:Init()
                 	Network:FireConnection("KilledPlayer", KillerValue.Value, plr)
 
 					CommonFunctions.UpdatePlayerStat(KillerValue.Value, "KillerStats.Kills", 1)
-                	CommonFunctions.GrantRewardToPlayer(KillerValue.Value, 20, 60, "killing a Survivor")
+                	CommonFunctions.GrantRewardToPlayer(KillerValue.Value, {Money = 20, EXP = 60, Reason = "killing a Survivor"})
 
 					TimeManager:SetTime(TimeManager.CurrentTime + 35)
 				end

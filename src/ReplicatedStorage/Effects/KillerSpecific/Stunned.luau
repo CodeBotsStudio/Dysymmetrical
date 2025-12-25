@@ -21,8 +21,14 @@ return Effect.CreateEffect({
     end,
     RemoveEffect = function(self: Effect.Effect, char: Model)
         if RunService:IsServer() then
-            CommonFunctions.ApplyEffect(char:FindFirstChild("Humanoid"), "SpawnProtection", nil, nil, "KillerSpecific")
-
+            CommonFunctions.ApplyEffect({
+                TargetHumanoid = char:FindFirstChildWhichIsA("Humanoid"),
+                EffectSettings = {
+                    Name = "SpawnProtection",
+                    Subfolder = "KillerSpecific",
+                },
+            })
+            
             return
         end
         require(Players.LocalPlayer.Character.PlayerAttributeScripts.SpeedManager):RemoveSpeedFactor("Stunned")

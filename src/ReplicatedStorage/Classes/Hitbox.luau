@@ -402,7 +402,13 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                     -- Play execution animations, if applicable
                     if not (Char.Role.Value == "Killer" and Config.ExecuteOnKill and not TargetCharacter:GetAttribute("ExecutionsDisabled")) then
                         -- If not, just inflict the damage as usual.
-                        CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason, CheckPart.CFrame.LookVector, Config.Knockback)
+                        CommonFunctions.DamagePlayer({
+                            SourcePlayer = SourcePlayer,
+                            TargetHumanoid = Humanoid,
+                            Reason = Config.Reason,
+                            KnockbackDirection = CheckPart.CFrame.LookVector,
+                            KnockbackMagnitude = Config.Knockback,
+                        })
 
                         return
                     end
@@ -413,7 +419,13 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
                     task.defer(function() -- Switched from task.spawn() to task.defer() to avoid task scheduler conflicts
                         -- If the user doesn't have valid execution animations to use, just inflict damage.
                         if not ExecutionAnimsAvailable then
-                            CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason, CheckPart.CFrame.LookVector, Config.Knockback)
+                            CommonFunctions.DamagePlayer({
+                                SourcePlayer = SourcePlayer,
+                                TargetHumanoid = Humanoid,
+                                Reason = Config.Reason,
+                                KnockbackDirection = CheckPart.CFrame.LookVector,
+                                KnockbackMagnitude = Config.Knockback,
+                            })
 
                             return
                         end
@@ -437,7 +449,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
             	            Network:FireConnection("KilledPlayer", SourcePlayer, TargetPlayer)
 
 				            CommonFunctions.UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
-            	            CommonFunctions.GrantRewardToPlayer(SourcePlayer, 20, 60, "killing a Survivor")
+            	            CommonFunctions.GrantRewardToPlayer(SourcePlayer, {Money = 20, EXP = 60, Reason = "killing a Survivor"})
 
 				            TimeManager:SetTime(TimeManager.CurrentTime + 35)
                         end)
@@ -452,7 +464,13 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                         -- If there are no execution animations to use, for one reason or another, resort to just killing the target and flinging it really far.
                         if not ExecutionAnim then
-                            CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason, CheckPart.CFrame.LookVector, Config.Knockback)
+                            CommonFunctions.DamagePlayer({
+                                SourcePlayer = SourcePlayer,
+                                TargetHumanoid = Humanoid,
+                                Reason = Config.Reason,
+                                KnockbackDirection = CheckPart.CFrame.LookVector,
+                                KnockbackMagnitude = Config.Knockback,
+                            })
 
                             return
                         end
@@ -528,7 +546,13 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
 
                 -- If the hitbox deals damage or healing, inflict it and do some knockback if existent.
                 if Damage ~= 0 then
-                    CommonFunctions.DamagePlayer(SourcePlayer, Humanoid, Damage, Config.Reason, CheckPart.CFrame.LookVector, Config.Knockback)
+                    CommonFunctions.DamagePlayer({
+                        SourcePlayer = SourcePlayer,
+                        TargetHumanoid = Humanoid,
+                        Reason = Config.Reason,
+                        KnockbackDirection = CheckPart.CFrame.LookVector,
+                        KnockbackMagnitude = Config.Knockback,
+                    })
                 end
 
                 -- If the hitbox applies effects, apply them.

@@ -83,7 +83,7 @@ local Commander = Character.CreateSurvivor({
                                         },
                                         Connections = {
                                             PostHit = function(Hum: Humanoid)
-                                                CommonFunctions.GrantRewardToPlayer(self.Owner, 10, 20, "blinding the killer with Blindside")
+                                                CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 10, EXP = 20, Reason = "blinding the killer with Blindside"})
                                             end,
                                         }
                                     })
@@ -122,7 +122,14 @@ local Commander = Character.CreateSurvivor({
                             self.CharModule.GameplayConfig.Abilities.Justice:ChangeAbilityCharges("Set", 1)
                         end))
 
-                        CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", 3, 5)
+                        CommonFunctions.ApplyEffect({
+                            TargetHumanoid = self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"),
+                            EffectSettings = {
+                                Name = "Slowness",
+                                Level = 3,
+                                Duration = 5,
+                            },
+                        })
 
                         return
                     end
@@ -171,7 +178,7 @@ local Commander = Character.CreateSurvivor({
                                     },
                                     Connections = {
                                         PostHit = function(Hum: Humanoid)
-                                            CommonFunctions.GrantRewardToPlayer(self.Owner, 6, 14, "stunning the killer with Justice")
+                                            CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 6, EXP = 14, Reason = "stunning the killer with Justice"})
                                         end,
                                     }
                                 })
@@ -214,7 +221,14 @@ local Commander = Character.CreateSurvivor({
     },
 
     OnHit = function(self, _hitbox, _damage)
-        CommonFunctions.ApplyEffect(self.Owner.Character:FindFirstChildOfClass("Humanoid"), "Resistance", 5, 1)
+        CommonFunctions.ApplyEffect({
+            TargetHumanoid = self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"),
+            EffectSettings = {
+                Name = "Resistance",
+                Level = 5,
+                Duration = 1,
+            },
+        })
 
         return
     end,

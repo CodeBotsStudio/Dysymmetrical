@@ -185,10 +185,24 @@ local NullexVoyd: Character.Killer = Character.CreateKiller({
                 DisableSlashOnPerform = false,
                 Behaviour = function(self)
                     if RunService:IsServer() then
-                        CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Speed", self.SpeedLevel, self.SpeedDuration)
+                        CommonFunctions.ApplyEffect({
+                            TargetHumanoid = self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"),
+                            EffectSettings = {
+                                Name = "Speed", 
+                                Level = self.SpeedLevel, 
+                                Duration = self.SpeedDuration
+                            }
+                        })
 
                         self:AddConnection(task.delay(self.SpeedDuration, function()
-                            CommonFunctions.ApplyEffect(self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"), "Slowness", self.SlownessLevel, self.SlownessDuration)
+                            CommonFunctions.ApplyEffect({
+                                TargetHumanoid = self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"),
+                                EffectSettings = {
+                                    Name = "Slowness", 
+                                    Level = self.SlownessLevel, 
+                                    Duration = self.SlownessDuration
+                                }
+                            })
                         end))
                     
                         return
