@@ -27,21 +27,6 @@ jobs:
             author_url="https://github.com/$author"
 
             echo "[\`$short\`]($url) $msg - [**$author**]($author_url)" >> $GITHUB_ENV
-
-            files=$(git diff-tree --no-commit-id --name-status -r "$commit" | awk '
-              {
-                if ($1 ~ /^A/) print "Added: " $2
-                else if ($1 ~ /^M/) print "Modified: " $2
-                else if ($1 ~ /^D/) print "Removed: " $2
-                else if ($1 ~ /^R/) print "Renamed: " $2 " → " $3
-              }
-            ')
-          
-            if [ -n "$files" ]; then
-              echo '```' >> $GITHUB_ENV
-              echo "$files" >> $GITHUB_ENV
-              echo '```' >> $GITHUB_ENV
-            fi
           
             echo "" >> $GITHUB_ENV
           done
