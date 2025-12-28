@@ -12,7 +12,7 @@ BuyWindow.__index = BuyWindow
 function BuyWindow.New(Shop, Module: ModuleScript, skin: boolean?, Parent: Frame, Card)
     local Window = setmetatable({
         Checking = false,
-        Instance = Utils.Instance.FindFirstChild(script, "Window"):Clone(),
+        Instance = script:FindFirstChild("Window"):Clone(),
         Connections = {},
         Removed = Signal.new(),
         Purchased = Signal.new(),

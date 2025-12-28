@@ -4,7 +4,7 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 return {
     Init = function(_)
-        Utils.Instance.FindFirstChild(workspace, "TempObjectFolders.Hitboxes").ChildAdded:Connect(function(Child)
+        workspace.TempObjectFolders.Hitboxes.ChildAdded:Connect(function(Child)
             if Child:IsA("BasePart") and Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer, "Advanced.ShowHitboxes") then
                 Child.Material = Enum.Material.ForceField
                 Child.Transparency = 0.65

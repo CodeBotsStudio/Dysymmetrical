@@ -14,7 +14,7 @@ PlayerInfoWindow.__index = PlayerInfoWindow
 function PlayerInfoWindow.New(Player: Player, Parent: ScreenGui)
     local Window = setmetatable({
         PlayerShown = Player,
-        Instance = Utils.Instance.FindFirstChild(script, "PlayerInfoWindow"):Clone(),
+        Instance = script:FindFirstChild("PlayerInfoWindow"):Clone(),
         Connections = {},
         Removed = Signal.new(),
     }, PlayerInfoWindow)
@@ -171,7 +171,7 @@ function PlayerInfoWindow.New(Player: Player, Parent: ScreenGui)
 
     Window.Instance.Parent = Parent
 
-    local HideButton = Utils.Instance.FindFirstChild(Window.Instance, "Hide")
+    local HideButton = Window.Instance:FindFirstChild("Hide")
     table.insert(Window.Connections, HideButton.MouseEnter:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end))

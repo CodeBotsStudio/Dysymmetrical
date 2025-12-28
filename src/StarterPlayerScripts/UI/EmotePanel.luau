@@ -40,7 +40,7 @@ function EmotePanel:Init()
 
         local EmoteToPlay = EmoteButtonContainer[SelectedEmote]:GetAttribute("Name")
         if LocalPlayer.Character and EmoteToPlay and #EmoteToPlay > 0 then
-            local E = Utils.Instance.FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", false)
+            local E = Utils.Instance.FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", 0)
             if not E then
                 return
             end
@@ -126,7 +126,7 @@ function EmotePanel:Init()
                     return
                 end
 
-                local E = Utils.Instance.FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", false)
+                local E = Utils.Instance.FindFirstChild(LocalPlayer.Character, "Miscellaneous.EmoteManager", 0)
                 if not E then
                     return
                 end

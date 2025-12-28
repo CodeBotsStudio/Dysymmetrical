@@ -10,7 +10,7 @@ return {
         local Vignette = Utils.Instance.FindFirstChild(script, "DamageVignette")
         Vignette.Parent = Utils.Instance.FindFirstChild(Players.LocalPlayer.PlayerGui, "TemporaryUI")
 
-        local Humanoid = Utils.Instance.FindFirstChild(Players.LocalPlayer.Character, "Humanoid")
+        local Humanoid = Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
 
         local JanitorInstance = Janitor.new()
         JanitorInstance:LinkToInstance(Humanoid)

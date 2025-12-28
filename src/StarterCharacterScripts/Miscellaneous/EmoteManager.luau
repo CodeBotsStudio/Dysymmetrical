@@ -18,8 +18,8 @@ function EmoteManager:Init()
 
 	self.Char = Players.LocalPlayer.Character
 	self.Char:SetAttribute("Emoting", false)
-	self.Hum = Utils.Instance.FindFirstChild(self.Char, "Humanoid")
-	self.Head = Utils.Instance.FindFirstChild(self.Char, "Head")
+	self.Hum = self.Char:FindFirstChildWhichIsA("Humanoid")
+	self.Head = self.Char:FindFirstChild("Head")
 
 	self.Animator = self.Char:FindFirstChildOfClass("Humanoid"):FindFirstChildOfClass("Animator")
 
@@ -45,7 +45,7 @@ function EmoteManager:Init()
 		end
 	end), "Disconnect")
 
-	self.Janitor:Add(Utils.Instance.FindFirstChild(self.Char, "Humanoid").Died:Connect(function()
+	self.Janitor:Add(self.Hum.Died:Connect(function()
 		if self.CurrentlyPlayingEmote then
 			self:StopEmote(self.CurrentlyPlayingEmote)
 		end
