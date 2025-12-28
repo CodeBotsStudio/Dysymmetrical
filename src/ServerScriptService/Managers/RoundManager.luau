@@ -3,7 +3,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local Rand = Random.new()
 
 local MapManager = require(ServerScriptService.Managers.MapManager)
 local ServerCharacterManager = require(ServerScriptService.Managers.ServerCharacterManager)
@@ -319,24 +318,18 @@ end
 
 --- Sets up a player in the round's player list while also spawning its character.
 function RoundManager.Utils.SetupPlayer(Player: Player, KillerIndex: number)
-    local Spawns = MapManager.CurrentMap.Map.SpawnPoints
-
     local Char
 
     if KillerIndex and RoundManager.CanSpawnKiller then --RoundManager.CanSpawnKiller is for debugging
         Utils.PlayerData.GetPlayerStat(Player, "General.Malice", false).Value = 1 --resets malice
 
-        local KillerSpawns = Spawns.Killers:GetChildren()
-
-        local ChosenSpawn = KillerSpawns[Rand:NextInteger(1, #KillerSpawns)].CFrame
         local EquippedKillerName = Utils.PlayerData.GetPlayerEquipped(Player, "Killer")
 
         --spawns the character
         Char = ServerCharacterManager.SetupCharacter(Player,
             EquippedKillerName,
             "Killer",
-            Utils.PlayerData.GetPlayerEquipped(Player, "Skins."..EquippedKillerName),
-            ChosenSpawn
+            Utils.PlayerData.GetPlayerEquipped(Player, "Skins."..EquippedKillerName)
         )
 
         --sets up connections for the round
@@ -355,17 +348,13 @@ function RoundManager.Utils.SetupPlayer(Player: Player, KillerIndex: number)
     else
         CommonFunctions.UpdatePlayerStat(Player, "General.Malice", 1) --adds 1 malice
 
-        local SurvivorSpawns = Spawns.Survivors:GetChildren()
-
-        local ChosenSpawn = SurvivorSpawns[Rand:NextInteger(1, #SurvivorSpawns)].CFrame
         local EquippedSurvivorName = Utils.PlayerData.GetPlayerEquipped(Player, "Survivor")
 
         --spawns the character
         Char = ServerCharacterManager.SetupCharacter(Player,
             EquippedSurvivorName,
             "Survivor",
-            Utils.PlayerData.GetPlayerEquipped(Player, "Skins."..EquippedSurvivorName),
-            ChosenSpawn
+            Utils.PlayerData.GetPlayerEquipped(Player, "Skins."..EquippedSurvivorName)
         )
 
         --sets up connections for the round

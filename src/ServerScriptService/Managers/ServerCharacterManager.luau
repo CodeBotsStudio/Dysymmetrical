@@ -8,6 +8,8 @@ local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
+local Rand = Random.new()
+
 local ServerCharacterManager = {}
 
 local PlayersRemainingFolder = ReplicatedStorage.RoundInfo.PlayersRemaining
@@ -15,13 +17,84 @@ local PlayersRemainingFolder = ReplicatedStorage.RoundInfo.PlayersRemaining
 function ServerCharacterManager:Init()
 end
 
+function ServerCharacterManager._PositionCharacter(Char: Model, charType: "Survivor" | "Killer", cf: CFrame?)
+    if cf then
+        Char:PivotTo(cf)
+        return
+    end
+
+    --will try to get the current map
+    local Map = workspace:FindFirstChild("Map")
+    if not Map then
+        return
+    end
+
+    --will try to get the map itself (because the map itself is parented to a folder named `Map` where `Config` and `Behaviour` reside)
+    Map = Map:FindFirstChild("Map")
+    if not Map then
+        warn("[ServerCharacterManager._PositionCharacter()] The map should be in a whole model inside of the map's folder! Check the template map! Using the folder itself instead...")
+        
+        Map = workspace:FindFirstChild("Map")
+    end
+
+    --will try to get the spawn points of the map
+    local SpawnPoints = Map:FindFirstChild("SpawnPoints")
+    if not SpawnPoints then
+        --i am so lazy to split this string
+        warn("[ServerCharacterManager._PositionCharacter()] Spawn points aren't set for this map! Inside of the map there should be a folder called \"SpawnPoints\" containing a folder for every possible spawn layout also containing a folder for every role (\"Killers\" and \"Survivors\" by default)! Preventing character positioning...")
+
+        return
+    end
+
+    --will check if the map has any spawn point layouts
+    SpawnPoints = SpawnPoints:GetChildren()
+    if #SpawnPoints <= 0 then
+        warn("[ServerCharacterManager._PositionCharacter()] The map's spawn point folder is empty! Make sure to make some spawn point layouts! Preventing character positioning...")
+        
+        return
+    end
+
+    --will get a random layout
+    SpawnPoints = SpawnPoints[Rand:NextInteger(1, #SpawnPoints)]
+    local LayoutName = SpawnPoints.Name
+    --will try to get the spawn points for the character's specific role
+    SpawnPoints = SpawnPoints:FindFirstChild(charType.."s")
+
+    if not SpawnPoints then
+        --i am so lazy to split this string
+        warn("[ServerCharacterManager._PositionCharacter()] There are no spawn points for the \""..charType.."\" role! Make sure the folder named \""..LayoutName.."\" in this map's layouts contains a folder for this role named \""..charType.."s\"! Preventing character positioning...")
+        
+        return
+    end
+
+    --will try to get any spawn points in the folder
+    SpawnPoints = SpawnPoints:GetChildren()
+    if #SpawnPoints <= 0 then
+        --i am so lazy to split this string
+        warn("[ServerCharacterManager._PositionCharacter()] Spawn Points aren't set for the \""..charType.."\" role in this map! Preventing character positioning...")
+
+        return
+    end
+
+    --will try to choose a BasePart spawnpoint from the children of the folder
+    local ChosenSpawnPoint = SpawnPoints[Rand:NextInteger(1, #SpawnPoints)]
+    if not ChosenSpawnPoint:IsA("BasePart") then
+        --i could make this cycle to another spawn but meh the rest would probably be badly set up the same way so yeah
+        warn("[ServerCharacterManager._PositionCharacter()] Chosen spawn point is not a BasePart! Make sure all of your spawn points are invisible, anchored, non-collidable baseparts which anchor point is touching the ground! Check the template map! Preventing character positioning...")
+
+        return
+    end
+
+    --will move the character to that spawn point
+    Char:PivotTo(ChosenSpawnPoint.CFrame)
+end
+
 --- Sets up a player's character specified by its name, its type, and a possible skin.
 --- Can also take a `CFrame` parameter to pivot the character there.
 function ServerCharacterManager.SetupCharacter(player: Player, charName: string, charType: "Survivor" | "Killer", skinName: string?, cf: CFrame?)
     local Char: Model = PlayerManager._RespawnPlayer(player, charName, charType, skinName)
-    if cf then
-        Char:PivotTo(cf)
-    end
+    --setting the character's position
+    ServerCharacterManager._PositionCharacter(Char, charType, cf)
 
     if charType == "Survivor" then
 	    local Remaining = Instance.new("ObjectValue") --only for survivors since there's only ever going to be 1 killer (i'm lazy to make the possibility to have multiple and it'd be too broken lol)

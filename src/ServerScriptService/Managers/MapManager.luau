@@ -51,26 +51,6 @@ function MapManager:GetRandomMap(): Model | Folder
         InGameFolder.Parent = MapInstance
     end
 
-    --references all of the spawn points
-    local Spawns = MapInstance.Map.SpawnPoints
-    local KillerSpawns = Spawns.Killers:GetChildren()
-    local SurvSpawns = Spawns.Survivors:GetChildren()
-
-    --selects a random preset
-    local Index = Rand:NextInteger(1, #KillerSpawns)
-
-    --removes any spawn points that aren't from the set preset
-    for _, Spawn: BasePart in KillerSpawns do
-        if Spawn:GetAttribute("Index") == nil or Spawn:GetAttribute("Index") ~= Index then
-            Spawn:Destroy()
-        end
-    end
-    for _, Spawn: BasePart in SurvSpawns do
-        if Spawn:GetAttribute("Index") == nil or Spawn:GetAttribute("Index") ~= Index then
-            Spawn:Destroy()
-        end
-    end
-
     --i think this is used idk lol but it's useful
     self.CurrentMap = MapInstance
     
