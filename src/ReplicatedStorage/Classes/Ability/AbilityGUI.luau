@@ -82,7 +82,7 @@ function AbilityGUI.InitGUI()
         if Ability.Uses then
             JanitorInstance:Add(Ability.ModuleCode.Signals.ChargesChanged:Connect(function(amount: number)
                 Ability.Uses.Text = tostring(amount)
-            end))
+            end), "Disconnect")
         end
 
         if Ability.Timer then
@@ -103,11 +103,11 @@ function AbilityGUI.InitGUI()
             if Ability.Timer then
                 Ability.Timer.TextTransparency = 1
             end
-        end))
+        end), "Disconnect")
 
         JanitorInstance:Add(Ability.Interactor.MouseButton1Click:Connect(function()
             Ability.ModuleCode:AttemptUse()
-        end))
+        end), "Disconnect")
     end
 end
 

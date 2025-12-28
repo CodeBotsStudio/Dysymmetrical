@@ -17,7 +17,6 @@ function FootstepPlayer.PlayFootstep(player: Player, Anchor: BasePart)
 	Sounds.PlaySound(FootstepPlayer.ControlledCharacters[player.UserId] or FootstepPlayer.DefaultSFXID, {
 		MinPitch = 0.9,
 		MaxPitch = 1.05,
-	}, {
 		Position = Anchor.Position - Vector3.new(0, 3, 0),
 	})
 end
