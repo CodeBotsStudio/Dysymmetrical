@@ -44,6 +44,7 @@ function Sprinting:ReloadAnimation(animId: string)
 		self.FootstepConnection:Disconnect()
 	end
 	self.SprintTrack = Utils.Character.LoadAnimationFromID(self.Char, animId)
+	self.SprintTrack.Priority = Enum.AnimationPriority.Movement
 	self.FootstepConnection = self.SprintTrack:GetMarkerReachedSignal("Footstep"):Connect(function()
 		FootstepPlayer.PlayFootstep(LocalPlayer, self.HRP)
 	end)
@@ -88,9 +89,9 @@ function Sprinting:Init()
 	end
 	
 	local char = LocalPlayer.Character
-	local HumanoidRootPart: BasePart = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
+	local Humanoid = char:FindFirstChildWhichIsA("Humanoid")
+	local HumanoidRootPart: BasePart = char:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
 	self.HRP = HumanoidRootPart
-	local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
 
 	self.Char = char
 
@@ -104,7 +105,7 @@ function Sprinting:Init()
 	local FOVManager = require(PlayerAttributeScripts.FOVManager)
 	self.FOVManager = FOVManager
 
-	local Role = Utils.Instance.FindFirstChild(char, "Role")
+	local Role = char:FindFirstChild("Role")
 	
 	local StaminaValue = char.PlayerAttributes.Stamina
 	self.MaxStamina = char.PlayerAttributes.MaxStamina

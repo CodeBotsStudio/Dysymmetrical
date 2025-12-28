@@ -3,7 +3,6 @@ return {
         local Players = game:GetService("Players")
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-        local Utils = require(ReplicatedStorage.Modules.Utils)
         local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
         local Character = Players.LocalPlayer.Character
@@ -16,7 +15,7 @@ return {
             end
         end
 
-        local Role = Utils.Instance.FindFirstChild(Character, "Role")
+        local Role = Character:FindFirstChild("Role")
         ToggleTheme(Role.Value)
         Role.Changed:Connect(function(Value: string)
             ToggleTheme(Value)

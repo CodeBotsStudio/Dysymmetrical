@@ -20,7 +20,7 @@ function EffectViewer:Init()
 end
 
 function EffectViewer:_SetupUI(UI: Frame, char: Model)
-    if Utils.Instance.FindFirstChild(char, "Role").Value == "Spectator" then
+    if char:FindFirstChild("Role").Value == "Spectator" then
         UI:Destroy()
         return
     end

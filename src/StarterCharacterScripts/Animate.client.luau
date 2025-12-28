@@ -167,7 +167,7 @@ script.ChildRemoved:Connect(scriptChildModified)
 
 -- Clear any existing animation tracks
 -- Fixes issue with characters that are moved in and out of the Workspace accumulating tracks
-local animator = if Humanoid then Humanoid:FindFirstChildOfClass("Animator") else nil
+local animator = if Humanoid then Humanoid:FindFirstChildWhichIsA("Animator") else nil
 if animator then
 	local animTracks = animator:GetPlayingAnimationTracks()
 	for _, track in ipairs(animTracks) do
@@ -262,7 +262,7 @@ function playAnimation(animName, transitionTime, humanoid)
 		currentAnimSpeed = 1.0
 
 		-- load it to the humanoid; get AnimationTrack
-		currentAnimTrack = humanoid:LoadAnimation(anim)
+		currentAnimTrack = animator:LoadAnimation(anim)
 		currentAnimTrack.Priority = Enum.AnimationPriority.Core
 
 		-- play the animation
@@ -316,7 +316,7 @@ function playToolAnimation(animName, transitionTime, humanoid, priority)
 		end
 
 		-- load it to the humanoid; get AnimationTrack
-		toolAnimTrack = humanoid:LoadAnimation(anim)
+		toolAnimTrack = animator:LoadAnimation(anim)
 		if priority then
 			toolAnimTrack.Priority = priority
 		end
@@ -586,6 +586,5 @@ playAnimation("idle", 0.1, Humanoid)
 pose = "Standing"
 
 while Figure.Parent ~= nil do
-	local _, time = wait(0.1)
-	move(time)
+	move(task.wait(0.1))
 end

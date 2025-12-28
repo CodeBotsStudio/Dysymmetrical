@@ -28,8 +28,9 @@ function QueryHitboxVisibility._CharSetup(char: Model)
             return
         end
 
-        if Utils.Instance.FindFirstChild(char, "Hitboxes", 3) then
-            for _, Hitbox in char.Hitboxes:GetChildren() do
+        local Hitboxes = char:FindFirstChild("Hitboxes")
+        if Hitboxes then
+            for _, Hitbox in Hitboxes:GetChildren() do
                 if not Hitbox:IsA("BasePart") then
                     continue
                 end

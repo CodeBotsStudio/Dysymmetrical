@@ -25,8 +25,8 @@ return {
 				end
 
 				local rootPart = humanoid.RootPart
-				local torso = Utils.Instance.FindFirstChild(character, "Torso", 0.5) or Utils.Instance.FindFirstChild(character, "LowerTorso", 0.5) :: BasePart
-				local head = Utils.Instance.FindFirstChild(character, "Head") :: BasePart
+				local torso: BasePart = character:FindFirstChild("Torso") or character:FindFirstChild("LowerTorso")
+				local head: BasePart = character:FindFirstChild("Head")
 
 				local joints: {[string]: Motor6D} = {
 					RootJoint = rootPart:FindFirstChild("RootJoint") or torso:FindFirstChild("Root"),

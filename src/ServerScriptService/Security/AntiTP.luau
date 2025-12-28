@@ -36,8 +36,8 @@ function AntiTP:Init()
 end
 
 function AntiTP:_SetupCharacter(Player: Player, Character: Model)
-    local HRP = Utils.Instance.FindFirstChild(Character, "HumanoidRootPart")
-    local Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
+    local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
+    local HRP = Character:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
 
     local LastPos = HRP.Position
 

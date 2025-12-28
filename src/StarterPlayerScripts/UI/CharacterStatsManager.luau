@@ -26,7 +26,7 @@ function CharacterStatsManager:_InitUI(Char: Model, UI: Frame)
         self.UI:Destroy()
     end
 
-    if Utils.Instance.FindFirstChild(Char, "Role").Value == "Spectator" then return end
+    if Char:FindFirstChild("Role").Value == "Spectator" then return end
 
     self.UI = UI
     UI.Parent = LocalPlayer.PlayerGui.PlayerStats

@@ -2,7 +2,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
@@ -15,7 +14,7 @@ local SpeedManager = {
 
 function SpeedManager:Init()
 	local char = Players.LocalPlayer.Character
-	local humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
+	local humanoid = char:FindFirstChildWhichIsA("Humanoid")
 
 	self.Janitor = Janitor.new()
 	self.Janitor:LinkToInstance(char)

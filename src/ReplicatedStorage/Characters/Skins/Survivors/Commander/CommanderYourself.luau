@@ -5,7 +5,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Character = require(ReplicatedStorage.Classes.Character)
-local Utils = require(ReplicatedStorage.Modules.Utils)
 
 return Character.CreateSkin("Survivor", "Commander", {
     Config = {
@@ -21,6 +20,6 @@ return Character.CreateSkin("Survivor", "Commander", {
             return
         end
     
-        Utils.Instance.FindFirstChild(Char, "Humanoid"):ApplyDescription(Players:GetHumanoidDescriptionFromUserId(self.Owner.UserId))
+        Char:FindFirstChildWhichIsA("Humanoid"):ApplyDescription(Players:GetHumanoidDescriptionFromUserId(self.Owner.UserId))
     end,
 })

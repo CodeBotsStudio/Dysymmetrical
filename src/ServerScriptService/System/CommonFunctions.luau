@@ -95,19 +95,20 @@ function CommonFunctions.DamagePlayer(DamageSettings: DamagePlayerSettings)
 	--correction: the hitboxes in Forsaken are FULLY server-handled, but it doesn't lag because THEIR GAME SOMEHOW DOESN'T LAG AT ALL. WHAT????
 	--quick thing: hitboxes are now fully server-sided. yup. i had to. :(
 
-	if Utils.Instance.FindFirstChild(Char, "Effects.StunSpawnProtection", 0) and not DamageSettings.SourcePlayer.Character:GetAttribute("BypassStunProtection") then
+	if DamageSettings.Damage >= 0 and Utils.Instance.FindFirstChild(Char, "Effects.StunSpawnProtection", 0) and not DamageSettings.SourcePlayer.Character:GetAttribute("BypassStunProtection") then
 		return
 	end
 
-	local Role = Utils.Instance.FindFirstChild(Char, "Role", 0.2)
+	local Role = Char:FindFirstChild("Role")
 	if Char:FindFirstChild("Killer") and Role and Role.Value == "Survivor" then
 		Char.Killer.Value = DamageSettings.SourcePlayer
 	end
 	
 	DamageSettings.Reason = DamageSettings.Reason or "HAHAHA" --OnlyIvo
 
-	if Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0) and DamageSettings.Damage > 0 then
-		DamageSettings.Damage /= 0.1 * Char.Effects.Resistance.Value + 1 --since lvl 1 should do the trick already
+	local ResistanceValue = Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0)
+	if ResistanceValue and DamageSettings.Damage > 0 then
+		DamageSettings.Damage /= 0.1 * ResistanceValue + 1 --since lvl 1 should do the trick already
 	end
 
 	DamageSettings.TargetHumanoid:TakeDamage(DamageSettings.Damage)

@@ -49,9 +49,13 @@ function PlayerManager:Init()
 		end
 
 		Utils.Character.ObserveCharacter(plr, function(char)
+			task.spawn(function()
+				require(char:FindFirstChild("Server"):FindFirstChild("ScriptInitter")):Init()
+			end)
+
 			AntiFly:_SetupCharacter(plr, char)
 			
-			local Role = Utils.Instance.FindFirstChild(char, "Role")
+			local Role = char:FindFirstChild("Role")
 
 			if char:GetAttribute("BaseSpeed") == nil then
 				char:SetAttribute("BaseSpeed", 10.5)
@@ -59,7 +63,7 @@ function PlayerManager:Init()
 
 			char.Parent = PlayerFolder
 			
-			local Humanoid = Utils.Instance.FindFirstChild(char, "Humanoid")
+			local Humanoid = char:FindFirstChildWhichIsA("Humanoid")
         	Humanoid.BreakJointsOnDeath = false
 
 			local KillerValue
@@ -95,7 +99,7 @@ function PlayerManager:Init()
 						end)
 					end)
 				else
-					local HRP = Utils.Instance.FindFirstChild(char, "HumanoidRootPart")
+					local HRP = char:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
 					local StunSP = StunSPPrefab:Clone()
 					StunSP.Parent = HRP
 					local Weld = Instance.new("Weld")
@@ -248,7 +252,7 @@ function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	end
 
 	local function LoadEmpty()
-		plr:LoadCharacter()
+		plr:LoadCharacterAsync()
 
 		--creates the role asap
 		local Role = Instance.new("StringValue")
@@ -288,7 +292,7 @@ function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 				return
 			end
 			
-			plr:LoadCharacter()
+			plr:LoadCharacterAsync()
 			return
 		end
 

@@ -35,7 +35,7 @@ return {
                 return
             end
 
-            local Role = Utils.Instance.FindFirstChild(Char, "Role")
+            local Role = Char:FindFirstChild("Role")
             if Role.Value ~= "Killer" then
                 return
             end

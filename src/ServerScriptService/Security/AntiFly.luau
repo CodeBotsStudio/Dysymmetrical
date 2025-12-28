@@ -20,7 +20,7 @@ function AntiFly:Init()
 end
 
 function AntiFly:_SetupCharacter(player: Player, char: Model)
-    local root = Utils.Instance.FindFirstChild(char, "Humanoid").RootPart
+    local root = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChildWhichIsA("Humanoid").RootPart
 
     local Params = RaycastParams.new()
     Params.FilterType = Enum.RaycastFilterType.Exclude

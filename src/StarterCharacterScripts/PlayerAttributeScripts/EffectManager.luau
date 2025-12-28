@@ -25,7 +25,7 @@ function EffectManager:Init()
         end
     end))
 
-    local Effects = Utils.Instance.FindFirstChild(Char, "Effects")
+    local Effects = Char:FindFirstChild("Effects")
 
     self.Janitor:Add(Effects.ChildAdded:Connect(function(EffectValue: Instance)
         if EffectValue:IsA("NumberValue") then

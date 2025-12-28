@@ -1,3 +1,6 @@
+--!nocheck
+
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
@@ -5,8 +8,8 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 return {
     Init = function(_self)
-        local char = script.Parent.Parent.Parent
-        local role = Utils.Instance.FindFirstChild(char, "Role")
+        local char = Players.LocalPlayer.Character
+        local role = char:FindFirstChild("Role")
 
         local threads = {}
 

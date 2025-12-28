@@ -239,12 +239,12 @@ function SideBar:Init()
             if not Menu.UIInstance then
                 return
             end
-            Menu:Toggle(Utils.Instance.FindFirstChild(char, "Role").Value == "Spectator")
+            Menu:Toggle(char:FindFirstChild("Role").Value == "Spectator")
         end)
     end
 
     Utils.Character.ObserveCharacter(LocalPlayer, function(char: Model)
-        self:Toggle(Utils.Instance.FindFirstChild(char, "Role").Value == "Spectator")
+        self:Toggle(char:FindFirstChild("Role").Value == "Spectator")
     end)
 end
 

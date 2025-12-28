@@ -1,5 +1,6 @@
 --!nocheck
 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local TextChatService = game:GetService("TextChatService")
@@ -15,8 +16,8 @@ until success --this means that it has initialized
 
 return {
     Init = function(_)
-        game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function(Char)
-            local IsSpectator = Utils.Instance.FindFirstChild(Char, "Role").Value == "Spectator"
+        Utils.Character.ObserveCharacter(Players.LocalPlayer, function(Char: Model)
+            local IsSpectator = Char:FindFirstChild("Role").Value == "Spectator"
             TextChatService:FindFirstChildOfClass("ChatWindowConfiguration").Enabled = IsSpectator
             StarterGui:SetCore("ResetButtonCallback", IsSpectator)
         end)

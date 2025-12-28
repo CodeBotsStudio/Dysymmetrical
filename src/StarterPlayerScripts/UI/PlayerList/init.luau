@@ -89,7 +89,7 @@ function PlayerList:Init()
     end
 
     Utils.Character.ObserveCharacter(LocalPlayer, function(Char: Model)
-        local Role = Utils.Instance.FindFirstChild(Char, "Role")
+        local Role = Char:FindFirstChild("Role")
         if Role.Value ~= "Spectator" then
             if CurrentPlayerWindow then
                 CurrentPlayerWindow:Hide(true)

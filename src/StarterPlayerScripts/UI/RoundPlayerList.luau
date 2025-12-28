@@ -36,7 +36,7 @@ function RoundPlayerList:Init()
 end
 
 function RoundPlayerList:_InitUI(Char: Model)
-    if Utils.Instance.FindFirstChild(Char, "Role").Value == "Spectator" then
+    if Char:FindFirstChild("Role").Value == "Spectator" then
         return
     end
 
@@ -50,7 +50,7 @@ function RoundPlayerList:_InitUI(Char: Model)
     local Conns: {[string]: RBXScriptConnection} = {}
 
     for _, Character in workspace.Players:GetChildren() do
-        if not Utils.Instance.FindFirstChild(Character, "Role") or Character.Role.Value ~= "Survivor" then
+        if not Character:FindFirstChild("Role") or Character.Role.Value ~= "Survivor" then
             continue
         end
 
@@ -62,7 +62,7 @@ function RoundPlayerList:_InitUI(Char: Model)
         --should show the root character's name without caring about the skin
         Card.CharacterName.Text = require(Utils.Instance.GetCharacterModule("Survivor", Character:GetAttribute("CharacterName"))).Config.Name
 
-        local Humanoid: Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
+        local Humanoid: Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
 
         if Character == LocalPlayer.Character then
             Card.PlayerHealth.TextTransparency = 1

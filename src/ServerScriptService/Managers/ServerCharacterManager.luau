@@ -49,7 +49,7 @@ function ServerCharacterManager._InitCharacter(player: Player, charModule: Modul
     local CharacterAbilities = require(Char.PlayerAbilities.CharacterAbilities)
     CharacterAbilities.CharacterModule = module
     
-    local Animate = Utils.Instance.FindFirstChild(Char, "Animate")
+    local Animate = Char:FindFirstChild("Animate")
     Animate.idle.IdleAnim.AnimationId = module.Config.AnimationIDs.IdleAnimation
     Animate.walk.WalkAnim.AnimationId = module.Config.AnimationIDs.WalkAnimation
     Animate.run.RunAnim.AnimationId = module.Config.AnimationIDs.RunAnimation

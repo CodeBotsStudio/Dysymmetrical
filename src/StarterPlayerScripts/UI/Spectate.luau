@@ -64,7 +64,7 @@ function Spectate:Init()
     end)
 
     local function OnCharacterAdded(Player: Player, Character: Model)
-        local Role = Utils.Instance.FindFirstChild(Character, "Role")
+        local Role = Character:FindFirstChild("Role")
 
         if Role.Value == "Spectator" then
 
@@ -151,12 +151,12 @@ function Spectate:_Update()
         return
     end
 
-    local Role = Utils.Instance.FindFirstChild(Char, "Role")
+    local Role = Char:FindFirstChild("Role")
     if Role.Value == "Spectator" then
         return
     end
 
-    local Humanoid = Utils.Instance.FindFirstChild(Char, "Humanoid")
+    local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
     workspace.CurrentCamera.CameraSubject = Humanoid
 
     self.UIInstance.PlayerText.DisplayName.Text = Players:GetPlayerFromCharacter(Char).DisplayName

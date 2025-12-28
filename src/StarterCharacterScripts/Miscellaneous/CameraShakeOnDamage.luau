@@ -9,10 +9,10 @@ return {
     Init = function(_self)
         local Player = Players.LocalPlayer
         local Character = Player.Character
-        if Utils.Instance.FindFirstChild(Character, "Role").Value == "Killer" then
+        if Character:FindFirstChild("Role").Value == "Killer" then
             return
         end
-        local Humanoid = Utils.Instance.FindFirstChild(Character, "Humanoid")
+        local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
 
         local LastValue = Humanoid.Health
         Utils.Instance.ObserveProperty(Humanoid, "Health", function(value: number)

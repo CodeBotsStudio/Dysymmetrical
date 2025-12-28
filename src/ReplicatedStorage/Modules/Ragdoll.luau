@@ -36,7 +36,7 @@ function Ragdoll:Init()
 		end
 		Utils.Player.ObservePlayers(function(Player: Player)
 			Utils.Character.ObserveCharacter(Player, function(Char: Model)
-				AddHumRagdoll(Utils.Instance.FindFirstChild(Char, "Humanoid"))
+				AddHumRagdoll(Char:FindFirstChildWhichIsA("Humanoid"))
 			end)
 		end)
 	else
@@ -85,7 +85,7 @@ function Ragdoll:Init()
 		end
 		Utils.Player.ObservePlayers(function(Player: Player)
 			Utils.Character.ObserveCharacter(Player, function(Char: Model)
-				local Hum = Utils.Instance.FindFirstChild(Char, "Humanoid")
+				local Hum = Char:FindFirstChildWhichIsA("Humanoid")
 				AddHumRagdoll(Hum, Hum.RootPart)
 			end)
 		end)

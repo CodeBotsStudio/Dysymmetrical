@@ -51,15 +51,16 @@ function TerrorRadiusManager:Init()
         return
     end
     local Char = LocalPlayer.Character
-    local Role = Utils.Instance.FindFirstChild(Char, "Role").Value
+    local Role = Char:FindFirstChild("Role").Value
     if Role == "Spectator" then
         return
     end
+    local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
     self.LocalPlayerProps = {
         Role = Role,
         Char = Char,
-        Humanoid = Utils.Instance.FindFirstChild(Char, "Humanoid"),
-        HRP = Utils.Instance.FindFirstChild(Char, "HumanoidRootPart"),
+        Humanoid = Humanoid,
+        HRP = Char:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart,
     }
 
     self.MapAmbience = workspace.Themes:FindFirstChild("MapAmbience")
@@ -311,15 +312,32 @@ function TerrorRadiusManager:_CheckAsKiller(delta: number)
     local ClosestDistance = 50000
 
     for _, char in workspace.Players:GetChildren() do
-        if char ~= self.LocalPlayerProps.Char
-        and char:FindFirstChild("Role") and char.Role.Value == "Survivor"
-        and char:FindFirstChildOfClass("Humanoid").Health > 0
-        and not Utils.Instance.FindFirstChild(char, "Effects.Undetectable", 0) then
+        if char == self.LocalPlayerProps.Char then
+            continue
+        end
+
+        local Hum = char:FindFirstChildWhichIsA("Humanoid")
+        if not Hum or Hum.Health <= 0 then
+            continue
+        end
+
+        local Role = char:FindFirstChild("Role")
+        if not Role or Role.Value == "Survivor" then
+            continue
+        end
+
+        if not Utils.Instance.FindFirstChild(char, "Effects.Undetectable", 0) then
+            continue
+        end
+
+        local Root = char:FindFirstChild("HumanoidRootPart") or Hum.RootPart
+        if not Root then
+            continue
+        end
             
-            local Distance = (Utils.Instance.FindFirstChild(char, "HumanoidRootPart").Position - self.LocalPlayerProps.HRP.Position).Magnitude
-            if ClosestDistance > Distance then
-                ClosestDistance = Distance
-            end
+        local Distance = (Root.Position - self.LocalPlayerProps.HRP.Position).Magnitude
+        if ClosestDistance > Distance then
+            ClosestDistance = Distance
         end
     end
 
