@@ -349,7 +349,7 @@ function SaveManager.Load(Player: Player): Folder
 
 		-- Iterate through equipped emotes
 		for emotename, emote in PlayerData.Equipped.Emotes do
-			if Utils.Instance.GetEmoteModule(emotename) == nil then
+			if Utils.Instance.GetEmoteModule(emote) == nil then
 				continue
 			end
 
