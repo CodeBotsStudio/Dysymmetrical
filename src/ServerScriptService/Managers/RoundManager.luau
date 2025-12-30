@@ -60,7 +60,7 @@ function RoundManager.StartRound()
     end)
 
     --spawns in the map
-    MapManager:GetRandomMap()
+    MapManager.GetRandomMap()
     
     --gets the killers for the round
     for killerIndex = 1, workspace:GetAttribute("KillersAllowed") do
@@ -229,7 +229,7 @@ function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
 
     --removing map and resetting lighting
     task.defer(function()
-        MapManager:DestroyCurrentMap()
+        MapManager.DestroyCurrentMap()
     end)
 
     --duh
