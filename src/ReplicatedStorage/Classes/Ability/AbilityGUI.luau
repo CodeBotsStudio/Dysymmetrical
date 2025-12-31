@@ -1,5 +1,7 @@
 --!nocheck
 
+--it was definitely not 3 am when writing this months ago (excusing the funny comments)
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Ability = require(script.Parent)
@@ -91,7 +93,7 @@ function AbilityGUI.InitGUI()
 
         JanitorInstance:Add(Ability.ModuleCode.Signals.CooldownSet:Connect(function(_cooldownSet: number)
             Ability.Timer.TextTransparency = 0
-            while Ability.ModuleCode.CooldownTimer > 0 do
+            while Ability.Timer and Ability.ModuleCode.CooldownTimer > 0 do
                 -- failsafe if the ui gets destroyed for any reason
                 if not Ability.Timer then
                     break
@@ -122,7 +124,7 @@ function AbilityGUI._SetupAbilityFrame(Ability): Ability
     AbilityContainer.Parent = Ability.Parent
 
     --what if i put skibidi toilet in here -Quinn definetly not Dyscarn
-    local RenderImage: ImageLabel = AbilityContainer:FindFirstChildOfClass("ImageLabel")
+    local RenderImage: ImageLabel = AbilityContainer:FindFirstChildWhichIsA("ImageLabel")
     RenderImage.Image = Ability.RenderImage
     if Ability.UICorner then
         local Corner = Instance.new("UICorner")
@@ -165,7 +167,7 @@ function AbilityGUI._UpdateAbilityFrameInput(Ability: Ability, InputManager, Cur
         Ability.Keybind.TextTransparency = 0
 
         --slash isn't built different now nvm :(
-        local Input = InputManager["DefaultActions"][Ability.ModuleCode.InputName]
+        local Input = InputManager.DefaultActions[Ability.ModuleCode.InputName]
         local Key = Input[CurrentScheme.."Key"] or Input["InputType"]
 
         --WOW THANKS DYSCARN FOR MAKING A COOL INPUT MANAGER THAT ACTUALLY WORKS AND SHOWS YOUR `preferred input device` // you're welcome Dyscarn
@@ -173,10 +175,11 @@ function AbilityGUI._UpdateAbilityFrameInput(Ability: Ability, InputManager, Cur
         if CurrentScheme == "Gamepad" then
             Ability.Keybind.Text = Ability.Keybind.Text:gsub("Button", "")
         end
-    else
-        --NEVER SHOW UP ON MY FACE AGAIN!!!!
-        Ability.Keybind.TextTransparency = 1
+
+        return
     end
+    --NEVER SHOW UP ON MY FACE AGAIN!!!!
+    Ability.Keybind.TextTransparency = 1
 end
 
 return AbilityGUI
