@@ -35,8 +35,8 @@ function MapManager.GetRandomMap(): Model | Folder
     --chooses a random map
     local SelectedMap = MapManager.MapPrefabs[Rand:NextInteger(1, #MapManager.MapPrefabs)]
     --if it's the same as the one before it chooses a different one
-    if not MapManager.CanRepeatMap and MapManager.LastMap and #MapManager.MapPrefabs > 1 and MapManager.LastMap == SelectedMap then
-        while SelectedMap == SelectedMap do
+    if not MapManager.CanRepeatMap and MapManager.LastMap and #MapManager.MapPrefabs > 1 then
+        while SelectedMap == MapManager.LastMap do
             SelectedMap = MapManager.MapPrefabs[Rand:NextInteger(1, #MapManager.MapPrefabs)]
         end
     end
@@ -51,6 +51,22 @@ function MapManager.GetRandomMap(): Model | Folder
         local InGameFolder = Instance.new("Folder")
         InGameFolder.Name = "InGame"
         InGameFolder.Parent = MapInstance
+    end
+
+    --checks if there's more than 1 layout available
+    local Spawnpoints = MapInstance:FindFirstChild("Map"):FindFirstChild("SpawnPoints")
+    local AvailableLayouts = Spawnpoints:GetChildren()
+    if #AvailableLayouts > 2 then
+        --chooses a random layout from the spawnpoint pool
+        local ChosenLayout = AvailableLayouts[Rand:NextInteger(1, #AvailableLayouts)]
+        --destroys the rest to ensure that the chosen one is the only one available
+        for _, Layout in AvailableLayouts do
+            if Layout == ChosenLayout then
+                continue
+            end
+
+            Layout:Destroy()
+        end
     end
 
     --i think this is used idk lol but it's useful

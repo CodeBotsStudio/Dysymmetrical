@@ -54,8 +54,8 @@ function ServerCharacterManager._PositionCharacter(Char: Model, charType: "Survi
         return
     end
 
-    --will get a random layout
-    SpawnPoints = SpawnPoints[Rand:NextInteger(1, #SpawnPoints)]
+    --will get a random layout if there's more than 1 available (which there shouldn't)
+    SpawnPoints = SpawnPoints[#SpawnPoints > 1 and Rand:NextInteger(1, #SpawnPoints) or 1]
     local LayoutName = SpawnPoints.Name
     --will try to get the spawn points for the character's specific role
     SpawnPoints = SpawnPoints:FindFirstChild(charType.."s")
