@@ -270,7 +270,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                 -- Configure damage to be affected by the Resistance effect.
                 local Damage = Config.Damage * (1 - Resistance / 5)
 
-                local function DamageHumanoid(Humanoid)
+                local function DamageHumanoid()
                     CommonFunctions.DamagePlayer({
                         SourcePlayer = SourcePlayer,
                         TargetHumanoid = Humanoid,
@@ -342,7 +342,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                     -- Play execution animations, if applicable
                     if not (Char.Role.Value == "Killer" and Config.ExecuteOnKill and not TargetCharacter:GetAttribute("ExecutionsDisabled")) then
                         -- If not, just inflict the damage as usual.
-                        DamageHumanoid(Humanoid)
+                        DamageHumanoid()
 
                         return
                     end
@@ -353,7 +353,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                     task.defer(function() -- Switched from task.spawn() to task.defer() to avoid task scheduler conflicts
                         -- If the user doesn't have valid execution animations to use, just inflict damage.
                         if not ExecutionAnimsAvailable then
-                            DamageHumanoid(Humanoid)
+                            DamageHumanoid()
 
                             return
                         end
@@ -392,7 +392,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 
                         -- If there are no execution animations to use, for one reason or another, resort to just killing the target and flinging it really far.
                         if not ExecutionAnim then
-                            DamageHumanoid(Humanoid)
+                            DamageHumanoid()
 
                             return
                         end
@@ -467,7 +467,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                 end
 
                 -- Inflict the hitbox's damage if possible and do some knockback if existent.
-                DamageHumanoid(Humanoid)
+                DamageHumanoid()
 
                 -- If the hitbox applies effects, apply them.
                 if Config.EffectsToApply then
