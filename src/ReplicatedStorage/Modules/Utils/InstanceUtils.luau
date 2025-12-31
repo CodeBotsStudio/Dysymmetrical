@@ -233,7 +233,11 @@ end
 
 --- Gets a character's module from a specific type.
 --- It also supports skins using `skinName` as an optional last parameter.
-function InstanceUtils.GetCharacterModule(charType: "Survivor" | "Killer", charName: string, skinName: string?): ModuleScript
+function InstanceUtils.GetCharacterModule(charType: "Survivor" | "Killer", charName: string, skinName: string?, doWarn: boolean?): ModuleScript
+	if doWarn == nil then
+		doWarn = true
+	end
+
     local CharFolder = ReplicatedStorage.Characters
 
     local Module
@@ -259,8 +263,10 @@ function InstanceUtils.GetCharacterModule(charType: "Survivor" | "Killer", charN
             skinName = "[N/A]"
         end
 
-        warn("Can't find character module! ("..charType..", "..charName..", "..skinName..")")
-        warn(debug.traceback())
+		if doWarn then
+        	warn("Can't find character module! ("..charType..", "..charName..", "..skinName..")")
+        	warn(debug.traceback())
+		end
         return
     end
 
