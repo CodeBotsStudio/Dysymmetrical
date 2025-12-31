@@ -191,7 +191,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
             for _index, collidedpart in Damaged do
 
                 -- Determine whether or not the part in question belongs to a character by searching for a "humanoid" object sibling.
-                local Humanoid = collidedpart.Parent:FindFirstChildOfClass("Humanoid")
+                local Humanoid = collidedpart.Parent:FindFirstChildWhichIsA("Humanoid")
 
                 if not Humanoid or table.find(Props.HumanoidsHit, Humanoid) then
                     continue
@@ -270,6 +270,17 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                 -- Configure damage to be affected by the Resistance effect.
                 local Damage = Config.Damage * (1 - Resistance / 5)
 
+                local function DamageHumanoid(Humanoid)
+                    CommonFunctions.DamagePlayer({
+                        SourcePlayer = SourcePlayer,
+                        TargetHumanoid = Humanoid,
+                        Damage = Damage,
+                        Reason = Config.Reason,
+                        KnockbackDirection = CheckPart.CFrame.LookVector,
+                        KnockbackMagnitude = Config.Knockback,
+                    })
+                end
+
                 -- If a HumanoidRootPart exists as a sibling to the humanoid object, proceed with registering a hit.
                 if not HRoot then
                     continue
@@ -331,13 +342,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                     -- Play execution animations, if applicable
                     if not (Char.Role.Value == "Killer" and Config.ExecuteOnKill and not TargetCharacter:GetAttribute("ExecutionsDisabled")) then
                         -- If not, just inflict the damage as usual.
-                        CommonFunctions.DamagePlayer({
-                            SourcePlayer = SourcePlayer,
-                            TargetHumanoid = Humanoid,
-                            Reason = Config.Reason,
-                            KnockbackDirection = CheckPart.CFrame.LookVector,
-                            KnockbackMagnitude = Config.Knockback,
-                        })
+                        DamageHumanoid(Humanoid)
 
                         return
                     end
@@ -348,13 +353,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                     task.defer(function() -- Switched from task.spawn() to task.defer() to avoid task scheduler conflicts
                         -- If the user doesn't have valid execution animations to use, just inflict damage.
                         if not ExecutionAnimsAvailable then
-                            CommonFunctions.DamagePlayer({
-                                SourcePlayer = SourcePlayer,
-                                TargetHumanoid = Humanoid,
-                                Reason = Config.Reason,
-                                KnockbackDirection = CheckPart.CFrame.LookVector,
-                                KnockbackMagnitude = Config.Knockback,
-                            })
+                            DamageHumanoid(Humanoid)
 
                             return
                         end
@@ -393,13 +392,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 
                         -- If there are no execution animations to use, for one reason or another, resort to just killing the target and flinging it really far.
                         if not ExecutionAnim then
-                            CommonFunctions.DamagePlayer({
-                                SourcePlayer = SourcePlayer,
-                                TargetHumanoid = Humanoid,
-                                Reason = Config.Reason,
-                                KnockbackDirection = CheckPart.CFrame.LookVector,
-                                KnockbackMagnitude = Config.Knockback,
-                            })
+                            DamageHumanoid(Humanoid)
 
                             return
                         end
@@ -473,16 +466,8 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 
                 end
 
-                -- If the hitbox deals damage or healing, inflict it and do some knockback if existent.
-                if Damage ~= 0 then
-                    CommonFunctions.DamagePlayer({
-                        SourcePlayer = SourcePlayer,
-                        TargetHumanoid = Humanoid,
-                        Reason = Config.Reason,
-                        KnockbackDirection = CheckPart.CFrame.LookVector,
-                        KnockbackMagnitude = Config.Knockback,
-                    })
-                end
+                -- Inflict the hitbox's damage if possible and do some knockback if existent.
+                DamageHumanoid(Humanoid)
 
                 -- If the hitbox applies effects, apply them.
                 if Config.EffectsToApply then
