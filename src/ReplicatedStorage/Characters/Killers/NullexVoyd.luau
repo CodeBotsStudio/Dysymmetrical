@@ -10,6 +10,7 @@ local SoundService = game:GetService("SoundService")
 local CommonFunctions = RunService:IsServer() and require(ServerScriptService.System.CommonFunctions) or nil
 local Character = require(ReplicatedStorage.Classes.Character)
 local Ability = require(ReplicatedStorage.Classes.Ability)
+local Types = require(ReplicatedStorage.Classes.Types)
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
@@ -19,7 +20,7 @@ local MasterSoundGroup = SoundService.SoundGroups.Master
 local SoundFolder = SoundService.TempSounds
 
 --Character Definition
-local NullexVoyd: Character.Killer = Character.CreateKiller({
+local NullexVoyd: Types.Killer = Character.CreateKiller({
     Config = {
         Name = "Nullex Voyd",
         Quote = "Order was the first lie.",

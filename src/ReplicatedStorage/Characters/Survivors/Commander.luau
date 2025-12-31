@@ -8,11 +8,12 @@ local TweenService = game:GetService("TweenService")
 local Character = require(ReplicatedStorage.Classes.Character)
 local Ability = require(ReplicatedStorage.Classes.Ability)
 local Hitbox = require(ReplicatedStorage.Classes.Hitbox)
+local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local CommonFunctions = RunService:IsServer() and require(game:GetService("ServerScriptService").System.CommonFunctions) or nil
 
-local Commander = Character.CreateSurvivor({
+local Commander: Types.Survivor = Character.CreateSurvivor({
     Config = {
         Name = "Commander",
         Quote = "*pyro noises*",
