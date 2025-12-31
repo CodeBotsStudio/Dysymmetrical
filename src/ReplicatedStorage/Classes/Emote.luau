@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local rand = Random.new()
 
+local Types = require(script.Parent.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
@@ -12,41 +13,8 @@ local Network = require(game:GetService("ReplicatedStorage").Modules.Network)
 
 local EmoteClass = {}
 
-export type Emote = {
-    Config: {
-        Name: string,
-        Quote: string,
-        Author: string,
-        Render: string,
-        Price: number,
-    },
-
-    AnimationIds: {string} | string,
-    SoundIds: {[string]: string}? | string?,
-    SpeedMultiplier: number,
-    BaseBehaviourAllowed: boolean,
-
-    AnimationTracks: { [string]: {AnimationTrack} },
-    Init: (self: Emote, owner: Player, animator: Animator) -> (),
-    BaseBehaviour: (self: Emote) -> (),
-    Behaviour: ((self: Emote, character: Model) -> ())?,
-    --- Callback for when the emote stops.
-    OnStop: ((self: Emote, character: Model) -> ())?,
-
-    Animator: Animator,
-    HumanoidRootPart: BasePart,
-    SpeedManager: {any},
-    TurnToMoveDirection: {any},
-
-    TrackPlaying: AnimationTrack,
-    AddConnection: <T>(self: Emote, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
-
-    Owner: Player,
-    Janitor: Janitor.Janitor,
-}
-
 --- Emote preset for customization.
-function EmoteClass.GetDefaultEmoteSettings(): Emote
+function EmoteClass.GetDefaultEmoteSettings(): Types.Emote
     return {
         Config = {
             Name = "Emote",
@@ -61,7 +29,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
         SpeedMultiplier = 0,
         BaseBehaviourAllowed = true,
 
-        AddConnection = function<T>(self: Emote, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
+        AddConnection = function<T>(self: Types.Emote, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
             self.Janitor:Add(Connection,
                 if typeof(Connection) == "thread" then
                     true
@@ -72,7 +40,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
 
         AnimationTracks = {},
         --NOTE: remember to pass the player on init
-        Init = function(self: Emote, player: Player)
+        Init = function(self: Types.Emote, player: Player)
             self.Owner = player
             self.Janitor = Janitor.new()
             self.Janitor:LinkToInstance(self.Owner.Character)
@@ -184,7 +152,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Emote
                 end
             end))
         end,
-        BaseBehaviour = function(self: Emote)
+        BaseBehaviour = function(self: Types.Emote)
             if RunService:IsServer() then return end
 
             if self.BaseBehaviourAllowed then
@@ -216,7 +184,7 @@ end
 --- Creates an emote with the settings specified in `Props`.
 --- 
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
-function EmoteClass.CreateEmote(Props: Emote): Emote
+function EmoteClass.CreateEmote(Props: Types.Emote): Types.Emote
     Props = Props or {}
 
     return Utils.Type.DeepTableOverwrite(EmoteClass.GetDefaultEmoteSettings(), Props)

@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Hitbox = require(script.Parent.Hitbox)
+local Types = require(script.Parent.Types)
 
 local Projectile = {
     DefaultConfig = {
@@ -17,55 +18,10 @@ local Projectile = {
     },
 }
 
---- Holds data for any given projectile
-export type Projectile = {
-    --- The player that created the projectile.
-    SourcePlayer: Player,
-    --- The model of the projectile.
-    --- It has to have a `CollisionBox` part inside of it that acts as a hitbox for `DestroyOnCollision` if it's `true`.
-    --- If it's a model, make a `Pivot` part inside it that represents the center and make it the `PrimaryPart` property.
-    --- Then, weld every other part in the model to it.
-    -- TODO: fix MODEL projectiles since only BasePart projectiles work properly
-    Model: (Model | BasePart),
-    --- The initial position of the projectile.
-    StartingCFrame: CFrame?,
-    --- The speed of the projectile.
-    Speed: number,
-    --- How much the projectile will rotate in its lifetime.
-    --- Use `CFrame.fromEulerAnglesXYZ()` and `math.rad()` for this.
-    FinalRotation: CFrame?,
-    --- How much time in seconds it'll take for the projectile to be removed naturally.
-    Lifetime: number,
-    --- The behaviour of the throw.
-    --- * If it's `Forward`, it'll be thrown relative to the `Forward` vector of `StartingCFrame`.
-    --- * If it's `Mouse`, it'll be thrown towards where the mouse is pointing at.
-    ThrowType: ("Forward" | "Mouse")?,
-    --- The settings of the projectile's hitbox.
-    HitboxSettings: Hitbox.HitboxSettings?,
-    --- If `true`, the projectile will be destroyed whenever it collides with a part, including players.
-    DestroyOnCollision: boolean?,
-
-    --- Callback fired when the projectile is about to be destroyed by `Projectile:Destroy()` when it gets called from colliding with something when `DestroyOnCollision` is `true`.
-    OnHitDestroy: (self: Projectile, Details: ProjectileDetails) -> "PreventDestruction"?,
-    --- Callback fired when the projectile is about to be destroyed by `Projectile:Destroy()`.
-    OnDestroy: (self: Projectile, Details: ProjectileDetails) -> (),
-}
-
-export type ProjectileDetails = {
-    --- The model of the projectile.
-    Model: Instance & (BasePart | Model),
-    --- The tween that acts as the projectile's movement.
-    Tween: Tween,
-    --- The hitbox associated to this projectile.
-    Hitbox: Hitbox.HitboxDetails,
-    --- Destroys this projectile by destroying the model and cancelling the hitbox.
-    Destroy: (self: ProjectileDetails) -> (),
-}
-
 --- Creates a new projectile instance.
 ---
 --- Remember to call this function with a `.` instead of a `:`.
-function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
+function Projectile.New(ProjectileSettings: Types.Projectile): Types.ProjectileDetails
 
     ---Stop this from running on the client (technically, a stubborn exploiter could remove this line and run it anyways, but it'll do nothing regardless.)
     -- "i love writing server shit and putting it in ReplicatedStorage :]" – Dyscarn
@@ -111,12 +67,12 @@ function Projectile.New(ProjectileSettings: Projectile): ProjectileDetails
     local Cancel = false
 
     -- Make a new table for throwing this all into an instance.
-    local ProjectileInstance: ProjectileDetails = {
+    local ProjectileInstance: Types.ProjectileDetails = {
         Model = ProjectileSettings.Model:Clone(),
         Tween = nil,
         -- Create a new hitbox instance with these settings
         Hitbox = Hitbox.New(ProjectileSettings.SourcePlayer, ProjectileSettings.HitboxSettings),
-        Destroy = function(self: ProjectileDetails)
+        Destroy = function(self: Types.ProjectileDetails)
             if ProjectileSettings.OnDestroy then
                 ProjectileSettings:OnDestroy(self)
             end

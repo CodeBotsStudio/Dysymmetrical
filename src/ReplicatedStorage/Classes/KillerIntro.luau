@@ -3,53 +3,11 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Types = require(script.Parent.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
 local KillerIntroClass = {}
-
---- Type used for 2D killer intros.
-export type UiIntro = {
-    --- Connections and threads that make the intro work. Add any `task.delay()`s or `RBXScriptConnection`s here.
-    Connections: {RBXScriptConnection & thread},
-    --- Everything that'll be removed after the intro ends.
-    Disposables: {[string]: Instance},
-
-    --- Function used to prepare the intro to be played.
-    Init: (self: UiIntro) -> (),
-    --- Plays the intro.
-    Play: (self: UiIntro) -> (any),
-    --- Used when the intro ends so that everything gets disposed.
-    Destroy: (self: UiIntro) -> (),
-
-    --- The module of the character for custom usage.
-    Module: any,
-    --- The player's VideoPlayer that'll be used to play the intro's sprite animation if it has one.
-    VideoPlayer: any,
-}
-
---- Type used for 3D killer intros.
-export type AnimatedIntro = {
-    --- Connections and threads that make the intro work. Add any `task.delay()`s or `RBXScriptConnection`s here.
-    Connections: {RBXScriptConnection & thread},
-    --- Everything that'll be removed after the intro ends.
-    Disposables: {[string]: Instance},
-    --- All of the animations that are used in the intro.
-    Animations: {[string]: AnimationTrack},
-
-    --- Function used to prepare the intro to be played.
-    Init: (self: AnimatedIntro) -> (),
-    --- Plays the intro.
-    --- @return The killer rig.
-    --- @return The camera rig.
-    --- @return The length of the camera rig's animation.
-    Play: (self: AnimatedIntro) -> (Model, Model, number),
-    --- Used when the intro ends so that everything gets disposed.
-    Destroy: (self: AnimatedIntro) -> (),
-
-    --- The module of the character for custom usage.
-    Module: any,
-}
 
 --- The settings of a killer intro. Determines which intro to use and what names to display.
 export type IntroSettings = {
@@ -63,12 +21,12 @@ export type IntroSettings = {
 
 --- Creates a new 2D killer intro.
 --- See `IntroSettings`.
-function KillerIntroClass.New2DIntro(Config: IntroSettings, IntroModule: ModuleScript): UiIntro
+function KillerIntroClass.New2DIntro(Config: IntroSettings, IntroModule: ModuleScript): Types.UiIntro
     return {
         Connections = {},
         Disposables = {},
 
-        Init = function(self: UiIntro)
+        Init = function(self: Types.UiIntro)
             if RunService:IsServer() then
                 return
             end
@@ -93,7 +51,7 @@ function KillerIntroClass.New2DIntro(Config: IntroSettings, IntroModule: ModuleS
             end
         end,
 
-        Play = function(self: UiIntro): (any)
+        Play = function(self: Types.UiIntro): (any)
             if RunService:IsServer() then
                 return
             end
@@ -122,7 +80,7 @@ function KillerIntroClass.New2DIntro(Config: IntroSettings, IntroModule: ModuleS
             return self.VideoPlayer
         end,
 
-        Destroy = function(self: UiIntro)
+        Destroy = function(self: Types.UiIntro)
             self.VideoPlayer:Reset()
 
             for _, connection in self.Connections do
@@ -144,13 +102,13 @@ end
 
 --- Creates a new 3D killer intro.
 --- See `IntroSettings`.
-function KillerIntroClass.New3DIntro(Config: IntroSettings): AnimatedIntro
+function KillerIntroClass.New3DIntro(Config: IntroSettings): Types.AnimatedIntro
     return {
         Connections = {},
         Disposables = {},
         Animations = {},
 
-        Init = function(self: AnimatedIntro)
+        Init = function(self: Types.AnimatedIntro)
             if RunService:IsServer() then
                 return
             end
@@ -196,7 +154,7 @@ function KillerIntroClass.New3DIntro(Config: IntroSettings): AnimatedIntro
             end
         end,
 
-        Play = function(self: AnimatedIntro): (Model, Model, number)
+        Play = function(self: Types.AnimatedIntro): (Model, Model, number)
             if RunService:IsServer() then
                 return
             end
@@ -238,7 +196,7 @@ function KillerIntroClass.New3DIntro(Config: IntroSettings): AnimatedIntro
             return self.Disposables.KillerRig, self.Disposables.CameraRig, self.Animations.CameraRig.Length
         end,
 
-        Destroy = function(self: AnimatedIntro)
+        Destroy = function(self: Types.AnimatedIntro)
             for _, connection in self.Connections do
                 if typeof(connection) == "thread" then
                     task.cancel(connection)

@@ -6,6 +6,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local TimeManager = RunService:IsServer() and require(ServerScriptService.Managers.TimeManager) or nil
 local CommonFunctions = RunService:IsServer() and require(ServerScriptService.System.CommonFunctions) or nil
+local Types = require(script.Parent.Types)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
@@ -31,80 +32,8 @@ local Hitbox = {
     },
 }
 
---- Settings type for all hitboxes.
-export type HitboxSettings = {
-    --- Size of the hitbox in studs.
-    Size: Vector3,
-    --- Offset for the assigned CFrame in the settings. Useful to e.g. move hitbox backwards or forwards for adjusting.
-    CFrameOffset: CFrame?,
-    --- Coordinate Frame of the hitbox. May also be a function to update it dynamically.
-    CFrame: CFrame? | () -> (CFrame)?,
-    --- Damage inflicted to any hit humanoids.
-    Damage: number,
-    --- Determines how long the hitbox will last.
-    Time: number,
-    --- Optional parameter to apply a force to any hit humanoids.
-    Knockback: number?,
-    --- Piercing. If false, the hitbox will stop whenever it hits a humanoid.
-    HitMultiple: boolean?,
-    --- If true, will try to predict the player's velocity & ping to be more accurate.
-    PredictVelocity: boolean?,
-    --- If true, will play an execution animation, killing the hit humanoid afterwards. Should be used with `HitMultiple` being false and only in slashes.
-    ExecuteOnKill: boolean?,
-    --- Info boolean that indicates if this hitbox is originated from a projectile.
-    IsProjectile: boolean?,
-    --- If true, the hitbox will be able to hit anyone.
-    FriendlyFire: boolean?,
-    --- Reason ID for custom behaviours on hit. Please assign this.
-    Reason: string,
-    --- The shape of the hitbox.
-    --- 
-    --- Read `Enum.PartType`.
-    Shape: Enum.PartType?,
-    --- The specific execution animation to use if `ExecuteOnKill` is `true`.
-    --- 
-    --- Will be looked up automatically if this isn't set.
-    --- 
-    --- TODO: **Fill this field with examples as this property is a bit weird to use and research is needed.**
-    ExecutionAnimation: string?,
-    --- Optional parameter to specify certain status effects that'll be applied to whoever's hit.
-    EffectsToApply: {{
-        --- Name of the effect in the files.
-		Name: string,
-        --- Desired level to grant.
-		Level: number?,
-        --- How long it'll last.
-		Duration: number?,
-        --- If in a subfolder, specify it.
-		Subfolder: string?,
-	}}?,
-    --- Any callbacks for events fired in the hitbox's functionality.
-    -- TODO: write what connections there are and what they do
-    Connections: {[string]: (any?) -> ()}?,
-}
-
---- Details on a hitbox's current stats
-export type HitboxDetails = {
-    --- The humanoids the hitbox has already hit.
-    HumanoidsHit: {Humanoid},
-    --- The player that created this hitbox.
-    Creator: Player,
-    --- The damage this hitbox deals.
-    Damage: number,
-    --- The time that's passed since the creation of the hitbox.
-    TimePast: number,
-    --- If the hitbox has been cancelled.
-    Cancelled: boolean,
-    --- The multiple connections of this hitbox to detect if the character gets stunned or destroyed.
-    Connections: {RBXScriptConnection},
-    --- Cancels the hitbox and destroys it.
-    --- 
-    --- Call this with a `:`.
-    Cancel: (self: HitboxDetails) -> (),
-}
-
 --- Creates a new hitbox, assigning it to a specific player.
-function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
+function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.HitboxDetails
     -- Prevent this from normally running on the client
     --i love writing server shit and putting it in ReplicatedStorage :] -dys
     if not RunService:IsServer() then
@@ -154,7 +83,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
     local Effects = Char.Effects
 
     -- Initialize a property table for storing some important details about the hitbox that we'll want to fetch later; additionally, make a useful cancelling function, also for later.
-    local Props: HitboxDetails = {
+    local Props: Types.HitboxDetails = {
         HumanoidsHit = {},
         Creator = SourcePlayer,
         Damage = Config.Damage,
@@ -162,7 +91,7 @@ function Hitbox.New(SourcePlayer: Player, Config: HitboxSettings): HitboxDetails
         Cancelled = false,
         IsProjectile = Config.IsProjectile,
         Connections = {},
-        Cancel = function(Props: HitboxDetails)
+        Cancel = function(Props: Types.HitboxDetails)
             if Props.Cancelled then
                 return
             end

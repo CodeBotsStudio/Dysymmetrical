@@ -6,12 +6,13 @@ local RunService = game:GetService("RunService")
 local Hitbox = require(ReplicatedStorage.Classes.Hitbox)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Ability = require(ReplicatedStorage.Classes.Ability)
+local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local SlashModule = {}
 
 --- Creates a new Slash ability instance. Use this in every killer that you want to have a slash ability in.
-function SlashModule.New(Props: Ability.Ability?): Ability.Ability
+function SlashModule.New(Props: Types.Ability?): Types.Ability
 
 	-- Doesn't require you to unintuitively slot in an empty table for it to work at all– someone was confused about this a bit earlier, so I figured a fix was in order.
 	Props = Props or {}

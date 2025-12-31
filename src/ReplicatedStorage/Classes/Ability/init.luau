@@ -4,7 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
-local Character = require(script.Parent.Character)
+local Types = require(script.Parent.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
@@ -13,168 +13,15 @@ local Signal = require(ReplicatedStorage.Utils.Signal)
 
 local AbilityType = {}
 
---- Class used for character abilities.
-export type Ability = {
-    --- The display name.
-    Name: string,
-    --- The image of the ability in the GUI when playing.
-    RenderImage: string,
-    --- If the image should have a UICorner just in case it's not round.
-    UICorner: boolean,
-    --- If it's passive (to hide it in the GUI).
-    Passive: boolean,
-
-    --- Internal function to initialize the ability's generally used variables and connections.
-    Init: (self: Ability, charModule: any, owner: Player) -> (),
-    --- Empty function to execute extra code right after the ability is initialized using `Init`.
-    ExtraInit: (self: Ability) -> (),
-    --- Empty function to execute extra code right before the ability gets destroyed using `Destroy`.
-    OnRemove: (self: Ability) -> (),
-    --- Reloads the animation to be `newId`.
-    ReloadAnimation: (self: Ability, newId: string) -> (),
-    --- Plays the use animation for this ability. Mainly used internally.
-    PlayUseAnimation: (self: Ability) -> (),
-    --- Destroys the ability, disconnecting any connections it might have, cancelling any threads...
-    Destroy: (self: Ability) -> (),
-
-    --- CLIENT FUNCTION: Attempts to use the ability by checking if it's possible in the first place.
-    AttemptUse: (self: Ability) -> (),
-    --- Modifies the `UsesLeft` property in both client and server.
-    --- 
-    --- Any `Type` other from `"Set"` can be inconsistent in some very rare ping cases.
-    --- 
-    --- <b>SHOULD ONLY BE USED IN SERVER.</b>
-    ChangeAbilityCharges: (self: Ability, Type: "Set" | "Add" | "Take", amount: number) -> (),
-
-    --- The name of the input used for the ability, set up in `InputManager`.
-    InputName: string,
-    --- Literally the behaviour of the ability; what it does. Write your ability here.
-    Behaviour: (self: Ability) -> (),
-
-    --- The animation ID of the use animation.
-    UseAnimation: string,
-    --- The track that `UseAnimation` is tied to.
-    UseAnimationTrack: AnimationTrack,
-    --- Toggle that lets you not play the use animation when using this ability.
-    PlayUseAnimationOnUse: boolean,
-    --- The time it'll take to transition between the currently playing animation and this one and viceversa.
-    --- 
-    --- Overrides `Character.Config.AnimationTransitionTime` for `self.UseAnimation`'s transition time.
-    UseAnimationTransitionTime: number,
-
-    --- The cooldown setting of the ability / how long it takes to recharge. It can also be changed dynamically.
-    Cooldown: number,
-    --- The timer for the cooldown to finish. Don't tamper with this unless you know what you're doing!
-    CooldownTimer: number,
-    --- Will be `true` if the ability is on cooldown.
-    OnCooldown: boolean,
-    --- If `true`, the cooldown of this ability will be automatically applied when using it.
-    AutomaticCooldown: boolean,
-    --- Utility to check if the ability can legally be used.
-    CanUse: (self: Ability) -> boolean,
-    --- Extra, custom conditions to add to `Ability:CanUse()` instead of replacing the latter.
-    --- 
-    --- Must return a `boolean`.
-    UseConditions: (self: Ability) -> boolean,
-    --- Activates this ability's cooldown.
-    --- 
-    --- A custom cooldown can be specified in `duration`.
-    --- If there's nothing set, it'll use `Ability.Cooldown`.
-    SetOnCooldown: (self: Ability, duration: number?) -> (),
-    --- <b>CLIENT FUNCTION:</b> Disables the input of every ability
-    --- 
-    --- The duration of the ability disabling is set by the `Duration` parameter. If it's `nil`, it'll fallback to `Ability.Duration`.
-    --- 
-    --- Will disable the Slash ability if it exists depending on `Ability.DisableSlashOnPerform`, which can be overriden by `DisableSlash`.
-    --- 
-    --- Won't take `DisableOtherAbilitiesOnPerform` into account as that's what calls this function automatically.
-    DisableAllAbilities: (self: Ability, Duration: number?, DisableSlash: boolean?) -> (),
-
-    --- The duration of the ability. Mainly used to disable input until it finishes. Doesn't need to be the literal length.
-    Duration: number,
-
-    --- If `true`, when using this ability, it'll disable every ability for `Duration` time.
-    DisableOtherAbilitiesOnPerform: boolean,
-    --- If `true`, when using this ability, it'll disable the Slash ability for `Duration` time.
-    --- Only works if the character is a killer and if `DisableOtherAbilitiesOnPerform` is `true`.
-    DisableSlashOnPerform: boolean,
-
-    --- The uses / charges left for this ability. Won't matter if uses aren't limited.
-    UsesLeft: number,
-
-    --- Settings for uses / charges.
-    UseSettings: {
-        --- If false, the ability won't care about uses / charges.
-        Limited: boolean,
-        --- Initial uses / charges for an ability when starting a round.
-        InitialUses: number,
-    },
-
-    Signals: {
-        ChargesChanged: Signal.Signal<number>,
-        Used: Signal.Signal<>,
-        CooldownSet: Signal.Signal<number>,
-    },
-
-    --- Adds a connection / thread to the ability's janitor to be disposed of when the owner's character is destroyed.
-    --- 
-    --- Use this to make connections and threads.
-    AddConnection: <T>(self: Ability, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
-    --- Adds a connection / thread to the ability's janitor to be disposed of when the owner's character is destroyed.
-    --- 
-    --- Differs from `Ability:AddConnection()` in that the connections added through this function will be cancelled when the character gets stunned.
-    --- 
-    --- Use this to make connections and threads that can be cancelled when the character is stunned.
-    AddStunnableConnection: <T>(self: Ability, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
-    --- The table containing all connections currently instanced that can be cancelled through a stun.
-    --- 
-    --- Should only be used internally.
-    StunnableConnections: {RBXScriptConnection | thread},
-    --- The owner of the ability.
-    Owner: Player,
-    --- The ability's Janitor instance.
-    --- 
-    --- Used to make cleanups easier.
-    Janitor: Janitor.Janitor,
-    --- The properties of this ability's owner.
-    OwnerProperties: {
-        --this is hybrid (client & server)
-        --- The Character of the owner player. Also gettable through `Owner.Character`.
-        Character: Model,
-        --- The owner's character's HumanoidRootPart instance for usage. Also gettable through `Owner.Character:FindFirstChild("HumanoidRootPart")`.
-        HRP: BasePart,
-        --this is server
-        --- See `ServerScriptService.System.CommonFunctions`.
-        CommonFunctions: any,
-        --the rest are all from client
-        --- See `StarterPlayerScripts.InputManager`.
-        InputManager: any,
-        --- See `StarterCharacterScripts.PlayerAttributeScripts.SpeedManager`.
-        SpeedManager: any,
-        --- See `StarterCharacterScripts.PlayerAttributeScripts.FOVManager`.
-        FOVManager: any,
-        --- See `StarterCharacterScripts.PlayerAttributeScripts.EffectManager`.
-        EffectManager: any,
-        --- See `StarterCharacterScripts.Miscellaneous.EmoteManager`.
-        EmoteManager: any,
-        --- See `StarterCharacterScripts.Miscellaneous.TurnToMoveDirection`.
-        TurnToMoveDirection: any,
-        --- See `StarterCharacterScripts.PlayerAbilities.Default.Sprinting`.
-        Sprinting: any,
-    },
-    --- The source module where the ability comes from. Contains all character info.
-    CharModule: Character.Killer | Character.Survivor,
-}
-
 --- Ability preset for customization.
-function AbilityType.GetDefaultAbilitySettings(): Ability
+function AbilityType.GetDefaultAbilitySettings(): Types.Ability
     return {
         Name = "Ability",
         RenderImage = "rbxassetid://9759886280",
         UICorner = true,
         Passive = false,
         
-        Init = function(self: Ability, charModule: any, plr: Player)
+        Init = function(self: Types.Ability, charModule: Types.Killer | Types.Survivor, plr: Player)
             self.Owner = plr
             self.CharModule = charModule
             self.UsesLeft = self.UseSettings.InitialUses
@@ -328,7 +175,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
         ExtraInit = nil,
         OnRemove = nil,
 
-        ReloadAnimation = function(self: Ability, id: string)
+        ReloadAnimation = function(self: Types.Ability, id: string)
             self.UseAnimationTrack = Utils.Character.LoadAnimationFromID(self.Owner.Character, id)
             local AnimName = self.Name:gsub(" ", "").."UseAnim"
             self.CharModule.GameplayConfig.Cache.Animations[AnimName] = Utils.Character.LoadAnimationFromID(self.Owner.Character, id)
@@ -346,7 +193,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             end
         end,
 
-        Destroy = function(self: Ability)
+        Destroy = function(self: Types.Ability)
             if self.OnRemove then
                 self:OnRemove()
             end
@@ -359,7 +206,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             self.OnCooldown = false
         end,
 
-        AttemptUse = function(self: Ability)
+        AttemptUse = function(self: Types.Ability)
             if RunService:IsServer() then
                 return
             end
@@ -370,7 +217,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             end
         end,
 
-        ChangeAbilityCharges = function(self: Ability, Type: "Add" | "Set" | "Take", amount: number)
+        ChangeAbilityCharges = function(self: Types.Ability, Type: "Add" | "Set" | "Take", amount: number)
             if Type == "Set" then
                 self.UsesLeft = amount
             elseif Type == "Add" then
@@ -385,7 +232,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             end
         end,
         
-        DisableAllAbilities = function(self: Ability, Duration: number?, DisableSlash: boolean?)
+        DisableAllAbilities = function(self: Types.Ability, Duration: number?, DisableSlash: boolean?)
             if RunService:IsServer() then
                 return
             end
@@ -408,7 +255,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             end))
         end,
 
-        SetOnCooldown = function(self: Ability, duration: number?)
+        SetOnCooldown = function(self: Types.Ability, duration: number?)
             if not workspace:GetAttribute("CooldownsEnabled") then
                 return
             end
@@ -462,7 +309,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             self.Signals.CooldownSet:Fire(duration)
         end,
 
-        AddConnection = function<T>(self: Ability, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
+        AddConnection = function<T>(self: Types.Ability, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
             self.Janitor:Add(Connection,
                 if typeof(Connection) == "thread" then
                     true
@@ -474,7 +321,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
         end,
 
         StunnableConnections = {},
-        AddStunnableConnection = function<T>(self: Ability, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
+        AddStunnableConnection = function<T>(self: Types.Ability, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)
             self:AddConnection(Connection)
             table.insert(self.StunnableConnections, Connection)
 
@@ -495,7 +342,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
         AutomaticCooldown = true,
 
         --read
-        CanUse = function(self: Ability): boolean
+        CanUse = function(self: Types.Ability): boolean
             --if it's limited then it should have to have enough uses left
             local EnoughUses = true
             if workspace:GetAttribute("ChargesEnabled") and self.UseSettings.Limited then
@@ -537,7 +384,7 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
             and not OnCooldown
             and self:UseConditions() --any extra conditions added by the ability's definition in `Ability:UseConditions()`
         end,
-        UseConditions = function(_self: Ability): boolean
+        UseConditions = function(_self: Types.Ability): boolean
             return true
         end,
         
@@ -561,11 +408,11 @@ function AbilityType.GetDefaultAbilitySettings(): Ability
     }
 end
 
-function AbilityType.GetDefaultPassiveAbilitySettings()
+function AbilityType.GetDefaultPassiveAbilitySettings(): Types.Ability
     return Utils.Type.DeepTableOverwrite({
         Passive = true,
 
-        Init = function(self: Ability, charModule: any, plr: Player)
+        Init = function(self: Types.Ability, charModule: Types.Killer | Types.Survivor, plr: Player)
             self.Owner = plr
             self.CharModule = charModule
             self.UsesLeft = self.UseSettings.InitialUses
@@ -615,16 +462,16 @@ function AbilityType.GetDefaultPassiveAbilitySettings()
                 self:ExtraInit()
             end
         end,
-        ReloadAnimation = function(self: Ability, id: string)
+        ReloadAnimation = function(self: Types.Ability, id: string)
             warn("Ability \""..self.Name.."\" is a Passive, so no use animation can be assigned to it!")
         end,
-        PlayUseAnimation = function(self)
+        PlayUseAnimation = function(self: Types.Ability)
             warn("Ability \""..self.Name.."\" is a Passive, so no use animation is available!")
         end,
-        AttemptUse = function(self: Ability)
+        AttemptUse = function(self: Types.Ability)
             warn("Ability \""..self.Name.."\" is a Passive, so it can't be used through input!")
         end,
-        ChangeAbilityCharges = function(self: Ability, _Type: "Add" | "Set" | "Take", _amount: number)
+        ChangeAbilityCharges = function(self: Types.Ability, _Type: "Add" | "Set" | "Take", _amount: number)
             warn("Ability \""..self.Name.."\" is a Passive, so charges aren't applied!")
         end,
 
@@ -632,10 +479,10 @@ function AbilityType.GetDefaultPassiveAbilitySettings()
 
         Cooldown = 0,
 
-        CanUse = function(_self: Ability): boolean
+        CanUse = function(_self: Types.Ability): boolean
             return true
         end,
-        UseConditions = function(_self: Ability): boolean
+        UseConditions = function(_self: Types.Ability): boolean
             return true
         end,
 
@@ -650,7 +497,7 @@ end
 
 --- Creates an ability with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
-function AbilityType.CreateAbility(Props: Ability): Ability
+function AbilityType.CreateAbility(Props: Types.Ability): Types.Ability
     Props = Props or {}
 
     return Utils.Type.DeepTableOverwrite(
