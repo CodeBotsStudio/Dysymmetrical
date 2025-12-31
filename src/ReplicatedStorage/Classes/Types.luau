@@ -259,7 +259,7 @@ export type Survivor = {
         ]=]
         Voicelines: {
             --- The voiceline (s) that'll play at random times while the character isn't saying any other voiceline.
-            Idle: (string | {string} | {[string]: string | {string}})?,
+            Idle: (string | {string})?,
             --[=[
                 The voiceline (s) that'll play when LMS starts.
                 
@@ -273,7 +273,7 @@ export type Survivor = {
                 [string]: string | {string} | {[string]: string | {string}},
             }?,
             --- The voiceline (s) that'll play when the character gets stunned. Yes, you can do this with survivors.
-            Stunned: (string | {string} | {[string]: string | {string}})?,
+            Stunned: (string | {string})?,
 
             [string]: string | {string} | {[string]: string | {string}},
         },
@@ -491,7 +491,7 @@ export type Killer = {
                 [string]: (string | {string}),
             }?,
             --- The voiceline (s) that'll play at random times while the character isn't saying any other voiceline.
-            Idle: (string | {string} | {[string]: string | {string}})?,
+            Idle: (string | {string})?,
             --[=[
                 The voiceline (s) that'll play when LMS starts.
                 
@@ -501,11 +501,11 @@ export type Killer = {
             ]=]
             LMS: {
                 --- The default voiceline (s).
-                Default: string | {string} | {[string]: string | {string}},
+                Default: string | {string},
                 [string]: string | {string} | {[string]: string | {string}},
             }?,
             --- The voiceline (s) that'll play when the character gets stunned.
-            Stunned: (string | {string} | {[string]: string | {string}})?,
+            Stunned: (string | {string})?,
 
             [string]: string | {string} | {[string]: string | {string}},
         },
