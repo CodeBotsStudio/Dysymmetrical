@@ -132,4 +132,14 @@ function PlayerDataUtils.CreateMissingPurchasedSkinValue(SourcePlayer: Player, n
     return SkinFolder
 end
 
+function PlayerDataUtils.GetAchievementObject(SourcePlayer: Player, path: string)
+    local AchievementObject = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Achievements."..path, 5)
+    --TODO: make a fallback to create a missing achievement object
+    -- if not AchievementObject then
+    --     
+    -- end
+
+    return AchievementObject
+end
+
 return PlayerDataUtils

@@ -65,11 +65,7 @@ local function ConvertInstanceTreeToTable(TargetInstance: Instance, Depth: numbe
 	local tree = {}
 
 	-- A cap for maximum allowed depth– leaving it arbitrary feels like a recipe for disaster 
-	if not Depth then 
-		Depth = 0
-	else
-		Depth += 1
-	end
+	Depth = (Depth or -1) + 1
 
 	-- Iterate through all of the instance's children
 	for _index, value in ipairs(TargetInstance:GetChildren()) do
@@ -213,27 +209,37 @@ function SaveManager:Init()
 			-- Go through all achievements, set them up in folders for the player in question.
 			for AchievementGroupCodeName, AchievementGroup in Achievements do
 
-				-- If the specific achievement group doesnt exist, make it.
-				if not ThisPlayerData.Achievements:FindFirstChild(AchievementGroupCodeName) then
+				local Group = ThisPlayerData.Achievements:FindFirstChild(AchievementGroupCodeName)
 
-					local Group = Instance.new("Folder")
+				-- If the specific achievement group doesnt exist, make it.
+				if not Group then
+
+					Group = Instance.new("Folder")
 					Group.Name = AchievementGroupCodeName
 					Group.Parent = ThisPlayerData.Achievements
 
 				end
 
 				-- Go by achievement group, check for achievement-tracking valueobjects.
-				for AchievementCodeName, Achievement in AchievementGroup do
+				for AchievementCodeName, Achievement in AchievementGroup.Achievements do
+
+					if Group:FindFirstChild(AchievementCodeName) then
+						continue
+					end
 
 					-- If the valueobject for tracking this achievement's progress doesn't exist, make it.
-					if Achievement.Requirement and not ThisPlayerData.Achievements[AchievementGroupCodeName]:FindFirstChild(AchievementCodeName) then
+					local AchievementProgress
 
-						local AchievementProgress = Instance.new("NumberValue")
-						AchievementProgress.Name = AchievementCodeName
+					if Achievement.Requirement then
+						AchievementProgress = Instance.new("NumberValue")
 						AchievementProgress.Value = 0
-						AchievementProgress.Parent = ThisPlayerData
-
+					else
+						AchievementProgress = Instance.new("BoolValue")
+						AchievementProgress.Value = false
 					end
+
+					AchievementProgress.Name = AchievementCodeName
+					AchievementProgress.Parent = Group
 
 				end
 

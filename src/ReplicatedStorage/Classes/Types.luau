@@ -836,17 +836,35 @@ export type ProjectileDetails = {
 }
 
 export type Achievement = {
+    --- This achievement's display name.
     Title: string,
+    --- This achievement's description.
+    --- 
+    --- Should generally display *how* to get this achievement.
     Description: string,
+    --- This achievement's *square* icon ID.
     Icon: string,
+    --- The icon for the lock displayed if this achievement hasn't been unlocked if `HideIconIfLocked` is `true`.
+    LockIcon: string?,
+    --- If `true`, the title of this achievement will be displayed as interrogation marks if it hasn't been unlocked.
     HideTitleIfLocked: boolean?,
+    --- If `true`, the description of this achievement will be displayed as interrogation marks if it hasn't been unlocked.
     HideDescriptionIfLocked: boolean?,
+    --- If `true`, the icon of this achievement will be displayed as a lock (defined in `LockIcon`) if it hasn't been unlocked.
     HideIconIfLocked: boolean?,
+    --- The ID of the Roblox badge equivalent to this achievement. **Completely optional.**
     BadgeID: number?,
+    --- The type of reward to grant when granting this achievement if applicable.
     RewardType: "Currency" | "Skin" | "Character" | "Emote",
+    --- Amount of currency to grant when this achievement is granted if `RewardType == "Currency"`.
     Amount: number?,
-    Skin: string?,
+    --- Name of the skin / character / emote to grant when this achievement is granted if `RewardType ~= nil and RewardType ~= "Currency"`.
+    --- 
+    --- For skins, name it like so: `[SkinName][CharacterName]`, e.g. `YourselfCommander`.
+    Item: string?,
+    --- Place in the list of its achievement group.
     LayoutOrder: number,
+    --- Any numeric requirement to automatically grant this achievement (useful for e.g. milestone achievements).
     Requirement: number?,
 }
 

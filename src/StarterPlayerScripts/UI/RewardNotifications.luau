@@ -28,16 +28,20 @@ function RewardNotifications:Init()
         
         Card.ImageContainer.Render.Image = IsAchievement and Info.Icon or Info.Config.Render
 
-        local Text = (TypeLower:find("bought") and "Bought" or "Received").." \""..tostring(Info.Config.Name).."\" "
+        local Text
 
-        if TypeLower:find("emote") then
-            Text = Text.." emote"
-        elseif TypeLower:find("skin") then
-            Text = Text.." skin"
-        elseif TypeLower:find("character") then
-            Text = Text.." character"
-        elseif IsAchievement then
+        if IsAchievement then
             Text = "Achievement granted!"
+        else
+            Text = (TypeLower:find("bought") and "Bought" or "Received").." \""..tostring(Info.Config.Name).."\" "
+
+            if TypeLower:find("emote") then
+                Text = Text.." emote"
+            elseif TypeLower:find("skin") then
+                Text = Text.." skin"
+            elseif TypeLower:find("character") then
+                Text = Text.." character"
+            end
         end
 
         Card.TextContainer.RewardLabel.Text = Text

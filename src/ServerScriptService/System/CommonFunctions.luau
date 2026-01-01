@@ -366,7 +366,7 @@ end
 --- Increments a player's progress of a specific achievement.
 function CommonFunctions.IncrementAchievementProgress(Player: Player, AchievementPath: string, Amount: number)
 	local SplitPath = Utils.Type.SplitStringPath(AchievementPath)
-	local Achievement: Achievements.Achievement = Achievements
+	local Achievement: Types.Achievement = Achievements
 	for _, step in SplitPath do
 		Achievement = Achievement[step]
 		if not Achievement then
@@ -375,23 +375,25 @@ function CommonFunctions.IncrementAchievementProgress(Player: Player, Achievemen
 		end
 	end
 	if not Achievement.Requirement then
-		warn("[CommonFunctions.IncrementAchievementProgress] Achievement from path "..AchievementPath.." doesn't have a numeric requirement!", debug.traceback())
+		warn("[CommonFunctions.IncrementAchievementProgress] Achievement from path "..AchievementPath.." doesn't have a numeric requirement! If this is intentional, make sure to use `CommonFunctions.CompleteAchievement()` instead!", debug.traceback())
 		return
 	end
 
-	local AValue = Utils.Instance.FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath)
+	local AValue = Utils.PlayerData.GetAchievementObject(Player, AchievementPath)
+
 	if AValue.Value + Amount >= Achievement.Requirement then
 		CommonFunctions.CompleteAchievement(Player, AchievementPath)
-	else
-		AValue.Value += Amount
+		return
 	end
+
+	AValue.Value += Amount
 end
 
 --- Grants a player an achievement instantly.
 --- Useful to grant boolean achievements or just complete achievements that have a numeric requirement.
 function CommonFunctions.CompleteAchievement(Player: Player, AchievementPath: string)
 	local SplitPath = Utils.Type.SplitStringPath(AchievementPath)
-	local Achievement: Achievements.Achievement = Achievements
+	local Achievement: Types.Achievement = Achievements
 	for _, step in SplitPath do
 		Achievement = Achievement[step]
 		if not Achievement then
@@ -400,25 +402,10 @@ function CommonFunctions.CompleteAchievement(Player: Player, AchievementPath: st
 		end
 	end
 
-	--TODO: achievement rewards
-	if Achievement.Requirement then
-		Utils.Instance.FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath).Value = Achievement.Requirement
-	else
-		local AValue = Instance.new("BoolValue")
-		AValue.Name = SplitPath[#SplitPath]
-		AValue.Value = true
-		local InstPath = SplitPath[1]
-		for index, step in SplitPath do
-			if index == 1 or index == #SplitPath then
-				continue
-			end
+	Utils.Instance.FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath).Value = Achievement.Requirement or true
 
-			InstPath = InstPath.."."..step
-		end
-		AValue.Parent = Utils.Instance.FindFirstChild(Player, "PlayerData.Achievements."..InstPath)
-	end
-
-	Network:FireClientConnection(Player, "CompletedAchievement", "REMOTE_EVENT", Achievement)
+	--display the reward notification
+	Network:FireClientConnection(Player, "ShowRewardNotification", "REMOTE_EVENT", AchievementPath, "Achievement")
 end
 
 --- Gets a player's permission rank.
@@ -479,14 +466,6 @@ function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, di
         Debris:AddItem(Att, 0.05)
         Debris:AddItem(LinearVel, 0.05)
 	end
-end
-
-function CommonFunctions.GrantAchievementToPlayer(Player: Player, Achievement: Types.Achievement)
-	
-end
-
-function CommonFunctions.ProgressAchievement(Player: Player, Achievement: Types.Achievement, Progress: number)
-	
 end
 
 return CommonFunctions
