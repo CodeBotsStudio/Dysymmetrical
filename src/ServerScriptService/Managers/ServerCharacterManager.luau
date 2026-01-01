@@ -176,7 +176,7 @@ function ServerCharacterManager._InitCharacter(player: Player, charModule: Modul
             return
         end
 
-        local Primary = Utils.Character.GetAliveRootPart(Char)
+        local Primary = Utils.Character.GetRootPart(Char)
         if not Primary then
             return
         end

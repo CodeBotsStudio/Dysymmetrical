@@ -34,6 +34,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
+local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
@@ -86,7 +87,7 @@ type DamagePlayerSettings = {
 --- Handles resistance, weakness...
 function CommonFunctions.DamagePlayer(DamageSettings: DamagePlayerSettings)
     local Char = DamageSettings.TargetHumanoid.Parent
-	local HRP: BasePart = Utils.Character.GetAliveRootPart(Char)
+	local HRP: BasePart = Utils.Character.GetRootPart(Char)
     local targetPos = HRP.Position
 	local TargetPlayer = Players:GetPlayerFromCharacter(Char)
 
@@ -453,7 +454,7 @@ function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, di
 		allowAssembly = true
 	end
 
-	local HRP = Rig:IsA("Model") and Utils.Character.GetAliveRootPart(Rig) or Rig
+	local HRP = Rig:IsA("Model") and Utils.Character.GetRootPart(Rig) or Rig
 
 	-- If the knockback property of the hitbox is greater than 15, fling the target(?) -itrid
 	-- FLINGING GO BOOM -dys
@@ -478,6 +479,14 @@ function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, di
         Debris:AddItem(Att, 0.05)
         Debris:AddItem(LinearVel, 0.05)
 	end
+end
+
+function CommonFunctions.GrantAchievementToPlayer(Player: Player, Achievement: Types.Achievement)
+	
+end
+
+function CommonFunctions.ProgressAchievement(Player: Player, Achievement: Types.Achievement, Progress: number)
+	
 end
 
 return CommonFunctions

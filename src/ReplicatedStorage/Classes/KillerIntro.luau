@@ -120,7 +120,7 @@ function KillerIntroClass.New3DIntro(Config: IntroSettings): Types.AnimatedIntro
             local HRP = Utils.Instance.FindFirstChild(PlayerRig, "HumanoidRootPart")
 
             local KillerRig = PlayerRig:Clone()
-            HRP = Utils.Character.GetAliveRootPart(KillerRig)
+            HRP = Utils.Character.GetRootPart(KillerRig)
             KillerRig.Parent = workspace.TempObjectFolders.Intro
             HRP.Anchored = true
             KillerRig:PivotTo(CFrame.new(0, 10000, 0))

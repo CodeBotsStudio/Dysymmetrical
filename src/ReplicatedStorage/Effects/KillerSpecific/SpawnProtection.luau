@@ -10,14 +10,14 @@ return Effect.CreateEffect({
     Duration = 12,
     ShowInGUI = false,
     ApplyEffect = function(self: Effect.Effect, level: number, char: Model, duration: number)
-        local HRP = Utils.Character.GetAliveRootPart(char)
+        local HRP = Utils.Character.GetRootPart(char)
         local UI = HRP:FindFirstChild("StunSpawnProtection")
         if UI then
             UI:FindFirstChildWhichIsA("ParticleEmitter").Enabled = true
         end
     end,
     RemoveEffect = function(self: Effect.Effect, char: Model)
-        local HRP = Utils.Character.GetAliveRootPart(char)
+        local HRP = Utils.Character.GetRootPart(char)
         local UI = HRP:FindFirstChild("StunSpawnProtection")
         if UI then
             UI:FindFirstChildWhichIsA("ParticleEmitter").Enabled = false

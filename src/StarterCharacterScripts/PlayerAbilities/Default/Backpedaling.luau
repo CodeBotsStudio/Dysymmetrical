@@ -13,7 +13,7 @@ return {
 	Init = function(_)
 		local char = LocalPlayer.Character
 		local Humanoid = char:FindFirstChildWhichIsA("Humanoid")
-		local HumanoidRootPart = Utils.Character.GetAliveRootPart(char)
+		local HumanoidRootPart = Utils.Character.GetRootPart(char)
 
 		local SpeedManager = require(script.Parent.Parent.Parent.PlayerAttributeScripts.SpeedManager)
 

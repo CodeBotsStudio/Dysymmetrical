@@ -90,7 +90,7 @@ function Sprinting:Init()
 	
 	local char = LocalPlayer.Character
 	local Humanoid = char:FindFirstChildWhichIsA("Humanoid")
-	local HumanoidRootPart: BasePart = Utils.Character.GetAliveRootPart(char)
+	local HumanoidRootPart: BasePart = Utils.Character.GetRootPart(char)
 	self.HRP = HumanoidRootPart
 
 	self.Char = char
@@ -157,7 +157,7 @@ function Sprinting:Init()
 					if otherChar == char then
 						continue
 					end
-					local charHRP = Utils.Character.GetAliveRootPart(otherChar)
+					local charHRP = Utils.Character.GetRootPart(otherChar)
 					if not charHRP then continue end
 
 					if (charHRP.Position - HumanoidRootPart.Position).Magnitude <= 110 then

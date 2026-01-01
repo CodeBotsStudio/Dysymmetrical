@@ -1,19 +1,11 @@
-export type Achievement = {
-    Title: string,
-    Description: string,
-    Icon: string,
-    BadgeID: number?,
-    RewardType: "Currency" | "Skin",
-    Amount: number?,
-    Skin: string?,
-    LayoutOrder: number,
-    Requirement: number?,
-}
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Types = require(ReplicatedStorage.Classes.Types)
 
 type AchievementGroup = {
     Title: string,
     LayoutOrder: number,
-    Achievements: {[string]: Achievement}
+    Achievements: {[string]: Types.Achievement}
 }
 
 return {

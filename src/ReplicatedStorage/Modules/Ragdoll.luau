@@ -61,7 +61,7 @@ function Ragdoll:Init()
 
 		local function AddHumRagdoll(Desc: Instance, Primary: BasePart?)
 			local Parent = Desc.Parent
-			Primary = Primary or (Parent and Parent:IsA("Model") and Utils.Character.GetAliveRootPart(Parent))
+			Primary = Primary or (Parent and Parent:IsA("Model") and Utils.Character.GetRootPart(Parent))
 			if Primary and Desc:IsA("Humanoid") then
 				if table.find(self.HandledHumanoids, Desc) then
 					return

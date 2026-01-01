@@ -51,7 +51,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Types.Emote
                 self:AddConnection(Network:SetConnection("PlayEmote", "REMOTE_EVENT", function(plr: Player, emoteName: string, soundId: string)
                     if plr == self.Owner and emoteName == self.Config.Name and not self.Owner.Character:GetAttribute("Emoting") then
                         if soundId and #soundId > 0 then
-                            Sounds.PlaySound(soundId, {Name = "Emote", Parent = Utils.Character.GetAliveRootPart(self.Owner), Looped = true})
+                            Sounds.PlaySound(soundId, {Name = "Emote", Parent = Utils.Character.GetRootPart(self.Owner), Looped = true})
                         end
                         self.Owner.Character:SetAttribute("Emoting", true)
 
@@ -66,7 +66,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Types.Emote
 					if plr == self.Owner and emoteName == self.Config.Name then
                         --removing existing emote using `do ... end` to limit the scope of the variables used here
                         do
-                            local HRP = Utils.Character.GetAliveRootPart(self.Owner)
+                            local HRP = Utils.Character.GetRootPart(self.Owner)
                             local ExistingEmote = HRP and HRP:FindFirstChild("Emote")
                             
                             if ExistingEmote then
@@ -103,7 +103,7 @@ function EmoteClass.GetDefaultEmoteSettings(): Types.Emote
             end
 
             local char = self.Owner.Character
-            self.HumanoidRootPart = Utils.Character.GetAliveRootPart(self.Owner)
+            self.HumanoidRootPart = Utils.Character.GetRootPart(self.Owner)
             self.SpeedManager = require(char.PlayerAttributeScripts.SpeedManager)
             self.TurnToMoveDirection = require(Players.LocalPlayer.PlayerScripts.Miscellaneous.TurnToMoveDirection)
 

@@ -26,7 +26,7 @@ function FootstepPlayer._SetupChar(player: Player, character: Model)
 	if not Humanoid then
 		return
 	end
-	local HRP = Utils.Character.GetAliveRootPart(character)
+	local HRP = Utils.Character.GetRootPart(character)
 	if not HRP then
 		return
 	end

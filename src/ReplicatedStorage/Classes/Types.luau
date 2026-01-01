@@ -135,7 +135,7 @@ export type Ability = {
         Character: Model,
         --- The owner's character's `Humanoid` instance for usage. Also gettable through `Utils.Character.GetAlivePlayerHumanoid(Owner)`.
         Humanoid: Humanoid,
-        --- The owner's character's `HumanoidRootPart` instance for usage. Also gettable through `Utils.Character.GetAliveRootPart(Owner)`.
+        --- The owner's character's `HumanoidRootPart` instance for usage. Also gettable through `Utils.Character.GetRootPart(Owner)`.
         HRP: BasePart,
         --this is server
         --- See `ServerScriptService.System.CommonFunctions`.
@@ -833,6 +833,21 @@ export type ProjectileDetails = {
     Hitbox: HitboxDetails,
     --- Destroys this projectile by destroying the model and cancelling the hitbox.
     Destroy: (self: ProjectileDetails) -> (),
+}
+
+export type Achievement = {
+    Title: string,
+    Description: string,
+    Icon: string,
+    HideTitleIfLocked: boolean?,
+    HideDescriptionIfLocked: boolean?,
+    HideIconIfLocked: boolean?,
+    BadgeID: number?,
+    RewardType: "Currency" | "Skin" | "Character" | "Emote",
+    Amount: number?,
+    Skin: string?,
+    LayoutOrder: number,
+    Requirement: number?,
 }
 
 return {}

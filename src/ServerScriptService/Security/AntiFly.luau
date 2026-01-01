@@ -21,7 +21,7 @@ end
 
 function AntiFly:_SetupCharacter(player: Player)
     local char = player.Character
-    local root = Utils.Character.GetAliveRootPart(player)
+    local root = Utils.Character.GetRootPart(player)
 
     local Params = RaycastParams.new()
     Params.FilterType = Enum.RaycastFilterType.Exclude

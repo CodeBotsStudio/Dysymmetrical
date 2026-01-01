@@ -16,7 +16,7 @@ return {
         task.wait(1)
 
         if role.Value == "Survivor" then
-            local HRP = Utils.Character.GetAliveRootPart(char)
+            local HRP = Utils.Character.GetRootPart(char)
             local SpeedManager = require(char.PlayerAttributeScripts.SpeedManager)
             char.Humanoid.StateChanged:Connect(function(_old: Enum.HumanoidStateType, new: Enum.HumanoidStateType)
                 if new == Enum.HumanoidStateType.Landed then

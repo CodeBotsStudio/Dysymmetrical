@@ -129,7 +129,7 @@ function RoundManager.Callables.PlayIntro()
     RoundManager.Threads["IntroEndingThread"] = task.delay(3, function()
         TimeManager.CanDecreaseTime = true
         for _, player: Player in RoundManager.CurrentRound.PlayersAccepted do
-            Utils.Character.GetAliveRootPart(player).Anchored = false --handled from server
+            Utils.Character.GetRootPart(player).Anchored = false --handled from server
         end
     end)
 end
@@ -376,7 +376,7 @@ function RoundManager.Utils.SetupPlayer(Player: Player, KillerIndex: number)
 
     --anchoring at beginning of round to unanchor later
     task.wait()
-    Utils.Character.GetAliveRootPart(Char).Anchored = true
+    Utils.Character.GetRootPart(Char).Anchored = true
 end
 
 return RoundManager

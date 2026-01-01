@@ -60,7 +60,7 @@ function AbilityType.GetDefaultAbilitySettings(): Types.Ability
                 self.OwnerProperties = {
                     Character = self.Owner.Character,
                     Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
-                    HRP = Utils.Character.GetAliveRootPart(self.Owner),
+                    HRP = Utils.Character.GetRootPart(self.Owner),
                     CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
@@ -108,7 +108,7 @@ function AbilityType.GetDefaultAbilitySettings(): Types.Ability
             self.OwnerProperties = {
                 Character = self.Owner.Character,
                 Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
-                HRP = Utils.Character.GetAliveRootPart(self.Owner),
+                HRP = Utils.Character.GetRootPart(self.Owner),
                 InputManager = require(self.Owner.PlayerScripts.InputManager),
                 SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
                 FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),
@@ -437,7 +437,7 @@ function AbilityType.GetDefaultPassiveAbilitySettings(): Types.Ability
                 self.OwnerProperties = {
                     Character = self.Owner.Character,
                     Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
-                    HRP = Utils.Character.GetAliveRootPart(self.Owner),
+                    HRP = Utils.Character.GetRootPart(self.Owner),
                     CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
@@ -452,7 +452,7 @@ function AbilityType.GetDefaultPassiveAbilitySettings(): Types.Ability
             self.OwnerProperties = {
                 Character = self.Owner.Character,
                 Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
-                HRP = Utils.Character.GetAliveRootPart(self.Owner),
+                HRP = Utils.Character.GetRootPart(self.Owner),
                 InputManager = require(self.Owner.PlayerScripts.InputManager),
                 SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
                 FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),

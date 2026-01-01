@@ -239,7 +239,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
                     if not SkinModel.Humanoid:FindFirstChildOfClass("Animator") then
                         Instance.new("Animator").Parent = SkinModel.Humanoid
                     end
-                    Utils.Character.GetAliveRootPart(SkinModel).Anchored = true
+                    Utils.Character.GetRootPart(SkinModel).Anchored = true
                     SkinModel:PivotTo(CFrame.new(0, 10000, 0) * CFrame.fromEulerAnglesXYZ(0, math.rad(180), 0))
 
                     Camera.CFrame = CFrame.new(0, 10000, 6 * SkinModel:GetExtentsSize().Y)
@@ -920,7 +920,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
                 if not Model.Humanoid:FindFirstChildOfClass("Animator") then
                     Instance.new("Animator").Parent = Model.Humanoid
                 end
-                Utils.Character.GetAliveRootPart(Model).Anchored = true
+                Utils.Character.GetRootPart(Model).Anchored = true
                 Model:PivotTo(CFrame.new(0, 10000, 0) * CFrame.fromEulerAnglesXYZ(0, math.rad(180), 0))
 
                 Camera.CFrame = CFrame.new(0, 10000, 6 * Model:GetExtentsSize().Y)
