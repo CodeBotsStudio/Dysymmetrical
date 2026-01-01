@@ -138,9 +138,9 @@ function SideBar:Init()
             CloseOthersOnOpen = true,
         },
         Achievements = {
-            Render = "rbxassetid://82434587437333",
+            Render = "rbxassetid://113899511427023",
             Type = "Button",
-            InvertedRender = "rbxassetid://113410904986274",
+            InvertedRender = "rbxassetid://70778277265275",
             MenuModule = PlayerUIModules.AchievementsMenu,
             LayoutOrder = 2,
             CloseOnOtherOpen = true,
@@ -219,6 +219,7 @@ function SideBar:Init()
         end)
         Menu.Button = BarButton
 
+        --TODO: replace these variables only if the size is the hidden one to handle resolution changes
         local OriginalSize = BarButton.Size
         local HoverSize = UDim2.fromScale(OriginalSize.X.Scale * 1.2, OriginalSize.Y.Scale * 1.2)
 
@@ -231,6 +232,8 @@ function SideBar:Init()
             TweenService:Create(BarButton, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = HoverSize}):Play()
             -- Why does `TextLabel.AutomaticSize` not fucking work with `TextLabel.TextScaled`? No idea! I'm mentally insane! :D
             -- `TextLabel.TextSize` doesn't either. What world are we living in?
+            -- 
+            -- reading this 2 months later makes me realize i was a dumbass -Dys 2026
             local Size = TextService:GetTextSize(BarButton.Title.Holder.Label.Text, OriginalYLabelBound, BarButton.Title.Holder.Label.Font, BarButton.Title.Holder.Label.AbsoluteSize)
             TweenService:Create(BarButton.Title.Holder, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                 Position = UDim2.new(0.15, Size.X + 56, 0.5, 0)

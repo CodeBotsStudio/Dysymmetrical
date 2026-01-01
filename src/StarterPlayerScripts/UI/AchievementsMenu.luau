@@ -15,6 +15,8 @@ local AchievementsMenu = {
     Opened = false,
 }
 
+local AchievementPrefab = Utils.Instance.FindFirstChild(script, "Achievement") :: Frame
+
 local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function AchievementsMenu:Init()
     if self.UIInstance then
