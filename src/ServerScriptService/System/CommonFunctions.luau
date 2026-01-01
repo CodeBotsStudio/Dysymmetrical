@@ -86,7 +86,7 @@ type DamagePlayerSettings = {
 --- Handles resistance, weakness...
 function CommonFunctions.DamagePlayer(DamageSettings: DamagePlayerSettings)
     local Char = DamageSettings.TargetHumanoid.Parent
-	local HRP: BasePart = Char:FindFirstChild("HumanoidRootPart") or DamageSettings.TargetHumanoid.RootPart
+	local HRP: BasePart = Utils.Character.GetAliveRootPart(Char)
     local targetPos = HRP.Position
 	local TargetPlayer = Players:GetPlayerFromCharacter(Char)
 
@@ -453,7 +453,7 @@ function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, di
 		allowAssembly = true
 	end
 
-	local HRP = Rig:IsA("Model") and Rig:FindFirstChild("HumanoidRootPart") or Rig
+	local HRP = Rig:IsA("Model") and Utils.Character.GetAliveRootPart(Rig) or Rig
 
 	-- If the knockback property of the hitbox is greater than 15, fling the target(?) -itrid
 	-- FLINGING GO BOOM -dys

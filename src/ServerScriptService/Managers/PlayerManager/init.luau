@@ -99,7 +99,7 @@ function PlayerManager:Init()
 						end)
 					end)
 				else
-					local HRP = char:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
+					local HRP = Utils.Character.GetAliveRootPart(char)
 					local StunSP = StunSPPrefab:Clone()
 					StunSP.Parent = HRP
 					local Weld = Instance.new("Weld")
@@ -217,9 +217,9 @@ function PlayerManager.CancelAutoRespawn(plr: Player)
 end
 
 --- Internal: Creates all hitboxes available for a character.
-function PlayerManager._SetupHitboxes(Character)
+function PlayerManager._SetupHitboxes(Character: Model)
 	local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
-	local HumanoidRootPart = Humanoid.RootPart
+	local HumanoidRootPart = Utils.Character.GetAliveRootPart(Character)
 	local HitboxFolder = Instance.new("Folder")
 	HitboxFolder.Name = "Hitboxes"
 	HitboxFolder.Parent = Character

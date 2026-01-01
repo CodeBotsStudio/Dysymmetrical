@@ -59,7 +59,8 @@ function AbilityType.GetDefaultAbilitySettings(): Types.Ability
 
                 self.OwnerProperties = {
                     Character = self.Owner.Character,
-                    HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
+                    Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
+                    HRP = Utils.Character.GetAliveRootPart(self.Owner),
                     CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
@@ -106,7 +107,8 @@ function AbilityType.GetDefaultAbilitySettings(): Types.Ability
 
             self.OwnerProperties = {
                 Character = self.Owner.Character,
-                HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
+                Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
+                HRP = Utils.Character.GetAliveRootPart(self.Owner),
                 InputManager = require(self.Owner.PlayerScripts.InputManager),
                 SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
                 FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),
@@ -376,8 +378,8 @@ function AbilityType.GetDefaultAbilitySettings(): Types.Ability
             end
 
             return EnoughUses
-            and self.Owner.Character:FindFirstChildOfClass("Humanoid").Health > 0 --if the player's alive
-            and not self.Owner.Character:FindFirstChild("HumanoidRootPart").Anchored --if the player isn't restrained by initial round setup
+            and self.OwnerProperties.Humanoid.Health > 0 --if the player's alive
+            and not self.OwnerProperties.HRP.Anchored --if the player isn't restrained by initial round setup
             and not self.Owner.Character:GetAttribute("Executing")
             and not Emoting
             and not EffectPrevention
@@ -434,7 +436,8 @@ function AbilityType.GetDefaultPassiveAbilitySettings(): Types.Ability
 
                 self.OwnerProperties = {
                     Character = self.Owner.Character,
-                    HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
+                    Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
+                    HRP = Utils.Character.GetAliveRootPart(self.Owner),
                     CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
@@ -448,7 +451,8 @@ function AbilityType.GetDefaultPassiveAbilitySettings(): Types.Ability
 
             self.OwnerProperties = {
                 Character = self.Owner.Character,
-                HRP = Utils.Instance.FindFirstChild(self.Owner.Character, "HumanoidRootPart"),
+                Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
+                HRP = Utils.Character.GetAliveRootPart(self.Owner),
                 InputManager = require(self.Owner.PlayerScripts.InputManager),
                 SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
                 FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),

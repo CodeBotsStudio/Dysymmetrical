@@ -13,14 +13,15 @@ local AntiFly = {
 
 function AntiFly:Init()
     Utils.Player.ObservePlayers(function(plr: Player)
-        Utils.Character.ObserveCharacter(plr, function(char: Model)
-            self:_SetupCharacter(plr, char)
+        Utils.Character.ObserveCharacter(plr, function(_char: Model)
+            self:_SetupCharacter(plr)
         end)
     end)
 end
 
-function AntiFly:_SetupCharacter(player: Player, char: Model)
-    local root = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChildWhichIsA("Humanoid").RootPart
+function AntiFly:_SetupCharacter(player: Player)
+    local char = player.Character
+    local root = Utils.Character.GetAliveRootPart(player)
 
     local Params = RaycastParams.new()
     Params.FilterType = Enum.RaycastFilterType.Exclude

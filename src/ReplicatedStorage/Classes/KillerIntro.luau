@@ -115,12 +115,12 @@ function KillerIntroClass.New3DIntro(Config: IntroSettings): Types.AnimatedIntro
 
             local Module = Utils.Instance.GetCharacterModule("Killer", Config.KillerName, Config.SkinName)
 
-            local PlayerRig = Utils.Instance.FindFirstChild(workspace.Players, Config.PlayerName)
+            local PlayerRig = workspace.Players:FindFirstChild(Config.Name)
             --yield until the char loads properly
             local HRP = Utils.Instance.FindFirstChild(PlayerRig, "HumanoidRootPart")
 
             local KillerRig = PlayerRig:Clone()
-            HRP = Utils.Instance.FindFirstChild(KillerRig, "HumanoidRootPart")
+            HRP = Utils.Character.GetAliveRootPart(KillerRig)
             KillerRig.Parent = workspace.TempObjectFolders.Intro
             HRP.Anchored = true
             KillerRig:PivotTo(CFrame.new(0, 10000, 0))

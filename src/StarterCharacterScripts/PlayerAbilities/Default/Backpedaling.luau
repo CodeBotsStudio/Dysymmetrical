@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
@@ -12,7 +13,7 @@ return {
 	Init = function(_)
 		local char = LocalPlayer.Character
 		local Humanoid = char:FindFirstChildWhichIsA("Humanoid")
-		local HumanoidRootPart = char:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
+		local HumanoidRootPart = Utils.Character.GetAliveRootPart(char)
 
 		local SpeedManager = require(script.Parent.Parent.Parent.PlayerAttributeScripts.SpeedManager)
 

@@ -355,7 +355,8 @@ end
 local Speed = 0
 game:GetService("RunService").RenderStepped:Connect(function(_delta: number)
 	if currentAnimInstance and pose == "Running" then
-		local DirectionOfMovement = Figure.HumanoidRootPart.CFrame:VectorToObjectSpace( Figure.HumanoidRootPart.AssemblyLinearVelocity )
+		local HRP = Figure:FindFirstChild("HumanoidRootPart") or Figure:FindFirstChildWhichIsA("Humanoid").RootPart or Figure.PrimaryPart
+		local DirectionOfMovement = HRP.CFrame:VectorToObjectSpace(HRP.AssemblyLinearVelocity)
 		DirectionOfMovement = Vector3.new( DirectionOfMovement.X / Humanoid.WalkSpeed, 0, DirectionOfMovement.Z / Humanoid.WalkSpeed )
 
 		if DirectionOfMovement.Z < 0.1 then

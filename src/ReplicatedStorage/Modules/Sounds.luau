@@ -281,7 +281,7 @@ end
 --- Plays a voice line inside of a rig. Used instead of `Sounds.PlaySound()` since it has a priority system.
 function Sounds.PlayVoiceline(Rig: Model, ID: string | {[string]: string | {string}}, SoundSettings: {[string]: any}?)
     --get the root
-    local Primary = Rig.PrimaryPart or Rig:FindFirstChildWhichIsA("Humanoid").RootPart or Rig:FindFirstChild("HumanoidRootPart")
+    local Primary = Utils.Character.GetAliveRootPart(Rig)
     if not Primary then
         return
     end

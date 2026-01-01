@@ -176,7 +176,7 @@ function ServerCharacterManager._InitCharacter(player: Player, charModule: Modul
             return
         end
 
-        local Primary = Char.PrimaryPart or Char:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
+        local Primary = Utils.Character.GetAliveRootPart(Char)
         if not Primary then
             return
         end

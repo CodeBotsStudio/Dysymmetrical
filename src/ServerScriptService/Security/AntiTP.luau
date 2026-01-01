@@ -15,7 +15,7 @@ local AntiTP = {
 function AntiTP:Init()
     Utils.Player.ObservePlayers(function(Player: Player)
         Utils.Character.ObserveCharacter(Player, function(Character: Model)
-            self:_SetupCharacter(Player, Character)
+            self:_SetupCharacter(Player)
         end)
         Player.CharacterRemoving:Connect(function(_Character: Model)
             if not self.PlayerThreads[Player.UserId] then
@@ -35,9 +35,10 @@ function AntiTP:Init()
     end)
 end
 
-function AntiTP:_SetupCharacter(Player: Player, Character: Model)
+function AntiTP:_SetupCharacter(Player: Player)
+    local Character = Player.Character
     local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
-    local HRP = Character:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
+    local HRP = Utils.Character.GetAliveRootPart(Player)
 
     local LastPos = HRP.Position
 

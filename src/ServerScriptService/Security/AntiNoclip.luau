@@ -10,11 +10,11 @@ local AntiNoclip = {
 	Margin = 1
 }
 
-function AntiNoclip:_SetupPart(Character, RootPart, Humanoid)
+function AntiNoclip._SetupPart(Character, RootPart, Humanoid)
 	local NoclipPart = Instance.new("Part")
 	NoclipPart.Size = Vector3.new(1.5, 1.9, 0.8)
 	NoclipPart.CanCollide = true
-	NoclipPart.Transparency = self.VisualizePart and 0 or 1
+	NoclipPart.Transparency = AntiNoclip.VisualizePart and 0 or 1
 	NoclipPart:AddTag("Transparent")
 	NoclipPart.Name = "AntiNoclipBrain"
 	NoclipPart.CollisionGroup = RootPart.CollisionGroup
@@ -26,7 +26,7 @@ function AntiNoclip:_SetupPart(Character, RootPart, Humanoid)
 	
 	NoclipPart.Destroying:Connect(function()
 		if Humanoid and Humanoid.Health > 0 then
-			NoclipPart = self:_SetupPart(Character, RootPart)
+			NoclipPart = AntiNoclip._SetupPart(Character, RootPart)
 		end
 	end)
 	
@@ -34,7 +34,7 @@ function AntiNoclip:_SetupPart(Character, RootPart, Humanoid)
 		if Humanoid and Humanoid.Health and Humanoid.Health > 0 then
 			if Humanoid and Humanoid.Health > 0 then
 				NoclipPart:Destroy()
-				NoclipPart = self:_SetupPart(Character, RootPart)
+				NoclipPart = AntiNoclip._SetupPart(Character, RootPart)
 			end
 		end
 	end)
@@ -44,10 +44,10 @@ end
 
 function AntiNoclip:Init()
     Utils.Player.ObservePlayers(function(Player)
-        Utils.Character.ObserveCharacter(Player, function(Character)
+        Utils.Character.ObserveCharacter(Player, function(Character: Model)
         	local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
-        	local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
-        	local NoclipPart = self:_SetupPart(Character, HumanoidRootPart)
+        	local HumanoidRootPart = Utils.Character.GetAliveRootPart(Character)
+        	local NoclipPart = AntiNoclip._SetupPart(Character, HumanoidRootPart)
 
             local RayParams = RaycastParams.new()
             RayParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -87,43 +87,41 @@ function AntiNoclip:Init()
                 end
             end)
         
-        	while true do
+			-- failsafe
+			--while true do
+        	while Character and Character.Parent and Humanoid and Humanoid.Health > 0 do
 				local TimePast = task.wait(0.09)
-        		if Humanoid and Humanoid.Health > 0 then
-					local Found = false
-        			for _, Part in NoclipPart:GetTouchingParts() do
-        				if Part:IsA("Part") and not Part.Parent:FindFirstChild("Humanoid") then 
-							if not Found then
-								Found = true
-							end
+				local Found = false
+				for _, Part in NoclipPart:GetTouchingParts() do
+					if Part:IsA("Part") and not Part.Parent:FindFirstChild("Humanoid") then 
+						if not Found then
+							Found = true
+						end
 
-        					local Origin = NoclipPart.Position
-        					local Direction = Part.Position
+						local Origin = NoclipPart.Position
+						local Direction = Part.Position
 
-        					local RayResults = workspace:Raycast(Origin, Direction, RayParams)
-                    
-        					if not RayResults or not RayResults.Instance then
-								NoclipTime += TimePast
-								if NoclipTime > self.Margin then
-									if self.Kick then
-										CommonFunctions.KickPlayer(Player, CommonFunctions.KickIDs.Noclipping)
-									else
-        								Humanoid.Health = 0 --REPLACE WITH KICKING
-									end
-									continue
+						local RayResults = workspace:Raycast(Origin, Direction, RayParams)
+				
+						if not RayResults or not RayResults.Instance then
+							NoclipTime += TimePast
+							if NoclipTime > self.Margin then
+								if self.Kick then
+									CommonFunctions.KickPlayer(Player, CommonFunctions.KickIDs.Noclipping)
+								else
+									Humanoid.Health = 0 --REPLACE WITH KICKING
 								end
-							else
-								NoclipTime = 0
-        					end
-        				end
-        			end
-
-					if not Found then
-						NoclipTime = 0
+								continue
+							end
+						else
+							NoclipTime = 0
+						end
 					end
-        		else
-        			break
-        		end
+				end
+
+				if not Found then
+					NoclipTime = 0
+				end
         	end
         end)
     end)

@@ -264,7 +264,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 
                 -- Look for critical parts in the character in question, as well as the resistance effect, if applicable.
                 local TargetCharacter = Humanoid.Parent
-                local HRoot = TargetCharacter and TargetCharacter:IsA("Model") and TargetCharacter.PrimaryPart
+                local HRoot = TargetCharacter and TargetCharacter:IsA("Model") and Utils.Character.GetAliveRootPart(TargetCharacter)
                 local Resistance = TargetCharacter and TargetCharacter:FindFirstChild("Resistance") and TargetCharacter.Effects:FindFirstChild("Resistance") and TargetCharacter.Effects["Resistance"].Value or 0
 
                 -- Configure damage to be affected by the Resistance effect.

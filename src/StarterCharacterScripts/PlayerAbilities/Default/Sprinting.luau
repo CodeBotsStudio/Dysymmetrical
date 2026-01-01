@@ -90,7 +90,7 @@ function Sprinting:Init()
 	
 	local char = LocalPlayer.Character
 	local Humanoid = char:FindFirstChildWhichIsA("Humanoid")
-	local HumanoidRootPart: BasePart = char:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart
+	local HumanoidRootPart: BasePart = Utils.Character.GetAliveRootPart(char)
 	self.HRP = HumanoidRootPart
 
 	self.Char = char
@@ -154,16 +154,18 @@ function Sprinting:Init()
 			if Role.Value == "Killer" then
 				local found = false
 				for _, otherChar in playersFolder:GetChildren() do
-					if otherChar ~= char then
-						local charHRP = otherChar:FindFirstChild("HumanoidRootPart")
-						if not charHRP then continue end
+					if otherChar == char then
+						continue
+					end
+					local charHRP = Utils.Character.GetAliveRootPart(otherChar)
+					if not charHRP then continue end
 
-						if (charHRP.Position - HumanoidRootPart.Position).Magnitude <= 110 then
-							found = true
-							break
-						end
+					if (charHRP.Position - HumanoidRootPart.Position).Magnitude <= 110 then
+						found = true
+						break
 					end
 				end
+				
 				if found then
 					self:_DrainStamina(delta)
 				elseif self.CanGainStamina then

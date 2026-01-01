@@ -83,12 +83,12 @@ function CharacterUtils.GetAliveCharacter(player: Player) : Model?
 end
 
 --- Gets the root part of a player's alive character.
-function CharacterUtils.GetAliveRootPart(player: Player) : BasePart?
-	local character = CharacterUtils.GetAliveCharacter(player)
+function CharacterUtils.GetAliveRootPart(character: Player | Model) : BasePart?
+	character = character:IsA("Player") and CharacterUtils.GetAliveCharacter(character) or character
 	if not character then
 		return
 	end
-	return character:FindFirstChild("HumanoidRootPart")
+	return character:FindFirstChild("HumanoidRootPart") or character:FindFirstChildWhichIsA("Humanoid").RootPart or character.PrimaryPart
 end
 
 --- Gets the humanoid of a player's alive character.

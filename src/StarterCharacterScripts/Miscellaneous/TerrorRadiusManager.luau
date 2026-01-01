@@ -60,7 +60,7 @@ function TerrorRadiusManager:Init()
         Role = Role,
         Char = Char,
         Humanoid = Humanoid,
-        HRP = Char:FindFirstChild("HumanoidRootPart") or Humanoid.RootPart,
+        HRP = Utils.Character.GetAliveRootPart(Char),
     }
 
     self.MapAmbience = workspace.Themes:FindFirstChild("MapAmbience")
@@ -224,7 +224,7 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
                 continue
             end
 
-            local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - PlayerChar:FindFirstChild("HumanoidRootPart").Position).Magnitude or 50000
+            local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - Utils.Character.GetAliveRootPart(PlayerChar).Position).Magnitude or 50000
             if Distance <= Radiuses["L1"] and (not CurrentKillerChosen or Distance <= CurrentKillerChosen.Distance) then
                 CurrentKillerChosen = {
                     Player = PlayerChar,
@@ -241,7 +241,7 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
         CurrentKillerChosen = workspace.Players:FindFirstChild(CurrentKillerChosen)
     end
 
-    local KillerHRP = CurrentKillerChosen:FindFirstChild("HumanoidRootPart")
+    local KillerHRP = Utils.Character.GetAliveRootPart(CurrentKillerChosen)
 
     local Distance = self.LocalPlayerProps.Humanoid and self.LocalPlayerProps.Humanoid.Health > 0 and (self.LocalPlayerProps.HRP.Position - KillerHRP.Position).Magnitude or 50000
 
@@ -330,7 +330,7 @@ function TerrorRadiusManager:_CheckAsKiller(delta: number)
             continue
         end
 
-        local Root = char:FindFirstChild("HumanoidRootPart") or Hum.RootPart
+        local Root = Utils.Character.GetAliveRootPart(char)
         if not Root then
             continue
         end

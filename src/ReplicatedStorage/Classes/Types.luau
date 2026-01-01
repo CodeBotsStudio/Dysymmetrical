@@ -133,7 +133,9 @@ export type Ability = {
         --this is hybrid (client & server)
         --- The Character of the owner player. Also gettable through `Owner.Character`.
         Character: Model,
-        --- The owner's character's HumanoidRootPart instance for usage. Also gettable through `Owner.Character:FindFirstChild("HumanoidRootPart")`.
+        --- The owner's character's `Humanoid` instance for usage. Also gettable through `Utils.Character.GetAlivePlayerHumanoid(Owner)`.
+        Humanoid: Humanoid,
+        --- The owner's character's `HumanoidRootPart` instance for usage. Also gettable through `Utils.Character.GetAliveRootPart(Owner)`.
         HRP: BasePart,
         --this is server
         --- See `ServerScriptService.System.CommonFunctions`.
