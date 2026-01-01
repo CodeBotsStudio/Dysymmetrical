@@ -21,5 +21,5 @@ return {
                 LayoutOrder = 1,
             },
         },
-    }
+    },
 } :: {[string]: AchievementGroup}

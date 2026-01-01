@@ -137,6 +137,15 @@ function SideBar:Init()
             CloseOnOtherOpen = true,
             CloseOthersOnOpen = true,
         },
+        Achievements = {
+            Render = "rbxassetid://82434587437333",
+            Type = "Button",
+            InvertedRender = "rbxassetid://113410904986274",
+            MenuModule = PlayerUIModules.AchievementsMenu,
+            LayoutOrder = 2,
+            CloseOnOtherOpen = true,
+            CloseOthersOnOpen = true,
+        },
         Stats = {
             Render = "rbxassetid://130488549713780",
             Type = "Button",

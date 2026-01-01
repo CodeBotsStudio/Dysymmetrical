@@ -858,10 +858,16 @@ export type Achievement = {
     RewardType: "Currency" | "Skin" | "Character" | "Emote",
     --- Amount of currency to grant when this achievement is granted if `RewardType == "Currency"`.
     Amount: number?,
-    --- Name of the skin / character / emote to grant when this achievement is granted if `RewardType ~= nil and RewardType ~= "Currency"`.
+    --- Name of the character / emote to grant when this achievement is granted if `RewardType ~= nil and RewardType ~= "Currency"`.
     --- 
-    --- For skins, name it like so: `[SkinName][CharacterName]`, e.g. `YourselfCommander`.
+    --- If it's not an emote, also fill `CharacterRole` with either `Killer` or `Survivor`.
+    --- 
+    --- For skins, name this variable like the character the skin is for, and add the skin's name to `Skin`.
     Item: string?,
+    --- The role of the character / skin to grant if `RewardType == "Skin" or RewardType == "Character"`.
+    CharacterRole: ("Killer" | "Survivor")?,
+    --- Name of the skin to grant if applicable. Also fill `Item`.
+    Skin: string?,
     --- Place in the list of its achievement group.
     LayoutOrder: number,
     --- Any numeric requirement to automatically grant this achievement (useful for e.g. milestone achievements).

@@ -83,7 +83,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
                                             },
                                         },
                                         Connections = {
-                                            PostHit = function(Hum: Humanoid)
+                                            PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
                                                 CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 10, EXP = 20, Reason = "blinding the killer with Blindside"})
                                             end,
                                         }
@@ -124,7 +124,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
                         end))
 
                         CommonFunctions.ApplyEffect({
-                            TargetHumanoid = self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"),
+                            TargetHumanoid = self.OwnerProperties.Humanoid,
                             EffectSettings = {
                                 Name = "Slowness",
                                 Level = 3,
@@ -178,7 +178,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
                                         },
                                     },
                                     Connections = {
-                                        PostHit = function(Hum: Humanoid)
+                                        PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
                                             CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 6, EXP = 14, Reason = "stunning the killer with Justice"})
                                         end,
                                     }
@@ -223,7 +223,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
 
     OnHit = function(self, _hitbox, _damage)
         CommonFunctions.ApplyEffect({
-            TargetHumanoid = self.OwnerProperties.Character:FindFirstChildOfClass("Humanoid"),
+            TargetHumanoid = self.OwnerProperties.Humanoid,
             EffectSettings = {
                 Name = "Resistance",
                 Level = 5,

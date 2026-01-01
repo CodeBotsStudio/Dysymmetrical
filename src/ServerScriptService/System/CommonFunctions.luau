@@ -298,7 +298,7 @@ end
 --- Grants a character / skin to a player.
 --- 
 --- Should be called from achievements or milestone granting.
-function CommonFunctions.GrantCharacterItemToPlayer(Player: Player, Type: "Killer" | "Survivor", CharacterName: string, SkinName: string)
+function CommonFunctions.GrantCharacterItemToPlayer(Player: Player, Type: "Killer" | "Survivor", CharacterName: string, SkinName: string?)
 	--shouldn't give anything if in a private server
 	if #game.PrivateServerId > 0 then
 		return
@@ -403,6 +403,24 @@ function CommonFunctions.CompleteAchievement(Player: Player, AchievementPath: st
 	end
 
 	Utils.Instance.FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath).Value = Achievement.Requirement or true
+
+	--granting achievement reward
+	task.defer(function()
+		if not Achievement.RewardType then
+			return
+		end
+
+		if Achievement.RewardType == "Currency" then
+			CommonFunctions.UpdatePlayerStat(Player, "Currency.Money", Achievement.Amount)
+			return
+		end
+
+		CommonFunctions.GrantCharacterItemToPlayer(Player,
+			Achievement.CharacterRole,
+			Achievement.Item,
+			Achievement.RewardType == "Skin" and Achievement.Skin or nil
+		)
+	end)
 
 	--display the reward notification
 	Network:FireClientConnection(Player, "ShowRewardNotification", "REMOTE_EVENT", AchievementPath, "Achievement")

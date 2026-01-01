@@ -332,11 +332,8 @@ function InstanceUtils.GetEffectModule(name: string, subfolder: string?, module:
     
 	local Effect: ModuleScript
 
-	if subfolder and #subfolder > 0 then
-        Effect = InstanceUtils.FindFirstChild(ReplicatedStorage.Effects, subfolder.."."..name, false)
-	else
-        Effect = InstanceUtils.FindFirstChild(ReplicatedStorage.Effects, name, false)
-	end
+	local path = (subfolder and #subfolder > 0) and subfolder.."."..name or name
+	Effect = InstanceUtils.FindFirstChild(ReplicatedStorage.Effects, path, 0)
 
     if not Effect:IsA("ModuleScript") then
         return
