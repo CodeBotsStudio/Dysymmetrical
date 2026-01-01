@@ -11,13 +11,13 @@ local InstanceUtils = {}
 function InstanceUtils.ObserveChildren(
 	parent: Instance,
 	callback: (child: Instance, childJanitor: Janitor.Janitor) -> (),
-	paredicate: (child: Instance) -> boolean?
+	predicate: (child: Instance) -> boolean?
 )
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(parent)
 
 	local function onChildAdded(child: Instance)
-		if paredicate and not paredicate(child) then
+		if predicate and not predicate(child) then
 			return
 		end
 		callback(child, mainJanitor:AddObject(Janitor, nil, child))
@@ -117,18 +117,53 @@ end
 --- Behaves like `WaitForChild()` but uses `...ChildWhichIsA()` which lets you look for a specific type of `Instance`.
 --- 
 --- ⚠️ THIS FUNCTION YIELDS!
-function InstanceUtils.WaitForChildWhichIsA(parent: Instance, className: string)
-	local child = parent:FindFirstChildWhichIsA(className)
-	if child then
-		return child
-	end
+function InstanceUtils.WaitForChildWhichIsA(parent: Instance, className: string, timeout: number?)
+	-- local child = parent:FindFirstChildWhichIsA(className)
+	-- if child then
+	-- 	return child
+	-- end
 
-	while not child do
-		child = parent:FindFirstChildWhichIsA(className)
-		task.wait()
-	end
+	-- local connection
+	-- connection = parent.ChildAdded:Connect(function(newChild: Instance)
+	-- 	if newChild:IsA(className) then
+	-- 		child = newChild
+	-- 	end
+	-- end)
 
-	return child
+	-- local timer = 0
+	-- while parent and parent.Parent and not child and (timeout == nil or timer < timeout) do
+	-- 	timer += task.wait()
+	-- end
+
+	-- connection:Disconnect()
+
+	-- return child
+
+    local existing = parent:FindFirstChildWhichIsA(className)
+    if existing then
+        return existing
+    end
+
+    local thread = coroutine.running()
+    local connection
+    
+    connection = parent.ChildAdded:Connect(function(child)
+        if child:IsA(className) then
+            connection:Disconnect()
+            task.spawn(thread, child)
+        end
+    end)
+
+    if timeout then
+        task.delay(timeout, function()
+            if connection then
+                connection:Disconnect()
+                task.spawn(thread)
+            end
+        end)
+    end
+
+    return coroutine.yield()
 end
 
 --- Executes a callback when a specific property of an `Instance` changes.

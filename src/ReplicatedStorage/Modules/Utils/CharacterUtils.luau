@@ -20,6 +20,8 @@ function CharacterUtils.WaitForCharacterLoaded(character: Model)
 	if not character:IsDescendantOf(workspace) then
 		character.AncestryChanged:Wait()
 	end
+	
+	InstanceUtils.WaitForChildWhichIsA(character, "Humanoid")
 end
 
 --- Gets a player's character's humanoid.
