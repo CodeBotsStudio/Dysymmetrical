@@ -472,7 +472,16 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                 -- If the hitbox applies effects, apply them.
                 if Config.EffectsToApply then
                     for _, Effect in Config.EffectsToApply do
-				        CommonFunctions.ApplyEffect(Humanoid, Effect.Name, Effect.Level, Effect.Duration, Effect.Subfolder)
+                        CommonFunctions.ApplyEffect({
+                            TargetHumanoid = Humanoid,
+                            EffectSettings = {
+                                Name = Effect.Name,
+                                Level = Effect.Level,
+                                Duration = Effect.Duration,
+                                Subfolder = Effect.Subfolder,
+                            },
+                            OverwriteExistingEffect = Effect.OverwriteExisting,
+                        })
 			        end
                 end
 

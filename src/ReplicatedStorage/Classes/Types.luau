@@ -764,6 +764,8 @@ export type HitboxSettings = {
 		Duration: number?,
         --- If in a subfolder, specify it.
 		Subfolder: string?,
+        --- If this effect has already been applied, overwrite the existing one.
+        OverwriteExisting: boolean?,
 	}}?,
     --- Any callbacks for events fired in the hitbox's functionality.
     -- TODO: write what connections there are and what they do
