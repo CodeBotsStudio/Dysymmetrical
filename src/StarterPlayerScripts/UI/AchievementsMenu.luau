@@ -75,7 +75,11 @@ function AchievementsMenu:Toggle(toggle: boolean)
 end
 
 function AchievementsMenu:_SetupAchievements()
-    
+    local Content = self.UIInstance.Content
+
+    for _, AchievementGroup in Utils.Instance.FindFirstChild(LocalPlayer, "PlayerData.Achievements", 5):GetChildren() do
+        AchievementGroup = AchievementGroup :: Folder
+    end
 end
 
 return AchievementsMenu

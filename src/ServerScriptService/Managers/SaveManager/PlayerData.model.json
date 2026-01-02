@@ -3,41 +3,7 @@
     "children": [
         {
             "name": "Achievements",
-            "className": "Folder",
-            "children": [
-                {
-                    "name": "Challenges",
-                    "className": "Folder"
-                },
-                {
-                    "name": "Completionist",
-                    "className": "Folder"
-                },
-                {
-                    "name": "Fun",
-                    "className": "Folder"
-                },
-                {
-                    "name": "General",
-                    "className": "Folder"
-                },
-                {
-                    "name": "KillerSpecific",
-                    "className": "Folder"
-                },
-                {
-                    "name": "KillersMilestones",
-                    "className": "Folder"
-                },
-                {
-                    "name": "SurvivorSpecific",
-                    "className": "Folder"
-                },
-                {
-                    "name": "SurvivorsMilestones",
-                    "className": "Folder"
-                }
-            ]
+            "className": "Folder"
         },
         {
             "name": "Equipped",

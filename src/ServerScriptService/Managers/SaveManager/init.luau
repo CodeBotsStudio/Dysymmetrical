@@ -96,12 +96,30 @@ function SaveManager:Init()
 
 	-- First, check to make sure the valueobjects which these would be stored in exist.
 
+	local Playerdata = script:FindFirstChild("PlayerData")
+
 	-- Quickly flip through and make sure the valueobjects we need exist. Eventually may create them on its own, to make things easier.
-	if not (script.PlayerData and script.PlayerData.Equipped and script.PlayerData.Equipped.Killer and script.PlayerData.Equipped.Survivor and script.PlayerData.Purchased and script.PlayerData.Purchased.Killers and script.PlayerData.Purchased.Skins and script.PlayerData.Purchased.Survivors) then
+	if not (
+			Playerdata
+			and Playerdata:FindFirstChild("Equipped")
+			and Playerdata.Equipped:FindFirstChild("Killer")
+			and Playerdata.Equipped:FindFirstChild("Survivor")
+			and Playerdata:FindFirstChild("Purchased") and
+			Playerdata.Purchased:FindFirstChild("Killers")
+			and Playerdata.Purchased:FindFirstChild("Skins")
+			and Playerdata.Purchased:FindFirstChild("Survivors")
+			and Playerdata:FindFirstChild("Achievements")
+		) then
+
 		error("[SaveManager:Init()] – ERROR: Default playerdata may be missing important pieces, or entirely absent! Check for a folder in ServerScriptService/Managers/SaveManager/PlayerData. If you know what you're doing, you can silence this message in ServerScriptService/Managers/SaveManager.")
 	end
 
-	local Playerdata = script.PlayerData
+	for AchievementGroup, _ in Achievements do
+		local GroupFolder = Instance.new("Folder")
+		GroupFolder.Name = AchievementGroup
+		GroupFolder.Parent = Playerdata.Achievements
+	end
+
 	local EquippedFolder = Playerdata.Equipped
 	local PurchasedFolder = Playerdata.Purchased
 

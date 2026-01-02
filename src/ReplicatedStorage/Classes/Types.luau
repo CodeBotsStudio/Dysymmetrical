@@ -872,6 +872,8 @@ export type Achievement = {
     LayoutOrder: number,
     --- Any numeric requirement to automatically grant this achievement (useful for e.g. milestone achievements).
     Requirement: number?,
+    --- If `true`, the achievement will be fully hidden in the achievements menu unless it's been unlocked (useful for e.g. event achievements).
+    Hide: boolean?,
 }
 
 return {}
