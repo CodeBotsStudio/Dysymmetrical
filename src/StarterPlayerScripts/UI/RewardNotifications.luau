@@ -33,7 +33,7 @@ function RewardNotifications:Init()
         if IsAchievement then
             Text = `"{Info.Title}" achievement obtained!`
         else
-            Text = (TypeLower:find("bought") and "Bought" or "Received").." \""..tostring(Info.Config.Name).."\" "
+            Text = (TypeLower:find("bought") and "Bought" or "Received").." \""..tostring(Info.Config.Name).."\""
 
             if TypeLower:find("emote") then
                 Text = Text.." emote"

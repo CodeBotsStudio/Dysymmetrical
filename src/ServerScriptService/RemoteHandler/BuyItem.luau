@@ -11,7 +11,7 @@ return function()
             Quotation = true
         end
 
-        local ItemType = Module.Parent
+        local ItemType: string = Module.Parent
         if ItemType.Parent.Parent.Name == "Skins" then
             ItemType = ItemType.Parent.Parent
         end
@@ -37,7 +37,7 @@ return function()
 
             Product.Parent = Parent
 
-            Network:FireClientConnection(SourcePlayer, "ShowRewardNotification", "REMOTE_EVENT", Module, "QuotedSkin")
+            Network:FireClientConnection(SourcePlayer, "ShowRewardNotification", "REMOTE_EVENT", Module, "Quoted"..ItemType:sub(1, -2))
 
             return true
         end

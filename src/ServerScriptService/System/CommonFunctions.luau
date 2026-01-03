@@ -311,7 +311,7 @@ function CommonFunctions.GrantCharacterItemToPlayer(Player: Player, Type: "Kille
 	local Parent = Utils.Instance.FindFirstChild(Player, "PlayerData.Purchased."..(SkinName and "Skins" or Type.."s"), 0)
 
 	--if the value that's about to be created is already there, don't do anything
-	if Utils.Instance.FindFirstChild(Parent, CharacterName..("."..SkinName or ""), 0) then
+	if Utils.Instance.FindFirstChild(Parent, CharacterName..(SkinName and "."..SkinName or ""), 0) then
 		return
 	end
 
@@ -340,6 +340,32 @@ function CommonFunctions.GrantCharacterItemToPlayer(Player: Player, Type: "Kille
 
 	--display the reward notification
 	Network:FireClientConnection(Player, "ShowRewardNotification", "REMOTE_EVENT", CharacterModule, "QuotedGranted"..(SkinName and "Skin" or "Character"))
+end
+
+function CommonFunctions.GrantEmoteToPlayer(Player: Player, EmoteName: string)
+	--shouldn't give anything if in a private server
+	if #game.PrivateServerId > 0 then
+		return
+	end
+
+	--checks for the parent
+	--if SkinName is available, get the Skins folder
+	--if not, get the role's folder
+	local Parent = Utils.Instance.FindFirstChild(Player, "PlayerData.Purchased.Emotes", 0)
+
+	--if the module supposedly doesn't exist, don't do anything
+	local EmoteModule = Utils.Instance.GetEmoteModule(EmoteName)
+	if not EmoteModule then
+		return
+	end
+
+	--create the item's value
+	local Value = Instance.new("IntValue")
+	Value.Name = EmoteName --if SkinName is available, it should be named that
+	Value.Parent = Parent
+
+	--display the reward notification
+	Network:FireClientConnection(Player, "ShowRewardNotification", "REMOTE_EVENT", EmoteModule, "QuotedGrantedEmote")
 end
 
 --- Updates a player's stat specified by a `string` path.
@@ -414,6 +440,11 @@ function CommonFunctions.CompleteAchievement(Player: Player, AchievementPath: st
 
 		if Achievement.RewardType == "Currency" then
 			CommonFunctions.UpdatePlayerStat(Player, "Currency.Money", Achievement.Amount)
+			return
+		end
+
+		if Achievement.RewardType == "Emote" then
+			CommonFunctions.GrantEmoteToPlayer(Player, Achievement.Item)
 			return
 		end
 
