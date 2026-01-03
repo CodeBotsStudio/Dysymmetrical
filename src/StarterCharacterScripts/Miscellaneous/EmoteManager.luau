@@ -21,7 +21,7 @@ function EmoteManager:Init()
 	self.Hum = self.Char:FindFirstChildWhichIsA("Humanoid")
 	self.Head = self.Char:FindFirstChild("Head")
 
-	self.Animator = self.Char:FindFirstChildOfClass("Humanoid"):FindFirstChildOfClass("Animator")
+	self.Animator = self.Char:FindFirstChildWhichIsA("Humanoid"):FindFirstChildWhichIsA("Animator")
 
 	self.Janitor:LinkToInstance(self.Char)
 

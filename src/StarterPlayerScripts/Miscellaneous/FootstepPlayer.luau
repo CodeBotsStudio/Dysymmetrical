@@ -12,7 +12,7 @@ local FootstepPlayer = {
 }
 
 function FootstepPlayer.PlayFootstep(player: Player, Anchor: BasePart)
-	if Anchor:FindFirstChildOfClass("LinearVelocity") or Anchor.Parent:GetAttribute("Emoting") then return end
+	if Anchor:FindFirstChildWhichIsA("LinearVelocity") or Anchor.Parent:GetAttribute("Emoting") then return end
 	
 	Sounds.PlaySound(FootstepPlayer.ControlledCharacters[player.UserId] or FootstepPlayer.DefaultSFXID, {
 		MinPitch = 0.9,

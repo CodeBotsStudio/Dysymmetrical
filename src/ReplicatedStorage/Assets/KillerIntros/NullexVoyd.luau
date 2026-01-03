@@ -2,7 +2,7 @@ return {
     Behaviour = function(_, Intro)
     	local TweenService = game:GetService("TweenService")
     
-    	local Group = script:FindFirstChildOfClass("Frame"):Clone()
+    	local Group = script:FindFirstChildWhichIsA("Frame"):Clone()
         Group.Parent = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("KillerIntros")
 		table.insert(Intro.Disposables, Group)
     	local Frame = Group.Background
@@ -22,7 +22,7 @@ return {
     		end
     	end)
 
-    	Group:FindFirstChildOfClass("Sound"):Play()
+    	Group:FindFirstChildWhichIsA("Sound"):Play()
     
     	TweenService:Create(Text, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
     

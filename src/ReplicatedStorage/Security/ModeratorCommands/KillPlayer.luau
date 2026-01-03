@@ -15,7 +15,7 @@ return {
 
         if Player:lower() == "all" then
             for _, PlayerChar in workspace.Players:GetChildren() do
-                if not PlayerChar:FindFirstChildOfClass("Humanoid") then
+                if not PlayerChar:FindFirstChildWhichIsA("Humanoid") then
                     continue
                 end
 
@@ -24,7 +24,7 @@ return {
             return
         end
 
-        if not workspace.Players:FindFirstChild(Player) or not workspace.Players[Player]:FindFirstChildOfClass("Humanoid") then
+        if not workspace.Players:FindFirstChild(Player) or not workspace.Players[Player]:FindFirstChildWhichIsA("Humanoid") then
             return
         end
 

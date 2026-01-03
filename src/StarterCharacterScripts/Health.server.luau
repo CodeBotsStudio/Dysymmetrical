@@ -25,7 +25,7 @@ local Config = {
 }
 
 local char = script.Parent
-local Humanoid = char:FindFirstChildOfClass("Humanoid")
+local Humanoid = char:FindFirstChildWhichIsA("Humanoid")
 
 if Config.RegenRate > 0 and Config.RegenStepInSeconds > 0 then
     while Humanoid.HealthChanged:Wait() do

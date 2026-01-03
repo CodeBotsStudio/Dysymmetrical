@@ -39,7 +39,7 @@ function CharacterStatsManager:_InitUI(Char: Model, UI: Frame)
     local HealthText = Health.TextLabel
     local HealthBar = Health.BarBackground.Bar
     
-    local Humanoid = Char:FindFirstChildOfClass("Humanoid")
+    local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
     local StaminaAttributes = {
     	Stamina = Char.PlayerAttributes.Stamina,
     	MaxStamina = Char.PlayerAttributes.MaxStamina

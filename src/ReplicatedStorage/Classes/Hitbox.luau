@@ -233,7 +233,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                         local Inst = cast and cast.Instance
 
                         -- If the object hit is not a character (has no humanoid sibling), is not fully transparent, and is not a hitbox, then its a wall or something map-related– add one to an index counter.
-                        if Inst and not Inst.Parent:FindFirstChildOfClass("Humanoid") and Inst.Transparency ~= 1 and not Inst:GetAttribute("Hitbox") then
+                        if Inst and not Inst.Parent:FindFirstChildWhichIsA("Humanoid") and Inst.Transparency ~= 1 and not Inst:GetAttribute("Hitbox") then
                             index += 1
                         end
                     end

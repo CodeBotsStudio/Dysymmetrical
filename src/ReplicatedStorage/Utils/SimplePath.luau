@@ -215,7 +215,7 @@ function Path.new(agent: Model, agentParameters: {[string]: any}, override: Path
 			Stopped = Signal.new(),
 		},
 		_agent = agent,
-		_humanoid = agent:FindFirstChildOfClass("Humanoid"),
+		_humanoid = agent:FindFirstChildWhichIsA("Humanoid"),
 		_path = PathfindingService:CreatePath(agentParameters),
 		_status = "Idle",
 		_t = 0,

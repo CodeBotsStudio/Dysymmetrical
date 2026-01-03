@@ -176,7 +176,7 @@ function KillerIntroClass.New3DIntro(Config: IntroSettings): Types.AnimatedIntro
                 end
 
                 Camera.CameraType = Enum.CameraType.Custom
-                Camera.CameraSubject = Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                Camera.CameraSubject = Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
             end))
 
             for _, Anim in self.Animations do

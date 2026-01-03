@@ -111,7 +111,7 @@ end
 function Spectate:Close()
     self.Opened = false
     self.UIInstance.Visible = false
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid") then
         workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
     end
 end

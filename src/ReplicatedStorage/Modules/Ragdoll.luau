@@ -245,7 +245,7 @@ end
 
 --- Unragdolls a specific character if they're ragdolling.
 function Ragdoll.Disable(Character: Model)
-	if Character:GetAttribute("CantRagdoll") or not Character.Parent or not Character:FindFirstChildOfClass("Humanoid") then
+	if Character:GetAttribute("CantRagdoll") or not Character.Parent or not Character:FindFirstChildWhichIsA("Humanoid") then
 		return
 	end
 
@@ -267,7 +267,7 @@ function Ragdoll.Disable(Character: Model)
 		end
 	end
 
-	local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+	local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
 	local Attr = Character:GetAttribute("OriginalJumpInfo")
 	if Attr then
         Attr = string.split(Attr, "|")

@@ -18,7 +18,7 @@ return {
     Init = function(_)
         Utils.Character.ObserveCharacter(Players.LocalPlayer, function(Char: Model)
             local IsSpectator = Char:FindFirstChild("Role").Value == "Spectator"
-            TextChatService:FindFirstChildOfClass("ChatWindowConfiguration").Enabled = IsSpectator
+            TextChatService:FindFirstChildWhichIsA("ChatWindowConfiguration").Enabled = IsSpectator
             StarterGui:SetCore("ResetButtonCallback", IsSpectator)
         end)
     end,

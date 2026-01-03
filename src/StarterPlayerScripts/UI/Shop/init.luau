@@ -236,7 +236,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
                     SkinPreview.CurrentCamera = Camera
 
                     SkinModel = SkinModel:Clone()
-                    if not SkinModel.Humanoid:FindFirstChildOfClass("Animator") then
+                    if not SkinModel.Humanoid:FindFirstChildWhichIsA("Animator") then
                         Instance.new("Animator").Parent = SkinModel.Humanoid
                     end
                     Utils.Character.GetRootPart(SkinModel).Anchored = true
@@ -917,7 +917,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
                 Preview.CurrentCamera = Camera
 
                 Model = Model:Clone()
-                if not Model.Humanoid:FindFirstChildOfClass("Animator") then
+                if not Model.Humanoid:FindFirstChildWhichIsA("Animator") then
                     Instance.new("Animator").Parent = Model.Humanoid
                 end
                 Utils.Character.GetRootPart(Model).Anchored = true

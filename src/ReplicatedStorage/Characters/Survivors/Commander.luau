@@ -55,7 +55,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
 
                         self:AddConnection(task.delay(self.ThrowDelay, function()
                             local FunctionalGrenade = AnimatedGrenade:Clone()
-                            local Joint = FunctionalGrenade:FindFirstChildOfClass("JointInstance")
+                            local Joint = FunctionalGrenade:FindFirstChildWhichIsA("JointInstance")
                             if Joint then
                                 Joint:Destroy()
                             end
@@ -90,11 +90,11 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
                                     })
                                 end)
                             
-                                local Light = FunctionalGrenade:FindFirstChildOfClass("PointLight")
+                                local Light = FunctionalGrenade:FindFirstChildWhichIsA("PointLight")
                                 Light.Enabled = true
                                 TweenService:Create(Light, TweenInfo.new(0.1), {Brightness = 0}):Play()
                             
-                                FunctionalGrenade:FindFirstChildOfClass("ParticleEmitter"):Emit(80)
+                                FunctionalGrenade:FindFirstChildWhichIsA("ParticleEmitter"):Emit(80)
                             
                                 self:AddConnection(task.delay(0.1, function()
                                     FunctionalGrenade.Transparency = 1

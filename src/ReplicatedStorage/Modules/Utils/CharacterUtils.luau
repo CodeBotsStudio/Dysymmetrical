@@ -261,7 +261,7 @@ function CharacterUtils.GetCharactersWithRoles(IncludeAFK: boolean?): {[string]:
     for _, Character in CharacterUtils.GetLoadedCharacters(IncludeAFK) do
         if Character:FindFirstChild("Role") then
             --dead ones EZ!!!!
-            if Character:FindFirstChildOfClass("Humanoid").Health <= 0 or Character:GetAttribute("Dead") == true then
+            if Character:FindFirstChildWhichIsA("Humanoid").Health <= 0 or Character:GetAttribute("Dead") == true then
                 continue
             end
 
