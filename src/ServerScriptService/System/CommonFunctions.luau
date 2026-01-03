@@ -342,6 +342,9 @@ function CommonFunctions.GrantCharacterItemToPlayer(Player: Player, Type: "Kille
 	Network:FireClientConnection(Player, "ShowRewardNotification", "REMOTE_EVENT", CharacterModule, "QuotedGranted"..(SkinName and "Skin" or "Character"))
 end
 
+--- Grants an emote to a player.
+--- 
+--- Should be called from achievements or milestone granting.
 function CommonFunctions.GrantEmoteToPlayer(Player: Player, EmoteName: string)
 	--shouldn't give anything if in a private server
 	if #game.PrivateServerId > 0 then
@@ -389,7 +392,6 @@ function CommonFunctions.KickPlayer(Player: Player, KickMessage: {
     Player:Kick("\n\n[DysMemberer] "..KickMessage.ID..":\n"..KickMessage.Message.."\n")
 end
 
---TODO: Achievement UI
 --- Increments a player's progress of a specific achievement.
 function CommonFunctions.IncrementAchievementProgress(Player: Player, AchievementPath: string, Amount: number)
 	local SplitPath = Utils.Type.SplitStringPath(AchievementPath)
