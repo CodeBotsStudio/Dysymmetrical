@@ -92,6 +92,10 @@
 
     ------20/12/2025------
     * Actually made ability buttons work (MAKE SURE TO GO INTO `ReplicatedStorage/Classes/Ability/AbilityGUI` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+    
+    ------03/01/2026------
+    * Added achievements menu (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/AchievementsMenu` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()
