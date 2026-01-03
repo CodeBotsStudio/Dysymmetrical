@@ -97,7 +97,6 @@ function AchievementsMenu:Toggle(toggle: boolean)
     self.Enabled = toggle
 end
 
---TODO: implement section buttons on the left to only show certain sections
 function AchievementsMenu:_SetupAchievements()
     local Content = self.UIInstance.Content
 

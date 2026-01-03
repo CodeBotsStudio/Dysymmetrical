@@ -336,7 +336,9 @@ function PlayerManager._AttemptWelcomeAchievementGranting(Player: Player)
 		return
 	end
 
-	-- task.defer(CommonFunctions.CompleteAchievement, Player, "General.Welcome")
+	if not RunService:IsStudio() then
+		task.defer(CommonFunctions.CompleteAchievement, Player, "General.Welcome")
+	end
 end
 
 function PlayerManager.OnPlayerLoad(Player: Player)
