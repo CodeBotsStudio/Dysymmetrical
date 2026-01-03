@@ -396,14 +396,12 @@ end
 --- 
 --- ### ANY CALLS TO THIS FUNCTION SHOULD BE DEFERRED IF THE ACHIEVEMENT TO GRANT HAS A `BadgeId` PROPERTY SET!
 function CommonFunctions.CompleteAchievement(Player: Player, AchievementPath: string)
+	print(`Granting achievement "{AchievementPath}"...`)
 	local SplitPath = Utils.Type.SplitStringPath(AchievementPath)
-	local Achievement: Types.Achievement = Achievements
-	for _, step in SplitPath do
-		Achievement = Achievement[step]
-		if not Achievement then
-			warn("[CommonFunctions.CompleteAchievement] Achievement from path "..AchievementPath.." not found!", debug.traceback())
-			return
-		end
+	local Achievement: Types.Achievement = Achievements[SplitPath[1]].Achievements[SplitPath[2]]
+	if not Achievement then
+		warn("[CommonFunctions.CompleteAchievement] Achievement from path "..AchievementPath.." not found!", debug.traceback())
+		return
 	end
 
 	Utils.Instance.FindFirstChild(Player, "PlayerData.Achievements."..AchievementPath).Value = Achievement.Requirement or true

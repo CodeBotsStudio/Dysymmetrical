@@ -140,7 +140,6 @@ function AchievementsMenu:_SetupAchievements()
     end)
 
     for _, AchievementGroup in AchievementGroups do
-        AchievementGroup = AchievementGroup
         local AchievementGroupEquivalent = Achievements[AchievementGroup.Name]
 
         AchievementGroupLayoutOrder += 1
@@ -164,7 +163,6 @@ function AchievementsMenu:_SetupAchievements()
         local AchievementLayoutOrder = 0
 
         for _, AchievementValue in AchievementGroup:GetChildren() do
-            AchievementValue = AchievementValue
             local AchievementEquivalent: Types.Achievement = AchievementGroupEquivalent.Achievements[AchievementValue.Name]
 
             AchievementLayoutOrder += 1
@@ -179,30 +177,45 @@ function AchievementsMenu:_SetupAchievements()
                 return if AchievementEquivalent.Requirement ~= nil then AchievementValue.Value >= AchievementEquivalent.Requirement else AchievementValue.Value
             end
 
-            if not Unlocked() then
-                Achievement.LockedOverlay.Visible = true
+            local function Reload()
+                if not Unlocked() then
+                    Achievement.LockedOverlay.Visible = true
 
-                if AchievementEquivalent.HideTitleIfLocked then
-                    Achievement.Content.DisplayName.Text = AchievementEquivalent.HiddenTitle or self.Defaults.Hidden.Title
-                end
-                if AchievementEquivalent.HideDescriptionIfLocked then
-                    Achievement.Content.Description.Text = AchievementEquivalent.HiddenDescription or self.Defaults.Hidden.Description
-                end
-                if AchievementEquivalent.HideIconIfLocked then
-                    Achievement.Icon.Image = AchievementEquivalent.LockIcon or self.Defaults.Hidden.Icon
-                end
+                    if AchievementEquivalent.HideTitleIfLocked then
+                        Achievement.Content.DisplayName.Text = AchievementEquivalent.HiddenTitle or self.Defaults.Hidden.Title
+                    else
+                        Achievement.Content.DisplayName.Text = AchievementEquivalent.Title or self.Defaults.Shown.Title
+                    end
 
-                if AchievementEquivalent.Hide then
-                    Achievement.Visible = false
+                    if AchievementEquivalent.HideDescriptionIfLocked then
+                        Achievement.Content.Description.Text = AchievementEquivalent.HiddenDescription or self.Defaults.Hidden.Description
+                    else
+                        Achievement.Content.Description.Text = AchievementEquivalent.Description or self.Defaults.Shown.Description
+                    end
+
+                    if AchievementEquivalent.HideIconIfLocked then
+                        Achievement.Icon.Image = AchievementEquivalent.LockIcon or self.Defaults.Hidden.Icon
+                    else
+                        Achievement.Icon.Image = AchievementEquivalent.Icon or self.Defaults.Shown.Icon
+                    end
+
+                    if AchievementEquivalent.Hide then
+                        Achievement.Visible = false
+                    end
+                else
+                    Achievement.LockedOverlay.Visible = false
+                    Achievement.Visible = true
+                    
+                    Achievement.Content.DisplayName.Text = AchievementEquivalent.Title or self.Defaults.Shown.Title
+                    Achievement.Content.Description.Text = AchievementEquivalent.Description or self.Defaults.Shown.Description
+                    Achievement.Icon.Image = AchievementEquivalent.Icon or self.Defaults.Shown.Icon
                 end
-            else
-                Achievement.LockedOverlay.Visible = false
-                Achievement.Visible = true
-                
-                Achievement.Content.DisplayName.Text = AchievementEquivalent.Title or self.Defaults.Shown.Title
-                Achievement.Content.Description.Text = AchievementEquivalent.Description or self.Defaults.Shown.Description
-                Achievement.Icon.Image = AchievementEquivalent.Icon or self.Defaults.Shown.Icon
             end
+
+            AchievementValue.Changed:Connect(function()
+                Reload()
+            end)
+            Reload()
 
             if not AchievementValue:IsA("NumberValue") then
                 Achievement.Content.Requirement:Destroy()

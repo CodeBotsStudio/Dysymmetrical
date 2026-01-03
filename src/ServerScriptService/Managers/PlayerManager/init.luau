@@ -18,7 +18,6 @@ local Network = require(ReplicatedStorage.Modules.Network)
 
 local threads: {thread} = {}
 
-local Folder = ReplicatedStorage.LoadedPlayers
 local Hitboxes = ServerStorage.Assets.Hitboxes
 
 local StarterCharacterScripts = game:GetService("StarterPlayer").StarterCharacterScripts
@@ -38,6 +37,10 @@ function PlayerManager:Init()
 			Rank = "ServerOwner",
 		})
 	end
+
+	Network:SetConnection("AddLoadedPlayer", "REMOTE_EVENT", function(plr: Player)
+		PlayerManager.OnPlayerLoad(plr)
+	end)
 
 	Utils.Player.ObservePlayers(function(plr: Player)
 		if RunService:IsStudio() then
@@ -182,18 +185,9 @@ function PlayerManager:Init()
 		end)
 	end)
 
-	Network:SetConnection("AddLoadedPlayer", "REMOTE_EVENT", function(plr: Player)
-		if not Folder:FindFirstChild(plr.Name) then
-			local Value = Instance.new("ObjectValue")
-			Value.Name = plr.Name
-			Value.Value = plr
-			Value.Parent = Folder
-		end
-	end)
-
 	Players.PlayerRemoving:Connect(function(plr: Player)
-		if Folder:FindFirstChild(plr.Name) then
-			Folder[plr.Name]:Destroy()
+		if ReplicatedStorage.LoadedPlayers:FindFirstChild(plr.Name) then
+			ReplicatedStorage.LoadedPlayers[plr.Name]:Destroy()
 		end
 
 		if TimePlayedThreads[plr.UserId] then
@@ -335,6 +329,32 @@ function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	Network:FireAllClientConnection("SetupLocalRagdoll", "REMOTE_EVENT", plr)
 
 	return char
+end
+
+function PlayerManager._AttemptWelcomeAchievementGranting(Player: Player)
+	if not Player:IsA("Player") then
+		return
+	end
+
+	-- task.defer(CommonFunctions.CompleteAchievement, Player, "General.Welcome")
+end
+
+function PlayerManager.OnPlayerLoad(Player: Player)
+	PlayerManager._AttemptWelcomeAchievementGranting(Player)
+
+	task.wait(3)
+
+	if Player then
+		if not ReplicatedStorage.LoadedPlayers:FindFirstChild(Player.Name) then
+			local Value = Instance.new("ObjectValue")
+			Value.Name = Player.Name
+			Value.Value = Player
+			Value.Parent = ReplicatedStorage.LoadedPlayers
+		end
+
+		local Log = Utils.Instance.FindFirstChild(Player, "PlayerData.Misc.LastSeenLog")
+		Log.Value = game.PlaceVersion
+	end
 end
 
 return PlayerManager

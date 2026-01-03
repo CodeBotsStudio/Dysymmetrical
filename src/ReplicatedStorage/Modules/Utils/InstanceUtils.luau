@@ -2,6 +2,8 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Achievements = require(ReplicatedStorage.Assets.Achievements)
+local Types = require(ReplicatedStorage.Classes.Types)
 local TypeUtils = require(script.Parent.TypeUtils)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
@@ -343,18 +345,11 @@ function InstanceUtils.GetEffectModule(name: string, subfolder: string?, module:
 end
 
 --- Returns an achievement's data table through an `AchievementGroup.AchievementName` path.
-function InstanceUtils.GetAchievementData(path: string)
+function InstanceUtils.GetAchievementData(path: string): Types.Achievement
     local steps = TypeUtils.SplitStringPath(path)
-    
-    local Achievement = require(ReplicatedStorage.Assets.Achievements)
-    for _, step in steps do
-        Achievement = Achievement[step]
-    end
 
-    return Achievement
+    return Achievements[steps[1]].Achievements[steps[2]]
 end
-
-
 
 --- Returns a completely invisible, uncollidable, undetectable, 1 cubic stud sized part in CFrame `cf` and parented to `parent`.
 function InstanceUtils.GetInvisPart(cf: CFrame?, parent: Instance?): Part

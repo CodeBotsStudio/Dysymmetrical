@@ -21,17 +21,17 @@ function RewardNotifications:Init()
 
         local TypeLower = Type:lower()
 
-        local IsAchievement = TypeLower:find("achievement")
+        local IsAchievement = TypeLower:find("achievement") ~= nil
 
         local Card = (IsAchievement and AchievementPrefab or Prefab):Clone()
         local Info = IsAchievement and Utils.Instance.GetAchievementData(Module) or require(Module)
         
-        Card.ImageContainer.Render.Image = IsAchievement and Info.Icon or Info.Config.Render
+        Card.ImageContainer.Render.Image = IsAchievement and (Info.Icon or "rbxasset://textures/ui/GuiImagePlaceholder.png") or Info.Config.Render
 
         local Text
 
         if IsAchievement then
-            Text = "Achievement granted!"
+            Text = `"{Info.Title}" achievement obtained!`
         else
             Text = (TypeLower:find("bought") and "Bought" or "Received").." \""..tostring(Info.Config.Name).."\" "
 
@@ -46,7 +46,7 @@ function RewardNotifications:Init()
 
         Card.TextContainer.RewardLabel.Text = Text
         
-        local Quote = Info.Config and Info.Config.Quote or Info.Title
+        local Quote = not IsAchievement and Info.Config.Quote or Info.Description
         if TypeLower:find("quoted") then
             Quote = "\""..Quote.."\""
         end

@@ -52,6 +52,10 @@ local function Finish()
         --don't remove this or you'll get in trouble! salutations! (unless you mention the engine in the game's description)
         print(require(game:GetService("ReplicatedStorage").Modules.Utils).Credits)
     end
+    
+    task.spawn(function()
+        require(game:GetService("ReplicatedStorage").Modules.Network):FireServerConnection("AddLoadedPlayer", "REMOTE_EVENT")
+    end)
 
     loaded = true
 
@@ -94,10 +98,6 @@ local function Finish()
     task.wait(0.8)
 
     workspace:SetAttribute("ClientLoaded", true)
-
-    task.wait(3) -- wait for the player to actually be in the game instead of being thrown into a round right away
-
-    require(game:GetService("ReplicatedStorage").Modules.Network):FireServerConnection("AddLoadedPlayer", "REMOTE_EVENT")
 end
 
 task.delay(10, function()
