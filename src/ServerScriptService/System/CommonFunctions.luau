@@ -29,6 +29,7 @@ local CommonFunctions = {
 	CommandDebounce = {},
 }
 
+local BadgeService = game:GetService("BadgeService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -382,7 +383,7 @@ function CommonFunctions.IncrementAchievementProgress(Player: Player, Achievemen
 	local AValue = Utils.PlayerData.GetAchievementObject(Player, AchievementPath)
 
 	if AValue.Value + Amount >= Achievement.Requirement then
-		CommonFunctions.CompleteAchievement(Player, AchievementPath)
+		task.defer(CommonFunctions.CompleteAchievement, Player, AchievementPath)
 		return
 	end
 
@@ -390,7 +391,10 @@ function CommonFunctions.IncrementAchievementProgress(Player: Player, Achievemen
 end
 
 --- Grants a player an achievement instantly.
+--- 
 --- Useful to grant boolean achievements or just complete achievements that have a numeric requirement.
+--- 
+--- ### ANY CALLS TO THIS FUNCTION SHOULD BE DEFERRED IF THE ACHIEVEMENT TO GRANT HAS A `BadgeId` PROPERTY SET!
 function CommonFunctions.CompleteAchievement(Player: Player, AchievementPath: string)
 	local SplitPath = Utils.Type.SplitStringPath(AchievementPath)
 	local Achievement: Types.Achievement = Achievements
@@ -424,6 +428,11 @@ function CommonFunctions.CompleteAchievement(Player: Player, AchievementPath: st
 
 	--display the reward notification
 	Network:FireClientConnection(Player, "ShowRewardNotification", "REMOTE_EVENT", AchievementPath, "Achievement")
+
+	--grant the badge if applicable
+	if Achievement.BadgeID then
+		BadgeService:AwardBadgeAsync(Player.UserId, Achievement.BadgeID)
+	end
 end
 
 --- Gets a player's permission rank.

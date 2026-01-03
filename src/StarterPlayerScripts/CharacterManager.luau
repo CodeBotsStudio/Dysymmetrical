@@ -16,7 +16,6 @@ local AnimLoadPrevented = {
     "IdleAnimation",
     "WalkAnimation",
     "RunAnimation",
-    "SlashAnimation",
     "Execution",
 }
 

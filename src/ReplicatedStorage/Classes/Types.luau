@@ -840,10 +840,14 @@ export type ProjectileDetails = {
 export type Achievement = {
     --- This achievement's display name.
     Title: string,
+    --- If `HideTitleIfLocked` is `true` and the achievement hasn't been unlocked, this will be the display title instead of `Title`.
+    HiddenTitle: string?,
     --- This achievement's description.
     --- 
     --- Should generally display *how* to get this achievement.
     Description: string,
+    --- If `HideDescriptionIfLocked` is `true` and the achievement hasn't been unlocked, this will be the description instead of `Description`.
+    HiddenDescription: string?,
     --- This achievement's *square* icon ID.
     Icon: string,
     --- The icon for the lock displayed if this achievement hasn't been unlocked if `HideIconIfLocked` is `true`.
@@ -854,6 +858,8 @@ export type Achievement = {
     HideDescriptionIfLocked: boolean?,
     --- If `true`, the icon of this achievement will be displayed as a lock (defined in `LockIcon`) if it hasn't been unlocked.
     HideIconIfLocked: boolean?,
+    --- If `true`, the reward given by obtaining this achievement won't be displayed on hover until it's unlocked if applicable.
+    HideRewardIfLocked: boolean?,
     --- The ID of the Roblox badge equivalent to this achievement. **Completely optional.**
     BadgeID: number?,
     --- The type of reward to grant when granting this achievement if applicable.

@@ -1,7 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Utils = require(ReplicatedStorage.Modules.Utils)
+type DevID = number
 type DevItemList = {
-    [number]: {
+    [DevID]: {
         {
             Type: "Character" | "Skin" | "Emote",
             Item: {
@@ -13,17 +14,21 @@ type DevItemList = {
     }
 }
 
+--[=[
+    ADD YOUR DEV ITEMS HERE
+]=]--
 local DevItemGrantingManager = {}
 DevItemGrantingManager.UsersWithDevItems = {
-    [432073982] = { --Dyscarn
-        {
-            Type = "Character",
-            Item = {
-                Role = "Killer",
-                Name = "NullexVoyd",
-            },
-        },
-    },
+    -- Here's an example of how a dev in the list could look like:
+    -- [432073982] = { --Dyscarn
+    --     {
+    --         Type = "Character",
+    --         Item = {
+    --             Role = "Killer",
+    --             Name = "NullexVoyd",
+    --         },
+    --     },
+    -- },
 } :: DevItemList
 
 function DevItemGrantingManager:Init()
