@@ -1,5 +1,6 @@
 local HitmarkerCreator = {}
 
+local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
@@ -18,7 +19,7 @@ local HitmarkerFolder = workspace.TempObjectFolders.Hitmarkers
 
 local SoundGroup: SoundGroup = SoundService.SoundGroups.Master.UI
 
-function HitmarkerCreator.ShowHitmarker(position: Vector3, dmgAmount: number, playSound: boolean?)
+function HitmarkerCreator.new(position: Vector3, dmgAmount: number, playSound: boolean?): Part
 	playSound = playSound or true
 
 	local Hitmarker = HitmarkerPrefab:Clone()
@@ -34,12 +35,16 @@ function HitmarkerCreator.ShowHitmarker(position: Vector3, dmgAmount: number, pl
 			end)
 		end
 	end
-	--
-	TweenService:Create(Hitmarker.BillboardGui.TextLabel, AppearTweenInfo, {Size = FinalBillboardSize}):Play()
-	task.wait(4)
-	TweenService:Create(Hitmarker.BillboardGui.TextLabel, DisappearTweenInfo, {TextTransparency = 1}):Play()
-	task.wait(1)
-	Hitmarker:Destroy()
+    Debris:AddItem(Hitmarker, 5)
+	task.spawn(function()
+		TweenService:Create(Hitmarker.BillboardGui.TextLabel, AppearTweenInfo, {Size = FinalBillboardSize}):Play()
+		task.wait(4)
+		if Hitmarker then
+			TweenService:Create(Hitmarker.BillboardGui.TextLabel, DisappearTweenInfo, {TextTransparency = 1}):Play()
+		end
+	end)
+
+	return Hitmarker
 end
 
 return HitmarkerCreator
