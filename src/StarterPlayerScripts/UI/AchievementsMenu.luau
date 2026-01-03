@@ -31,8 +31,10 @@ local AchievementsMenu = {
     },
 }
 
-local AchievementPrefab = Utils.Instance.FindFirstChild(script, "Achievement") :: Frame
-local CategoryPrefab = Utils.Instance.FindFirstChild(script, "Category") :: Frame
+local Prefabs = Utils.Instance.FindFirstChild(script, "Prefabs")
+local AchievementPrefab = Utils.Instance.FindFirstChild(Prefabs, "Achievement")
+local CategoryPrefab = Utils.Instance.FindFirstChild(Prefabs, "Category")
+local CategoryButtonPrefab = Utils.Instance.FindFirstChild(Prefabs, "CategoryButton")
 
 local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function AchievementsMenu:Init()
@@ -101,6 +103,34 @@ function AchievementsMenu:_SetupAchievements()
 
     local AchievementGroupLayoutOrder = 0
 
+    local CategoryButtons = self.UIInstance.CategoryButtons
+
+    local function MakeCategoryButton(Name: string, Title: string?, Category: Frame?)
+        local CategoryButton = CategoryButtonPrefab:Clone()
+        CategoryButton.Name = Name
+        CategoryButton.Label.Text = Title or Name
+        CategoryButton.LayoutOrder = AchievementGroupLayoutOrder
+        CategoryButton.MouseEnter:Connect(function()
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
+        end)
+        CategoryButton.MouseLeave:Connect(function()
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
+        end)
+        CategoryButton.MouseButton1Click:Connect(function()
+            Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
+            for _, OtherCategory: Frame in Content:GetChildren() do
+                if not OtherCategory:IsA("Frame") then
+                    continue
+                end
+            
+                OtherCategory.Visible = if Category ~= nil then OtherCategory == Category else true
+            end
+        end)
+        CategoryButton.Parent = CategoryButtons
+    end
+
+    MakeCategoryButton("All")
+
     local AchievementGroups = Utils.Instance.FindFirstChild(LocalPlayer, "PlayerData.Achievements", 5):GetChildren()
     table.sort(AchievementGroups, function(a: Folder, b: Folder)
         local aEquivalent = Achievements[a.Name]
@@ -110,7 +140,7 @@ function AchievementsMenu:_SetupAchievements()
     end)
 
     for _, AchievementGroup in AchievementGroups do
-        AchievementGroup = AchievementGroup :: Folder --remove later
+        AchievementGroup = AchievementGroup
         local AchievementGroupEquivalent = Achievements[AchievementGroup.Name]
 
         AchievementGroupLayoutOrder += 1
@@ -120,6 +150,8 @@ function AchievementsMenu:_SetupAchievements()
         Category.CategoryLabel.Label.Text = AchievementGroupEquivalent.Title
         Category.LayoutOrder = AchievementGroupLayoutOrder
         Category.Parent = Content
+
+        MakeCategoryButton(AchievementGroup.Name, AchievementGroupEquivalent.Title, Category)
 
         local AchievementsInThisGroup = AchievementGroup:GetChildren()
         table.sort(AchievementsInThisGroup, function(a: NumberValue | BoolValue, b: NumberValue | BoolValue)
@@ -132,7 +164,7 @@ function AchievementsMenu:_SetupAchievements()
         local AchievementLayoutOrder = 0
 
         for _, AchievementValue in AchievementGroup:GetChildren() do
-            AchievementValue = AchievementValue :: NumberValue | BoolValue --remove later
+            AchievementValue = AchievementValue
             local AchievementEquivalent: Types.Achievement = AchievementGroupEquivalent.Achievements[AchievementValue.Name]
 
             AchievementLayoutOrder += 1
