@@ -119,7 +119,7 @@ end
 --- Behaves like `WaitForChild()` but uses `...ChildWhichIsA()` which lets you look for a specific type of `Instance`.
 --- 
 --- ⚠️ THIS FUNCTION YIELDS!
-function InstanceUtils.WaitForChildWhichIsA(parent: Instance, className: string, timeout: number?)
+function InstanceUtils.WaitForChildWhichIsA(parent: Instance, className: string, timeout: number?): Instance
 	-- local child = parent:FindFirstChildWhichIsA(className)
 	-- if child then
 	-- 	return child

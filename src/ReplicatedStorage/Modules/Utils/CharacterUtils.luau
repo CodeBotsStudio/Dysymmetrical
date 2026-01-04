@@ -21,7 +21,8 @@ function CharacterUtils.WaitForCharacterLoaded(character: Model)
 		character.AncestryChanged:Wait()
 	end
 	
-	InstanceUtils.WaitForChildWhichIsA(character, "Humanoid")
+	local Hum = InstanceUtils.WaitForChildWhichIsA(character, "Humanoid")
+	InstanceUtils.WaitForChildWhichIsA(Hum, "Animator")
 end
 
 --- Gets a player's character's humanoid.
