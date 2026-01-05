@@ -392,6 +392,34 @@ function CommonFunctions.KickPlayer(Player: Player, KickMessage: {
     Player:Kick("\n\n[DysMemberer] "..KickMessage.ID..":\n"..KickMessage.Message.."\n")
 end
 
+--- Sets a player's progress of a specific achievement.
+--- 
+--- Useful for milestone achievements.
+function CommonFunctions.SetAchievementProgress(Player: Player, AchievementPath: string, Amount: number)
+	local SplitPath = Utils.Type.SplitStringPath(AchievementPath)
+	local Achievement: Types.Achievement = Achievements
+	for _, step in SplitPath do
+		Achievement = Achievement[step]
+		if not Achievement then
+			warn("[CommonFunctions.SetAchievementProgress] Achievement from path "..AchievementPath.." not found!", debug.traceback())
+			return
+		end
+	end
+	if not Achievement.Requirement then
+		warn("[CommonFunctions.SetAchievementProgress] Achievement from path "..AchievementPath.." doesn't have a numeric requirement! If this is intentional, make sure to use `CommonFunctions.CompleteAchievement()` instead!", debug.traceback())
+		return
+	end
+
+	local AValue = Utils.PlayerData.GetAchievementObject(Player, AchievementPath)
+
+	if Amount >= Achievement.Requirement then
+		task.defer(CommonFunctions.CompleteAchievement, Player, AchievementPath)
+		return
+	end
+
+	AValue.Value = Amount
+end
+
 --- Increments a player's progress of a specific achievement.
 function CommonFunctions.IncrementAchievementProgress(Player: Player, AchievementPath: string, Amount: number)
 	local SplitPath = Utils.Type.SplitStringPath(AchievementPath)
