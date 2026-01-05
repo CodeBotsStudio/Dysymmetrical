@@ -166,10 +166,6 @@ function PlayerManager:Init()
         	    end)
         	end)
 		end)
-
-		task.delay(2, function()
-			PlayerManager._RespawnPlayer(plr)
-		end)
 		
 		task.defer(function()
 			--saving this before hand just in case there's a leave
@@ -183,6 +179,8 @@ function PlayerManager:Init()
 				TimePlayed.Value += delta
 			end)
 		end)
+
+		PlayerManager._RespawnPlayer(plr)
 	end)
 
 	Players.PlayerRemoving:Connect(function(plr: Player)
@@ -240,11 +238,9 @@ end
 
 --- Internal: Literally just `Player:LoadCharacterAsync()` but with a safety check so that the `LoadCharacter can only be called when Player is in the world` warn doesn't appear.
 function PlayerManager._LoadCharacterAsyncSafely(Player: Player)
-	task.defer(function()
-		if Player.Parent then
-			Player:LoadCharacterAsync()
-		end
-	end)
+	if Player.Parent then
+		Player:LoadCharacterAsync()
+	end
 end
 
 --- Internal: Respawns a player with a possibility to add a custom character rig from `ServerStorage.Assets.Characters`.
