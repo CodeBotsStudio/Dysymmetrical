@@ -65,7 +65,7 @@ return {
 
 		    local Intro2D = GetIntroModule(KillerName, KillerSkin)
 
-		    local Intro = Intro2D and KillerIntro.New2DIntro(IntroInfo, Intro2D) or KillerIntro.New3DIntro(IntroInfo)
+		    local Intro
 			if Intro2D then
 				Intro = KillerIntro.New2DIntro(IntroInfo, Intro2D)
 			else
