@@ -52,11 +52,6 @@ return {
 		    	Utils.Player.Fade(Players.LocalPlayer, "Out", 0.6)
 		    	return
 		    end
-
-			if CurrentIntro then
-				CurrentIntro:Destroy()
-				CurrentIntro = nil
-			end
         
 		    local IntroInfo: KillerIntro.IntroSettings = {
 		    	KillerName = KillerName,
@@ -71,6 +66,26 @@ return {
 		    local Intro2D = GetIntroModule(KillerName, KillerSkin)
 
 		    local Intro = Intro2D and KillerIntro.New2DIntro(IntroInfo, Intro2D) or KillerIntro.New3DIntro(IntroInfo)
+			if Intro2D then
+				Intro = KillerIntro.New2DIntro(IntroInfo, Intro2D)
+			else
+				local Module = Utils.Instance.GetCharacterModule("Killer", KillerName, KillerSkin)
+				if Module and Module.Config.AnimationIDs["KillerRig"] and Module.Config.AnimationIDs["CameraRig"] then
+					Intro = KillerIntro.New3DIntro(IntroInfo)
+				end
+			end
+
+			if not Intro then
+		    	task.spawn(require(ToastPrefab), IntroContainer, KillerPlayerNames)
+
+		    	Utils.Player.Fade(Players.LocalPlayer, "Out", 0.6)
+				return
+			end
+
+			if CurrentIntro then
+				CurrentIntro:Destroy()
+				CurrentIntro = nil
+			end
 			CurrentIntro = Intro
 
 		    Intro:Init()
