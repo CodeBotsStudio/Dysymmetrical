@@ -291,7 +291,7 @@ function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 				return
 			end
 			
-			PlayerManager._LoadCharacterAsyncSafely(plr)
+			-- LoadEmpty()
 			return
 		end
 

@@ -209,6 +209,10 @@ function AchievementsMenu:_SetupAchievements()
                     Achievement.Content.Description.Text = AchievementEquivalent.Description or self.Defaults.Shown.Description
                     Achievement.Icon.Image = AchievementEquivalent.Icon or self.Defaults.Shown.Icon
                 end
+
+                if AchievementEquivalent.Requirement then
+                    Achievement.Content.Requirement.Text = tostring(AchievementValue.Value).."/"..tostring(AchievementEquivalent.Requirement)
+                end
             end
 
             AchievementValue.Changed:Connect(function()
@@ -216,7 +220,7 @@ function AchievementsMenu:_SetupAchievements()
             end)
             Reload()
 
-            if not AchievementValue:IsA("NumberValue") then
+            if not AchievementEquivalent.Requirement then
                 Achievement.Content.Requirement:Destroy()
             end
 
