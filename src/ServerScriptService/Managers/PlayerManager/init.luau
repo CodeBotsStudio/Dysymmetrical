@@ -238,6 +238,15 @@ function PlayerManager._SetupHitboxes(Character: Model)
 	end)
 end
 
+--- Internal: Literally just `Player:LoadCharacterAsync()` but with a safety check so that the `LoadCharacter can only be called when Player is in the world` warn doesn't appear.
+function PlayerManager._LoadCharacterAsyncSafely(Player: Player)
+	task.defer(function()
+		if Player.Parent then
+			Player:LoadCharacterAsync()
+		end
+	end)
+end
+
 --- Internal: Respawns a player with a possibility to add a custom character rig from `ServerStorage.Assets.Characters`.
 function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("Killer" | "Survivor")?, skinName: string?) --: Model
 	PlayerManager.CancelAutoRespawn(plr)
@@ -246,7 +255,7 @@ function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	end
 
 	local function LoadEmpty()
-		plr:LoadCharacterAsync()
+		PlayerManager._LoadCharacterAsyncSafely(plr)
 
 		--creates the role asap
 		local Role = Instance.new("StringValue")
@@ -286,7 +295,7 @@ function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 				return
 			end
 			
-			plr:LoadCharacterAsync()
+			PlayerManager._LoadCharacterAsyncSafely(plr)
 			return
 		end
 

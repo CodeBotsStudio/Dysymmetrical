@@ -23,6 +23,11 @@ function ServerCharacterManager._PositionCharacter(Char: Model, charType: "Survi
         return
     end
 
+    --if it's neither of the roles it won't position the character
+    if not charType then
+        return
+    end
+
     --will try to get the current map
     local Map = workspace:FindFirstChild("Map")
     if not Map then
