@@ -271,8 +271,10 @@ function PlayerUtils.RevealPlayerAuraTo(Player: Player | Model, RevealedPlayer: 
     Network:FireClientConnection(Player, "RevealPlayerAura", "REMOTE_EVENT", RevealedPlayer, Duration, Color)
 end
 
---- SERVER FUNCTION: Shows a black fade in/out in a player's UI.
+--- Shows a black fade in/out in a player's UI.
+--- 
 --- If it's called from server, the player(s) must be specified.
+--- 
 --- If it's called from client, it can't be sent to other clients.
 function PlayerUtils.Fade(Target: Player | {Player}, FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
     if RunService:IsServer() then
