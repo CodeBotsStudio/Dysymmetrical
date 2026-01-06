@@ -40,7 +40,7 @@ function FootstepPlayer._SetupChar(player: Player, character: Model)
 
 	Humanoid:FindFirstChildWhichIsA("Animator").AnimationPlayed:Connect(function(track: AnimationTrack)
 		track:GetMarkerReachedSignal("Footstep"):Connect(function()
-			if (character.PlayerAttributes.Sprinting and character.PlayerAttributes.Sprinting.Value) or Humanoid.FloorMaterial == Enum.Material.Air or HRP.Anchored then
+			if Humanoid.FloorMaterial == Enum.Material.Air or HRP.Anchored then
 				return
 			end
 			FootstepPlayer.PlayFootstep(player, HRP)

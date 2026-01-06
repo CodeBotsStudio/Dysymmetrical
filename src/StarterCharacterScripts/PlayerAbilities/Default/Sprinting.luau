@@ -27,8 +27,6 @@ local InputManager = require(PlayerScripts.InputManager)
 
 local playersFolder = workspace.Players
 
-local FootstepPlayer = require(LocalPlayer.PlayerScripts.Miscellaneous.FootstepPlayer)
-
 local FactorName = "Sprint"
 
 local RecoverDelay = 0.75
@@ -44,10 +42,7 @@ function Sprinting:ReloadAnimation(animId: string)
 		self.FootstepConnection:Disconnect()
 	end
 	self.SprintTrack = Utils.Character.LoadAnimationFromID(self.Char, animId)
-	self.SprintTrack.Priority = Enum.AnimationPriority.Movement
-	self.FootstepConnection = self.SprintTrack:GetMarkerReachedSignal("Footstep"):Connect(function()
-		FootstepPlayer.PlayFootstep(LocalPlayer, self.HRP)
-	end)
+	self.SprintTrack.Priority = Enum.AnimationPriority.Core
 end
 
 function Sprinting:_Stop(StopExhausted: boolean)
