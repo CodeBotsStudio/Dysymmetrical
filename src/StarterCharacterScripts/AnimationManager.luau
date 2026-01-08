@@ -1,26 +1,34 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local AnimationManager = {
-    FadeTime = 0.1,
     AnimationTracks = {},
 	CurrentCoreAnimation = nil,
 	Character = nil,
+	Janitor = nil,
+	AnimationTransitionTime = nil,
+}
+
+local DefaultAnimations: {[string]: string} = {
+	Climb = "rbxassetid://180436334",
+	Fall = "rbxassetid://180436148",
+	Idle = "rbxassetid://180435571",
+	Walk = "rbxassetid://180426354",
+	Sit = "rbxassetid://178130996",
 }
 
 function AnimationManager:Init()
-	local DefaultAnimations: {[string]: string} = {
-		Climb = "rbxassetid://180436334",
-		Fall = "rbxassetid://180436148",
-		Idle = "rbxassetid://180435571",
-		Walk = "rbxassetid://180426354",
-		Sit = "rbxassetid://178130996",
-	}
-
 	self.Character = Players.LocalPlayer.Character
 	local Humanoid = Utils.Instance.WaitForChildWhichIsA(self.Character, "Humanoid") :: Humanoid
+	local HumanoidRootPart = Utils.Character.GetRootPart(self.Character)
+
+	local Sprinting = self.Character.PlayerAttributes.Sprinting
+
+	self.AnimationTransitionTime = Utils.Instance.FindFirstChild(self.Character, "PlayerAttributes.AnimationTransitionTime")
 
 	for Name, ID in DefaultAnimations do
 		self:LoadAnimation(Name, ID, false, Enum.AnimationPriority.Core)
@@ -34,17 +42,21 @@ function AnimationManager:Init()
 
 	local function onFreeFalling(active: boolean)
 		if active then
-			self:PlayAnimation("Fall", self.FadeTime * 5)
+			self:PlayAnimation("Fall", self.AnimationTransitionTime.Value * 5)
 		end
 	end
 
-	local function onRunning(speed: number)
-		if speed > 0.01 then
-			self:PlayAnimation("Walk")
-
-			self:AdjustAnimationSpeed("Walk", speed / 16)
+	local Speed = 0
+	local function onRunning(speed: number?)
+		Speed = (speed ~= nil and typeof(speed) == "number") and speed or Speed
+		
+		print(Speed)
+		if Speed > 0.01 then
+			self:PlayAnimation(if (self.AnimationTracks.Sprint and Sprinting.Value) then "Sprint" else "Walk")
+			print(if (self.AnimationTracks.Sprint and Sprinting.Value) then "Sprint" else "Walk")
 		else
 			self:PlayAnimation("Idle")
+			print("Idle")
 		end
 	end
 
@@ -54,10 +66,28 @@ function AnimationManager:Init()
 		end
 	end
 
-	Humanoid.Climbing:Connect(onClimbing)
-	Humanoid.FreeFalling:Connect(onFreeFalling)
-	Humanoid.Running:Connect(onRunning)
-	Humanoid.Seated:Connect(onSeated)
+	self.Janitor = Janitor.new()
+	self.Janitor:LinkToInstance(self.Character)
+
+	self.Janitor:Add(Humanoid.Climbing:Connect(onClimbing))
+	self.Janitor:Add(Humanoid.FreeFalling:Connect(onFreeFalling))
+	self.Janitor:Add(Humanoid.Running:Connect(onRunning))
+	self.Janitor:Add(Humanoid.Seated:Connect(onSeated))
+	self.Janitor:Add(Sprinting.Changed:Connect(onRunning))
+
+	self.Janitor:Add(RunService.PreAnimation:Connect(function()
+		if (self.AnimationTracks.Walk and self.AnimationTracks.Walk.IsPlaying) or (self.AnimationTracks.Sprint and self.AnimationTracks.Sprint.IsPlaying) then
+			local DirectionOfMovement = HumanoidRootPart.CFrame:VectorToObjectSpace(HumanoidRootPart.AssemblyLinearVelocity)
+			DirectionOfMovement = Vector3.new(DirectionOfMovement.X / Humanoid.WalkSpeed, 0, DirectionOfMovement.Z / Humanoid.WalkSpeed)
+			if DirectionOfMovement.Z > 0.1 then
+				self:AdjustAnimationSpeed("Walk", -(Humanoid.WalkSpeed / 16))
+				self:AdjustAnimationSpeed("Sprint", -(Humanoid.WalkSpeed / 30))
+			else
+				self:AdjustAnimationSpeed("Walk", Humanoid.WalkSpeed / 16)
+				self:AdjustAnimationSpeed("Sprint", Humanoid.WalkSpeed / 30)
+			end
+		end
+	end))
 
 	self:PlayAnimation("Idle")
 end
@@ -65,6 +95,10 @@ end
 function AnimationManager:LoadAnimation(Name: string, ID: string, YieldUntilLoad: boolean?, PriorityOverride: Enum.AnimationPriority?): AnimationTrack
 	--removes the animation if it exists
 	self:RemoveAnimation(Name)
+
+	while not self.Character do
+		task.wait(0.1)
+	end
 	
 	--loads the new one
 	local AnimationTrack = Utils.Character.LoadAnimationFromID(self.Character, ID, YieldUntilLoad)
@@ -92,17 +126,17 @@ function AnimationManager:PlayAnimation(Name: string, fadeTime: number?)
 		return
 	end
 
-	if AnimationTrack.Priority == Enum.AnimationPriority.Core then
+	if AnimationTrack.Priority == Enum.AnimationPriority.Core or DefaultAnimations[Name] or Name == "Sprint" then
 		if self.CurrentCoreAnimation then
-			self.CurrentCoreAnimation:Stop(fadeTime or self.FadeTime)
+			self.CurrentCoreAnimation:Stop(fadeTime or self.AnimationTransitionTime.Value)
 		end
-		AnimationTrack:Play(fadeTime or self.FadeTime)
+		AnimationTrack:Play(fadeTime or self.AnimationTransitionTime.Value)
 		self.CurrentCoreAnimation = AnimationTrack
 
 		return
 	end
 
-	AnimationTrack:Play(fadeTime or self.FadeTime)
+	AnimationTrack:Play(fadeTime or self.AnimationTransitionTime.Value)
 end
 
 function AnimationManager:StopAnimation(Name: string, fadeTime: number?)
@@ -115,7 +149,7 @@ function AnimationManager:StopAnimation(Name: string, fadeTime: number?)
 		self.CurrentCoreAnimation = nil
 	end
 
-	AnimationTrack:Stop(fadeTime or self.FadeTime)
+	AnimationTrack:Stop(fadeTime or self.AnimationTransitionTime.Value)
 end
 
 function AnimationManager:AdjustAnimationSpeed(Name: string, Speed: number)

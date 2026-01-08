@@ -127,10 +127,10 @@ function ServerCharacterManager._InitCharacter(player: Player, charModule: Modul
     local CharacterAbilities = require(Char.PlayerAbilities.CharacterAbilities)
     CharacterAbilities.CharacterModule = module
     
-    local Animate = Char:FindFirstChild("Animate")
-    Animate.idle.IdleAnim.AnimationId = module.Config.AnimationIDs.IdleAnimation
-    Animate.walk.WalkAnim.AnimationId = module.Config.AnimationIDs.WalkAnimation
-    Animate.run.RunAnim.AnimationId = module.Config.AnimationIDs.RunAnimation
+    -- local Animate = Char:FindFirstChild("Animate")
+    -- Animate.idle.IdleAnim.AnimationId = module.Config.AnimationIDs.IdleAnimation
+    -- Animate.walk.WalkAnim.AnimationId = module.Config.AnimationIDs.WalkAnimation
+    -- Animate.run.RunAnim.AnimationId = module.Config.AnimationIDs.RunAnimation
 
     local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
     Humanoid.MaxHealth = module.GameplayConfig.Health

@@ -20,8 +20,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local PlayerScripts = LocalPlayer.PlayerScripts
 
+local AnimationManager = require(script.Parent.Parent.Parent.AnimationManager)
 local Utils = require(ReplicatedStorage.Modules.Utils)
-local Network = require(ReplicatedStorage.Modules.Network)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 local InputManager = require(PlayerScripts.InputManager)
 
@@ -35,23 +35,15 @@ local RecoverExhaustionDelay = 2
 local FOVFactorName = "Sprint"
 local SprintFOVMultiplier = 1.2
 
-local MovementAnimSpeedDiv = 30
-
 function Sprinting:ReloadAnimation(animId: string)
-	if self.FootstepConnection then
-		self.FootstepConnection:Disconnect()
-	end
-	self.SprintTrack = Utils.Character.LoadAnimationFromID(self.Char, animId)
-	self.SprintTrack.Priority = Enum.AnimationPriority.Core
+	task.defer(function()
+		AnimationManager:LoadAnimation("Sprint", animId, Enum.AnimationPriority.Core)
+	end)
 end
 
 function Sprinting:_Stop(StopExhausted: boolean)
 	self.FOVManager:RemoveFOVFactor(FOVFactorName)
 	self.Recovering = true
-
-	if self.SprintTrack and self.SprintTrack.IsPlaying then
-		self.SprintTrack:Stop(self.AnimationTransitionTime.Value)
-	end
 
 	if StopExhausted then
 		self.Stamina = 0
@@ -92,8 +84,6 @@ function Sprinting:Init()
 
 	self.Janitor = Janitor.new()
 	self.Janitor:LinkToInstance(char)
-
-	self.AnimationTransitionTime = Utils.Instance.FindFirstChild(char, "PlayerAttributes.AnimationTransitionTime")
 
 	local PlayerAttributeScripts = char.PlayerAttributeScripts
 	local SpeedManager = require(PlayerAttributeScripts.SpeedManager)
@@ -136,10 +126,6 @@ function Sprinting:Init()
 				FOVManager:AddFOVFactor(FOVFactorName, SprintFOVMultiplier)
 			end
 
-			if self.SprintTrack and not self.SprintTrack.IsPlaying then
-				self.SprintTrack:Play(self.AnimationTransitionTime.Value)
-			end
-
 			if self.RecoveryThread then
                 task.cancel(self.RecoveryThread)
             end
@@ -152,8 +138,16 @@ function Sprinting:Init()
 					if otherChar == char then
 						continue
 					end
+
 					local charHRP = Utils.Character.GetRootPart(otherChar)
-					if not charHRP then continue end
+					if not charHRP then
+						continue
+					end
+
+					local Role = otherChar:FindFirstChild("Role")
+					if not Role or Role.Value == "Killer" then
+						continue
+					end
 
 					if (charHRP.Position - HumanoidRootPart.Position).Magnitude <= 110 then
 						found = true
@@ -201,25 +195,10 @@ function Sprinting:Init()
 
 		if SprintValue.Value ~= self.SpeedApplied then
 			SprintValue.Value = self.SpeedApplied
-			Network:FireServerConnection("SprintValueToggle", "REMOTE_EVENT", self.SpeedApplied)
-		end
-
-		--backpedaling
-		if self.SprintTrack then
-			DirectionOfMovement = Vector3.new(DirectionOfMovement.X / Humanoid.WalkSpeed, 0, DirectionOfMovement.Z / Humanoid.WalkSpeed)
-			local AnimSpeed = Humanoid.WalkSpeed / MovementAnimSpeedDiv
-			if DirectionOfMovement.Z > 0.1 then
-				self.SprintTrack:AdjustSpeed(-AnimSpeed)
-			else
-				self.SprintTrack:AdjustSpeed(AnimSpeed)
-			end
 		end
 	end))
 
 	self.Janitor:Add(function()
-		if self.FootstepConnection then
-			self.FootstepConnection:Disconnect()
-		end
 		if self.RecoveryThread then
 			task.cancel(self.RecoveryThread)
 		end

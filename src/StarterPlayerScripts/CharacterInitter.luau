@@ -5,11 +5,14 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 return {
     Init = function(_)
-        Utils.Character.ObserveCharacter(Players.LocalPlayer, function(Char: Model)
+        Utils.Character.ObserveCharacter(Players.LocalPlayer, function(Char: Model) 
             local Server = Char:FindFirstChild("Server")
 
+            local AnimationManager = Char:FindFirstChild("AnimationManager")
+            require(AnimationManager):Init()
+
             for _, Module in Char:GetDescendants() do
-            	if not Module:IsA("ModuleScript") or Module:IsDescendantOf(Server) then
+            	if not Module:IsA("ModuleScript") or Module == AnimationManager or Module:IsDescendantOf(Server) then
             		continue
             	end
             

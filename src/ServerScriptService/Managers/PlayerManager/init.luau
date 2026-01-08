@@ -318,8 +318,6 @@ function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 	
 	char:PivotTo(plr.Character and plr.Character.WorldPivot or CFrame.new(0, 10, 0))
 	
-	plr.Character = char
-	
 	--clones all scripts
 	for _, Child in StarterCharacterScripts:GetChildren() do
 		Child:Clone().Parent = char
@@ -327,6 +325,8 @@ function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 
 	--adds the char to `Players` in `workspace`
 	char.Parent = PlayerFolder
+	
+	plr.Character = char
 
 	--failsafe
 	PlayerManager.CancelAutoRespawn(plr)

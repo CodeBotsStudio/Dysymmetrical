@@ -75,8 +75,13 @@ function CharManager.LoadCharacter(charName: string, charType: "Survivor" | "Kil
     Utils.Misc.PreloadAssets(CharModule.Config)
 
     local Sprinting = require(Char.PlayerAbilities.Default.Sprinting)
-    Sprinting:ReloadAnimation(CharModule.Config.AnimationIDs.RunAnimation)
     Sprinting.SprintMultiplier = CharModule.GameplayConfig.SprintSpeedMultiplier
+    task.defer(function()
+        local AnimationManager = require(Char:FindFirstChild("AnimationManager"))
+        AnimationManager:LoadAnimation("Idle", CharModule.Config.AnimationIDs.IdleAnimation)
+        AnimationManager:LoadAnimation("Walk", CharModule.Config.AnimationIDs.WalkAnimation)
+        AnimationManager:LoadAnimation("Sprint", CharModule.Config.AnimationIDs.RunAnimation)
+    end)
 
     Utils.Instance.FindFirstChild(Char, "PlayerAttributes.AnimationTransitionTime", 0).Value = CharModule.Config.AnimationTransitionTime
 
