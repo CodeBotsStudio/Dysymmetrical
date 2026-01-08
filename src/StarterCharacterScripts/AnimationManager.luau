@@ -34,7 +34,7 @@ function AnimationManager:Init()
 		if self.AnimationTracks[Name] then
 			continue
 		end
-		
+
 		self:LoadAnimation(Name, ID, false, Enum.AnimationPriority.Core)
 	end
 
@@ -57,10 +57,8 @@ function AnimationManager:Init()
 		print(Speed)
 		if Speed > 0.01 then
 			self:PlayAnimation(if (self.AnimationTracks.Sprint and Sprinting.Value) then "Sprint" else "Walk")
-			print(if (self.AnimationTracks.Sprint and Sprinting.Value) then "Sprint" else "Walk")
 		else
 			self:PlayAnimation("Idle")
-			print("Idle")
 		end
 	end
 
