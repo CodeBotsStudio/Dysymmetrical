@@ -36,9 +36,17 @@ function FootstepPlayer._SetupChar(player: Player, character: Model)
 		if CharModule.Config.Sounds.FootstepSounds then
 			FootstepPlayer.ControlledCharacters[player.UserId] = CharModule.Config.Sounds.FootstepSounds
 		end
+	elseif FootstepPlayer.ControlledCharacters[player.UserId] then
+		FootstepPlayer.ControlledCharacters[player.UserId] = nil
 	end
 
+	local ConnectedTracks = {}
 	Humanoid:FindFirstChildWhichIsA("Animator").AnimationPlayed:Connect(function(track: AnimationTrack)
+		if table.find(ConnectedTracks, track) then
+			return
+		end
+		table.insert(ConnectedTracks, track)
+
 		track:GetMarkerReachedSignal("Footstep"):Connect(function()
 			if Humanoid.FloorMaterial == Enum.Material.Air or HRP.Anchored then
 				return

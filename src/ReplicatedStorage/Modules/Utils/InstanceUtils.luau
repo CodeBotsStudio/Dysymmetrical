@@ -259,13 +259,14 @@ function InstanceUtils.GetInstanceFromPath(path: string): Instance
 		end
 	end
 
-    if Inst then
-        return Inst
-    elseif workspace:GetAttribute("DebugAllowed") then
-        warn("[Utils:GetInstanceFromPath()] Instance not found for path: " .. path)
+    if not Inst then
+		if workspace:GetAttribute("DebugAllowed") then
+    	    warn("[Utils:GetInstanceFromPath()] Instance not found for path: " .. path)
+    	end
+        return
     end
 
-    return
+    return Inst
 end
 
 --- Gets a character's module from a specific type.

@@ -11,6 +11,7 @@ local AnimationManager = {
 	Character = nil,
 	Janitor = nil,
 	AnimationTransitionTime = nil,
+	Initted = false,
 }
 
 local DefaultAnimations: {[string]: string} = {
@@ -22,7 +23,12 @@ local DefaultAnimations: {[string]: string} = {
 }
 
 function AnimationManager:Init()
-	self.Character = Players.LocalPlayer.Character
+	if self.Initted then
+		return
+	end
+	self.Initted = true
+
+	self.Character = self.Character or Players.LocalPlayer.Character
 	local Humanoid = Utils.Instance.WaitForChildWhichIsA(self.Character, "Humanoid") :: Humanoid
 	local HumanoidRootPart = Utils.Character.GetRootPart(self.Character)
 
@@ -54,7 +60,6 @@ function AnimationManager:Init()
 	local function onRunning(speed: number?)
 		Speed = (speed ~= nil and typeof(speed) == "number") and speed or Speed
 		
-		print(Speed)
 		if Speed > 0.01 then
 			self:PlayAnimation(if (self.AnimationTracks.Sprint and Sprinting.Value) then "Sprint" else "Walk")
 		else
@@ -98,8 +103,9 @@ function AnimationManager:LoadAnimation(Name: string, ID: string, YieldUntilLoad
 	--removes the animation if it exists
 	self:RemoveAnimation(Name)
 
-	while not self.Character do
-		task.wait(0.1)
+	--init the module if not initted yet
+	if not self.Initted then
+		self:Init()
 	end
 	
 	--loads the new one

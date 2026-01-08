@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Network = require(ReplicatedStorage.Modules.Network)
 local InstanceUtils = require(script.Parent.InstanceUtils)
 local TypeUtils = require(script.Parent.TypeUtils)
@@ -50,7 +51,9 @@ function PlayerDataUtils.GetPlayerEquipped(Player: Player, path: string, value: 
 end
 
 --- Retrieves a player's purchased item of a type through a string path.
+--- 
 --- Also works for emotes.
+--- 
 --- If `value` is false, it'll return the `StringValue` object instead of the value itself.
 function PlayerDataUtils.GetPlayerOwned(Player: Player, path: string, value: boolean?): StringValue | string
     if value == nil then
@@ -63,6 +66,7 @@ function PlayerDataUtils.GetPlayerOwned(Player: Player, path: string, value: boo
 end
 
 --- Retrieves a player's stat through a string path.
+--- 
 --- If `value` is false, it'll return the `ValueBase` object instead of the value itself to modify it or to get a property from it (e.g. attributes).
 function PlayerDataUtils.GetPlayerStat(Player: Player, path: string, value: boolean?): ValueBase | any
     if value == nil then
@@ -94,13 +98,13 @@ function PlayerDataUtils.GetPlayerSetting(Player: Player, path: string): any
 end
 
 --- INTERNAL | SERVER FUNCTION: Used to create a character's equipped skin value for a player if it's missing.
-function PlayerDataUtils.CreateMissingSkinValue(SourcePlayer: Player, name: string)
+function PlayerDataUtils.CreateMissingSkinValue(SourcePlayer: Player, name: string): StringValue
     if not RunService:IsServer() then
-        return
+        return InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins."..name, 5) :: StringValue | any
     end
 
     local EquippedSkins = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins", 5)
-    local SkinValue = InstanceUtils.FindFirstChild(EquippedSkins, name, 0)
+    local SkinValue = EquippedSkins:FindFirstChild(name)
     if SkinValue then
         return SkinValue
     end
@@ -113,10 +117,10 @@ function PlayerDataUtils.CreateMissingSkinValue(SourcePlayer: Player, name: stri
     return SkinValue
 end
 
---- INTERNAL | SERVER FUNCTION: Used to create a character's purchased skin value for a player if it's missing.
-function PlayerDataUtils.CreateMissingPurchasedSkinValue(SourcePlayer: Player, name: string)
+--- INTERNAL | SERVER FUNCTION: Used to create a character's purchased skins folder for a player if it's missing.
+function PlayerDataUtils.CreateMissingPurchasedSkinValue(SourcePlayer: Player, name: string): Folder
     if not RunService:IsServer() then
-        return
+        return InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins."..name, 5) :: Folder | any
     end
 
     local PurchasedSkins = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins", 5)
@@ -132,12 +136,27 @@ function PlayerDataUtils.CreateMissingPurchasedSkinValue(SourcePlayer: Player, n
     return SkinFolder
 end
 
-function PlayerDataUtils.GetAchievementObject(SourcePlayer: Player, path: string)
-    local AchievementObject = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Achievements."..path, 5)
-    --TODO: make a fallback to create a missing achievement object
-    -- if not AchievementObject then
-    --     
-    -- end
+function PlayerDataUtils.GetAchievementObject(SourcePlayer: Player, path: string): NumberValue | BoolValue
+    local AchievementFolder = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Achievements", 5)
+    local AchievementObject = InstanceUtils.FindFirstChild(AchievementFolder, path, 5)
+    
+    if not AchievementObject then
+        local steps = TypeUtils.SplitStringPath(path)
+        local Achievement = Achievements[steps[1]].Achievements[steps[2]]
+        if not Achievement then
+            return nil :: any
+        end
+
+        if Achievement.Requirement then
+            AchievementObject = Instance.new("NumberValue")
+            AchievementObject.Value = 0
+        else
+            AchievementObject = Instance.new("BoolValue")
+            AchievementObject = false
+        end
+        AchievementObject.Name = steps[2]
+        AchievementObject.Parent = AchievementFolder:FindFirstChild(steps[1])
+    end
 
     return AchievementObject
 end
