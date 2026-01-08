@@ -2,7 +2,6 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local ServerScriptService = game:GetService("ServerScriptService")
 
 local Types = require(script.Parent.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -61,7 +60,6 @@ function AbilityType.GetDefaultAbilitySettings(): Types.Ability
                     Character = self.Owner.Character,
                     Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
                     HRP = Utils.Character.GetRootPart(self.Owner),
-                    CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
                 self:AddConnection(Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
@@ -439,7 +437,6 @@ function AbilityType.GetDefaultPassiveAbilitySettings(): Types.Ability
                     Character = self.Owner.Character,
                     Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
                     HRP = Utils.Character.GetRootPart(self.Owner),
-                    CommonFunctions = require(ServerScriptService.System.CommonFunctions),
                 }
 
                 --executes any extra initialization code that the ability might need

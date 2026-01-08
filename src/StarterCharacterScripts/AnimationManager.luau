@@ -169,4 +169,9 @@ function AnimationManager:AdjustAnimationSpeed(Name: string, Speed: number)
 	AnimationTrack:AdjustSpeed(Speed)
 end
 
+--this is useless but it's done for readability's sake
+function AnimationManager:GetAnimationTrack(Name: string): AnimationTrack
+	return self.AnimationTracks[Name]
+end
+
 return AnimationManager

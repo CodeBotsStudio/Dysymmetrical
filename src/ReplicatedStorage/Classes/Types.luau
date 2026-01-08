@@ -130,17 +130,12 @@ export type Ability = {
     Janitor: Janitor.Janitor,
     --- The properties of this ability's owner.
     OwnerProperties: {
-        --this is hybrid (client & server)
         --- The Character of the owner player. Also gettable through `Owner.Character`.
         Character: Model,
         --- The owner's character's `Humanoid` instance for usage. Also gettable through `Utils.Character.GetAlivePlayerHumanoid(Owner)`.
         Humanoid: Humanoid,
         --- The owner's character's `HumanoidRootPart` instance for usage. Also gettable through `Utils.Character.GetRootPart(Owner)`.
         HRP: BasePart,
-        --this is server
-        --- See `ServerScriptService.System.CommonFunctions`.
-        CommonFunctions: any,
-        --the rest are all from client
         --- See `StarterPlayerScripts.InputManager`.
         InputManager: any,
         --- See `StarterCharacterScripts.PlayerAttributeScripts.SpeedManager`.
@@ -878,6 +873,76 @@ export type Achievement = {
     Requirement: number?,
     --- If `true`, the achievement will be fully hidden in the achievements menu unless it's been unlocked (useful for e.g. event achievements).
     Hide: boolean?,
+}
+
+export type Item = {
+    Name: string,
+
+    Init: (self: Item, owner: Player) -> (),
+    Equip: (self: Item) -> (),
+    Unequip: (self: Item) -> (),
+
+    OnEquip: ((self: Item) -> ())?,
+    OnUnequip: ((self: Item) -> ())?,
+
+    Behaviour: (self: Item) -> (),
+
+    AnimationIDs: {
+        Equip: string?,
+        Idle: string?,
+        Use: string?,
+        [string]: string,
+    },
+    SoundIDs: {
+        Equip: string?,
+        Unequip: string?,
+        Use: string?,
+        [string]: string,
+    },
+
+    AnimationTracks: {[string]: AnimationTrack},
+
+    --- Adds a connection / thread to the item's janitor to be disposed of when the owner's character is destroyed.
+    --- 
+    --- Use this to make connections and threads.
+    AddConnection: <T>(self: Item, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
+    --- Adds a connection / thread to the item's janitor to be disposed of when the owner's character is destroyed.
+    --- 
+    --- ## This function should be used for connections that WILL be cancelled / disconnected when the item is unequipped.
+    --- 
+    --- Use this to make connections and threads.
+    AddUseConnection: <T>(self: Item, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
+    UseConnections: {RBXScriptConnection | thread},
+
+    --- The owner of this item.
+    Owner: Player,
+    --- The properties of this item's owner.
+    OwnerProperties: {
+        --- The Character of the owner player. Also gettable through `Owner.Character`.
+        Character: Model,
+        --- The owner's character's `Humanoid` instance for usage. Also gettable through `Utils.Character.GetAlivePlayerHumanoid(Owner)`.
+        Humanoid: Humanoid,
+        --- The owner's character's `HumanoidRootPart` instance for usage. Also gettable through `Utils.Character.GetRootPart(Owner)`.
+        HRP: BasePart,
+        --- See `StarterPlayerScripts.InputManager`.
+        InputManager: any,
+        --- See `StarterCharacterScripts.PlayerAttributeScripts.SpeedManager`.
+        SpeedManager: any,
+        --- See `StarterCharacterScripts.PlayerAttributeScripts.FOVManager`.
+        FOVManager: any,
+        --- See `StarterCharacterScripts.PlayerAttributeScripts.EffectManager`.
+        EffectManager: any,
+        --- See `StarterCharacterScripts.Miscellaneous.EmoteManager`.
+        EmoteManager: any,
+        --- See `StarterCharacterScripts.Miscellaneous.TurnToMoveDirection`.
+        TurnToMoveDirection: any,
+        --- See `StarterCharacterScripts.PlayerAbilities.Default.Sprinting`.
+        Sprinting: any,
+        --- See `StarterCharacterScripts.AnimationManager`.
+        AnimationManager: any,
+    },
+    --- The `Janitor` instance of this item.
+    Janitor: Janitor.Janitor,
 }
 
 return {}
