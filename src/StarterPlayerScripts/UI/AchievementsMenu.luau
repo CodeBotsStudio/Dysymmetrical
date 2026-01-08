@@ -104,6 +104,40 @@ function AchievementsMenu:_SetupAchievements()
 
     local CategoryButtons = self.UIInstance.CategoryButtons
 
+    local function IsAchievementUnlocked(AchievementValue: NumberValue | BoolValue, AchievementEquivalent: Types.Achievement): boolean
+        return if AchievementEquivalent.Requirement ~= nil then AchievementValue.Value >= AchievementEquivalent.Requirement else (AchievementValue.Value :: boolean)
+    end
+
+    local Counter = self.UIInstance.Label.TextLabel
+    local function ReloadCounter()
+        local Total = 0
+        local Unlocked = 0
+
+        for _, Group in Content:GetChildren() do
+            if not Group:IsA("Frame") then
+                continue
+            end
+            
+            local AchievementGroupEquivalent = Achievements[Group.Name]
+
+            for _, Achievement in Group:GetChildren() do
+                if not Achievement:IsA("Frame") then
+                    continue
+                end
+
+                Total += 1
+
+                local AchievementEquivalent: Types.Achievement = AchievementGroupEquivalent.Achievements[Achievement.Name]
+                local AchievementValue = Utils.Instance.FindFirstChild(LocalPlayer, `PlayerData.Achievements.{Group.Name}.{Achievement.Name}`, 1)
+                if IsAchievementUnlocked(AchievementValue, AchievementEquivalent) then
+                    Unlocked += 1
+                end
+            end
+        end
+
+        Counter.Text = `Achievements ({Unlocked}/{Total} Unlocked)`
+    end
+
     local function MakeCategoryButton(Name: string, Title: string?, Category: Frame?)
         local CategoryButton = CategoryButtonPrefab:Clone()
         CategoryButton.Name = Name
@@ -171,13 +205,8 @@ function AchievementsMenu:_SetupAchievements()
             Achievement.Reward.Visible = false
             Achievement.LayoutOrder = AchievementLayoutOrder
 
-            --making this a function to let it update
-            local function Unlocked(): boolean
-                return if AchievementEquivalent.Requirement ~= nil then AchievementValue.Value >= AchievementEquivalent.Requirement else AchievementValue.Value
-            end
-
             local function Reload()
-                if not Unlocked() then
+                if not IsAchievementUnlocked(AchievementValue, AchievementEquivalent) then
                     Achievement.LockedOverlay.Visible = true
 
                     if AchievementEquivalent.HideTitleIfLocked then
@@ -213,6 +242,8 @@ function AchievementsMenu:_SetupAchievements()
                 if AchievementEquivalent.Requirement then
                     Achievement.Content.Requirement.Text = tostring(AchievementValue.Value).."/"..tostring(AchievementEquivalent.Requirement)
                 end
+
+                ReloadCounter()
             end
 
             AchievementValue.Changed:Connect(function()
@@ -241,7 +272,7 @@ function AchievementsMenu:_SetupAchievements()
                 Achievement.Reward.Text = "Reward: "..RewardText
 
                 Achievement.MouseEnter:Connect(function()
-                    if AchievementEquivalent.HideRewardIfLocked and not Unlocked() then
+                    if AchievementEquivalent.HideRewardIfLocked and not IsAchievementUnlocked(AchievementValue, AchievementEquivalent) then
                         return
                     end
 
@@ -249,7 +280,7 @@ function AchievementsMenu:_SetupAchievements()
                     Achievement.Reward.Visible = true
                 end)
                 Achievement.MouseLeave:Connect(function()
-                    if AchievementEquivalent.HideRewardIfLocked and not Unlocked() then
+                    if AchievementEquivalent.HideRewardIfLocked and not IsAchievementUnlocked(AchievementValue, AchievementEquivalent) then
                         return
                     end
 
@@ -261,6 +292,8 @@ function AchievementsMenu:_SetupAchievements()
             Achievement.Parent = Category
         end
     end
+
+    ReloadCounter()
 end
 
 return AchievementsMenu
