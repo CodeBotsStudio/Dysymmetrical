@@ -97,7 +97,7 @@ function RoundManager.StartRound()
 
     --round vars setup
     RoundState.Value = "InRound"
-    TimeManager:SetTime(TimeManager.Config.RoundTime)
+    TimeManager.SetTime(TimeManager.Config.RoundTime)
     TimeManager.OnTimerEnd = function()
         RoundManager.Callables.EndRound("Survivors")
     end
@@ -151,7 +151,7 @@ function RoundManager.Callables.InitLMS(LastMan: Player)
     end
 
     --duh
-    TimeManager:SetTime(TimeManager.Config.LastManStandingTime)
+    TimeManager.SetTime(TimeManager.Config.LastManStandingTime)
 
     Network:FireConnection("LMSVoiceline", LastMan)
 
@@ -209,7 +209,7 @@ function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
 
     Utils.Player.Fade(Utils.Player.GetLoadedPlayers(), "In", 0.7, true)
     
-    TimeManager:SetTime(TimeManager.Config.LobbyTime)
+    TimeManager.SetTime(TimeManager.Config.LobbyTime)
 
     --respawning everyone left
     for _, Player: Player in RoundManager.CurrentRound.PlayersAccepted do

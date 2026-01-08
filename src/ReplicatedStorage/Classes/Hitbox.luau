@@ -379,7 +379,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 				            CommonFunctions.UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
             	            CommonFunctions.GrantRewardToPlayer(SourcePlayer, {Money = 20, EXP = 60, Reason = "killing a Survivor"})
 
-				            TimeManager:SetTime(TimeManager.CurrentTime + 35)
+				            TimeManager.SetTime(TimeManager.CurrentTime + 35)
                         end)
 
                         -- Find out if theres a special execution animation to use for this specific survivor; if there isn't, use a default.

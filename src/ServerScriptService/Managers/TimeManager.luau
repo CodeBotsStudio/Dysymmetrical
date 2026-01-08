@@ -28,41 +28,41 @@ local EnoughPlayers: BoolValue = ReplicatedStorage.RoundInfo.EnoughPlayers
 function TimeManager:Init()
     --print("FINISH TIMEMANAGER LATER >:(") --gotta save this line for memories lol
 
-    self.FreezeTime = workspace:GetAttribute("FreezeTime")
+    TimeManager.FreezeTime = workspace:GetAttribute("FreezeTime")
     Utils.Instance.ObserveAttribute(workspace, "FreezeTime", function(value: boolean)
-        self.FreezeTime = value
+        TimeManager.FreezeTime = value
     end)
     
     RunService.Heartbeat:Connect(function(delta: number)
-        if self.Config.WaitForEnoughPlayers and State.Value == "Lobby" and not self:_EnoughPlayers() then
+        if TimeManager.Config.WaitForEnoughPlayers and State.Value == "Lobby" and not TimeManager._EnoughPlayers() then
             EnoughPlayers.Value = false
-            if self.CurrentTime ~= self.Config.LobbyTime then
-                self:SetTime(self.Config.LobbyTime)
+            if TimeManager.CurrentTime ~= TimeManager.Config.LobbyTime then
+                TimeManager.SetTime(TimeManager.Config.LobbyTime)
             end
             return
         end
         
         EnoughPlayers.Value = true
-        if self.CanDecreaseTime and not self.FreezeTime then
-            self:SetTime(self.CurrentTime - delta)
-            if self.CurrentTime <= 0 then
-                self.CanDecreaseTime = false
-                self:SetTime(0)
-                self.OnTimerEnd()
+        if TimeManager.CanDecreaseTime and not TimeManager.FreezeTime then
+            TimeManager.SetTime(TimeManager.CurrentTime - delta)
+            if TimeManager.CurrentTime <= 0 then
+                TimeManager.CanDecreaseTime = false
+                TimeManager.SetTime(0)
+                TimeManager.OnTimerEnd()
             end
         end
     end)
 
-    self:SetTime(self.Config.LobbyTime) --starting with lobby since `Init()` is called when the server initializes
+    TimeManager.SetTime(TimeManager.Config.LobbyTime) --starting with lobby since `Init()` is called when the server initializes
 end
 
-function TimeManager:_EnoughPlayers()
-    return #Utils.Player.GetLoadedPlayers(false) >= self.Config.MinimumPlayerAmount
+function TimeManager._EnoughPlayers()
+    return #Utils.Player.GetLoadedPlayers(false) >= TimeManager.Config.MinimumPlayerAmount
 end
 
 --- You can use this instead of changing the value directly. It works better.
-function TimeManager:SetTime(value: number)
-    self.CurrentTime = value
+function TimeManager.SetTime(value: number)
+    TimeManager.CurrentTime = value
     TimeValue.Value = value
 end
 

@@ -138,7 +138,7 @@ function PlayerManager:Init()
             	    	CommonFunctions.GrantRewardToPlayer(KillerValue.Value, {Money = 7, EXP = 20, Reason = "making a Survivor ragequit"})
 
 						--i'm leaving this because it's funny to have double the extra time when someone ragequits lol -Dyscarn
-						TimeManager:SetTime(TimeManager.CurrentTime + 35)
+						TimeManager.SetTime(TimeManager.CurrentTime + 35)
 					end
 				end)
 			end
@@ -157,7 +157,7 @@ function PlayerManager:Init()
 					CommonFunctions.UpdatePlayerStat(KillerValue.Value, "KillerStats.Kills", 1)
                 	CommonFunctions.GrantRewardToPlayer(KillerValue.Value, {Money = 20, EXP = 60, Reason = "killing a Survivor"})
 
-					TimeManager:SetTime(TimeManager.CurrentTime + 35)
+					TimeManager.SetTime(TimeManager.CurrentTime + 35)
 				end
 				
         	    threads[plr.UserId] = task.delay(3, function()
