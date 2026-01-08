@@ -116,6 +116,7 @@ function AbilityType.GetDefaultAbilitySettings(): Types.Ability
                 EmoteManager = require(self.Owner.Character.Miscellaneous.EmoteManager),
                 TurnToMoveDirection = require(self.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
                 Sprinting = require(self.Owner.Character.PlayerAbilities.Default.Sprinting),
+                AnimationManager = require(self.Owner.Character.AnimationManager),
             }
 
             if #self.UseAnimation > 0 then

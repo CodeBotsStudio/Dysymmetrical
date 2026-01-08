@@ -76,26 +76,25 @@ function CharManager.LoadCharacter(charName: string, charType: "Survivor" | "Kil
 
     local Sprinting = require(Char.PlayerAbilities.Default.Sprinting)
     Sprinting.SprintMultiplier = CharModule.GameplayConfig.SprintSpeedMultiplier
+
+    --animation loading
     task.defer(function()
         local AnimationManager = require(Char:FindFirstChild("AnimationManager"))
         AnimationManager:LoadAnimation("Idle", CharModule.Config.AnimationIDs.IdleAnimation)
         AnimationManager:LoadAnimation("Walk", CharModule.Config.AnimationIDs.WalkAnimation)
         AnimationManager:LoadAnimation("Sprint", CharModule.Config.AnimationIDs.RunAnimation)
-    end)
 
-    Utils.Instance.FindFirstChild(Char, "PlayerAttributes.AnimationTransitionTime", 0).Value = CharModule.Config.AnimationTransitionTime
-
-    --loading any anims in `Config.AnimationIDs` that aren't loaded by the engine itself
-    task.defer(function()
         for name, anim in CharModule.Config.AnimationIDs do
             local animCodeName = name:gsub("Animation", "")
             if table.find(Character.AutoLoadedAnims, animCodeName) or animCodeName:lower():find("execution") then
                 continue
             end
 
-            CharModule.GameplayConfig.Cache.Animations[animCodeName.."Anim"] = Utils.Character.LoadAnimationFromID(Char, anim, false)
+            AnimationManager:LoadAnimation(name, anim)
         end
     end)
+
+    Utils.Instance.FindFirstChild(Char, "PlayerAttributes.AnimationTransitionTime", 0).Value = CharModule.Config.AnimationTransitionTime
 
     local CharacterAbilities = CharManager._InitCharacterAbilities(CharModule)
 
@@ -104,24 +103,29 @@ function CharManager.LoadCharacter(charName: string, charType: "Survivor" | "Kil
             if CharacterAbilities.Animations.Stunned then
                 CharacterAbilities.Animations.Stunned:Play(0)
             end
+
             if CharacterAbilities.Animations.StunnedLoop then
                 task.delay(CharacterAbilities.Animations.Stunned.Length - 0.1, function()
-                    if (CharacterAbilities.Animations.Stunned :: AnimationTrack).IsPlaying then
+                    if CharacterAbilities.Animations.Stunned.IsPlaying then
                         CharacterAbilities.Animations.Stunned:Stop(0)
                     end
+
                     if not CharacterAbilities.Animations.StunnedEnd.IsPlaying then
                         CharacterAbilities.Animations.StunnedLoop:Play(0)
                     end
                 end)
             end
+
             if CharacterAbilities.Animations.StunnedEnd then
                 task.delay((newChild:GetAttribute("Duration") < 0.2 and 0.2 or newChild:GetAttribute("Duration")) - 0.2 - CharacterAbilities.Animations.StunnedEnd.Length, function()
                     if CharacterAbilities.Animations.Stunned then
                         CharacterAbilities.Animations.Stunned:Stop(0)
                     end
+
                     if CharacterAbilities.Animations.StunnedLoop then
                         CharacterAbilities.Animations.StunnedLoop:Stop(0)
                     end
+
                     CharacterAbilities.Animations.StunnedEnd:Play(0)
                 end)
             end

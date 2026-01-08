@@ -31,6 +31,10 @@ function AnimationManager:Init()
 	self.AnimationTransitionTime = Utils.Instance.FindFirstChild(self.Character, "PlayerAttributes.AnimationTransitionTime")
 
 	for Name, ID in DefaultAnimations do
+		if self.AnimationTracks[Name] then
+			continue
+		end
+		
 		self:LoadAnimation(Name, ID, false, Enum.AnimationPriority.Core)
 	end
 
