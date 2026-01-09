@@ -3,7 +3,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Types = require(ReplicatedStorage.Classes.Types)
-local Utils = require(ReplicatedStorage.Modules.Utils)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 type Ability = {
@@ -31,11 +30,11 @@ local AbilityGUI = {
     },
 }
 
-local PrefabContainer = Utils.Instance.FindFirstChild(script, "Prefabs")
+local PrefabContainer = script:FindFirstChild("Prefabs")
 local Prefabs = {
-    Container = Utils.Instance.FindFirstChild(PrefabContainer, "CharacterAbilitiesContainer"),
-    AbilityContainer = Utils.Instance.FindFirstChild(PrefabContainer, "AbilityContainer"),
-    UsesLeftText = Utils.Instance.FindFirstChild(PrefabContainer, "UsesLeft"),
+    Container = PrefabContainer:FindFirstChild("CharacterAbilitiesContainer"),
+    AbilityContainer = PrefabContainer:FindFirstChild("AbilityContainer"),
+    UsesLeftText = PrefabContainer:FindFirstChild("UsesLeft"),
 }
 
 --- Function used to init a character's ability GUI based on their ability table's info stored in `StarterCharacterScripts.PlayerAbilities.CharacterAbilities`.
@@ -66,7 +65,7 @@ function AbilityGUI.InitGUI()
     end
 
     local JanitorInstance = Janitor.new()
-    JanitorInstance:LinkToInstance(Container)
+    JanitorInstance:LinkToInstances(Container, Character)
 
     JanitorInstance:Add(InputManager.SchemeChanged:Connect(function(CurrentScheme: string)
         for _, Ability: Ability in Abilities do
