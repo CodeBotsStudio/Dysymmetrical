@@ -22,7 +22,6 @@
 -- Authors:                                                                   --
 --   stravant - July 31st, 2021 - Created the file.                           --
 --------------------------------------------------------------------------------
---!nocheck
 
 --------------------------------------------------------------------------------
 -- API:                                                                       --
@@ -138,7 +137,7 @@ function Signal.new()
 	return setmetatable({
 		_handlerListHead = false,
 
-		Connect = function(self: Signal<T...>, fn: (...any) -> (...any))
+		Connect = function<T...>(self: Signal<T...>, fn: (...any) -> (...any))
 			local connection = Connection.new(self, fn)
 			if self._handlerListHead then
 				connection._next = self._handlerListHead
@@ -151,7 +150,7 @@ function Signal.new()
 
 		-- Disconnect all handlers. Since we use a linked list it suffices to clear the
 		-- reference to the head handler.
-		DisconnectAll = function(self: Signal<T...>)
+		DisconnectAll = function<T...>(self: Signal<T...>)
 			self._handlerListHead = false
 		end,
 
@@ -159,7 +158,7 @@ function Signal.new()
 		-- coRunnerThread, and any time the resulting thread yielded without returning
 		-- to us, that means that it yielded to the Roblox scheduler and has been taken
 		-- over by Roblox scheduling, meaning we have to make a new coroutine runner.
-		Fire = function(self: Signal<T...>, ...)
+		Fire = function<T...>(self: Signal<T...>, ...)
 			local item = self._handlerListHead
 			while item do
 				if item._connected then
@@ -174,7 +173,7 @@ function Signal.new()
 			end
 		end,
 
-		FireDeferred = function(self: Signal<T...>, ...)
+		FireDeferred = function<T...>(self: Signal<T...>, ...)
 			local item = self._handlerListHead
 			while item do
 				local conn = item
@@ -189,7 +188,7 @@ function Signal.new()
 
 		-- Implement Signal:Wait() in terms of a temporary connection using
 		-- a Signal:Connect() which disconnects itself.
-		Wait = function(self: Signal<T...>)
+		Wait = function<T...>(self: Signal<T...>)
 			local waitingCoroutine = coroutine.running()
 			local cn;
 			cn = self:Connect(function(...)
@@ -201,7 +200,7 @@ function Signal.new()
 
 		-- Implement Signal:Once() in terms of a connection which disconnects
 		-- itself before running the handler.
-		Once = function(self: Signal<T...>, fn:(...any) -> (...any))
+		Once = function<T...>(self: Signal<T...>, fn:(...any) -> (...any))
 			local cn
 			cn = self:Connect(function(...)
 				if cn._connected then

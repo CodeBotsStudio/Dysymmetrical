@@ -1,5 +1,3 @@
---!nocheck
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -186,7 +184,7 @@ function TerrorRadiusManager:_CheckAsSurvivor(delta: number)
             PlayerThemeFolder.Name = PlayerChar.Name
             PlayerThemeFolder.Parent = self.ThemeFolder
 
-            local ChaseThemes = require(Utils:GetCharacterModule("Killer", PlayerChar:GetAttribute("CharacterName"), PlayerChar:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
+            local ChaseThemes = require(Utils.Instance.GetCharacterModule("Killer", PlayerChar:GetAttribute("CharacterName"), PlayerChar:GetAttribute("CharacterSkinName"))).Config.ChaseThemes
             for layerName, ID in ChaseThemes do
                 local Sound = Instance.new("Sound")
                 Sound.Name = layerName
