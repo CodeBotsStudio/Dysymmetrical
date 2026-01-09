@@ -1,6 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterGui = game:GetService("StarterGui")
+-- local StarterGui = game:GetService("StarterGui")
 
 local ItemGUI = require(ReplicatedStorage.Classes.Item.ItemGUI)
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -11,14 +11,14 @@ return {
             local Role = char:FindFirstChild("Role")
 
             if Role.Value ~= "Spectator" then
-                StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
+                -- StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
 
                 ItemGUI.InitGUI()
                 
-                return
+                -- return
             end
 
-            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
+            -- StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
         end)
     end,
 }
