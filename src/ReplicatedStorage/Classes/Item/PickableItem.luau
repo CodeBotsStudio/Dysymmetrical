@@ -16,6 +16,8 @@ function PickableItem.GetDefaultSettings(): Types.PickableItem
         Janitor = nil,
 
         Init = function(self: Types.PickableItem)
+            print("initting uhhh ig")
+
             if not RunService:IsServer() or not self.Model then
                 warn(`Can't initialize item {self.ItemEquivalent and self.ItemEquivalent.Name or self.DisplayName or "UNKNOWN"}!`, debug.traceback())
                 return
@@ -34,6 +36,11 @@ function PickableItem.GetDefaultSettings(): Types.PickableItem
                 end
 
                 self:AddConnection(Prompt.Triggered:Connect(function(Player: Player)
+                    local Role = Player.Character:FindFirstChild("Role")
+                    if not Role or Role.Value ~= "Survivor" then
+                        return
+                    end
+
                     task.spawn(CommonFunctions.GivePhysicalItemToPlayer, Player, self.ItemEquivalent)
 
                     ModelInstance:Destroy()
@@ -56,7 +63,7 @@ function PickableItem.GetDefaultSettings(): Types.PickableItem
     }
 end
 
-function PickableItem.New(Props: Types.PickableItem): Types.PickableItem
+function PickableItem.New(Props: Types.PickableItem?): Types.PickableItem
     Props = Props or {} :: any
     local Final = PickableItem.GetDefaultSettings()
     

@@ -12,7 +12,9 @@ function Item.GetDefaultSettings(): Types.Item
     return {
         Name = "Item",
 
-        Init = function(self: Types.Item, Owner: Player)
+        Init = function(self: Types.Item, Owner: Player, ExistingTool: Tool?)
+            self.Owner = Owner
+
             if not self.Owner.Character then
                 return
             end
@@ -30,10 +32,21 @@ function Item.GetDefaultSettings(): Types.Item
                 Utils.Misc.PreloadAssets(self.SoundIDs)
             end)
 
-            local Tool = self.ToolPrefab:Clone()
+            local Tool = ExistingTool
+            if not Tool then
+                Tool = self.ToolPrefab:Clone()
+                Tool.Parent = self.Owner.Backpack
+            end
 
             self.Janitor = Janitor.new()
             self.Janitor:LinkToInstances(Character, Tool)
+
+            self:AddConnection(Tool.Equipped:Connect(function()
+                self:Equip()
+            end))
+            self:AddConnection(Tool.Unequipped:Connect(function()
+                self:Unequip()
+            end))
 
             if RunService:IsServer() then
                 self.OwnerProperties = {
@@ -41,6 +54,19 @@ function Item.GetDefaultSettings(): Types.Item
                     Humanoid = Character:FindFirstChildWhichIsA("Humanoid"),
                     HRP = Utils.Character.GetRootPart(Character),
                 }
+
+                self:AddConnection(Tool.Activated:Connect(function()
+                    local UseSound = self.SoundIDs.Use
+                    if UseSound then
+                        Sounds.PlaySound(UseSound, {
+                            Parent = self.OwnerProperties.HRP,
+                        })
+                    end
+
+                    if self.Behaviour then
+                        self:Behaviour()
+                    end
+                end))
 
                 return
             end
@@ -67,20 +93,7 @@ function Item.GetDefaultSettings(): Types.Item
                 self.OwnerProperties.AnimationManager:LoadAnimation(`{self.Name}.{Name}`, ID)
             end
 
-            self:AddConnection(Tool.Equipped:Connect(function()
-                self:Equip()
-            end))
-            self:AddConnection(Tool.Unequipped:Connect(function()
-                self:Unequip()
-            end))
             self:AddConnection(Tool.Activated:Connect(function()
-                local UseSound = self.SoundIDs.Use
-                if UseSound then
-                    Sounds.PlaySound(UseSound, {
-                        Parent = self.OwnerProperties.HRP,
-                    })
-                end
-
                 if self.Behaviour then
                     self:Behaviour()
                 end
@@ -88,20 +101,22 @@ function Item.GetDefaultSettings(): Types.Item
         end,
 
         Equip = function(self: Types.Item)
-            --playing equip & idle tracks if existent
-            local EquipTrack = self.OwnerProperties.AnimationManager:GetAnimationTrack(`{self.Name}.Equip`)
-            if EquipTrack then
-                self.OwnerProperties.AnimationManager:PlayAnimation(`{self.Name}.Equip`)
-                self:AddUseConnection(task.delay(EquipTrack.Length - 0.02, function()
-                    self.OwnerProperties.AnimationManager:PlayAnimation(`{self.Name}.Idle`)
-                end))
-            end
-
-            local EquipSound = self.SoundIDs.Equip
-            if EquipSound then
-                Sounds.PlaySound(EquipSound, {
-                    Parent = self.OwnerProperties.HRP,
-                })
+            if not RunService:IsServer() then
+                --playing equip & idle tracks if existent
+                local EquipTrack = self.OwnerProperties.AnimationManager:GetAnimationTrack(`{self.Name}.Equip`)
+                if EquipTrack then
+                    self.OwnerProperties.AnimationManager:PlayAnimation(`{self.Name}.Equip`)
+                    self:AddUseConnection(task.delay(EquipTrack.Length - 0.02, function()
+                        self.OwnerProperties.AnimationManager:PlayAnimation(`{self.Name}.Idle`)
+                    end))
+                end
+            else
+                local EquipSound = self.SoundIDs.Equip
+                if EquipSound then
+                    Sounds.PlaySound(EquipSound, {
+                        Parent = self.OwnerProperties.HRP,
+                    })
+                end
             end
 
             if self.OnEquip then
@@ -110,15 +125,17 @@ function Item.GetDefaultSettings(): Types.Item
         end,
 
         Unequip = function(self: Types.Item)
-            for _, Name in {"Idle", "Equip", "Use"} do
-                self.OwnerProperties.AnimationManager:StopAnimation(`{self.Name}.{Name}`)
-            end
-
-            local UnequipSound = self.SoundIDs.Unequip
-            if UnequipSound then
-                Sounds.PlaySound(UnequipSound, {
-                    Parent = self.OwnerProperties.HRP,
-                })
+            if not RunService:IsServer() then
+                for _, Name in {"Idle", "Equip", "Use"} do
+                    self.OwnerProperties.AnimationManager:StopAnimation(`{self.Name}.{Name}`)
+                end
+            else
+                local UnequipSound = self.SoundIDs.Unequip
+                if UnequipSound then
+                    Sounds.PlaySound(UnequipSound, {
+                        Parent = self.OwnerProperties.HRP,
+                    })
+                end
             end
 
             for _, Connection in self.UseConnections do

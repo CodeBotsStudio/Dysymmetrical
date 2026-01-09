@@ -22,6 +22,12 @@ local DefaultAnimations: {[string]: string} = {
 	Sit = "rbxassetid://178130996",
 }
 
+local SpectatorOnly = {
+	"Fall",
+	"Climb",
+	"Sit",
+}
+
 function AnimationManager:Init()
 	if self.Initted then
 		return
@@ -31,6 +37,7 @@ function AnimationManager:Init()
 	self.Character = self.Character or Players.LocalPlayer.Character
 	local Humanoid = Utils.Instance.WaitForChildWhichIsA(self.Character, "Humanoid") :: Humanoid
 	local HumanoidRootPart = Utils.Character.GetRootPart(self.Character)
+	local Role = self.Character:FindFirstChild("Role")
 
 	local Sprinting = self.Character.PlayerAttributes.Sprinting
 
@@ -38,6 +45,10 @@ function AnimationManager:Init()
 
 	for Name, ID in DefaultAnimations do
 		if self.AnimationTracks[Name] then
+			continue
+		end
+
+		if Role and Role.Value ~= "Spectator" and table.find(SpectatorOnly, Name) then
 			continue
 		end
 

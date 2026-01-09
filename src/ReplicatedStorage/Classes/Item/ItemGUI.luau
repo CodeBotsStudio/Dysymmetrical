@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local ItemGUI = {}
@@ -40,17 +41,19 @@ function ItemGUI.InitGUI()
     local Tools: {Tool} = {}
 
     JanitorInstance:Add(Players.LocalPlayer.Backpack.ChildAdded:Connect(function(newChild: Instance)
-        if not newChild:IsA("Tool") then
+        if not newChild:IsA("Tool") or table.find(Tools, newChild) then
             return
         end
 
+        table.insert(Tools, newChild)
         ItemGUI._InitTool(Container, newChild, Humanoid)
     end))
     JanitorInstance:Add(Character.ChildAdded:Connect(function(newChild: Instance)
-        if not newChild:IsA("Tool") then
+        if not newChild:IsA("Tool") or table.find(Tools, newChild) then
             return
         end
 
+        table.insert(Tools, newChild)
         ItemGUI._InitTool(Container, newChild, Humanoid)
     end))
     JanitorInstance:Add(Players.LocalPlayer.Backpack.ChildRemoved:Connect(function(child: Instance)
@@ -114,6 +117,7 @@ function ItemGUI.InitGUI()
         end
 
         for _, Item: Tool in ipairs(ExistingTools) do
+            table.insert(Tools, Item)
             ItemGUI._InitTool(Container, Item)
         end
     end
@@ -169,15 +173,25 @@ function ItemGUI._InitTool(Container: Frame, Tool: Tool, Humanoid: Humanoid)
         ReloadEquipped()
     end))
 
-    FrameJanitor:Add((Tool:FindFirstChild("Interactor") :: ImageButton).MouseButton1Click:Connect(function()
+    FrameJanitor:Add((ItemContainer:FindFirstChild("Interactor") :: ImageButton).MouseButton1Click:Connect(function()
         if Tool.Parent == Humanoid.Parent then
             Humanoid:UnequipTools()
+        else
+            Humanoid:EquipTool(Tool)
+        end
 
+        ReloadEquipped()
+    end))
+
+    task.spawn(function()
+        local ItemEquivalent = ReplicatedStorage.Assets.Items:FindFirstChild(Tool.Name)
+        if not ItemEquivalent then
             return
         end
 
-        Humanoid:EquipTool(Tool)
-    end))
+        ItemEquivalent = Utils.Type.CopyTable(require(ItemEquivalent))
+        ItemEquivalent:Init(Players.LocalPlayer, Tool)
+    end)
 
     ReloadEquipped(true)
 end
