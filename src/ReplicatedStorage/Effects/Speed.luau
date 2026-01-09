@@ -1,14 +1,14 @@
---!nocheck
-
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Types = require(ReplicatedStorage.Classes.Types)
 local Effect = require(game:GetService("ReplicatedStorage").Classes.Effect)
 
-return Effect.CreateEffect({
+return Effect.New({
     Name = "Speed",
     Description = "Makes the player faster the higher the level.",
-    ApplyEffect = function(_own: Effect.Effect, level: number)
+    ApplyEffect = function(_own: Types.Effect, level: number)
         if RunService:IsServer() then
             return
         end

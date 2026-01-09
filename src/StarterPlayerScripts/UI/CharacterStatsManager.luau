@@ -1,5 +1,3 @@
---!nocheck
-
 local CharacterStatsManager = {
     UI = nil,
     Connection = nil,

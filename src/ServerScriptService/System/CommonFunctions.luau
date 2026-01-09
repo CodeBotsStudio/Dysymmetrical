@@ -1,5 +1,3 @@
---!nocheck
-
 local CommonFunctions = {
 	--- IDs used in the anti-cheat to display kick messages.
 	KickIDs = {

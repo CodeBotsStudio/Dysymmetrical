@@ -1,9 +1,7 @@
---!nocheck
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Emote = require(ReplicatedStorage.Classes.Emote)
 
-return Emote.CreateEmote({
+return Emote.New({
     Config = {
         Name = "T-Pose",
         Quote = "be not afraid.",

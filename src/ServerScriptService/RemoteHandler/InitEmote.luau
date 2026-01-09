@@ -1,5 +1,3 @@
---!nocheck
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Network = require(ReplicatedStorage.Modules.Network)

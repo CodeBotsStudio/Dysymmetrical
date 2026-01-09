@@ -1,8 +1,7 @@
---!nocheck
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Effect = require(ReplicatedStorage.Classes.Effect)
+local Types = require(ReplicatedStorage.Classes.Types)
 
 local function Work(apply: boolean, instances: {BasePart & Decal}, level: number?)
     if apply then
@@ -28,13 +27,13 @@ local function Work(apply: boolean, instances: {BasePart & Decal}, level: number
     end
 end
 
-return Effect.CreateEffect({
+return Effect.New({
     Name = "Invisibility",
     Description = "Makes the player fairly transparent (but never fully invisible) the higher the level.",
     Duration = 10,
     TransparentInstances = {},
 
-    ApplyEffect = function(own: Effect.Effect, level: number, char: Model)
+    ApplyEffect = function(own: Types.Effect, level: number, char: Model)
         if not RunService:IsServer() then
             return
         end
@@ -63,7 +62,7 @@ return Effect.CreateEffect({
 
         Work(true, own.TransparentInstances, level)
     end,
-    RemoveEffect = function(own: Effect.Effect)
+    RemoveEffect = function(own: Types.Effect)
         if not RunService:IsServer() then
             return
         end

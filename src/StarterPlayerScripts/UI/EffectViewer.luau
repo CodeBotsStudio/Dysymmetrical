@@ -1,5 +1,3 @@
---!nocheck
-
 local EffectViewer = {}
 
 local LocalPlayer = game:GetService("Players").LocalPlayer

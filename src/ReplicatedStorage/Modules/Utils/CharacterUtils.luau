@@ -1,10 +1,9 @@
---!nocheck
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local InstanceUtils = require(script.Parent.InstanceUtils)
 local PlayerUtils = require(script.Parent.PlayerUtils)
 local TypeUtils = require(script.Parent.TypeUtils)
-local Janitor = require(ReplicatedStorage.Packages.Janitor)
+local Janitor = require(ReplicatedStorage.Packages._Index["howmanysmall_janitor@1.18.3"].janitor)
 local Promise = require(ReplicatedStorage.Packages._Index["howmanysmall_janitor@1.18.3"].Promise)
 
 local Rand = Random.new()
@@ -125,7 +124,7 @@ end
 --- Equivalent to `Player.CharacterAdded:Connect()` but managed by Janitor.
 function CharacterUtils.ObserveCharacter(
 	player: Player,
-	callback: (character: Model, characterJanitor: janitor.Janitor) -> ()
+	callback: (character: Model, characterJanitor: Janitor.Janitor) -> ()
 )
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(player)

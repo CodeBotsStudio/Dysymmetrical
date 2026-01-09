@@ -1,5 +1,3 @@
---!nocheck
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -29,9 +27,9 @@ export type Key = {
     MobileButton: GuiButton?, --NEVER IMPLEMENTING THIS. >:(
 
     --- Signal fired when the input's pressed. Read `ReplicatedStorage.Utils.Signal`.
-    Pressed: Signal.Signal,
+    Pressed: Signal.Signal<>,
     --- Signal fired when the input's released. Read `ReplicatedStorage.Utils.Signal`.
-    Released: Signal.Signal,
+    Released: Signal.Signal<>,
 }
 
 local InputManager = {

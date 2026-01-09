@@ -1,14 +1,13 @@
---!nocheck
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Effect = require(ReplicatedStorage.Classes.Effect)
+local Types = require(ReplicatedStorage.Classes.Types)
 
 local CommonFunctions = RunService:IsServer() and require(game:GetService("ServerScriptService").System.CommonFunctions) or nil
 
-return Effect.CreateEffect({
+return Effect.New({
     Name = "Stunned",
     Description = "Keeps the player still and unable to use their abilities for a specific amount of time.",
     Duration = 3,
@@ -19,7 +18,7 @@ return Effect.CreateEffect({
         end
         require(Players.LocalPlayer.Character.PlayerAttributeScripts.SpeedManager):AddSpeedFactor("Stunned", 0)
     end,
-    RemoveEffect = function(self: Effect.Effect, char: Model)
+    RemoveEffect = function(self: Types.Effect, char: Model)
         if RunService:IsServer() then
             CommonFunctions.ApplyEffect({
                 TargetHumanoid = char:FindFirstChildWhichIsA("Humanoid"),

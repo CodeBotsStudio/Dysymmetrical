@@ -1,5 +1,3 @@
---!nocheck
-
 --[[
 	Thanks for using DysNetworking!
 	Every bit of documentation is scattered through this same module.

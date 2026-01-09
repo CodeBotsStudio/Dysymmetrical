@@ -1,5 +1,3 @@
---!nocheck
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -10,7 +8,7 @@ local GuiService = game:GetService("GuiService")
 local EmoteEquipWindow = require(script.EmoteEquipWindow)
 local SideBar = require(script.Parent.SideBar)
 local Network = require(ReplicatedStorage.Modules.Network)
-local Types = require(ReplicatedStorage.Classes.Character)
+local Types = require(ReplicatedStorage.Classes.Types)
 local Tooltip = require(ReplicatedStorage.Classes.Tooltip)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)

@@ -1,15 +1,13 @@
---!nocheck
-
 --it was definitely not 3 am when writing this months ago (excusing the funny comments)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Ability = require(script.Parent)
+local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 type Ability = {
-    ModuleCode: Ability.Ability,
+    ModuleCode: Types.Ability,
     Keybind: TextLabel,
     Timer: TextLabel,
     Uses: TextLabel?,

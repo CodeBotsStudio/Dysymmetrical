@@ -1,5 +1,3 @@
---!nocheck
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -162,7 +160,7 @@ end
 
 function Item.New(Props: Types.Item?): Types.Item
     Props = Props or {} :: any
-    local Final = Item.GetDefaultItemSettings()
+    local Final = Item.GetDefaultSettings()
     
     Utils.Type.DeepTableOverwrite(Final, Props :: any)
 

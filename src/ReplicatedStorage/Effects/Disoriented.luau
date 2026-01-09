@@ -1,5 +1,3 @@
---!nocheck
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -8,7 +6,7 @@ local Effect = require(ReplicatedStorage.Classes.Effect)
 
 local PlayerModule = not RunService:IsServer() and require(Players.LocalPlayer.PlayerScripts.PlayerModule) or nil
 
-return Effect.CreateEffect({
+return Effect.New({
     Name = "Disoriented",
     Description = "Inverts the player's contorls for the duration of the effect.",
     Duration = 4.2,

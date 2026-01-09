@@ -1,8 +1,6 @@
---!nocheck
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Janitor = require(ReplicatedStorage.Packages.Janitor)
+local Janitor = require(ReplicatedStorage.Packages._Index["howmanysmall_janitor@1.18.3"].janitor)
 local Signal = require(ReplicatedStorage.Utils.Signal)
 
 --- Class used for character abilities.
@@ -943,6 +941,36 @@ export type Item = {
     },
     --- The `Janitor` instance of this item.
     Janitor: Janitor.Janitor,
+}
+
+export type PickableItem = {
+    --- The equivalent `Item` of this pickable item to give when picking it up.
+    ItemEquivalent: Item,
+    --- An optional name to use in the `ProximityPrompt` instance of this item instead of `ItemEquivalent.Name`.
+    DisplayName: string?,
+    --- A description / quote under this pickable item's name in its `ProximityPrompt`.
+    Description: string,
+    --- The model to spawn in the map with its `ProximityPrompt`.
+    Model: Model,
+    --- Any offset to apply to `Model` when spawning it in the map.
+    CFrameOffset: CFrame?,
+    --- If specified, the rotation of the model when this item spawns in the map will be random in every axis set in this table.
+    --- 
+    --- If this table is `nil` or the table is empty, it won't do anything.
+    --- 
+    --- Defining this as `"All"` is the same as defining it as `{"X", "Y", "Z"}`
+    RandomRotation: ({"X" | "Y" | "Z"} | "All")?,
+
+    --- Initializes this item. Should only be called when spawning this item by either dropping it or spawning a map.
+    Init: (self: PickableItem) -> (),
+
+    --- This pickable item's `Janitor` instance.
+    Janitor: Janitor.Janitor,
+
+    --- Adds a connection / thread to the item's janitor to be disposed of when the owner's character is destroyed.
+    --- 
+    --- Use this to make connections and threads.
+    AddConnection: <T>(self: PickableItem, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
 }
 
 return {}

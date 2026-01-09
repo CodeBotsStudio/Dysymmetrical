@@ -1,5 +1,3 @@
---!nocheck
-
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -8,8 +6,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local SideBar = require(script.Parent.SideBar)
-local Types = require(ReplicatedStorage.Classes.Character)
-local Emote = require(ReplicatedStorage.Classes.Emote)
+local Types = require(ReplicatedStorage.Classes.Types)
 local Tooltip = require(ReplicatedStorage.Classes.Tooltip)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
@@ -754,7 +751,7 @@ function Shop:Toggle(toggle: boolean)
     self.Enabled = toggle
 end
 
-function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Survivor | Emote.Emote, Module: ModuleScript, Type: string, Card: Frame)
+function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Survivor | Types.Emote, Module: ModuleScript, Type: string, Card: Frame)
     if not self.Opened then
         return
     end

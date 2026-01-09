@@ -200,7 +200,7 @@ function PlayerInfoWindow:Hide(instant: boolean?)
     self.Removed:DisconnectAll()
     for _, connection in self.Connections do
         if typeof(connection) == "thread" then
-            if coroutine.status(connection) ~= "running" then
+            if coroutine.status(connection :: thread) ~= "running" then
                 task.cancel(connection)
             end
         else

@@ -1,5 +1,3 @@
---!nocheck
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -29,7 +27,7 @@ function SlashModule.New(Props: Types.Ability?): Types.Ability
 		Delay = 0.1,
 		HitboxSize = Vector3.new(5, 6, 4.5),
 		HitboxOffset = CFrame.new(0, 0, -2.5),
-		Behaviour = function(self: Ability.Ability)
+		Behaviour = function(self: Types.Ability)
 			if RunService:IsServer() then
 				Sounds.PlaySound(self.UseSound, {Parent = self.OwnerProperties.HRP})
 				task.delay(self.Delay, function()
@@ -49,7 +47,7 @@ function SlashModule.New(Props: Types.Ability?): Types.Ability
 				end))
 			end
 		end,
-		IncreaseDamage = function(self: Ability.Ability, amount: number)
+		IncreaseDamage = function(self: Types.Ability, amount: number)
 			self.Damage += amount
 		end,
 	})

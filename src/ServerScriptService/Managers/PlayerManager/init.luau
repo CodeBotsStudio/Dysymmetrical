@@ -1,5 +1,3 @@
---!nocheck
-
 local PlayerManager = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

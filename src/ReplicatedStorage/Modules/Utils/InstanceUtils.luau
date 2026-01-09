@@ -1,11 +1,9 @@
---!nocheck
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Types = require(ReplicatedStorage.Classes.Types)
 local TypeUtils = require(script.Parent.TypeUtils)
-local Janitor = require(ReplicatedStorage.Packages.Janitor)
+local Janitor = require(ReplicatedStorage.Packages._Index["howmanysmall_janitor@1.18.3"].janitor)
 
 local InstanceUtils = {}
 

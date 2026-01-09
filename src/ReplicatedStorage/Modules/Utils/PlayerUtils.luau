@@ -1,5 +1,3 @@
---!nocheck
-
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -9,7 +7,7 @@ local TweenService = game:GetService("TweenService")
 local InstanceUtils = require(script.Parent.InstanceUtils)
 local PlayerDataUtils = require(script.Parent.PlayerDataUtils)
 local Network = require(ReplicatedStorage.Modules.Network)
-local Janitor = require(ReplicatedStorage.Packages.Janitor)
+local Janitor = require(ReplicatedStorage.Packages._Index["howmanysmall_janitor@1.18.3"].janitor)
 
 local Rand = Random.new()
 
@@ -44,8 +42,10 @@ function PlayerUtils.ObservePlayers(callback: (player: Player, playerJanitor: Ja
 end
 
 --- Gets the mouse position in the screen. Also supports Mobile devices in a different way.
+--- 
 --- Never call this from server as it won't return anything.
---- This isn't supposed to be called at all, use `Utils:GetPlayerMousePosition()` instead
+--- 
+--- This isn't supposed to be called at all, use `Utils.Player.GetPlayerMousePosition()` instead
 function PlayerUtils._GetMousePosition(LockToClosestPlayer: boolean): Vector3
     --only available in client
     if RunService:IsServer() then
@@ -294,15 +294,15 @@ function PlayerUtils.Fade(Target: Player | {Player}, FadeType: "In" | "Out", Dur
     end
 end
 
---- INTERNAL: Makes `Utils:Fade()` work. Use that one instead.
+--- INTERNAL: Makes `Utils.Player.Fade()` work. Use that one instead.
 function PlayerUtils._Fade(FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
     if RunService:IsServer() then
-        warn("[Utils:Fade()] Tried to call internal fade function from server! Preventing fade execution...")
+        warn("[Utils.Player.Fade()] Tried to call internal fade function from server! Preventing fade execution...")
         return
     end
 
     if workspace:GetAttribute("ClientLoaded") ~= true then
-        warn("[Utils:Fade()] Tried to call fade when client hasn't loaded yet! Preventing fade execution...")
+        warn("[Utils.Player.Fade()] Tried to call fade when client hasn't loaded yet! Preventing fade execution...")
         return
     end
 
@@ -311,7 +311,7 @@ function PlayerUtils._Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
 
     if FadeType == "In" then
         if PlayerUtils.FadeFrame and PlayerUtils.FadeFrame.Parent then
-            warn("[Utils:Fade()] Fade already exists! Preventing fade execution...")
+            warn("[Utils.Player.Fade()] Fade already exists! Preventing fade execution...")
             return
         end
         
@@ -334,7 +334,7 @@ function PlayerUtils._Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
         end
     elseif FadeType == "Out" then
         if not PlayerUtils.FadeFrame or not PlayerUtils.FadeFrame.Parent then
-            warn("[Utils:Fade()] Fade non-existant! Call with `In` type first! Preventing fade execution...")
+            warn("[Utils.Player.Fade()] Fade non-existant! Call with `In` type first! Preventing fade execution...")
             return
         end
 
@@ -350,7 +350,7 @@ function PlayerUtils._Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
             Twn.Completed:Wait()
         end
     else
-        warn("[Utils:Fade()] Fade type not specified! Preventing fade execution...")
+        warn("[Utils.Player.Fade()] Fade type not specified! Preventing fade execution...")
     end
 end
 

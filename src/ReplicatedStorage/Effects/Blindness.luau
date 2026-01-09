@@ -1,5 +1,3 @@
---!nocheck
-
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -7,15 +5,16 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Effect = require(ReplicatedStorage.Classes.Effect)
+local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local DisappearThread
 
-return Effect.CreateEffect({
+return Effect.New({
     Name = "Blindness",
     Description = "Blinds the affected player for a set time. This effect will flash white if the Photosensitive setting is off, and black if it's on.",
 
-    ApplyEffect = function(own: Effect.Effect, char: Model, level: number, duration: number)
+    ApplyEffect = function(own: Types.Effect, char: Model, level: number, duration: number)
         if not RunService:IsServer() then
             if DisappearThread then
                 task.cancel(DisappearThread)
@@ -38,7 +37,7 @@ return Effect.CreateEffect({
             end)
         end
     end,
-    RemoveEffect = function(own: Effect.Effect, char: Model)
+    RemoveEffect = function(own: Types.Effect, char: Model)
         if not RunService:IsServer() then
             if DisappearThread then
                 task.cancel(DisappearThread)

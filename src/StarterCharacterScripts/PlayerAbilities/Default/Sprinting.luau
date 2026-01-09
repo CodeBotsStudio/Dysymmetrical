@@ -1,5 +1,3 @@
---!nocheck
-
 local Sprinting = {
 	AttemptingSprint = false,
 	PressingSprintWhileRecovering = false,
@@ -66,7 +64,7 @@ end
 
 function Sprinting:_GainStaminaLegally(delta: number)
 	if not self.Recovering and not self.Exhausted and self.Stamina <= self.MaxStamina.Value then
-		self.Stamina = math.clamp(self.Stamina + self.StaminaRegenRate.Value * delta, 0, self.MaxStamina.Value)
+		self.Stamina = math.clamp(self.Stamina + self.StaminaRegenRate.Value * delta, 0, self.MaxStamina.Value :: number)
 	end
 end
 

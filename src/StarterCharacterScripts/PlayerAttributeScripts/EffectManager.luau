@@ -1,10 +1,8 @@
---!nocheck
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Type = require(ReplicatedStorage.Classes.Effect)
+local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
@@ -20,7 +18,7 @@ function EffectManager:Init()
 
     --visual
     self.Janitor:Add(RunService.PreSimulation:Connect(function(delta: number)
-        for _, effect: Type.Effect in self.Effects do
+        for _, effect: Types.Effect in self.Effects do
             effect.TimeLeft -= delta
         end
     end))

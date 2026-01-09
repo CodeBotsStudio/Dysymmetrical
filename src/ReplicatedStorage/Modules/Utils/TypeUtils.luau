@@ -1,5 +1,3 @@
---!nocheck
-
 local TypeUtils = {}
 
 local Rand = Random.new()
