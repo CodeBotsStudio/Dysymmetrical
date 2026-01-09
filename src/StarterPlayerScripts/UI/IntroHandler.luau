@@ -70,8 +70,11 @@ return {
 				Intro = KillerIntro.New2DIntro(IntroInfo, Intro2D)
 			else
 				local Module = Utils.Instance.GetCharacterModule("Killer", KillerName, KillerSkin)
-				if Module and Module.Config.AnimationIDs["KillerRig"] and Module.Config.AnimationIDs["CameraRig"] then
-					Intro = KillerIntro.New3DIntro(IntroInfo)
+				if Module then
+					Module = require(Module)
+					if Module.Config.AnimationIDs["KillerRig"] and Module.Config.AnimationIDs["CameraRig"] then
+						Intro = KillerIntro.New3DIntro(IntroInfo)
+					end
 				end
 			end
 
