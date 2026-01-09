@@ -4,10 +4,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
+local Types = require(ReplicatedStorage.Classes.Types)
 local InstanceUtils = require(script.Parent.InstanceUtils)
 local PlayerDataUtils = require(script.Parent.PlayerDataUtils)
 local Network = require(ReplicatedStorage.Modules.Network)
-local Janitor = require(ReplicatedStorage.Packages._Index["howmanysmall_janitor@1.18.3"].janitor)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local Rand = Random.new()
 
@@ -22,7 +23,7 @@ local PlayerUtils = {
 }
 
 --- Equivalent to `Players.PlayerAdded:Connect()` but connections are handled by Janitor.
-function PlayerUtils.ObservePlayers(callback: (player: Player, playerJanitor: Janitor.Janitor) -> ()): Janitor.Janitor
+function PlayerUtils.ObservePlayers(callback: (player: Player, playerJanitor: Types.Janitor) -> ()): Types.Janitor
 	local mainJanitor = Janitor.new()
 
 	local function onNewPlayer(player: Player)

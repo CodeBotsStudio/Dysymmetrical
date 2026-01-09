@@ -1,6 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Janitor = require(ReplicatedStorage.Packages._Index["howmanysmall_janitor@1.18.3"].janitor)
+export type Janitor = Janitor.Janitor
+
 local Signal = require(ReplicatedStorage.Utils.Signal)
 
 --- Class used for character abilities.
@@ -125,7 +127,7 @@ export type Ability = {
     --- The ability's Janitor instance.
     --- 
     --- Used to make cleanups easier.
-    Janitor: Janitor.Janitor,
+    Janitor: Janitor,
     --- The properties of this ability's owner.
     OwnerProperties: {
         --- The Character of the owner player. Also gettable through `Owner.Character`.
@@ -704,7 +706,7 @@ export type Emote = {
     AddConnection: <T>(self: Emote, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
 
     Owner: Player,
-    Janitor: Janitor.Janitor,
+    Janitor: Janitor,
 }
 
 --- Settings type for all hitboxes.
@@ -940,7 +942,7 @@ export type Item = {
         AnimationManager: any,
     },
     --- The `Janitor` instance of this item.
-    Janitor: Janitor.Janitor,
+    Janitor: Janitor,
 }
 
 export type PickableItem = {
@@ -965,7 +967,7 @@ export type PickableItem = {
     Init: (self: PickableItem) -> (),
 
     --- This pickable item's `Janitor` instance.
-    Janitor: Janitor.Janitor,
+    Janitor: Janitor,
 
     --- Adds a connection / thread to the item's janitor to be disposed of when the owner's character is destroyed.
     --- 

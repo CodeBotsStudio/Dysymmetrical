@@ -3,14 +3,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Types = require(ReplicatedStorage.Classes.Types)
 local TypeUtils = require(script.Parent.TypeUtils)
-local Janitor = require(ReplicatedStorage.Packages._Index["howmanysmall_janitor@1.18.3"].janitor)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local InstanceUtils = {}
 
 --- Equivalent of `Instance.ChildAdded:Connect()` but managed by Janitor.
 function InstanceUtils.ObserveChildren(
 	parent: Instance,
-	callback: (child: Instance, childJanitor: Janitor.Janitor) -> (),
+	callback: (child: Instance, childJanitor: Types.Janitor) -> (),
 	predicate: (child: Instance) -> boolean?
 )
 	local mainJanitor = Janitor.new()
@@ -37,7 +37,7 @@ end
 --- Equivalent of `Instance.DescendantAdded:Connect()` but managed by Janitor.
 function InstanceUtils.ObserveDescendants(
 	parent: Instance,
-	callback: (descendant: Instance, descendantJanitor: Janitor.Janitor) -> (),
+	callback: (descendant: Instance, descendantJanitor: Types.Janitor) -> (),
 	paredicate: (descendant: Instance) -> boolean?
 )
 	local mainJanitor = Janitor.new()
@@ -65,7 +65,7 @@ end
 function InstanceUtils.ObserveChildrenWhichIsA(
 	parent: Instance,
 	className: string,
-	callback: (child: Instance, childJanitor: Janitor.Janitor) -> ()
+	callback: (child: Instance, childJanitor: Types.Janitor) -> ()
 )
 	return InstanceUtils.ObserveChildren(parent, callback, function(child: Instance)
 		return child:IsA(className)
@@ -76,7 +76,7 @@ end
 function InstanceUtils.ObserveDescendantsWhichIsA(
 	parent: Instance,
 	className: string,
-	callback: (descendant: Instance, descendantJanitor: Janitor.Janitor) -> ()
+	callback: (descendant: Instance, descendantJanitor: Types.Janitor) -> ()
 )
 	return InstanceUtils.ObserveDescendants(parent, callback, function(descendant: Instance)
 		return descendant:IsA(className)
@@ -87,7 +87,7 @@ end
 function InstanceUtils.ObserveChildrenOfName(
 	parent: Instance,
 	name: string,
-	callback: (child: Instance, childJanitor: Janitor.Janitor) -> ()
+	callback: (child: Instance, childJanitor: Types.Janitor) -> ()
 )
 	return InstanceUtils.ObserveChildren(parent, callback, function(child: Instance)
 		return child.Name == name
@@ -98,7 +98,7 @@ end
 function InstanceUtils.ObserveDescendantsOfName(
 	parent: Instance,
 	name: Instance,
-	callback: (descendant: Instance, descendantJanitor: Janitor.Janitor) -> ()
+	callback: (descendant: Instance, descendantJanitor: Types.Janitor) -> ()
 )
 	return InstanceUtils.ObserveDescendants(parent, callback, function(descendant: Instance)
 		return descendant.Name == name
@@ -108,7 +108,7 @@ end
 --- Executes a callback when the `Parent` property of an `Instance` changes.
 function InstanceUtils.ObserveParent(
 	instance: Instance,
-	callback: (parent: Instance, parentJanitor: Janitor.Janitor) -> (),
+	callback: (parent: Instance, parentJanitor: Types.Janitor) -> (),
 	predicate: (parent: Instance) -> boolean?
 )
 	return InstanceUtils.ObserveProperty(instance, "Parent", callback, predicate)
@@ -170,7 +170,7 @@ end
 function InstanceUtils.ObserveProperty(
 	instance: Instance,
 	propertyName: string,
-	callback: (value: any, propertyJanitor: Janitor.Janitor) -> (),
+	callback: (value: any, propertyJanitor: Types.Janitor) -> (),
 	predicate: ((value: any) -> boolean)?
 )
 	local mainJanitor = Janitor.new()
@@ -193,7 +193,7 @@ end
 function InstanceUtils.ObserveAttribute(
 	instance: Instance,
 	attributeName: string,
-	callback: (value: any, propertyJanitor: Janitor.Janitor) -> (),
+	callback: (value: any, propertyJanitor: Types.Janitor) -> (),
 	predicate: ((value: any) -> boolean)?
 )
 	local mainJanitor = Janitor.new()
