@@ -13,8 +13,13 @@ function Item.GetDefaultSettings(): Types.Item
         Name = "Item",
 
         Init = function(self: Types.Item, Owner: Player)
-            --TODO: make this a bit more verbose later
-            if not self.ToolPrefab or not self.Owner.Character then
+            if not self.Owner.Character then
+                return
+            end
+
+            if not self.ToolPrefab then
+                warn(`[Item:Init()] No tool prefab provided for tool {self.Name}!`, debug.traceback())
+
                 return
             end
 

@@ -53,6 +53,15 @@ function MapManager.GetRandomMap(): Model | Folder
         InGameFolder.Parent = MapInstance
     end
 
+    --creates the Items folder for spawned `PickableItem`s
+    if not MapInstance:FindFirstChild("Items") then
+        local ItemsFolder = Instance.new("Folder")
+        ItemsFolder.Name = "Items"
+        ItemsFolder.Parent = MapInstance
+    end
+
+    --TODO: make random PickableItem spawns
+
     --checks if there's more than 1 layout available
     local Spawnpoints = MapInstance:FindFirstChild("Map"):FindFirstChild("SpawnPoints")
     local AvailableLayouts = Spawnpoints:GetChildren()
