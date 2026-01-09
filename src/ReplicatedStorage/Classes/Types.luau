@@ -877,6 +877,7 @@ export type Achievement = {
 
 export type Item = {
     Name: string,
+    ToolPrefab: Tool,
 
     Init: (self: Item, owner: Player) -> (),
     Equip: (self: Item) -> (),

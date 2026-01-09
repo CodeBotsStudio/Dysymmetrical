@@ -527,12 +527,12 @@ function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, di
 
 	local HRP = Rig:IsA("Model") and Utils.Character.GetRootPart(Rig) or Rig
 
-	-- If the knockback property of the hitbox is greater than 15, fling the target(?) -itrid
+	-- If the knockback property of the hitbox is greater than 15, fling the target(?) -itred
 	-- FLINGING GO BOOM -dys
 	if magnitude >= 15 and allowAssembly then
 		HRP.AssemblyLinearVelocity = direction * magnitude * 10
 	
-	-- Otherwise, lightly push the target instead. -itrid
+	-- Otherwise, lightly push the target instead. -itred
 	--using linearvel generally works better with less than 15 magnitude -dys
 	elseif magnitude > 0 then
 		local Att = Instance.new("Attachment")
@@ -550,6 +550,18 @@ function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, di
         Debris:AddItem(Att, 0.05)
         Debris:AddItem(LinearVel, 0.05)
 	end
+end
+
+function CommonFunctions.GivePhysicalItemToPlayer(Player: Player, Item: Types.Item)
+	if not Player.Character then
+		return
+	end
+
+	if not Item then
+		return
+	end
+
+	Utils.Type.CopyTable(Item):Init(Player)
 end
 
 return CommonFunctions

@@ -12,13 +12,20 @@ function Item.GetDefaultSettings(): Types.Item
     return {
         Name = "Item",
 
-        Init = function(self: Types.Item, Owner: Player, Tool: Tool)
+        Init = function(self: Types.Item, Owner: Player)
+            --TODO: make this a bit more verbose later
+            if not self.ToolPrefab or not self.Owner.Character then
+                return
+            end
+
             self.Owner = Owner
             local Character = self.Owner.Character :: Model
 
             task.defer(function()
                 Utils.Misc.PreloadAssets(self.SoundIDs)
             end)
+
+            local Tool = self.ToolPrefab:Clone()
 
             self.Janitor = Janitor.new()
             self.Janitor:LinkToInstances(Character, Tool)
