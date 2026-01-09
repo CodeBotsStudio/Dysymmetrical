@@ -12,8 +12,7 @@ local Signal = require(ReplicatedStorage.Utils.Signal)
 
 local AbilityType = {}
 
---- Ability preset for customization.
-function AbilityType.GetDefaultAbilitySettings(): Types.Ability
+function AbilityType.GetDefaultSettings(): Types.Ability
     return {
         Name = "Ability",
         RenderImage = "rbxassetid://9759886280",
@@ -409,7 +408,15 @@ function AbilityType.GetDefaultAbilitySettings(): Types.Ability
     }
 end
 
-function AbilityType.GetDefaultPassiveAbilitySettings(): Types.Ability
+--- ## DEPRECATED: Use `Ability.GetDefaultSettings()` instead.
+--- Ability preset for customization.
+@deprecated
+function AbilityType.GetDefaultAbilitySettings(): Types.Ability
+    return AbilityType.GetDefaultSettings()
+end
+
+--- ## DEPRECATED: Use `Ability.GetDefaultPassiveSettings()` instead.
+function AbilityType.GetDefaultPassiveSettings(): Types.Ability
     return Utils.Type.DeepTableOverwrite({
         Passive = true,
 
@@ -494,21 +501,35 @@ function AbilityType.GetDefaultPassiveAbilitySettings(): Types.Ability
         DisableSlashOnPerform = false,
 
         Signals = {},
-    }, AbilityType.GetDefaultAbilitySettings())
+    }, AbilityType.GetDefaultSettings())
+end
+
+--- ## DEPRECATED: use `Ability.GetDefaultPassiveSettings()` instead.
+@deprecated
+function AbilityType.GetDefaultPassiveAbilitySettings(): Types.Ability
+    return AbilityType.GetDefaultPassiveSettings()
 end
 
 --- Creates an ability with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
-function AbilityType.CreateAbility(Props: Types.Ability): Types.Ability
+function AbilityType.New(Props: Types.Ability): Types.Ability
     Props = Props or {}
 
     return Utils.Type.DeepTableOverwrite(
         Props.Passive and
-            AbilityType.GetDefaultPassiveAbilitySettings() or
-            AbilityType.GetDefaultAbilitySettings(),
+            AbilityType.GetDefaultPassiveSettings() or
+            AbilityType.GetDefaultSettings(),
 
         Props
     )
+end
+
+--- ## DEPRECATED: use `Ability.New()` instead.
+--- Creates an ability with the settings specified in `Props`.
+--- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
+@deprecated
+function AbilityType.CreateAbility(Props: Types.Ability): Types.Ability
+    return AbilityType.New(Props)
 end
 
 return AbilityType

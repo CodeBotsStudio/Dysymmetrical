@@ -43,7 +43,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                 Duration = 0.35
             }),
 
-            DataAnchor = Ability.CreateAbility({
+            DataAnchor = Ability.New({
                 Name = "Data Anchor",
 
                 FirstCooldown = 3,
@@ -112,7 +112,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                 end,
             }),
 
-            CallbackPing = Ability.CreateAbility({
+            CallbackPing = Ability.New({
                 Name = "Callback Ping",
                 Duration = 3,
                 InputName = "ThirdAbility",
@@ -174,7 +174,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                 end,
             }),
 
-            Overcharge = Ability.CreateAbility({
+            Overcharge = Ability.New({
                 Name = "Overcharge",
                 Cooldown = 45,
                 InputName = "FourthAbility",

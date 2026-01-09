@@ -16,7 +16,7 @@ function SlashModule.New(Props: Types.Ability?): Types.Ability
 
 	-- Doesn't require you to unintuitively slot in an empty table for it to work at all– someone was confused about this a bit earlier, so I figured a fix was in order.
 	Props = Props or {}
-	local Final = Ability.CreateAbility({
+	local Final = Ability.New({
 		Name = "Slash",
 		InputName = "Slash",
 		Cooldown = 2,

@@ -11,10 +11,10 @@ local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 local Network = require(game:GetService("ReplicatedStorage").Modules.Network)
 
-local EmoteClass = {}
+local Emote = {}
 
 --- Emote preset for customization.
-function EmoteClass.GetDefaultEmoteSettings(): Types.Emote
+function Emote.GetDefaultSettings(): Types.Emote
     return {
         Config = {
             Name = "Emote",
@@ -187,13 +187,30 @@ function EmoteClass.GetDefaultEmoteSettings(): Types.Emote
     }
 end
 
+--- ## DEPRECATED: use `Emote.GetDefaultSettings()` instead.
+--- 
+--- Emote preset for customization.
+@deprecated
+function Emote.GetDefaultEmoteSettings(): Types.Emote
+    return Emote.GetDefaultSettings()
+end
+
 --- Creates an emote with the settings specified in `Props`.
 --- 
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
-function EmoteClass.CreateEmote(Props: Types.Emote): Types.Emote
+function Emote.New(Props: Types.Emote): Types.Emote
     Props = Props or {}
 
-    return Utils.Type.DeepTableOverwrite(EmoteClass.GetDefaultEmoteSettings(), Props)
+    return Utils.Type.DeepTableOverwrite(Emote.GetDefaultSettings(), Props)
 end
 
-return EmoteClass
+--- ## DEPRECATED: use `Emote.New()` instead.
+--- Creates an emote with the settings specified in `Props`.
+--- 
+--- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
+@deprecated
+function Emote.CreateEmote(Props: Types.Emote): Types.Emote
+    return Emote.New()
+end
+
+return Emote

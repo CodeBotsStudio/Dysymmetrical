@@ -7,7 +7,7 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local EffectType = {}
 
 --- Effect preset for customization.
-function EffectType.GetDefaultEffect(): Types.Effect
+function EffectType.GetDefaultSettings(): Types.Effect
     return {
         Name = "Effect",
         Description = "Does something",
@@ -30,15 +30,30 @@ function EffectType.GetDefaultEffect(): Types.Effect
     }
 end
 
+--- ## DEPRECATED: use `Effect.GetDefaultSettings()` instead.
+--- Effect preset for customization.
+@deprecated
+function EffectType.GetDefaultEffect(): Types.Effect
+    return EffectType.GetDefaultSettings()
+end
+
 --- Creates an effect with the settings specified in `Props`.
 --- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
-function EffectType.CreateEffect(Props: Types.Effect): Types.Effect
+function EffectType.New(Props: Types.Effect): Types.Effect
     Props = Props or {}
-    local Final = EffectType.GetDefaultEffect()
+    local Final = EffectType.GetDefaultSettings()
     
     Utils.Type.DeepTableOverwrite(Final, Props)
 
     return Final
+end
+
+--- ## DEPRECATED: use `Effect.New()` instead.
+--- Creates an effect with the settings specified in `Props`.
+--- Every property that has to be there has a fallback, so not all properties have to be written there if the default values are fine.
+@deprecated
+function EffectType.CreateEffect(Props: Types.Effect): Types.Effect
+    return EffectType.New(Props)
 end
 
 return EffectType

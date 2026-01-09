@@ -10,7 +10,7 @@ local Types = require(script.Parent.Types)
 
 local Item = {}
 
-function Item.GetDefaultItemSettings(): Types.Item
+function Item.GetDefaultSettings(): Types.Item
     return {
         Name = "Item",
 
@@ -160,7 +160,7 @@ function Item.GetDefaultItemSettings(): Types.Item
     }
 end
 
-function Item.CreateItem(Props: Types.Item?): Types.Item
+function Item.New(Props: Types.Item?): Types.Item
     Props = Props or {} :: any
     local Final = Item.GetDefaultItemSettings()
     
