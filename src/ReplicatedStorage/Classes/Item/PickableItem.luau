@@ -23,16 +23,16 @@ function PickableItem.GetDefaultSettings(): Types.PickableItem
                 return
             end
 
-            local ModelInstance = self.Model:Clone()
+            self.ModelInstance = self.Model:Clone()
 
             self.Janitor = Janitor.new()
-            self.Janitor:LinkToInstance(ModelInstance)
+            self.Janitor:LinkToInstance(self.ModelInstance)
 
             do
-                local Prompt = ModelInstance:FindFirstChildWhichIsA("ProximityPrompt", true)
+                local Prompt = self.ModelInstance:FindFirstChildWhichIsA("ProximityPrompt", true)
                 if not Prompt then
                     Prompt = Instance.new("ProximityPrompt")
-                    Prompt.Parent = ModelInstance.PrimaryPart or ModelInstance
+                    Prompt.Parent = self.ModelInstance.PrimaryPart or self.ModelInstance
                 end
 
                 self:AddConnection(Prompt.Triggered:Connect(function(Player: Player)
@@ -43,11 +43,11 @@ function PickableItem.GetDefaultSettings(): Types.PickableItem
 
                     task.spawn(CommonFunctions.GivePhysicalItemToPlayer, Player, self.ItemEquivalent)
 
-                    ModelInstance:Destroy()
+                    self.ModelInstance:Destroy()
                 end))
             end
 
-            ModelInstance.Parent = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Items") or workspace.TempObjectFolders
+            self.ModelInstance.Parent = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Items") or workspace.TempObjectFolders
         end,
 
         AddConnection = function<T>(self: Types.PickableItem, Connection: T & (RBXScriptConnection | thread)): T & (RBXScriptConnection | thread)

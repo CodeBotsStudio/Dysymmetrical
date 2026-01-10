@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local Network = require(ReplicatedStorage.Modules.Network)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
@@ -173,12 +174,24 @@ function ItemGUI._InitTool(Container: Frame, Tool: Tool, Humanoid: Humanoid)
         ReloadEquipped()
     end))
 
+    local CanDrop = false
     FrameJanitor:Add((ItemContainer:FindFirstChild("Interactor") :: ImageButton).MouseButton1Click:Connect(function()
+        if CanDrop then
+            Network:FireServerConnection("DropItem", "REMOTE_EVENT", Tool)
+
+            return
+        end
+        
         if Tool.Parent == Humanoid.Parent then
             Humanoid:UnequipTools()
         else
             Humanoid:EquipTool(Tool)
         end
+
+        CanDrop = true
+        task.delay(0.12, function()
+            CanDrop = false
+        end)
 
         ReloadEquipped()
     end))

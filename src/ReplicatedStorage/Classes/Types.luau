@@ -977,6 +977,8 @@ export type PickableItem = {
     --- 
     --- Use this to make connections and threads.
     AddConnection: <T>(self: PickableItem, Connection: T & (RBXScriptConnection | thread)) -> T & (RBXScriptConnection | thread),
+    --- The physical model of this item that is currently in the map.
+    ModelInstance: Model,
 }
 
 return {}
