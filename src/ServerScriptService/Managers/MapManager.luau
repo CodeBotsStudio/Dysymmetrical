@@ -3,6 +3,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local Lighting = require(ReplicatedStorage.Modules.Lighting)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local MapManager = {
     --- Allows the map to not be the same to the last one.
@@ -62,8 +63,75 @@ function MapManager.GetRandomMap(): Model | Folder
 
     --TODO: make random PickableItem spawns
 
+    local ActualMap = MapInstance:FindFirstChild("Map")
+
+    task.spawn(function()
+        --checks if there are item spawn spots around
+        local ItemSpawns = ActualMap:FindFirstChild("ItemSpawns")
+        if not ItemSpawns then
+            return
+        end
+
+        --every item should have its own folder with possible spawn spots
+        for _, child in ItemSpawns:GetChildren() do
+            if not child:IsA("Folder") then
+                continue
+            end
+
+            --each folder should be named after its PickableItem
+            local ItemEquivalent = ReplicatedStorage.Assets.PickableItems:FindFirstChild(child.Name)
+            if not ItemEquivalent then
+                return
+            end
+            ItemEquivalent = require(ItemEquivalent)
+
+            for _, spawnPoint in child:GetChildren() do
+                --every spawn point should be an anchored, invisible part
+                if not spawnPoint:IsA("BasePart") then
+                    continue
+                end
+
+                --you can add a Chance attribute to every spawn to have a 1 every X chance for the item to spawn there
+                --by default it'll be a 1/10 chance
+                local Chance = spawnPoint:GetAttribute("Chance") or 10
+                local Result = Rand:NextInteger(1, Chance)
+                if Result ~= 1 then
+                    continue
+                end
+
+                --spawning the object
+                local ItemInstance = Utils.Type.CopyTable(ItemEquivalent)
+                ItemInstance:Init()
+
+                --applies the exact same cframe as the spawn point
+                local TargetCFrame = spawnPoint.CFrame
+
+                --if the axis is supposed to be random then do so
+                local RandomizedAxis = ItemEquivalent.RandomRotation
+                if RandomizedAxis then
+                    local RandomRotation = Vector3.new()
+                    local AxisTable = RandomizedAxis == "All" and {"X", "Y", "Z"} or RandomizedAxis
+
+                    for _, Axis in AxisTable do
+                        RandomRotation[Axis] = Rand:NextInteger(0, 359)
+                    end
+
+                    TargetCFrame *= CFrame.fromEulerAnglesXYZ(math.rad(RandomRotation.X), math.rad(RandomRotation.Y), math.rad(RandomRotation.Z))
+                end
+
+                --if any offset is present, apply it
+                if ItemEquivalent.CFrameOffset then
+                    TargetCFrame *= ItemEquivalent.CFrameOffset
+                end
+
+                --place it where it's supposed to be
+                ItemInstance.ModelInstance:PivotTo(TargetCFrame)
+            end
+        end
+    end)
+
     --checks if there's more than 1 layout available
-    local Spawnpoints = MapInstance:FindFirstChild("Map"):FindFirstChild("SpawnPoints")
+    local Spawnpoints = ActualMap:FindFirstChild("SpawnPoints")
     local AvailableLayouts = Spawnpoints:GetChildren()
     if #AvailableLayouts > 2 then
         --chooses a random layout from the spawnpoint pool
