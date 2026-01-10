@@ -944,6 +944,8 @@ export type Item = {
     },
     --- The `Janitor` instance of this item.
     Janitor: Janitor,
+    --- The `Tool` instance in the backpack of `Owner` when this item is initialized and live.
+    ToolInstance: Tool,
 }
 
 export type PickableItem = {

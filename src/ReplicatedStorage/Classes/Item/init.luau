@@ -37,6 +37,7 @@ function Item.GetDefaultSettings(): Types.Item
                 Tool = self.ToolPrefab:Clone()
                 Tool.Parent = self.Owner.Backpack
             end
+            self.ToolInstance = Tool
 
             self.Janitor = Janitor.new()
             self.Janitor:LinkToInstances(Character, Tool)

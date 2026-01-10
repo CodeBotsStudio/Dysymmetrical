@@ -183,6 +183,10 @@ function ItemGUI._InitTool(Container: Frame, Tool: Tool, Humanoid: Humanoid)
         ReloadEquipped()
     end))
 
+    FrameJanitor:Add(function()
+        ItemContainer:Destroy()
+    end, true)
+
     task.spawn(function()
         local ItemEquivalent = ReplicatedStorage.Assets.Items:FindFirstChild(Tool.Name)
         if not ItemEquivalent then
