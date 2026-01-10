@@ -194,6 +194,12 @@ function ItemGUI._InitTool(Container: Frame, Tool: Tool, Humanoid: Humanoid)
         end
 
         ItemEquivalent = Utils.Type.CopyTable(require(ItemEquivalent))
+
+        ItemContainer.Label.Text = ItemEquivalent.Name
+        if ItemEquivalent.Icon then
+            Image.Image = ItemEquivalent.Icon
+        end
+
         ItemEquivalent:Init(Players.LocalPlayer, Tool)
     end)
 
