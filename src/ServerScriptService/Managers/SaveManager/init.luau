@@ -524,7 +524,7 @@ function SaveManager.Load(Player: Player): Folder
 	Leaderstats.Parent = Player
 
 	DevItemGrantingManager.CheckPlayer(Player, ClonedData)
-	BadgeItemGrantingManager.CheckPlayer(Player, PlayerData)
+	BadgeItemGrantingManager.CheckPlayer(Player, ClonedData)
 
 	return ClonedData
 end
