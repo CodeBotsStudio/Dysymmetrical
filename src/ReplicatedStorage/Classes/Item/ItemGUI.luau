@@ -189,7 +189,7 @@ function ItemGUI._InitTool(Container: Frame, Tool: Tool, Humanoid: Humanoid)
         end
 
         CanDrop = true
-        task.delay(0.12, function()
+        task.delay(0.225, function()
             CanDrop = false
         end)
 
