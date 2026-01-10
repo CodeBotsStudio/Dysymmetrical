@@ -179,4 +179,26 @@ function TypeUtils.GetRandomItemFromTable<T>(Target: T & {}): any
     return UsedTable[Rand:NextInteger(1, #UsedTable)]
 end
 
+--- Splits a table into multiple chunks with size `ChunkSize`.
+--- 
+--- @return A table containing all chunks.
+function TypeUtils.SplitTableIntoChunks<T>(TableToSplit: T & {}, ChunkSize: number): {T & {}}
+    local Chunks = {}
+    local CurrentChunk = {}
+
+    for _, Item in ipairs(TypeUtils.DictToTable(TableToSplit)) do
+        table.insert(CurrentChunk, Item)
+        if #CurrentChunk > ChunkSize then
+            table.insert(Chunks, CurrentChunk)
+            CurrentChunk = {}
+        end
+    end
+
+    if #CurrentChunk > 0 then
+        table.insert(Chunks, CurrentChunk)
+    end
+
+    return Chunks
+end
+
 return TypeUtils

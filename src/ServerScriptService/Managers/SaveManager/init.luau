@@ -2,6 +2,7 @@ local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local BadgeItemGrantingManager = require(script.BadgeItemGrantingManager)
 local DevItemGrantingManager = require(script.DevItemGrantingManager)
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -523,6 +524,7 @@ function SaveManager.Load(Player: Player): Folder
 	Leaderstats.Parent = Player
 
 	DevItemGrantingManager.CheckPlayer(Player, ClonedData)
+	BadgeItemGrantingManager.CheckPlayer(Player, PlayerData)
 
 	return ClonedData
 end
