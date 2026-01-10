@@ -96,6 +96,9 @@
     ------03/01/2026------
     * Added achievements menu (MAKE SURE TO GO INTO `StarterPlayer/StarterPlayerScripts/UI/AchievementsMenu` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
 
+    ------10/01/2026------
+    * Added PickableItems (MAKE SURE TO GO INTO `ReplicatedStorage/Classes/Item/ItemGUI`, `ReplicatedStorage/Assets/Items` & `ReplicatedStorage/Assets/PickableItems` IN THE EXAMPLE PLACE TO GRAB WHAT YOU NEED FOR IT TO WORK)
+
 ]]
 
 script:Destroy()

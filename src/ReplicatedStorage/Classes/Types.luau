@@ -876,32 +876,51 @@ export type Achievement = {
 }
 
 export type Item = {
+    --- The display name of this item.
     Name: string,
+    --- The tool that'll be copied over to this item's owner.
     ToolPrefab: Tool,
+    --- The icon of this item in the GUI-
     Icon: string?,
 
+    --- INTERNAL: Initializes this item.
     Init: (self: Item, owner: Player) -> (),
+    --- INTERNAL: Called when `ToolInstance.Equipped` is fired. Don't replace this.
     Equip: (self: Item) -> (),
+    --- INTERNAL: Called when `ToolInstance.Unequipped` is fired. Don't replace this.
     Unequip: (self: Item) -> (),
 
+    --- Callback executed after `Item.Equip()` is called.
     OnEquip: ((self: Item) -> ())?,
+    --- Callback executed after `Item.Unequip()` is called.
     OnUnequip: ((self: Item) -> ())?,
 
+    --- Callback executed when `ToolInstance.Activated` is fired.
+    --- 
+    --- Write your item logic here-
     Behaviour: (self: Item) -> (),
 
+    --- Any animation IDs to load to `Owner`'s character.
     AnimationIDs: {
+        --- Played when `Equip()` is called.
         Equip: string?,
+        --- Played after `AnimationIDs.Equip`. If the latter is `nil`, this'll be played instantly in its place.
         Idle: string?,
+        --- Played when `Behaviour()` is called.
         Use: string?,
         [string]: string,
     },
     SoundIDs: {
+        --- Played when `Equip()` is called.
         Equip: string?,
+        --- Played when `Unequip()` is called.
         Unequip: string?,
+        --- Played when `Behaviour()` is called.
         Use: string?,
         [string]: string,
     },
 
+    --- Any `AnimationTrack` instances generated when and ID from `AnimationIDs` when this tool is initialized.
     AnimationTracks: {[string]: AnimationTrack},
 
     --- Adds a connection / thread to the item's janitor to be disposed of when the owner's character is destroyed.
