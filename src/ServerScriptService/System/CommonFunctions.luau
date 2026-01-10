@@ -95,7 +95,7 @@ function CommonFunctions.DamagePlayer(DamageSettings: DamagePlayerSettings)
 	--correction: the hitboxes in Forsaken are FULLY server-handled, but it doesn't lag because THEIR GAME SOMEHOW DOESN'T LAG AT ALL. WHAT????
 	--quick thing: hitboxes are now fully server-sided. yup. i had to. :(
 
-	if DamageSettings.Damage >= 0 and Utils.Instance.FindFirstChild(Char, "Effects.StunSpawnProtection", 0) and not DamageSettings.SourcePlayer.Character:GetAttribute("BypassStunProtection") then
+	if DamageSettings.Damage == 0 or Utils.Instance.FindFirstChild(Char, "Effects.StunSpawnProtection", 0) or not DamageSettings.SourcePlayer.Character:GetAttribute("BypassStunProtection") then
 		return
 	end
 
