@@ -42,7 +42,7 @@ function SlashModule.New(Props: Types.Ability?): Types.Ability
 				end)
 			else
 				self.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor("Slash")
-				self:AddConnection(task.delay(self.UseAnimationTrack.Length - (1/20 * 2), function()
+				self:AddConnection(task.delay(0.7, function()
 					self.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor("Slash")
 				end))
 			end

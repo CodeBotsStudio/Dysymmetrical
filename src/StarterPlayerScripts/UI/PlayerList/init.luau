@@ -41,8 +41,8 @@ function PlayerList:Init()
         Container.PlayerLabel.Text = Player.DisplayName
 
         --money
-        local HiddenMoney = Utils.Instance.FindFirstChild(Player, "PlayerData.Settings.Privacy.HideMoney", 0)
-        local MoneyValue = Utils.Instance.FindFirstChild(Player, "leaderstats.Money")
+        local HiddenMoney = Utils.Instance.FindFirstChild(Player, "PlayerData.Settings.Privacy.HideMoney", 5)
+        local MoneyValue = Utils.Instance.FindFirstChild(Player, "leaderstats.Money", 5)
 
         Container.MoneyLabel.Text = HiddenMoney.Value and "(Hidden)" or tostring(MoneyValue.Value)
         Container.MoneyLabel.TextColor3 = HiddenMoney.Value and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(255, 255, 255)

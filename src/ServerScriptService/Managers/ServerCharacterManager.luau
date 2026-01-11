@@ -110,18 +110,17 @@ function ServerCharacterManager.SetupCharacter(player: Player, charName: string,
         return Char
     end
 
-    ServerCharacterManager._InitCharacter(player, Utils.Instance.GetCharacterModule(charType, charName, skinName))
+    ServerCharacterManager._InitCharacter(player, Char, Utils.Instance.GetCharacterModule(charType, charName, skinName))
 
     return Char
 end
 
 --- Inits a character's abilities and sets its properties accordingly as specified in its `GameplayConfig`.
-function ServerCharacterManager._InitCharacter(player: Player, charModule: ModuleScript)
+function ServerCharacterManager._InitCharacter(player: Player, Char: Model, charModule: ModuleScript)
     local module = Utils.Type.CopyTable(require(charModule))
     module.Owner = player
 
     --Abilities
-    local Char = player.Character
     local CharacterAbilities = require(Char.PlayerAbilities.CharacterAbilities)
     CharacterAbilities.CharacterModule = module
     

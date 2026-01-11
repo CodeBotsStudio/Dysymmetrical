@@ -133,7 +133,7 @@ function AbilityType.GetDefaultSettings(): Types.Ability
                 if abilityName == self.Name then
                     --disables ability keys for preventing the usage of a different ability while using it
                     if self.DisableOtherAbilitiesOnPerform then
-                        self:DisableAllAbilities()
+                        self:DisableAllAbilities(self.Duration)
                     end
 
                     --cooldown stuffs
@@ -235,7 +235,6 @@ function AbilityType.GetDefaultSettings(): Types.Ability
                 return
             end
             
-            Duration = Duration or self.Duration
             if DisableSlash == nil then
                 DisableSlash = self.DisableSlashOnPerform
             end
@@ -246,11 +245,13 @@ function AbilityType.GetDefaultSettings(): Types.Ability
                     table.insert(inputsToCancelLater, input)
                 end
             end
-            self:AddConnection(task.delay(Duration or (self.UseAnimationTrack and self.UseAnimationTrack.Length or 1), function()
-                for _, input in inputsToCancelLater do
-                    input.Enabled = true
-                end
-            end))
+            if Duration then
+                self:AddConnection(task.delay(Duration, function()
+                    for _, input in inputsToCancelLater do
+                        input.Enabled = true
+                    end
+                end))
+            end
         end,
 
         SetOnCooldown = function(self: Types.Ability, duration: number?)
