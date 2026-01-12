@@ -37,7 +37,7 @@ local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
 
-function CommonFunctions.Init()
+function CommonFunctions:Init()
     for _, CommandScript in ReplicatedStorage.Security.ModeratorCommands:GetChildren() do
         if not CommandScript:IsA("ModuleScript") then
             continue
@@ -100,23 +100,25 @@ function CommonFunctions.DamagePlayer(DamageSettings: DamagePlayerSettings)
 	end
 
 	local Role = Char:FindFirstChild("Role")
-	if Char:FindFirstChild("Killer") and Role and Role.Value == "Survivor" then
-		Char.Killer.Value = DamageSettings.SourcePlayer
+	if DamageSettings.Damage > 0 then
+		if Char:FindFirstChild("Killer") and Role and Role.Value == "Survivor" then
+			Char.Killer.Value = DamageSettings.SourcePlayer
+		end
+
+		local ResistanceValue = Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0)
+		if ResistanceValue then
+			DamageSettings.Damage /= 0.1 * ResistanceValue + 1 --since lvl 1 should do the trick already
+		end
+
+		Network:FireClientConnection(DamageSettings.SourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, DamageSettings.Damage)
+		if Utils.PlayerData.GetPlayerSetting(DamageSettings.SourcePlayer, "Miscellaneous.ImageFlashOnHit") then
+			Network:FireClientConnection(DamageSettings.SourcePlayer, "ShowJokeSettingImage", "REMOTE_EVENT", false, DamageSettings.SourcePlayer.Character.Role.Value)
+		end
 	end
 	
 	DamageSettings.Reason = DamageSettings.Reason or "HAHAHA" --OnlyIvo
 
-	local ResistanceValue = Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0)
-	if ResistanceValue and DamageSettings.Damage > 0 then
-		DamageSettings.Damage /= 0.1 * ResistanceValue + 1 --since lvl 1 should do the trick already
-	end
-
 	DamageSettings.TargetHumanoid:TakeDamage(DamageSettings.Damage)
-
-	Network:FireClientConnection(DamageSettings.SourcePlayer, "DisplayHitmarker", "REMOTE_EVENT", targetPos, DamageSettings.Damage)
-	if Utils.PlayerData.GetPlayerSetting(DamageSettings.SourcePlayer, "Miscellaneous.ImageFlashOnHit") then
-		Network:FireClientConnection(DamageSettings.SourcePlayer, "ShowJokeSettingImage", "REMOTE_EVENT", false, DamageSettings.SourcePlayer.Character.Role.Value)
-	end
 
 	DamageSettings.KnockbackDirection = DamageSettings.KnockbackDirection or Vector3.zero
 	DamageSettings.KnockbackMagnitude = DamageSettings.KnockbackMagnitude or 1
