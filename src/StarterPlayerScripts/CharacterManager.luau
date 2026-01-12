@@ -88,7 +88,7 @@ function CharManager.LoadCharacter(charName: string, charType: "Survivor" | "Kil
                 continue
             end
 
-            AnimationManager:LoadAnimation(name, anim)
+            CharModule.GameplayConfig.Cache.Animations[name] = AnimationManager:LoadAnimation(name, anim)
         end
     end)
 

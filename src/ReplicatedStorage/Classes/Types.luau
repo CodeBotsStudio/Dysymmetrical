@@ -328,7 +328,11 @@ export type Survivor = {
         --- All of the initialized abilities the character has.
         Abilities: {[string]: Ability},
         --- Any temp objects or instances that might be created mid-match.
-        Cache: {[string]: any},
+        Cache: {
+            --- Any animations loaded into this character's `Humanoid`.
+            Animations: {AnimationTrack},
+            [string]: any,
+        },
     },
 
     --- An empty function that you can replace to execute custom behaviour when this character initializes.
@@ -593,7 +597,11 @@ export type Killer = {
         --- All of the initialized abilities the character has, counting the slash.
         Abilities: {[string]: Ability},
         --- Any temp objects or instances that might be created mid-match.
-        Cache: {[string]: any},
+        Cache: {
+            --- Any animations loaded into this character's `Humanoid`.
+            Animations: {AnimationTrack},
+            [string]: any,
+        },
     },
 
     --- An empty function that you can replace to execute custom behaviour when this character initializes.

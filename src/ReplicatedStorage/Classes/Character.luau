@@ -59,7 +59,9 @@ function CharTypes.GetDefaultSurvivorSettings(): Types.Survivor
             },
 
             Abilities = {},
-            Cache = {},
+            Cache = {
+                Animations = {},
+            },
         },
 
         OnInit = nil,
@@ -130,7 +132,9 @@ function CharTypes.GetDefaultKillerSettings(): Types.Killer
             },
 
             Abilities = {},
-            Cache = {},
+            Cache = {
+                Animations = {},
+            },
         },
 
         OnInit = nil,
