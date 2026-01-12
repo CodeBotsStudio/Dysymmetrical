@@ -3,29 +3,19 @@ local Types = require(script.Parent.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local EffectType = {}
+EffectType.__index = EffectType
 
 --- Effect preset for customization.
 function EffectType.GetDefaultSettings(): Types.Effect
-    return {
+    return setmetatable({
         Name = "Effect",
         Description = "Does something",
         Duration = 1,
         Level = 1,
 
-        Apply = function(own: Types.Effect, level: number?, char: Model, duration: number)
-            own.Level = level or own.Level
-            own:ApplyEffect(level or own.Level, char, duration)
-        end,
-        Remove = function(own: Types.Effect, char: Model)
-            own:RemoveEffect(char)
-        end,
-
-        ApplyEffect = function(_own: Types.Effect, _level: number?, _char: Model, _duration: number) end,
-        RemoveEffect = function(_own: Types.Effect) end,
-
         TimeLeft = 1,
         ShowInGUI = true,
-    }
+    }, EffectType)
 end
 
 --- ## DEPRECATED: use `Effect.GetDefaultSettings()` instead.
@@ -52,6 +42,20 @@ end
 @deprecated
 function EffectType.CreateEffect(Props: Types.Effect): Types.Effect
     return EffectType.New(Props)
+end
+
+function EffectType:Apply(level: number?, char: Model, duration: number)
+    self.Level = level or self.Level
+    self:ApplyEffect(level or self.Level, char, duration)
+end
+
+function EffectType:Remove(char: Model)
+    self:RemoveEffect(char)
+end
+
+function EffectType:ApplyEffect(_level: number?, _char: Model, _duration: number)
+end
+function EffectType:RemoveEffect()
 end
 
 return EffectType

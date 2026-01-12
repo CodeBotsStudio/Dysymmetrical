@@ -36,7 +36,7 @@ function CharacterUtils.GetPlayerHumanoid(player: Player) : Humanoid
 end
 
 --- Equal to `Humanoid.Died:Connect()` but managed by Janitor.
-function CharacterUtils.ObserveOnDeath(humanoid: Humanoid, callback: () -> ())
+function CharacterUtils.ObserveOnDeath(humanoid: Humanoid, callback: () -> ()): Types.Janitor
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(humanoid)
 
@@ -67,7 +67,7 @@ function CharacterUtils.ObserveOnDeath(humanoid: Humanoid, callback: () -> ())
 end
 
 --- Checks if a `Humanoid` instance is actually dead.
-function CharacterUtils.IsHumanoidDead(humanoid: Humanoid)
+function CharacterUtils.IsHumanoidDead(humanoid: Humanoid): boolean
 	return humanoid.Health <= 0
 		or humanoid:GetState() == Enum.HumanoidStateType.Dead
 		or not humanoid:IsDescendantOf(workspace)
@@ -126,7 +126,7 @@ end
 function CharacterUtils.ObserveCharacter(
 	player: Player,
 	callback: (character: Model, characterJanitor: Types.Janitor) -> ()
-)
+): Types.Janitor
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(player)
 
@@ -152,7 +152,7 @@ end
 function CharacterUtils.ObserveHumanoid(
 	player: Player,
 	callback: (humanoid: Humanoid, humanoidJanitor: Types.Janitor) -> ()
-)
+): Types.Janitor
 	return CharacterUtils.ObserveCharacter(player, function(character: Model, characterJanitor)
 		characterJanitor:Add(
 			InstanceUtils.ObserveChildrenWhichIsA(character, "Humanoid", function(humanoid: Humanoid, childJanitor) 
@@ -170,7 +170,7 @@ end
 
 --- Checks if a player has an effect.
 --- @return Returns a `boolean` indicating if the specified player has the effect and the level if it's true.
-function CharacterUtils.CheckPlayerEffect(Player: Player, effectName: string): (boolean & number)?
+function CharacterUtils.CheckPlayerEffect(Player: Player, effectName: string): (boolean, number?)
     if Player.Character and InstanceUtils.FindFirstChild(Player.Character, "Effects."..effectName) then
         return true, Player.Character.Effects[effectName].Value
     end

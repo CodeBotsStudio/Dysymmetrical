@@ -9,16 +9,24 @@ end
 
 --- Makes a copy of an entire table.
 function TypeUtils.CopyTable<T>(CloneThis: T & {}) : T & {}
-	local MetaTable = getmetatable(CloneThis)
-	local NewTable = (MetaTable and setmetatable({}, MetaTable) or {}) :: typeof(CloneThis)
+    local NewTable = {}
 
 	for Key, Value in CloneThis do
 		if typeof(Value) == "table" then
 			NewTable[Key] = TypeUtils.CopyTable(Value)
+            local MetaTable = getmetatable(Value)
+            if MetaTable then
+                setmetatable(NewTable[Key], MetaTable)
+            end
 		else
 			NewTable[Key] = Value
 		end
 	end
+
+	local MetaTable = getmetatable(CloneThis)
+    if MetaTable then
+        setmetatable(NewTable, MetaTable)
+    end
 
 	return NewTable
 end
@@ -123,7 +131,12 @@ function TypeUtils.DeepTableOverwrite<T>(Target: T & {}, Source: {[any]: any}): 
 	for key, value in Source do
 		if typeof(value) == "table" then
 			if typeof(Target[key]) ~= "table" then
-				Target[key] = {}
+                local MetaTable = getmetatable(value)
+                if MetaTable then
+                    Target[key] = setmetatable({}, MetaTable)
+                else
+                    Target[key] = {}
+                end
 			end
 			TypeUtils.DeepTableOverwrite(Target[key], value)
             continue
@@ -145,7 +158,12 @@ function TypeUtils.DeepTableWrite<T>(Target: T & {}, Source: {[any]: any}): T & 
 	for key, value in Source do
 		if typeof(value) == "table" then
 			if typeof(Target[key]) ~= "table" then
-				Target[key] = {}
+                local MetaTable = getmetatable(value)
+                if MetaTable then
+                    Target[key] = setmetatable({}, MetaTable)
+                else
+                    Target[key] = {}
+                end
 			end
 			TypeUtils.DeepTableWrite(Target[key], value)
             continue

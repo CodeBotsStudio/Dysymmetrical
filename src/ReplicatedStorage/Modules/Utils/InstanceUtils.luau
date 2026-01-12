@@ -12,7 +12,7 @@ function InstanceUtils.ObserveChildren(
 	parent: Instance,
 	callback: (child: Instance, childJanitor: Types.Janitor) -> (),
 	predicate: (child: Instance) -> boolean?
-)
+): Types.Janitor
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(parent)
 
@@ -39,7 +39,7 @@ function InstanceUtils.ObserveDescendants(
 	parent: Instance,
 	callback: (descendant: Instance, descendantJanitor: Types.Janitor) -> (),
 	paredicate: (descendant: Instance) -> boolean?
-)
+): Types.Janitor
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(parent)
 
@@ -66,7 +66,7 @@ function InstanceUtils.ObserveChildrenWhichIsA(
 	parent: Instance,
 	className: string,
 	callback: (child: Instance, childJanitor: Types.Janitor) -> ()
-)
+): Types.Janitor
 	return InstanceUtils.ObserveChildren(parent, callback, function(child: Instance)
 		return child:IsA(className)
 	end)
@@ -77,7 +77,7 @@ function InstanceUtils.ObserveDescendantsWhichIsA(
 	parent: Instance,
 	className: string,
 	callback: (descendant: Instance, descendantJanitor: Types.Janitor) -> ()
-)
+): Types.Janitor
 	return InstanceUtils.ObserveDescendants(parent, callback, function(descendant: Instance)
 		return descendant:IsA(className)
 	end)
@@ -88,7 +88,7 @@ function InstanceUtils.ObserveChildrenOfName(
 	parent: Instance,
 	name: string,
 	callback: (child: Instance, childJanitor: Types.Janitor) -> ()
-)
+): Types.Janitor
 	return InstanceUtils.ObserveChildren(parent, callback, function(child: Instance)
 		return child.Name == name
 	end)
@@ -99,7 +99,7 @@ function InstanceUtils.ObserveDescendantsOfName(
 	parent: Instance,
 	name: Instance,
 	callback: (descendant: Instance, descendantJanitor: Types.Janitor) -> ()
-)
+): Types.Janitor
 	return InstanceUtils.ObserveDescendants(parent, callback, function(descendant: Instance)
 		return descendant.Name == name
 	end)
@@ -110,7 +110,7 @@ function InstanceUtils.ObserveParent(
 	instance: Instance,
 	callback: (parent: Instance, parentJanitor: Types.Janitor) -> (),
 	predicate: (parent: Instance) -> boolean?
-)
+): Types.Janitor
 	return InstanceUtils.ObserveProperty(instance, "Parent", callback, predicate)
 end
 
@@ -172,7 +172,7 @@ function InstanceUtils.ObserveProperty(
 	propertyName: string,
 	callback: (value: any, propertyJanitor: Types.Janitor) -> (),
 	predicate: ((value: any) -> boolean)?
-)
+): Types.Janitor
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(instance)
 
@@ -195,7 +195,7 @@ function InstanceUtils.ObserveAttribute(
 	attributeName: string,
 	callback: (value: any, propertyJanitor: Types.Janitor) -> (),
 	predicate: ((value: any) -> boolean)?
-)
+): Types.Janitor
 	local mainJanitor = Janitor.new()
 	mainJanitor:LinkToInstance(instance)
 
@@ -326,7 +326,7 @@ end
 
 --- Gets an effect's module.
 --- Also supports subfolders in `ReplicatedStorage.Effects`.
-function InstanceUtils.GetEffectModule(name: string, subfolder: string?, module: boolean?)
+function InstanceUtils.GetEffectModule(name: string, subfolder: string?, module: boolean?): ModuleScript | Types.Effect
     if module == nil then
         module = false
     end
