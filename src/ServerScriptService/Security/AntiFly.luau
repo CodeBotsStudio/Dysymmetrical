@@ -12,12 +12,12 @@ local AntiFly = {
 function AntiFly:Init()
     Utils.Player.ObservePlayers(function(plr: Player)
         Utils.Character.ObserveCharacter(plr, function(_char: Model)
-            self:_SetupCharacter(plr)
+            AntiFly._SetupCharacter(plr)
         end)
     end)
 end
 
-function AntiFly:_SetupCharacter(player: Player)
+function AntiFly._SetupCharacter(player: Player)
     local char = player.Character
     local root = Utils.Character.GetRootPart(player)
 
@@ -29,22 +29,22 @@ function AntiFly:_SetupCharacter(player: Player)
 
     task.spawn(function()
         while root and root.Parent and char and char.Parent do
-            task.wait(self.TimeBetweenChecks)
+            task.wait(AntiFly.TimeBetweenChecks)
             
-            if self:_IsCharacterNotFlying(char, root, Params) then
+            if AntiFly._IsCharacterNotFlying(char, root, Params) then
                 lastTouched = time()
                 continue --used to not check anything else during this check
             end
         
             local timeSinceFloor = time() - lastTouched
-            if timeSinceFloor >= self.MaximumFlyTime then
+            if timeSinceFloor >= AntiFly.MaximumFlyTime then
                 CommonFunctions.KickPlayer(player, CommonFunctions.KickIDs.Flying)
             end
         end
     end)
 end
 
-function AntiFly:_IsCharacterNotFlying(model: Model, root: BasePart, Params: RaycastParams): boolean
+function AntiFly._IsCharacterNotFlying(model: Model, root: BasePart, Params: RaycastParams): boolean
     if not (model and root and root.Parent and not root.Anchored) then
         return true
     end
@@ -60,7 +60,7 @@ function AntiFly:_IsCharacterNotFlying(model: Model, root: BasePart, Params: Ray
 
             local Cast = workspace:Raycast(Origin, Vector3.new(0, -RayHeight, 0), Params)
 
-            if self.VisualizeRays then
+            if AntiFly.VisualizeRays then
                 local Part = Instance.new("Part")
                 Part.Anchored = true
                 Part.CanCollide = false

@@ -15,27 +15,27 @@ local AntiTP = {
 function AntiTP:Init()
     Utils.Player.ObservePlayers(function(Player: Player)
         Utils.Character.ObserveCharacter(Player, function(Character: Model)
-            self:_SetupCharacter(Player)
+            AntiTP._SetupCharacter(Player)
         end)
         Player.CharacterRemoving:Connect(function(_Character: Model)
-            if not self.PlayerThreads[Player.UserId] then
+            if not AntiTP.PlayerThreads[Player.UserId] then
                 return
             end
 
-            self.PlayerThreads[Player.UserId]:Disconnect()
-            self.PlayerThreads[Player.UserId] = nil
+            AntiTP.PlayerThreads[Player.UserId]:Disconnect()
+            AntiTP.PlayerThreads[Player.UserId] = nil
         end)
     end)
 
     Players.PlayerRemoving:Connect(function(Player: Player)
-        if self.PlayerThreads[Player.UserId] then
-            self.PlayerThreads[Player.UserId]:Disconnect()
-            self.PlayerThreads[Player.UserId] = nil
+        if AntiTP.PlayerThreads[Player.UserId] then
+            AntiTP.PlayerThreads[Player.UserId]:Disconnect()
+            AntiTP.PlayerThreads[Player.UserId] = nil
         end
     end)
 end
 
-function AntiTP:_SetupCharacter(Player: Player)
+function AntiTP._SetupCharacter(Player: Player)
     local Character = Player.Character
     local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
     local HRP = Utils.Character.GetRootPart(Player)
@@ -45,8 +45,8 @@ function AntiTP:_SetupCharacter(Player: Player)
     self.PlayerThreads[Player.UserId] = RunService.PostSimulation:Connect(function()
         local PosDiff = HRP.Position - LastPos
 
-        if PosDiff.Magnitude > self.PositionMagnitudeThreshold then
-            if self.KickAllowed then
+        if PosDiff.Magnitude > AntiTP.PositionMagnitudeThreshold then
+            if AntiTP.KickAllowed then
                 CommonFunctions.KickPlayer(Player, CommonFunctions.KickIDs.TPing)
                 return
             end
