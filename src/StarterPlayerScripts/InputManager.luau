@@ -8,10 +8,6 @@ local LocalPlayer = Players.LocalPlayer
 
 --- Key config.
 export type Key = {
-    --- The name of the key for usage.
-    Name: string,
-    --- Any subgroup in may be in.
-    Subgroup: string, --we don't need subgroups of subgroups btw not going through that too lazy even if it's easy
     --- If false, it won't detect any input.
     Enabled: boolean,
 
@@ -32,12 +28,7 @@ export type Key = {
     Released: Signal.Signal<>,
 }
 
-local InputManager = {
-    CurrentControlScheme = "Keyboard",
-    SchemeChanged = Signal.new(),
-}
-
-function InputManager._SetupKeybind(key: Key)
+local function SetupKeybind(key: Key): Key
     key.Pressed = Signal.new()
     key.Released = Signal.new()
 
@@ -73,105 +64,73 @@ function InputManager._SetupKeybind(key: Key)
         end
     end)
 
-    if key.Subgroup and #key.Subgroup > 0 then
-        if not InputManager[key.Subgroup] then
-            InputManager[key.Subgroup] = {}
-        end
-        InputManager[key.Subgroup][key.Name] = key
-    else
-        InputManager[key.Name] = key
-    end
+    return key
 end
 
+local InputManager = {
+    CurrentControlScheme = "Keyboard",
+    SchemeChanged = Signal.new(),
+
+    DefaultActions = {
+        Sprint = SetupKeybind({
+            Enabled = true,
+
+            KeyboardKey = Enum.KeyCode.LeftShift,
+            GamepadKey = Enum.KeyCode.ButtonL2,
+        }),
+        FirstAbility = SetupKeybind({
+            Enabled = true,
+
+            KeyboardKey = Enum.KeyCode.Q,
+            GamepadKey = Enum.KeyCode.ButtonL1,
+        }),
+        SecondAbility = SetupKeybind({
+            Enabled = true,
+
+            KeyboardKey = Enum.KeyCode.E,
+            GamepadKey = Enum.KeyCode.ButtonR1,
+        }),
+        ThirdAbility = SetupKeybind({
+            Enabled = true,
+
+            KeyboardKey = Enum.KeyCode.R,
+            GamepadKey = Enum.KeyCode.ButtonY,
+        }),
+        FourthAbility = SetupKeybind({
+            Enabled = true,
+
+            KeyboardKey = Enum.KeyCode.F,
+            GamepadKey = Enum.KeyCode.ButtonB,
+        }),
+        Slash = SetupKeybind({
+            Enabled = true,
+
+            InputType = Enum.UserInputType.MouseButton1,
+            GamepadKey = Enum.KeyCode.ButtonR2,
+        }),
+    },
+    Miscellaneous = {
+        EmotePanel = SetupKeybind({
+            Enabled = true,
+
+            KeyboardKey = Enum.KeyCode.G,
+            GamepadKey = Enum.KeyCode.DPadDown,
+        }),
+        StopEmote = SetupKeybind({
+            Enabled = true,
+
+            KeyboardKey = Enum.KeyCode.Space,
+            GamepadKey = Enum.KeyCode.ButtonA,
+        }),
+        TogglePlayerList = SetupKeybind({
+            Enabled = true,
+
+            KeyboardKey = Enum.KeyCode.Tab,
+        }),
+    },
+}
+
 function InputManager:Init()
-    --DEFAULT ACTIONS--
-    InputManager._SetupKeybind({
-        Name = "Sprint",
-        Subgroup = "DefaultActions",
-
-        Enabled = true,
-
-        KeyboardKey = Enum.KeyCode.LeftShift,
-        GamepadKey = Enum.KeyCode.ButtonL2,
-    })
-    InputManager._SetupKeybind({
-        Name = "FirstAbility",
-        Subgroup = "DefaultActions",
-
-        Enabled = true,
-
-        KeyboardKey = Enum.KeyCode.Q,
-        GamepadKey = Enum.KeyCode.ButtonL1,
-    })
-    InputManager._SetupKeybind({
-        Name = "SecondAbility",
-        Subgroup = "DefaultActions",
-
-        Enabled = true,
-
-        KeyboardKey = Enum.KeyCode.E,
-        GamepadKey = Enum.KeyCode.ButtonR1,
-    })
-    InputManager._SetupKeybind({
-        Name = "ThirdAbility",
-        Subgroup = "DefaultActions",
-
-        Enabled = true,
-
-        KeyboardKey = Enum.KeyCode.R,
-        GamepadKey = Enum.KeyCode.ButtonY,
-    })
-    InputManager._SetupKeybind({
-        Name = "FourthAbility",
-        Subgroup = "DefaultActions",
-
-        Enabled = true,
-
-        KeyboardKey = Enum.KeyCode.F,
-        GamepadKey = Enum.KeyCode.ButtonB,
-    })
-
-    --KILLER--
-    InputManager._SetupKeybind({
-        Name = "Slash",
-        Subgroup = "DefaultActions",
-
-        Enabled = true,
-
-        GamepadKey = Enum.KeyCode.ButtonR2,
-
-        InputType = Enum.UserInputType.MouseButton1,
-    })
-
-    --MISC--
-    InputManager._SetupKeybind({
-        Name = "EmotePanel",
-        Subgroup = "Miscellaneous",
-
-        Enabled = true,
-        
-        KeyboardKey = Enum.KeyCode.G,
-        GamepadKey = Enum.KeyCode.DPadDown,
-    })
-    InputManager._SetupKeybind({
-        Name = "StopEmote",
-        Subgroup = "Miscellaneous",
-
-        Enabled = true,
-
-        KeyboardKey = Enum.KeyCode.Space,
-        GamepadKey = Enum.KeyCode.ButtonA,
-    })
-
-    InputManager._SetupKeybind({
-        Name = "TogglePlayerList",
-        Subgroup = "Miscellaneous",
-
-        Enabled = true,
-
-        KeyboardKey = Enum.KeyCode.Tab,
-    })
-
     --SETTING UP--
     local function ChangePreferred(value: Enum.UserInputType)
         local LastControlScheme = InputManager.CurrentControlScheme
@@ -190,10 +149,6 @@ function InputManager:Init()
         if gpe then return end
         ChangePreferred(input.UserInputType)
     end)
-
-    -- RunService.PreRender:Connect(function(_delta: number)
-    --     ChangePreferred(UserInputService:GetLastInputType())
-    -- end)
 
     ChangePreferred(UserInputService:GetLastInputType())
 
