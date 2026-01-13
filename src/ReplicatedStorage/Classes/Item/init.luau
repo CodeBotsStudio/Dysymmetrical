@@ -109,12 +109,10 @@ function Item:Init(Owner: Player, ExistingTool: Tool?)
         Humanoid = Character:FindFirstChildWhichIsA("Humanoid"),
         HRP = Utils.Character.GetRootPart(Character),
         InputManager = require(self.Owner.PlayerScripts.InputManager),
-        SpeedManager = require(Character.PlayerAttributeScripts.SpeedManager),
         FOVManager = require(Character.PlayerAttributeScripts.FOVManager),
         EffectManager = require(Character.PlayerAttributeScripts.EffectManager),
         EmoteManager = require(Character.Miscellaneous.EmoteManager),
         TurnToMoveDirection = require(self.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
-        Sprinting = require(Character.PlayerAbilities.Default.Sprinting),
         AnimationManager = require(Character.AnimationManager),
     }
 

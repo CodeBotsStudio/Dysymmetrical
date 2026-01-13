@@ -138,8 +138,6 @@ export type Ability = {
         HRP: BasePart,
         --- See `StarterPlayerScripts.InputManager`.
         InputManager: any,
-        --- See `StarterCharacterScripts.PlayerAttributeScripts.SpeedManager`.
-        SpeedManager: any,
         --- See `StarterCharacterScripts.PlayerAttributeScripts.FOVManager`.
         FOVManager: any,
         --- See `StarterCharacterScripts.PlayerAttributeScripts.EffectManager`.
@@ -148,8 +146,6 @@ export type Ability = {
         EmoteManager: any,
         --- See `StarterCharacterScripts.Miscellaneous.TurnToMoveDirection`.
         TurnToMoveDirection: any,
-        --- See `StarterCharacterScripts.PlayerAbilities.Default.Sprinting`.
-        Sprinting: any,
         --- See `StarterCharacterScripts.AnimationManager`.
         AnimationManager: any,
     },
@@ -707,7 +703,6 @@ export type Emote = {
 
     Animator: Animator,
     HumanoidRootPart: BasePart,
-    SpeedManager: {any},
     TurnToMoveDirection: {any},
 
     TrackPlaying: AnimationTrack,
@@ -955,8 +950,6 @@ export type Item = {
         HRP: BasePart,
         --- See `StarterPlayerScripts.InputManager`.
         InputManager: any,
-        --- See `StarterCharacterScripts.PlayerAttributeScripts.SpeedManager`.
-        SpeedManager: any,
         --- See `StarterCharacterScripts.PlayerAttributeScripts.FOVManager`.
         FOVManager: any,
         --- See `StarterCharacterScripts.PlayerAttributeScripts.EffectManager`.
@@ -965,8 +958,6 @@ export type Item = {
         EmoteManager: any,
         --- See `StarterCharacterScripts.Miscellaneous.TurnToMoveDirection`.
         TurnToMoveDirection: any,
-        --- See `StarterCharacterScripts.PlayerAbilities.Default.Sprinting`.
-        Sprinting: any,
         --- See `StarterCharacterScripts.AnimationManager`.
         AnimationManager: any,
     },

@@ -31,7 +31,9 @@ local BadgeService = game:GetService("BadgeService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
+local PlayerSpeedManager = require(ServerScriptService.Managers.PlayerManager.PlayerSpeedManager)
 local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -125,16 +127,25 @@ function CommonFunctions.DamagePlayer(DamageSettings: DamagePlayerSettings)
 	CommonFunctions.RigImpulse(HRP, DamageSettings.KnockbackMagnitude, DamageSettings.KnockbackDirection)
 
 	--printing
-	local targetName = Char.Name
     if workspace:GetAttribute("DebugAllowed") then
-		Utils.Misc.Print("[DamageDealt] Target: "..targetName.." || InflictedDamage: "..tostring(DamageSettings.Damage).." || Reason: "..DamageSettings.Reason)
+		Utils.Misc.Print("[DamageDealt] Target: "..Char.Name.." || InflictedDamage: "..tostring(DamageSettings.Damage).." || Reason: "..DamageSettings.Reason)
 	end
 
 	if TargetPlayer then
+
+		if Role and Role.Value == "Survivor" then
+			PlayerSpeedManager.AddSpeedFactor(TargetPlayer, "DamageSpeedBurst", 1.26)
+			task.delay(1, function()
+				PlayerSpeedManager.RemoveSpeedFactor(TargetPlayer, "DamageSpeedBurst")
+			end)
+		end
+		
 		Network:FireClientConnection(TargetPlayer, "DamagePlayer", "REMOTE_EVENT", DamageSettings.SourcePlayer, DamageSettings.Reason)
+
 		if Utils.PlayerData.GetPlayerSetting(TargetPlayer, "Miscellaneous.ImageFlashOnHit") then
 			Network:FireClientConnection(TargetPlayer, "ShowJokeSettingImage", "REMOTE_EVENT", true, Role and Role.Value or "Survivor")
 		end
+
 	end
 	Network:FireClientConnection(DamageSettings.SourcePlayer, "DamagedPlayer", "REMOTE_EVENT", TargetPlayer, DamageSettings.TargetHumanoid, DamageSettings.Reason)
 end

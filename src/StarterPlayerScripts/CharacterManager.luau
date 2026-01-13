@@ -72,9 +72,6 @@ function CharManager.LoadCharacter(charName: string, charType: "Survivor" | "Kil
 
     Utils.Misc.PreloadAssets(CharModule.Config)
 
-    local Sprinting = require(Char.PlayerAbilities.Default.Sprinting)
-    Sprinting.SprintMultiplier = CharModule.GameplayConfig.SprintSpeedMultiplier
-
     --animation loading
     task.defer(function()
         local AnimationManager = require(Char:FindFirstChild("AnimationManager"))

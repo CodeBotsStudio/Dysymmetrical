@@ -10,6 +10,7 @@ local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local CommonFunctions = RunService:IsServer() and require(game:GetService("ServerScriptService").System.CommonFunctions) or nil
+local PlayerSpeedManager = RunService:IsServer() and require(game:GetService("ServerScriptService").Managers.PlayerManager.PlayerSpeedManager) or nil
 
 local Commander: Types.Survivor = Character.CreateSurvivor({
     Config = {
@@ -157,62 +158,66 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
                 end,
 
                 Behaviour = function(self)
-                    if RunService:IsServer() then
-                        --Shot Sound & Hitbox
-                        self:AddConnection(task.delay(1.17, function()
-                            task.spawn(function()
-                                Hitbox.New(self.Owner, {
-                                    CFrameOffset = CFrame.new(0, 0, -(self.HitboxLength / 2)),
-                                    Size = Vector3.new(3, 1.5, self.HitboxLength),
-                                    Time = self.Duration,
-                                    Reason = "The Gun Shot",
-                                    Damage = self.Damage,
-                                    EffectsToApply = {
-                                        {
-                                            Name = "Stunned",
-                                            Level = 1,
-                                            Duration = self.StunTime,
-                                            Subfolder = "KillerSpecific"
-                                        },
+                    if not RunService:IsServer() then
+                        return
+                    end
+                    
+                    --Shot Sound & Hitbox
+                    self:AddConnection(task.delay(1.17, function()
+                        task.spawn(function()
+                            Hitbox.New(self.Owner, {
+                                CFrameOffset = CFrame.new(0, 0, -(self.HitboxLength / 2)),
+                                Size = Vector3.new(3, 1.5, self.HitboxLength),
+                                Time = self.Duration,
+                                Reason = "The Gun Shot",
+                                Damage = self.Damage,
+                                EffectsToApply = {
+                                    {
+                                        Name = "Stunned",
+                                        Level = 1,
+                                        Duration = self.StunTime,
+                                        Subfolder = "KillerSpecific"
                                     },
-                                    Connections = {
-                                        PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
-                                            CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 6, EXP = 14, Reason = "stunning the killer with Justice"})
-                                        end,
-                                    }
-                                })
-                            end)
-                        
-                            local FirePart = self.JusticeModel.FirePart
-                            FirePart.Burst:Emit(4)
-                            FirePart.Front:Emit(12)
-                            FirePart.Smoke:Emit(8)
-                            FirePart.Flash:Emit(3)
-                            Sounds.PlaySound(self.ShotSound, {Volume = 2}, {
-                                Position = FirePart.Position,
+                                },
+                                Connections = {
+                                    PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
+                                        CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 6, EXP = 14, Reason = "stunning the killer with Justice"})
+                                    end,
+                                }
                             })
-                        end))
+                        end)
                     
-                        --Hide
-                        self:AddConnection(task.delay(2, function()
-                            for _, Part in self.JusticeModel:GetDescendants() do
-                                if Part:IsA("BasePart") then
-                                    Part.Transparency = 1
-                                end
-                            end
-                        end))
-                    
-                        --Show
+                        local FirePart = self.JusticeModel.FirePart
+                        FirePart.Burst:Emit(4)
+                        FirePart.Front:Emit(12)
+                        FirePart.Smoke:Emit(8)
+                        FirePart.Flash:Emit(3)
+                        Sounds.PlaySound(self.ShotSound, {Volume = 2}, {
+                            Position = FirePart.Position,
+                        })
+                    end))
+                
+                    --Hide
+                    self:AddConnection(task.delay(2, function()
                         for _, Part in self.JusticeModel:GetDescendants() do
-                            if Part:IsA("BasePart") and not Part:HasTag("Transparent") then
-                                Part.Transparency = 0
+                            if Part:IsA("BasePart") then
+                                Part.Transparency = 1
                             end
                         end
-                    else
-                        self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0.3)
+                    end))
+
+                    task.spawn(function()
+                        PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0.3)
                         self:AddConnection(task.delay(self.UseAnimationTrack and self.UseAnimationTrack.Length or self.Duration, function()
-                            self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
+                            PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
                         end))
+                    end)
+                
+                    --Show
+                    for _, Part in self.JusticeModel:GetDescendants() do
+                        if Part:IsA("BasePart") and not Part:HasTag("Transparent") then
+                            Part.Transparency = 0
+                        end
                     end
                 end,
             }),

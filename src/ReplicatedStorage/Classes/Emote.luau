@@ -8,8 +8,10 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 local Network = require(game:GetService("ReplicatedStorage").Modules.Network)
+local PlayerSpeedManager = RunService:IsServer() and require(game:GetService("ServerScriptService").Managers.PlayerManager.PlayerSpeedManager) or nil
 
 local Emote = {}
+Emote.__index = Emote
 
 --- Emote preset for customization.
 function Emote.GetDefaultSettings(): Types.Emote
@@ -31,7 +33,6 @@ function Emote.GetDefaultSettings(): Types.Emote
         OnStop = nil,
 
         HumanoidRootPart = nil,
-        SpeedManager = nil,
         TurnToMoveDirection = nil,
 
         TrackPlaying = nil,
@@ -78,6 +79,7 @@ function Emote:Init(player: Player)
                     Sounds.PlaySound(soundId, {Name = "Emote", Parent = Utils.Character.GetRootPart(self.Owner), Looped = true})
                 end
                 self.Owner.Character:SetAttribute("Emoting", true)
+                PlayerSpeedManager.AddSpeedFactor(player, "Emoting", self.SpeedMultiplier)
 
                 Network:FireClientConnection(plr, "PlayEmote", "REMOTE_EVENT", emoteName)
 
@@ -98,6 +100,7 @@ function Emote:Init(player: Player)
                     end
                 end
                 self.Owner.Character:SetAttribute("Emoting", false)
+                PlayerSpeedManager.RemoveSpeedFactor(player, "Emoting")
 
                 Network:FireClientConnection(plr, "StopEmote", "REMOTE_EVENT", emoteName)
                 
@@ -126,9 +129,7 @@ function Emote:Init(player: Player)
         end
     end
 
-    local char = self.Owner.Character
     self.HumanoidRootPart = Utils.Character.GetRootPart(self.Owner)
-    self.SpeedManager = require(char.PlayerAttributeScripts.SpeedManager)
     self.TurnToMoveDirection = require(Players.LocalPlayer.PlayerScripts.Miscellaneous.TurnToMoveDirection)
 
     if self.SoundIds then
@@ -154,7 +155,6 @@ function Emote:Init(player: Player)
             end
 
             self.TrackPlaying.Animation:Play(0)
-            self.SpeedManager:AddSpeedFactor("Emoting", self.SpeedMultiplier)
             if self.TurnToMoveDirection.AddHeadPreventionFactor then
                 self.TurnToMoveDirection:AddHeadPreventionFactor("Emoting")
             end
@@ -168,7 +168,6 @@ function Emote:Init(player: Player)
     self:AddConnection(Network:SetConnection("StopEmote", "REMOTE_EVENT", function(emoteName: string)
         if emoteName == self.Config.Name and self.TrackPlaying and self.TrackPlaying.Animation then
             self.TrackPlaying.Animation:Stop(0)
-            self.SpeedManager:RemoveSpeedFactor("Emoting")
             
             if self.TurnToMoveDirection.RemoveHeadPreventionFactor then
                 self.TurnToMoveDirection:RemoveHeadPreventionFactor("Emoting")

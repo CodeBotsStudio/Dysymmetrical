@@ -107,7 +107,6 @@ function AbilityType.GetDefaultPassiveSettings(): Types.Ability
                 Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
                 HRP = Utils.Character.GetRootPart(self.Owner),
                 InputManager = require(self.Owner.PlayerScripts.InputManager),
-                SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
                 FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),
                 EffectManager = require(self.Owner.Character.PlayerAttributeScripts.EffectManager),
                 EmoteManager = require(self.Owner.Character.Miscellaneous.EmoteManager),
@@ -268,12 +267,10 @@ function AbilityType:Init(charModule: Types.Killer | Types.Survivor, plr: Player
         Humanoid = self.Owner.Character:FindFirstChildWhichIsA("Humanoid"),
         HRP = Utils.Character.GetRootPart(self.Owner),
         InputManager = require(self.Owner.PlayerScripts.InputManager),
-        SpeedManager = require(self.Owner.Character.PlayerAttributeScripts.SpeedManager),
         FOVManager = require(self.Owner.Character.PlayerAttributeScripts.FOVManager),
         EffectManager = require(self.Owner.Character.PlayerAttributeScripts.EffectManager),
         EmoteManager = require(self.Owner.Character.Miscellaneous.EmoteManager),
         TurnToMoveDirection = require(self.Owner.PlayerScripts.Miscellaneous.TurnToMoveDirection),
-        Sprinting = require(self.Owner.Character.PlayerAbilities.Default.Sprinting),
         AnimationManager = require(self.Owner.Character.AnimationManager),
     }
 

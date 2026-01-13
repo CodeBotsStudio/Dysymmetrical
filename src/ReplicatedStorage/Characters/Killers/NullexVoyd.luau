@@ -6,10 +6,10 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local SoundService = game:GetService("SoundService")
 
 local CommonFunctions = RunService:IsServer() and require(ServerScriptService.System.CommonFunctions) or nil
+local PlayerSpeedManager = RunService:IsServer() and require(game:GetService("ServerScriptService").Managers.PlayerManager.PlayerSpeedManager) or nil
 local Character = require(ReplicatedStorage.Classes.Character)
 local Ability = require(ReplicatedStorage.Classes.Ability)
 local Types = require(ReplicatedStorage.Classes.Types)
-
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 
@@ -118,6 +118,14 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                 UseSound = "rbxassetid://72568635961241",
                 Behaviour = function(self)
                     if RunService:IsServer() then
+                        PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0.18)
+                        self.OwnerProperties.Character:SetAttribute("PreventSlash", true)
+
+                        self:AddConnection(task.delay(self.Duration, function()
+                            PlayerSpeedManager.RemoveSpeedFactor(self.owner, self.Name)
+                            self.OwnerProperties.Character:SetAttribute("PreventSlash", false)
+                        end))
+
                         return
                     end
                     task.defer(function()
@@ -138,9 +146,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                         Debris:AddItem(Sound, Sound.TimeLength + 1)
                     end)
                 
-                    self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0.18)
                     self.OwnerProperties.FOVManager:AddFOVFactor(self.Name, 0.6)
-                    self.OwnerProperties.Character:SetAttribute("PreventSlash", true)
                 
                     task.defer(function()
                         local Equalizer = Instance.new("EqualizerSoundEffect")
@@ -160,9 +166,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                     end)
 
                     self:AddConnection(task.delay(self.Duration, function()
-                        self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
                         self.OwnerProperties.FOVManager:RemoveFOVFactor(self.Name)
-                        self.OwnerProperties.Character:SetAttribute("PreventSlash", false)
                     end))
                 
                     --shows all players' aura

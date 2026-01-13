@@ -1,5 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
+local PlayerSprintManager = require(ServerScriptService.Managers.PlayerManager.PlayerSprintManager)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local PlayerManager = require(script.Parent.PlayerManager)
 local Network = require(ReplicatedStorage.Modules.Network)
@@ -123,17 +125,27 @@ function ServerCharacterManager._InitCharacter(player: Player, Char: Model, char
     --Abilities
     local CharacterAbilities = require(Char.PlayerAbilities.CharacterAbilities)
     CharacterAbilities.CharacterModule = module
-    
-    -- local Animate = Char:FindFirstChild("Animate")
-    -- Animate.idle.IdleAnim.AnimationId = module.Config.AnimationIDs.IdleAnimation
-    -- Animate.walk.WalkAnim.AnimationId = module.Config.AnimationIDs.WalkAnimation
-    -- Animate.run.RunAnim.AnimationId = module.Config.AnimationIDs.RunAnimation
 
     local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
     Humanoid.MaxHealth = module.GameplayConfig.Health
     Humanoid.Health = module.GameplayConfig.Health
     Humanoid.JumpPower = 0
     Humanoid.JumpHeight = 0
+
+    task.defer(function()
+        if not PlayerSprintManager.ManagedPlayers[player] then
+            local Timeout = 0
+            repeat
+                task.wait()
+                Timeout += 1
+            until PlayerSprintManager.ManagedPlayers[player] or Timeout >= 50
+            if Timeout >= 50 then
+                return
+            end
+        end
+
+        PlayerSprintManager.ManagedPlayers[player].SprintMultiplier = module.GameplayConfig.SprintSpeedMultiplier
+    end)
 
     Utils.Misc.PreloadAssets(module.Config)
 
