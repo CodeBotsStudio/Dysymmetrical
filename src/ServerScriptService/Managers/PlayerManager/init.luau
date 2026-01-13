@@ -54,7 +54,7 @@ function PlayerManager:Init()
 				require(char:FindFirstChild("Server"):FindFirstChild("ScriptInitter")):Init()
 			end)
 
-			AntiFly:_SetupCharacter(plr, char)
+			AntiFly._SetupCharacter(plr, char)
 			
 			local Role = char:FindFirstChild("Role")
 
