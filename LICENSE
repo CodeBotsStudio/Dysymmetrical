@@ -1,4 +1,4 @@
-MIT License
+CodeBots Studio Attribution License (MIT-based)
 
 Copyright (c) 2025 CodeBots Studio
 
@@ -18,6 +18,22 @@ furnished to do so, subject to the following conditions:
    such as an in-game "Credits" screen, about section, or loading screen,
    unless explicit written permission is granted by CodeBots Studio to remove 
    or alter it.
+
+3. Any use of this Software, including but not limited to individual files,
+   snippets, components, logic, or functionality derived from the Software,
+   whether modified or unmodified, must provide visible credit to the original
+   author ("CodeBots Studio") in the final product.
+
+   This credit must be clearly accessible to end users and must be satisfied
+   by one or more of the following:
+   a) An in-game "Credits" or "About" menu
+   b) A loading or splash screen
+   c) A visible acknowledgment of the Software or engine in the product’s
+      public description (such as a store page or official website)
+
+   This requirement applies even if the Software is not used in its entirety
+   or is repurposed for a different project, unless explicit written
+   permission is granted by CodeBots Studio to waive this requirement.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

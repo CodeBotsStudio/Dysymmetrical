@@ -21,12 +21,11 @@ function Sounds:Init()
     if not RunService:IsServer() then
         Utils.Misc.PreloadAssets(Sounds.CommonlyUsedSounds)
     end
-    workspace.Themes.ChildAdded:Connect(function()
+    Utils.Instance.ObserveChildren(workspace.Themes, function()
         Sounds.UpdateThemes()
-    end)
-    workspace.Themes.ChildRemoved:Connect(function()
+    end):Add(workspace.Themes.ChildRemoved:Connect(function()
         Sounds.UpdateThemes()
-    end)
+    end))
 end
 
 --- Returns a sound with the ID `ID` originating from the sound folder in `ReplicatedStorage` for proper preloading.
