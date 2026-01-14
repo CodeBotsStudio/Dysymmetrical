@@ -7,6 +7,6 @@ return {
 	["LOCKED_CAMERA_OFFSET"]        = Vector3.new(1.75, 0.5, 0), --// Locked camera offset
 	["LOCKED_MOUSE_ICON"]           =                             --// Locked mouse icon
 		"rbxasset://textures/MouseLockedCursor.png",
-	["SHIFT_LOCK_KEYBINDS"]         =                             --// Shift lock keybinds
-		{ Enum.KeyCode.LeftControl, Enum.KeyCode.RightControl }
+	-- ["SHIFT_LOCK_KEYBINDS"]         =                             --// Shift lock keybinds
+	-- 	{ Enum.KeyCode.LeftControl, Enum.KeyCode.RightControl }
 }
