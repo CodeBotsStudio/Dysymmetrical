@@ -205,6 +205,28 @@
                             }
                         }
                     ]
+                },
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "ShiftLock"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard1",
+                                "KeyCode": "LeftControl"
+                            }
+                        },
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard2",
+                                "KeyCode": "RightControl"
+                            }
+                        }
+                    ]
                 }
             ]
         }

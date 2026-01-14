@@ -24,18 +24,19 @@ local SmoothShiftLock = {}
 SmoothShiftLock.__index = SmoothShiftLock
 
 --// Context action
-local CONTEXT_ACTION_NAME = "MouseLockSwitchAction"
-local MOUSELOCK_ACTION_PRIORITY = Enum.ContextActionPriority.Medium.Value
+-- local CONTEXT_ACTION_NAME = "MouseLockSwitchAction"
+-- local MOUSELOCK_ACTION_PRIORITY = Enum.ContextActionPriority.Medium.Value
 
 --// Services
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local ContextActionService = game:GetService("ContextActionService")
+-- local ContextActionService = game:GetService("ContextActionService")
 local Settings = UserSettings()
 local GameSettings = Settings.GameSettings
 
 --// Requires
+local InputManager = require(Players.LocalPlayer.PlayerScripts.InputManager)
 local CameraUtils = require(script.Parent:WaitForChild("CameraUtils"))
 local Maid = require(script.Parent:WaitForChild("Maid"))
 
@@ -134,15 +135,24 @@ function SmoothShiftLock:DoMouseLockSwitch(name, state, input)
 end
 
 --// Bind keybinds
+-- function SmoothShiftLock:BindContextActions()
+-- 	ContextActionService:BindActionAtPriority(CONTEXT_ACTION_NAME, function(name, state, input)
+-- 		return self:DoMouseLockSwitch(name, state, input)
+-- 	end, false, MOUSELOCK_ACTION_PRIORITY, unpack(Config.SHIFT_LOCK_KEYBINDS))
+-- end
+
 function SmoothShiftLock:BindContextActions()
-	ContextActionService:BindActionAtPriority(CONTEXT_ACTION_NAME, function(name, state, input)
-		return self:DoMouseLockSwitch(name, state, input)
-	end, false, MOUSELOCK_ACTION_PRIORITY, unpack(Config.SHIFT_LOCK_KEYBINDS))
+	self.ContextActionConnection = InputManager:GetInputAction("Miscellaneous.ShiftLock").Pressed:Connect(function()
+		self:DoMouseLockSwitch(nil, Enum.UserInputState.Begin, nil)
+	end)
 end
 
 --// Unbind keybinds
 function SmoothShiftLock:UnbindContextActions()
-	ContextActionService:UnbindAction(CONTEXT_ACTION_NAME)
+	if self.ContextActionConnection then
+		self.ContextActionConnection:Disconnect()
+	end
+	-- ContextActionService:UnbindAction(CONTEXT_ACTION_NAME)
 end
 
 --// Toggle shift lock
