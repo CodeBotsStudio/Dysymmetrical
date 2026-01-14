@@ -61,7 +61,7 @@ You may use this project for whatever you want, as long as you keep credit.
 Do NOT remove the `print()` calls that identify this engine.
 If you do, leave the engine credits in the game's description or in the credits menu in the lobby's sidebar.
 
-Also see [MIT](https://github.com/CodeBotsStudio/Dysymmetrical/blob/main/LICENSE).
+Also see [LICENSE](https://github.com/CodeBotsStudio/Dysymmetrical/blob/main/LICENSE).
 
 ## Credits
 Credits to [@PirosMacska](https://github.com/PirosMacska) for making the `VideoPlayer` module for 2D killer intros
