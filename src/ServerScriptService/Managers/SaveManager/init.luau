@@ -354,6 +354,9 @@ function SaveManager.Load(Player: Player): Folder
 	if PlayerData then
 
 		if not PlayerData.Achievements then
+			DevItemGrantingManager.CheckPlayer(Player, ClonedData)
+			BadgeItemGrantingManager.CheckPlayer(Player, ClonedData)
+
 			ClonedData.Parent = Player
 			SaveManager._SetupLeaderStats(ClonedData, Leaderstats)
 			Leaderstats.Parent = Player
@@ -518,13 +521,13 @@ function SaveManager.Load(Player: Player): Folder
 	end
 	-- SaveManager._CheckCheckSaveIntegrity(ClonedData)
 
+	DevItemGrantingManager.CheckPlayer(Player, ClonedData)
+	BadgeItemGrantingManager.CheckPlayer(Player, ClonedData)
+
 	-- Finally, nest all these instances neatly in the player for easy reference.
 	ClonedData.Parent = Player
 	SaveManager._SetupLeaderStats(ClonedData, Leaderstats)
 	Leaderstats.Parent = Player
-
-	DevItemGrantingManager.CheckPlayer(Player, ClonedData)
-	BadgeItemGrantingManager.CheckPlayer(Player, ClonedData)
 
 	return ClonedData
 end
