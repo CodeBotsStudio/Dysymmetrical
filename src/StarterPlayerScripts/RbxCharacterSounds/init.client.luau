@@ -177,8 +177,8 @@ local function initializeSoundSystem(instances: { [string]: Instance })
 		local i : number = 5
 		local step : number = 1.25 -- determines how fine-grained the curve gets sampled
 		while i < 150 do
-			curve[i] = 5 / i;
-			i *= step;
+			curve[i] = 5 / i
+			i *= step
 		end
 		curve[150] = 0
 		audioEmitter = Instance.new("AudioEmitter")
