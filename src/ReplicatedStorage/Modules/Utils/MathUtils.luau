@@ -1,7 +1,10 @@
 local MathUtils = {}
 
+--- ## DEPRECATED: use `math.lerp()` instead.
+--- 
 --- Linear interpolation: formula used to get a certain value between two specified values by using a magnitude from 0 to 1.
 --- See [Lerping](https://rfcs.luau.org/function-math-lerp.html).
+@deprecated
 function MathUtils.Lerp(a: number, b: number, t: number): number
     return a + (b - a) * t
 end

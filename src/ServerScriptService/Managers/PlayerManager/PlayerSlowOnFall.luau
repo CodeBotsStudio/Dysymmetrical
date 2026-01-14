@@ -32,7 +32,7 @@ return {
                             local alpha = 0
                             repeat
                                 alpha = math.clamp(elapsed / Recovery, 0, 1)
-                                PlayerSpeedManager.ManagedPlayers[Player].Factors.FallSlowness = Utils.Math.Lerp(Mult, 1, TweenService:GetValue(alpha, Enum.EasingStyle.Circular, Enum.EasingDirection.In))
+                                PlayerSpeedManager.ManagedPlayers[Player].Factors.FallSlowness = math.lerp(Mult, 1, TweenService:GetValue(alpha, Enum.EasingStyle.Circular, Enum.EasingDirection.In))
                                 elapsed += task.wait()
                             until alpha == 1 or not PlayerSpeedManager.ManagedPlayers[Player].Factors.FallSlowness
                         end)

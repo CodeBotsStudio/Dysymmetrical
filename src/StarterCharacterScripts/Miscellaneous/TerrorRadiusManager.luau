@@ -150,7 +150,7 @@ end
 
 function TerrorRadiusManager:TweenVolume(Sound: Sound, TargetVolume: number, delta: number)
     if math.abs(Sound.Volume - TargetVolume) > 0.01 then
-        Sound.Volume = Utils.Math.Lerp(Sound.Volume, TargetVolume, delta * 14)
+        Sound.Volume = math.lerp(Sound.Volume, TargetVolume, delta * 14)
     end
 end
 

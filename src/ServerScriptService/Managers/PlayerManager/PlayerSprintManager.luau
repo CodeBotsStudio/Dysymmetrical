@@ -111,7 +111,7 @@ function PlayerSprintManager:Init()
                 if ManagedPlayer.TweenSpeed then
                     local ValueToTweenTo = ManagedPlayer.SpeedApplied and ManagedPlayer.SprintMultiplier or 1
                     
-                    PlayerSpeedManager.ManagedPlayers[Player].Factors[FactorName] = Utils.Math.Lerp(PlayerSpeedManager.ManagedPlayers[Player].Factors[FactorName], ValueToTweenTo, delta * 5.5)
+                    PlayerSpeedManager.ManagedPlayers[Player].Factors[FactorName] = math.lerp(PlayerSpeedManager.ManagedPlayers[Player].Factors[FactorName], ValueToTweenTo, delta * 5.5)
                 else
                     PlayerSpeedManager.ManagedPlayers[Player].Factors[FactorName] = ManagedPlayer.SpeedApplied and ManagedPlayer.SprintMultiplier or 1
                 end

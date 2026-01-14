@@ -22,7 +22,7 @@ return {
                     0.5,
                     0.999
                 ) or 0.999
-            Vignette.ImageTransparency = Utils.Math.Lerp(
+            Vignette.ImageTransparency = math.lerp(
                 Vignette.ImageTransparency,
                 Target,
                 delta * 9.8

@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local Utils = require(ReplicatedStorage.Modules.Utils)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local Camera = workspace.CurrentCamera
@@ -25,7 +24,7 @@ function FOVManager:Init()
 				FOV *= factor
 			end
 
-			Camera.FieldOfView = Utils.Math.Lerp(
+			Camera.FieldOfView = math.lerp(
 				Camera.FieldOfView,
 				FOV,
 				delta * self.DeltaMultiplier

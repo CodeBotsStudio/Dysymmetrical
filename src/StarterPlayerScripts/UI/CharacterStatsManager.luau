@@ -49,9 +49,9 @@ function CharacterStatsManager:_InitUI(Char: Model, UI: Frame)
             return
         end
         
-	    HealthBar.Size = UDim2.fromScale(Utils.Math.Lerp(HealthBar.Size.X.Scale, Humanoid.Health / Humanoid.MaxHealth, delta * 9), 1)
+	    HealthBar.Size = UDim2.fromScale(math.lerp(HealthBar.Size.X.Scale, Humanoid.Health / Humanoid.MaxHealth, delta * 9), 1)
 	    --
-	    StaminaBar.Size = UDim2.fromScale(Utils.Math.Lerp(StaminaBar.Size.X.Scale, StaminaAttributes.Stamina.Value / StaminaAttributes.MaxStamina.Value, delta * 9), 1)
+	    StaminaBar.Size = UDim2.fromScale(math.lerp(StaminaBar.Size.X.Scale, StaminaAttributes.Stamina.Value / StaminaAttributes.MaxStamina.Value, delta * 9), 1)
     end)
 
     Utils.Instance.ObserveProperty(Humanoid, "Health", function(value: number)
