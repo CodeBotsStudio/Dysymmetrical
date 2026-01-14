@@ -283,8 +283,9 @@ function AbilityType:Init(charModule: Types.Killer | Types.Survivor, plr: Player
         end)
     end
 
-    if self.OwnerProperties.InputManager.DefaultActions[self.InputName] ~= nil then
-        self:AddConnection(self.OwnerProperties.InputManager.DefaultActions[self.InputName].Pressed:Connect(function()
+    local InputAction = self.Owner.PlayerScripts.InputManager.InputActions.Default:FindFirstChild(self.InputName)
+    if InputAction then
+        self:AddConnection(InputAction.Pressed:Connect(function()
             self:AttemptUse()
         end))
     end
@@ -396,7 +397,7 @@ function AbilityType:DisableAllAbilities(Duration: number?, DisableSlash: boolea
     if DisableSlash == nil then
         DisableSlash = self.DisableSlashOnPerform
     end
-    for _, input in self.OwnerProperties.InputManager.DefaultActions do
+    for _, input in self.Owner.PlayerScripts.InputManager.InputActions.Default:GetChildren() do
         if input.Name:lower():find("ability") or (input.Name:lower():find("slash") and DisableSlash) then
             input.Enabled = false
         end
@@ -409,7 +410,7 @@ function AbilityType:DisableAllAbilities(Duration: number?, DisableSlash: boolea
 end
 
 function AbilityType:EnableAllAbilities()
-    for _, input in self.OwnerProperties.InputManager.DefaultActions do
+    for _, input in self.Owner.PlayerScripts.InputManager.InputActions.Default:GetChildren() do
         if input.Name:lower():find("ability") or input.Name:lower():find("slash") then
             input.Enabled = true
         end

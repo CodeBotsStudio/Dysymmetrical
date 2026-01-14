@@ -101,7 +101,7 @@ function PlayerList:Init()
         end
     end)
 
-    InputManager.Miscellaneous.TogglePlayerList.Pressed:Connect(function()
+    InputManager:GetInputAction("Miscellaneous.TogglePlayerList").Pressed:Connect(function()
         Toggle()
     end)
     ToggleButton.MouseEnter:Connect(function()

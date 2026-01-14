@@ -82,6 +82,7 @@ function Item:Init(Owner: Player, ExistingTool: Tool?)
             Character = Character,
             Humanoid = Character:FindFirstChildWhichIsA("Humanoid"),
             HRP = Utils.Character.GetRootPart(Character),
+            InputManager = require(self.Owner.PlayerScripts.InputManager),
         }
 
         self:AddConnection(Tool.Activated:Connect(function()

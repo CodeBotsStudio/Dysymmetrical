@@ -164,11 +164,16 @@ function AbilityGUI._UpdateAbilityFrameInput(Ability: Ability, InputManager, Cur
         Ability.Keybind.TextTransparency = 0
 
         --slash isn't built different now nvm :(
-        local Input = InputManager.DefaultActions[Ability.ModuleCode.InputName]
-        local Key = Input[CurrentScheme.."Key"] or Input["InputType"]
+        local Path = "Default."..Ability.ModuleCode.InputName.."."
+        if CurrentScheme ~= "Gamepad" then
+            Path = Path.."Keyboard"
+        else
+            Path = Path.."Controller"
+        end
+        local Key = InputManager:GetInputBinding(Path) :: InputBinding
 
         --WOW THANKS DYSCARN FOR MAKING A COOL INPUT MANAGER THAT ACTUALLY WORKS AND SHOWS YOUR `preferred input device` // you're welcome Dyscarn
-        Ability.Keybind.Text = Key.Name
+        Ability.Keybind.Text = Key.KeyCode.Name
         if CurrentScheme == "Gamepad" then
             Ability.Keybind.Text = Ability.Keybind.Text:gsub("Button", "")
         end

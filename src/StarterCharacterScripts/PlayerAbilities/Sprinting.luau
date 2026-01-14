@@ -32,14 +32,11 @@ return {
         Utils.Instance.ObserveProperty(Sprinting, "Value", Reload)
         Reload(Sprinting.Value)
 
-        while not (InputManager.DefaultActions and InputManager.DefaultActions.Sprint) do
-            task.wait()
-        end
-
-        JanitorInstance:Add(InputManager.DefaultActions.Sprint.Pressed:Connect(function()
+        local Key = InputManager:GetInputAction("Default.Sprint")
+        JanitorInstance:Add(Key.Pressed:Connect(function()
             Network:FireServerConnection("ChangeSprintState", "REMOTE_EVENT", true)
         end))
-        JanitorInstance:Add(InputManager.DefaultActions.Sprint.Released:Connect(function()
+        JanitorInstance:Add(Key.Released:Connect(function()
             Network:FireServerConnection("ChangeSprintState", "REMOTE_EVENT", false)
         end))
     end,

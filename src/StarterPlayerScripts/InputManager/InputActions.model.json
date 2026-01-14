@@ -1,0 +1,212 @@
+{
+    "className": "Folder",
+    "children": [
+        {
+            "className": "InputContext",
+            "properties": {
+                "Name": "Default"
+            },
+            "children": [
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "Sprint"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard",
+                                "KeyCode": "LeftShift"
+                            }
+                        },
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Controller",
+                                "KeyCode": "ButtonL2"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "FirstAbility"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard",
+                                "KeyCode": "Q"
+                            }
+                        },
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Controller",
+                                "KeyCode": "ButtonL1"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "SecondAbility"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard",
+                                "KeyCode": "E"
+                            }
+                        },
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Controller",
+                                "KeyCode": "ButtonR1"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "ThirdAbility"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard",
+                                "KeyCode": "R"
+                            }
+                        },
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Controller",
+                                "KeyCode": "ButtonY"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "FourthAbility"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard",
+                                "KeyCode": "F"
+                            }
+                        },
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Controller",
+                                "KeyCode": "ButtonB"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "Slash"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard",
+                                "KeyCode": "MouseLeftButton"
+                            }
+                        },
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Controller",
+                                "KeyCode": "ButtonR2"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "className": "InputContext",
+            "properties": {
+                "Name": "Miscellaneous"
+            },
+            "children": [
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "EmotePanel"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard",
+                                "KeyCode": "G"
+                            }
+                        },
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Controller",
+                                "KeyCode": "DPadDown"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "StopEmote"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard",
+                                "KeyCode": "Space"
+                            }
+                        },
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Controller",
+                                "KeyCode": "ButtonA"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "className": "InputAction",
+                    "properties": {
+                        "Name": "TogglePlayerList"
+                    },
+                    "children": [
+                        {
+                            "className": "InputBinding",
+                            "properties": {
+                                "Name": "Keyboard",
+                                "KeyCode": "Tab"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -37,7 +37,7 @@ function EmoteManager:Init()
 		end))
 	end
 
-	self.Janitor:Add(require(LocalPlayer.PlayerScripts.InputManager).Miscellaneous.StopEmote.Pressed:Connect(function()
+	self.Janitor:Add(require(LocalPlayer.PlayerScripts.InputManager):GetInputAction("Miscellaneous.StopEmote").Pressed:Connect(function()
 		if self.CurrentlyPlayingEmote then
 			self:StopEmote(self.CurrentlyPlayingEmote)
 		end

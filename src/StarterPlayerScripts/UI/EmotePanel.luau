@@ -107,7 +107,7 @@ function EmotePanel:Init()
         end
     end)
 
-    InputManager.Miscellaneous.EmotePanel.Pressed:Connect(function()
+    InputManager:GetInputAction("Miscellaneous.EmotePanel").Pressed:Connect(function()
         self:Toggle()
     end)
 

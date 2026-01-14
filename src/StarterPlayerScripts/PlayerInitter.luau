@@ -1,5 +1,4 @@
 local PlayerModule = script.Parent.PlayerModule
-local ServerScripts = script.Parent.Server
 
 local Player = game:GetService("Players").LocalPlayer
 
@@ -19,7 +18,7 @@ function PlayerInitter:Init()
     Player:SetAttribute("BaseFOV", 70)
 
     for _, Module in script.Parent:GetDescendants() do
-        if not (Module:IsA("ModuleScript") and Module ~= script and Module ~= PlayerModule and not Module:IsDescendantOf(PlayerModule) and not Module:IsDescendantOf(ServerScripts)) then
+        if not (Module:IsA("ModuleScript") and Module ~= script and Module ~= PlayerModule and not Module:IsDescendantOf(PlayerModule)) then
             continue
     	end
 
