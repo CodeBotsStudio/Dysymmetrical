@@ -251,6 +251,49 @@ export type Survivor = {
             You may set customs for skins and characters using `"[SkinName][CharacterName]"` format.
             
             Remove `[SkinName]` to make it for a survivor in general.
+
+            Example for everything you can add here by default:
+            ```lua
+            local Survivor = Character.CreateSurvivor({
+                Config = {
+                    Voicelines = {
+                        --idle voicelines play every 10-25 seconds if there are no voicelines with higher priority
+                        Idle = {
+                            "rbxassetid://0000000000",
+                            "rbxassetid://0000000000",
+                            "rbxassetid://0000000000",
+                        },
+
+                        LMS = {
+                            --within a table of strings, a random one will be chosen
+                            Default = {
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                            },
+                            NullexVoyd = {
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                            },
+                            --for the "NullexVoydYourself" skin for "NullexVoyd"
+                            NullexVoydYourselfNullexVoyd = {
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                            },
+                        },
+
+                        --stunned voicelines play when this character gets stunned (obviously)
+                        Stunned = {
+                            "rbxassetid://0000000000",
+                            "rbxassetid://0000000000",
+                            "rbxassetid://0000000000",
+                        },
+                    },
+                },
+            })
+            ```
         ]=]
         Voicelines: {
             --- The voiceline (s) that'll play at random times while the character isn't saying any other voiceline.
@@ -279,10 +322,10 @@ export type Survivor = {
             e.g. for making a Milestone II (lvl 50), I would define it like so:
 
             ```lua
-            [CHARACTER_VARIABLE_NAME] = Character.CreateKiller({
+            local Survivor = Character.CreateSurvivor({
                 Config = {
                     Milestones = {
-                        [50] = "CharacterMilestoneII", -- The level it's granted on -> The name of the skin's module
+                        [50] = "CommanderMilestoneII", -- The level it's granted on -> The name of the skin's module
                     },
                 },
             })
@@ -472,6 +515,71 @@ export type Killer = {
             You may set customs for skins and characters using `"[SkinName][CharacterName]"` format.
             
             Remove `[SkinName]` to make it for a survivor in general.
+
+            Example for everything you can add here by default:
+            ```lua
+            local Killer = Character.CreateKiller({
+                Config = {
+                    Voicelines = {
+                        --idle voicelines play every 10-25 seconds if there are no voicelines with higher priority
+                        Idle = {
+                            "rbxassetid://0000000000",
+                            "rbxassetid://0000000000",
+                            "rbxassetid://0000000000",
+                        },
+
+                        Kill = {
+                            --within a table of strings, a random one will be chosen
+                            Default = {
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                            },
+                            --for commander in general
+                            Commander = {
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                            },
+                            --for the "CommanderYourself" skin for "Commander"
+                            CommanderYourselfCommander = {
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                            },
+                        },
+
+                        LMS = {
+                            --within a table of strings, a random one will be chosen
+                            Default = {
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                            },
+                            --for commander in general
+                            Commander = {
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                            },
+                            --for the "CommanderYourself" skin for "Commander"
+                            CommanderYourselfCommander = {
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                                "rbxassetid://0000000000",
+                            },
+                        },
+
+                        --stunned voicelines play when this character gets stunned (obviously)
+                        Stunned = {
+                            "rbxassetid://0000000000",
+                            "rbxassetid://0000000000",
+                            "rbxassetid://0000000000",
+                        },
+                    },
+                },
+            })
+            ```
         ]=]
         Voicelines: {
             --[=[
@@ -506,7 +614,22 @@ export type Killer = {
             [string]: string | {string} | {[string]: string | {string}},
         },
 
-        --- The chase theme of the character, separated in layers that depend on distance between the survivors and the killer.
+        --[=[
+         The chase theme of the character, separated in layers that depend on distance between the survivors and the killer.
+
+            ```lua
+            local Killer = Character.CreateKiller({
+                Config = {
+                    ChaseThemes = {
+                        L1 = "rbxassetid://0000000000",
+                        L2 = "rbxassetid://0000000000",
+                        L3 = "rbxassetid://0000000000",
+                        L4 = "rbxassetid://0000000000",
+                    },
+                },
+            })
+            ```
+        ]=]
         ChaseThemes: {
             --- Layer 1: 60 studs.
             L1: string,
@@ -524,7 +647,7 @@ export type Killer = {
             e.g. for making a Milestone II (lvl 50), I would define it like so:
 
             ```lua
-            [CHARACTER_VARIABLE_NAME] = Character.CreateKiller({
+            local Killer = Character.CreateKiller({
                 Config = {
                     Milestones = {
                         [50] = "CharacterMilestoneII", -- The level it's granted on -> The name of the skin's module
