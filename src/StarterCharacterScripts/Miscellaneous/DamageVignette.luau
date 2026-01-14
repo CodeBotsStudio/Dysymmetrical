@@ -7,7 +7,7 @@ local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 return {
     Init = function(_self)
-        local Vignette = Utils.Instance.FindFirstChild(script, "DamageVignette")
+        local Vignette = Utils.Instance.FindFirstChild(script, "DamageVignette"):Clone()
         Vignette.Parent = Utils.Instance.FindFirstChild(Players.LocalPlayer.PlayerGui, "TemporaryUI")
 
         local Humanoid = Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
