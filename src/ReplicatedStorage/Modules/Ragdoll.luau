@@ -103,34 +103,37 @@ function Ragdoll.Enable(Character: Model, Dupe: boolean)
 	local Char = Character
 	local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
 	if Dupe then
-		local function HideOriginal()
-			for _, Descendant in Character:GetDescendants() do
-				local isPart = Descendant:IsA("BasePart")
-				if Descendant:IsA("Decal") or isPart then
-					if isPart then
-						Descendant.CollisionGroup = "DeadPlayers"
-					end
-					Descendant.Transparency = 1
-				end
-			end
-		end
 		local RagdollFolder = workspace.Ragdolls
 		if not RagdollFolder then
 			return
 		end
+
 		local Silly = Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer or Players:GetPlayerFromCharacter(Char), "Advanced.SillyRagdolls")
+
 		--handle ragdoll limit option
 		Char = Character:Clone()
 		Char.Parent = RagdollFolder
 		if Char.PrimaryPart then
 			Char.PrimaryPart.Anchored = false
 		end
-		HideOriginal()
+
+		for _, Descendant in Character:GetDescendants() do
+			local isPart = Descendant:IsA("BasePart")
+
+			if Descendant:IsA("Decal") or isPart then
+				if isPart then
+					Descendant.CollisionGroup = "DeadPlayers"
+				end
+				Descendant.Transparency = 1
+			end
+		end
+
 		for _, Descendant in Char:GetDescendants() do
 			if Descendant:IsA("Sound") or Descendant:IsA("ParticleEmitter") or Descendant:IsA("Light") or Descendant:IsA("Beam") or Descendant:IsA("Highlight") then
                 Descendant:Destroy()
             end
 		end
+		
 		for index, blacklisted in {
 			"LinearVelocity",
 			"Highlight"
@@ -142,15 +145,18 @@ function Ragdoll.Enable(Character: Model, Dupe: boolean)
 				First = Char:FindFirstChild(blacklisted, true)
 			end
 		end
+
 		task.spawn(function()
 			if Humanoid then
 				Humanoid.Health = 1
 				Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+
 				if RunService:IsClient() and Players.LocalPlayer.Character == Character then
-					workspace.CurrentCamera.CameraSubject = Humanoid.BreakJointsOnDeath and (Char:FindFirstChild("Head") or Humanoid) or Humanoid
+					workspace.CurrentCamera.CameraSubject = not Humanoid.BreakJointsOnDeath and (Char:FindFirstChild("Head") or Humanoid) or Humanoid
 				end
 			end
 		end)
+		
 		task.delay(30, function()
 			if Char.Parent then
 				Debris:AddItem(Char, 10)
@@ -185,6 +191,7 @@ function Ragdoll.Enable(Character: Model, Dupe: boolean)
         	Joint.Enabled = false
         end
 	end
+	
 	if Humanoid then
         Char:SetAttribute("OriginalJumpInfo", ("%*|%*"):format(Humanoid.JumpPower, Humanoid.JumpHeight))
         Humanoid.RequiresNeck = false
@@ -192,11 +199,13 @@ function Ragdoll.Enable(Character: Model, Dupe: boolean)
         Humanoid.JumpPower = 0
         Humanoid.JumpHeight = 0
 	end
+
 	for _, Part in Char:GetDescendants() do
         if Part:IsA("BasePart") then
             if not Part:GetAttribute("OriginalCollision") then
                 Part:SetAttribute("OriginalCollision", Part.CanCollide)
             end
+
             Part.CanCollide = false
         end
     end
@@ -225,10 +234,11 @@ function Ragdoll.Enable(Character: Model, Dupe: boolean)
         "Right Leg",
     }
 	for _, Part in Char:GetChildren() do
-        if Part:IsA("BasePart") and (table.find(Limbs, Part.Name) or Part.Transparency < 0.25 and Part.Name ~= "HumanoidRootPart" and Part.Name ~= "CollisionHitbox") then
+        if Part:IsA("BasePart") and (table.find(Limbs, Part.Name) or (Part.Transparency < 0.25 and Part.Name ~= "HumanoidRootPart" and Part.Name ~= "CollisionHitbox")) then
             task.delay(0.125, function()
                 Part.CanCollide = false
             end)
+
             if Part.Name == "Head" then
                 MakeFakeLimb(Part, 0)
             else
