@@ -9,6 +9,30 @@ local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local SlashModule = {}
 
+local function DefaultSlashBehaviour(self: Types.Ability)
+	if RunService:IsServer() then
+		Sounds.PlaySound(self.UseSound, {Parent = self.OwnerProperties.HRP})
+		task.delay(self.Delay, function()
+			Hitbox.New(self.Owner, {
+				CFrameOffset = self.HitboxOffset,
+				Size = self.HitboxSize,
+				Time = self.Duration,
+				Damage = self.Damage,
+				Reason = "Slash Attack",
+				ExecuteOnKill = true,
+			})
+		end)
+	else
+		self.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor("Slash")
+		self:AddConnection(task.delay(0.7, function()
+			self.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor("Slash")
+		end))
+	end
+end
+local function IncreaseDamage(self: Types.Ability, amount: number)
+	self.Damage += amount
+end
+
 --- Creates a new Slash ability instance. Use this in every killer that you want to have a slash ability in.
 function SlashModule.New(Props: Types.Ability?): Types.Ability
 
@@ -27,29 +51,8 @@ function SlashModule.New(Props: Types.Ability?): Types.Ability
 		Delay = 0.1,
 		HitboxSize = Vector3.new(5, 6, 4.5),
 		HitboxOffset = CFrame.new(0, 0, -2.5),
-		Behaviour = function(self: Types.Ability)
-			if RunService:IsServer() then
-				Sounds.PlaySound(self.UseSound, {Parent = self.OwnerProperties.HRP})
-				task.delay(self.Delay, function()
-					Hitbox.New(self.Owner, {
-						CFrameOffset = self.HitboxOffset,
-						Size = self.HitboxSize,
-						Time = self.Duration,
-						Damage = self.Damage,
-						Reason = "Slash Attack",
-						ExecuteOnKill = true,
-					})
-				end)
-			else
-				self.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor("Slash")
-				self:AddConnection(task.delay(0.7, function()
-					self.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor("Slash")
-				end))
-			end
-		end,
-		IncreaseDamage = function(self: Types.Ability, amount: number)
-			self.Damage += amount
-		end,
+		Behaviour = DefaultSlashBehaviour,
+		IncreaseDamage = IncreaseDamage,
 	})
 
 	Utils.Type.DeepTableOverwrite(Final, Props)

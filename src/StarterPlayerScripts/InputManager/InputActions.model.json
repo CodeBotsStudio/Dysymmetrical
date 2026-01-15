@@ -2,138 +2,124 @@
     "className": "Folder",
     "children": [
         {
+            "name": "Default",
             "className": "InputContext",
-            "properties": {
-                "Name": "Default"
-            },
             "children": [
                 {
+                    "name": "Sprint",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "Sprint"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard",
                                 "KeyCode": "LeftShift"
                             }
                         },
                         {
+                            "name": "Controller",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Controller",
                                 "KeyCode": "ButtonL2"
                             }
                         }
                     ]
                 },
                 {
+                    "name": "FirstAbility",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "FirstAbility"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard",
                                 "KeyCode": "Q"
                             }
                         },
                         {
+                            "name": "Controller",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Controller",
                                 "KeyCode": "ButtonL1"
                             }
                         }
                     ]
                 },
                 {
+                    "name": "SecondAbility",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "SecondAbility"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard",
                                 "KeyCode": "E"
                             }
                         },
                         {
+                            "name": "Controller",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Controller",
                                 "KeyCode": "ButtonR1"
                             }
                         }
                     ]
                 },
                 {
+                    "name": "ThirdAbility",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "ThirdAbility"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard",
                                 "KeyCode": "R"
                             }
                         },
                         {
+                            "name": "Controller",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Controller",
                                 "KeyCode": "ButtonY"
                             }
                         }
                     ]
                 },
                 {
+                    "name": "FourthAbility",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "FourthAbility"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard",
                                 "KeyCode": "F"
                             }
                         },
                         {
+                            "name": "Controller",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Controller",
                                 "KeyCode": "ButtonB"
                             }
                         }
                     ]
                 },
                 {
+                    "name": "Slash",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "Slash"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard",
                                 "KeyCode": "MouseLeftButton"
                             }
                         },
                         {
+                            "name": "Controller",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Controller",
                                 "KeyCode": "ButtonR2"
                             }
                         }
@@ -142,87 +128,77 @@
             ]
         },
         {
+            "name": "Miscellaneous",
             "className": "InputContext",
-            "properties": {
-                "Name": "Miscellaneous"
-            },
             "children": [
                 {
+                    "name": "EmotePanel",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "EmotePanel"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard",
                                 "KeyCode": "G"
                             }
                         },
                         {
+                            "name": "Controller",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Controller",
                                 "KeyCode": "DPadDown"
                             }
                         }
                     ]
                 },
                 {
+                    "name": "StopEmote",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "StopEmote"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard",
                                 "KeyCode": "Space"
                             }
                         },
                         {
+                            "name": "Controller",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Controller",
                                 "KeyCode": "ButtonA"
                             }
                         }
                     ]
                 },
                 {
+                    "name": "TogglePlayerList",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "TogglePlayerList"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard",
                                 "KeyCode": "Tab"
                             }
                         }
                     ]
                 },
                 {
+                    "name": "ShiftLock",
                     "className": "InputAction",
-                    "properties": {
-                        "Name": "ShiftLock"
-                    },
                     "children": [
                         {
+                            "name": "Keyboard1",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard1",
                                 "KeyCode": "LeftControl"
                             }
                         },
                         {
+                            "name": "Keyboard2",
                             "className": "InputBinding",
                             "properties": {
-                                "Name": "Keyboard2",
                                 "KeyCode": "RightControl"
                             }
                         }

@@ -17,6 +17,141 @@ local Info = TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOu
 local MasterSoundGroup = SoundService.SoundGroups.Master
 local SoundFolder = SoundService.TempSounds
 
+local function DataAnchorBehaviour(self: Types.Ability)
+    if RunService:IsServer() then
+        if self.Setup then
+            self.OwnerProperties.Character:PivotTo(self.PositionInfo)
+        
+            if self.TeleporterInstance then
+                self.TeleporterInstance:Destroy()
+            end
+        
+            self.PositionInfo = nil
+            self.Setup = false
+        else
+            self.Setup = true
+        
+            self:AddConnection(task.delay(0.75, function()
+                self.DevicePosition = self.OwnerProperties.Character.HumanoidRootPart.Position - Vector3.new(0, 3 * self.OwnerProperties.Character:GetScale(), 0)
+                Sounds.PlaySound(self.PlaceSound, {
+                    Position = self.DevicePosition,
+                    RollOffMaxDistance = 35,
+                    RollOffMinDistance = 12,
+                    Name = self.Name,
+                    SoundGroup = SoundService.SoundGroups.Master.SFX,
+                })
+            end))
+            self:AddConnection(task.delay(0.917, function()
+                local TpInstance = self.CharModule.Config.TeleporterPrefab:Clone()
+                TpInstance:PivotTo(CFrame.new(self.DevicePosition))
+                TpInstance.Parent = workspace.Map.InGame
+                self.PositionInfo = self.OwnerProperties.Character:GetPivot()
+                self.TeleporterInstance = TpInstance
+            end))
+        end
+    else
+        if self.Setup then
+            self.Cooldown = self.FirstCooldown
+            self.Setup = false
+        else
+            self.Cooldown = self.SecondCooldown
+            self.Setup = true
+        
+            self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0)
+        
+            self:PlayUseAnimation()
+            self:AddConnection(task.delay((self.UseAnimationTrack.Length or 1.7) + 0.4, function()
+                self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
+            end))
+        end
+    end
+end
+
+local function CallbackPingBehaviour(self: Types.Ability)
+    if RunService:IsServer() then
+        PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0.18)
+        self.OwnerProperties.Character:SetAttribute("PreventSlash", true)
+
+        self:AddConnection(task.delay(self.Duration, function()
+            PlayerSpeedManager.RemoveSpeedFactor(self.owner, self.Name)
+            self.OwnerProperties.Character:SetAttribute("PreventSlash", false)
+        end))
+
+        return
+    end
+    task.defer(function()
+        local Sound = Instance.new("Sound")
+        Sound.Name = self.Name
+        Sound.SoundId = self.UseSound
+    
+        --muffling all audio except for the callback ping sound
+        local Equalizer = Instance.new("EqualizerSoundEffect")
+        Equalizer.LowGain = -10
+        Equalizer.MidGain = 15
+        Equalizer.HighGain = 80
+        Equalizer.Parent = Sound
+    
+        Sound.Parent = SoundFolder
+    
+        Sound:Play()
+        Debris:AddItem(Sound, Sound.TimeLength + 1)
+    end)
+
+    self.OwnerProperties.FOVManager:AddFOVFactor(self.Name, 0.6)
+
+    task.defer(function()
+        local Equalizer = Instance.new("EqualizerSoundEffect")
+        Equalizer.LowGain = 0
+        Equalizer.HighGain = 0
+        Equalizer.MidGain = 0
+        Equalizer.Parent = MasterSoundGroup
+        TweenService:Create(Equalizer, Info, {LowGain = 10, MidGain = -15, HighGain = -80}):Play()
+
+        self:AddConnection(task.delay(self.Duration, function()
+            TweenService:Create(Equalizer, Info, {LowGain = 0, MidGain = 0, HighGain = 0}):Play()
+        
+            self:AddConnection(task.delay(1, function()
+                Equalizer:Destroy()
+            end))
+        end))
+    end)
+
+    self:AddConnection(task.delay(self.Duration, function()
+        self.OwnerProperties.FOVManager:RemoveFOVFactor(self.Name)
+    end))
+
+    --shows all players' aura
+    for _, plr: Model in Utils.Character.GetCharactersWithRoles(false).Survivor or {} do
+        Utils.Player.RevealPlayerAura(plr, self.Duration)
+    end
+end
+
+function OverchargeBehaviour(self: Types.Ability)
+    if RunService:IsServer() then
+        CommonFunctions.ApplyEffect({
+            TargetHumanoid = self.OwnerProperties.Character:FindFirstChildWhichIsA("Humanoid"),
+            EffectSettings = {
+                Name = "Speed", 
+                Level = self.SpeedLevel, 
+                Duration = self.SpeedDuration
+            }
+        })
+
+        self:AddConnection(task.delay(self.SpeedDuration, function()
+            CommonFunctions.ApplyEffect({
+                TargetHumanoid = self.OwnerProperties.Character:FindFirstChildWhichIsA("Humanoid"),
+                EffectSettings = {
+                    Name = "Slowness", 
+                    Level = self.SlownessLevel, 
+                    Duration = self.SlownessDuration
+                }
+            })
+        end))
+    
+        return
+    end
+end
+
 --Character Definition
 local NullexVoyd: Types.Killer = Character.CreateKiller({
     Config = {
@@ -59,55 +194,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                 Setup = false,
                 PositionInfo = CFrame.new(),
 
-                Behaviour = function(self)
-                    if RunService:IsServer() then
-                        if self.Setup then
-                            self.OwnerProperties.Character:PivotTo(self.PositionInfo)
-                        
-                            if self.TeleporterInstance then
-                                self.TeleporterInstance:Destroy()
-                            end
-                        
-                            self.PositionInfo = nil
-                            self.Setup = false
-                        else
-                            self.Setup = true
-                        
-                            self:AddConnection(task.delay(0.75, function()
-                                self.DevicePosition = self.OwnerProperties.Character.HumanoidRootPart.Position - Vector3.new(0, 3 * self.OwnerProperties.Character:GetScale(), 0)
-                                Sounds.PlaySound(self.PlaceSound, {
-                                    Position = self.DevicePosition,
-                                    RollOffMaxDistance = 35,
-                                    RollOffMinDistance = 12,
-                                    Name = self.Name,
-                                    SoundGroup = SoundService.SoundGroups.Master.SFX,
-                                })
-                            end))
-                            self:AddConnection(task.delay(0.917, function()
-                                local TpInstance = self.CharModule.Config.TeleporterPrefab:Clone()
-                                TpInstance:PivotTo(CFrame.new(self.DevicePosition))
-                                TpInstance.Parent = workspace.Map.InGame
-                                self.PositionInfo = self.OwnerProperties.Character:GetPivot()
-                                self.TeleporterInstance = TpInstance
-                            end))
-                        end
-                    else
-                        if self.Setup then
-                            self.Cooldown = self.FirstCooldown
-                            self.Setup = false
-                        else
-                            self.Cooldown = self.SecondCooldown
-                            self.Setup = true
-                        
-                            self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0)
-                        
-                            self:PlayUseAnimation()
-                            self:AddConnection(task.delay((self.UseAnimationTrack.Length or 1.7) + 0.4, function()
-                                self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
-                            end))
-                        end
-                    end
-                end,
+                Behaviour = DataAnchorBehaviour,
             }),
 
             CallbackPing = Ability.New({
@@ -116,64 +203,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                 InputName = "ThirdAbility",
                 Cooldown = 32.5,
                 UseSound = "rbxassetid://72568635961241",
-                Behaviour = function(self)
-                    if RunService:IsServer() then
-                        PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0.18)
-                        self.OwnerProperties.Character:SetAttribute("PreventSlash", true)
-
-                        self:AddConnection(task.delay(self.Duration, function()
-                            PlayerSpeedManager.RemoveSpeedFactor(self.owner, self.Name)
-                            self.OwnerProperties.Character:SetAttribute("PreventSlash", false)
-                        end))
-
-                        return
-                    end
-                    task.defer(function()
-                        local Sound = Instance.new("Sound")
-                        Sound.Name = self.Name
-                        Sound.SoundId = self.UseSound
-                    
-                        --muffling all audio except for the callback ping sound
-                        local Equalizer = Instance.new("EqualizerSoundEffect")
-                        Equalizer.LowGain = -10
-                        Equalizer.MidGain = 15
-                        Equalizer.HighGain = 80
-                        Equalizer.Parent = Sound
-                    
-                        Sound.Parent = SoundFolder
-                    
-                        Sound:Play()
-                        Debris:AddItem(Sound, Sound.TimeLength + 1)
-                    end)
-                
-                    self.OwnerProperties.FOVManager:AddFOVFactor(self.Name, 0.6)
-                
-                    task.defer(function()
-                        local Equalizer = Instance.new("EqualizerSoundEffect")
-                        Equalizer.LowGain = 0
-                        Equalizer.HighGain = 0
-                        Equalizer.MidGain = 0
-                        Equalizer.Parent = MasterSoundGroup
-                        TweenService:Create(Equalizer, Info, {LowGain = 10, MidGain = -15, HighGain = -80}):Play()
-
-                        self:AddConnection(task.delay(self.Duration, function()
-                            TweenService:Create(Equalizer, Info, {LowGain = 0, MidGain = 0, HighGain = 0}):Play()
-                        
-                            self:AddConnection(task.delay(1, function()
-                                Equalizer:Destroy()
-                            end))
-                        end))
-                    end)
-
-                    self:AddConnection(task.delay(self.Duration, function()
-                        self.OwnerProperties.FOVManager:RemoveFOVFactor(self.Name)
-                    end))
-                
-                    --shows all players' aura
-                    for _, plr: Model in Utils.Character.GetCharactersWithRoles(false).Survivor or {} do
-                        Utils.Player.RevealPlayerAura(plr, self.Duration)
-                    end
-                end,
+                Behaviour = CallbackPingBehaviour,
             }),
 
             Overcharge = Ability.New({
@@ -186,31 +216,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                 SlownessLevel = 3,
                 Duration = 4.7,
                 DisableSlashOnPerform = false,
-                Behaviour = function(self)
-                    if RunService:IsServer() then
-                        CommonFunctions.ApplyEffect({
-                            TargetHumanoid = self.OwnerProperties.Character:FindFirstChildWhichIsA("Humanoid"),
-                            EffectSettings = {
-                                Name = "Speed", 
-                                Level = self.SpeedLevel, 
-                                Duration = self.SpeedDuration
-                            }
-                        })
-
-                        self:AddConnection(task.delay(self.SpeedDuration, function()
-                            CommonFunctions.ApplyEffect({
-                                TargetHumanoid = self.OwnerProperties.Character:FindFirstChildWhichIsA("Humanoid"),
-                                EffectSettings = {
-                                    Name = "Slowness", 
-                                    Level = self.SlownessLevel, 
-                                    Duration = self.SlownessDuration
-                                }
-                            })
-                        end))
-                    
-                        return
-                    end
-                end,
+                Behaviour = OverchargeBehaviour,
             }),
         },
     },

@@ -12,6 +12,165 @@ local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local CommonFunctions = RunService:IsServer() and require(game:GetService("ServerScriptService").System.CommonFunctions) or nil
 local PlayerSpeedManager = RunService:IsServer() and require(game:GetService("ServerScriptService").Managers.PlayerManager.PlayerSpeedManager) or nil
 
+local function BlindsideBehaviour(self: Types.Ability)
+    if RunService:IsServer() then
+        local AnimatedGrenade = self.OwnerProperties.Character:FindFirstChild("Grenade")
+        AnimatedGrenade.Transparency = 0
+
+        self:AddConnection(task.delay(self.ThrowDelay, function()
+            local FunctionalGrenade = AnimatedGrenade:Clone()
+            local Joint = FunctionalGrenade:FindFirstChildWhichIsA("JointInstance")
+            if Joint then
+                Joint:Destroy()
+            end
+            FunctionalGrenade.Name = "ActiveFlashGrenade"
+            FunctionalGrenade.CanCollide = true
+            FunctionalGrenade.CollisionGroup = "Items"
+            FunctionalGrenade.AssemblyLinearVelocity = (self.OwnerProperties.Character.HumanoidRootPart.CFrame.LookVector + Vector3.new(0, 0.5, 0)) * self.ThrowForce
+            FunctionalGrenade.Parent = workspace:FindFirstChild("Map") and workspace.Map.InGame or workspace.TempObjectFolders
+
+            AnimatedGrenade.Transparency = 1
+        
+            self:AddConnection(task.delay(self.TriggerDelay, function()
+                task.spawn(function()
+                    Hitbox.New(self.Owner, {
+                        CFrame = CFrame.new(FunctionalGrenade.Position),
+                        Size = Vector3.new(35, 35, 35),
+                        Damage = 0,
+                        Time = 1/40 * 3,
+                        Shape = Enum.PartType.Ball,
+                        EffectsToApply = {
+                            {
+                                Name = "Blindness",
+                                Duration = 4,
+                                Level = 1,
+                            },
+                        },
+                        Connections = {
+                            PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
+                                CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 10, EXP = 20, Reason = "blinding the killer with Blindside"})
+                            end,
+                        }
+                    })
+                end)
+            
+                local Light = FunctionalGrenade:FindFirstChildWhichIsA("PointLight")
+                Light.Enabled = true
+                TweenService:Create(Light, TweenInfo.new(0.1), {Brightness = 0}):Play()
+            
+                FunctionalGrenade:FindFirstChildWhichIsA("ParticleEmitter"):Emit(80)
+            
+                self:AddConnection(task.delay(0.1, function()
+                    FunctionalGrenade.Transparency = 1
+                    Light.Enabled = false
+                
+                    Debris:AddItem(FunctionalGrenade, 8)
+                end))
+            end))
+        end))
+
+        return
+    end
+end
+
+local function ReloadBehaviour(self: Types.Ability)
+    if RunService:IsServer() then
+        self:AddConnection(task.delay(self.Duration, function()
+            self.CharModule.GameplayConfig.Abilities.Justice:ChangeAbilityCharges("Set", 1)
+        end))
+
+        CommonFunctions.ApplyEffect({
+            TargetHumanoid = self.OwnerProperties.Humanoid,
+            EffectSettings = {
+                Name = "Slowness",
+                Level = 3,
+                Duration = 5,
+            },
+        })
+
+        return
+    end
+end
+
+local function JusticeExtraInit(self: Types.Ability)
+    self.JusticeModel = Utils.Instance.FindFirstChild(self.OwnerProperties.Character, "Deagle")
+end
+
+local function JusticeBehaviour(self: Types.Ability)
+    if not RunService:IsServer() then
+        return
+    end
+    
+    --Shot Sound & Hitbox
+    self:AddConnection(task.delay(1.17, function()
+        task.spawn(function()
+            Hitbox.New(self.Owner, {
+                CFrameOffset = CFrame.new(0, 0, -(self.HitboxLength / 2)),
+                Size = Vector3.new(3, 1.5, self.HitboxLength),
+                Time = self.Duration,
+                Reason = "The Gun Shot",
+                Damage = self.Damage,
+                EffectsToApply = {
+                    {
+                        Name = "Stunned",
+                        Level = 1,
+                        Duration = self.StunTime,
+                        Subfolder = "KillerSpecific"
+                    },
+                },
+                Connections = {
+                    PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
+                        CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 6, EXP = 14, Reason = "stunning the killer with Justice"})
+                    end,
+                }
+            })
+        end)
+    
+        local FirePart = self.JusticeModel.FirePart
+        FirePart.Burst:Emit(4)
+        FirePart.Front:Emit(12)
+        FirePart.Smoke:Emit(8)
+        FirePart.Flash:Emit(3)
+        Sounds.PlaySound(self.ShotSound, {Volume = 2}, {
+            Position = FirePart.Position,
+        })
+    end))
+
+    --Hide
+    self:AddConnection(task.delay(2, function()
+        for _, Part in self.JusticeModel:GetDescendants() do
+            if Part:IsA("BasePart") then
+                Part.Transparency = 1
+            end
+        end
+    end))
+
+    task.spawn(function()
+        PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0.3)
+        self:AddConnection(task.delay(self.UseAnimationTrack and self.UseAnimationTrack.Length or self.Duration, function()
+            PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
+        end))
+    end)
+
+    --Show
+    for _, Part in self.JusticeModel:GetDescendants() do
+        if Part:IsA("BasePart") and not Part:HasTag("Transparent") then
+            Part.Transparency = 0
+        end
+    end
+end
+
+local function OnCommanderHit(self: Types.Ability, _hitbox: Types.HitboxDetails, _damage: number)
+    CommonFunctions.ApplyEffect({
+        TargetHumanoid = self.OwnerProperties.Humanoid,
+        EffectSettings = {
+            Name = "Resistance",
+            Level = 5,
+            Duration = 1,
+        },
+    })
+end
+
 local Commander: Types.Survivor = Character.CreateSurvivor({
     Config = {
         Name = "Commander",
@@ -47,66 +206,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
                 InputName = "FirstAbility",
                 Duration = 2,
 
-                Behaviour = function(self)
-                    if RunService:IsServer() then
-                        local AnimatedGrenade = self.OwnerProperties.Character:FindFirstChild("Grenade")
-                        AnimatedGrenade.Transparency = 0
-
-                        self:AddConnection(task.delay(self.ThrowDelay, function()
-                            local FunctionalGrenade = AnimatedGrenade:Clone()
-                            local Joint = FunctionalGrenade:FindFirstChildWhichIsA("JointInstance")
-                            if Joint then
-                                Joint:Destroy()
-                            end
-                            FunctionalGrenade.Name = "ActiveFlashGrenade"
-                            FunctionalGrenade.CanCollide = true
-                            FunctionalGrenade.CollisionGroup = "Items"
-                            FunctionalGrenade.AssemblyLinearVelocity = (self.OwnerProperties.Character.HumanoidRootPart.CFrame.LookVector + Vector3.new(0, 0.5, 0)) * self.ThrowForce
-                            FunctionalGrenade.Parent = workspace:FindFirstChild("Map") and workspace.Map.InGame or workspace.TempObjectFolders
-
-                            AnimatedGrenade.Transparency = 1
-                        
-                            self:AddConnection(task.delay(self.TriggerDelay, function()
-                                task.spawn(function()
-                                    Hitbox.New(self.Owner, {
-                                        CFrame = CFrame.new(FunctionalGrenade.Position),
-                                        Size = Vector3.new(35, 35, 35),
-                                        Damage = 0,
-                                        Time = 1/40 * 3,
-                                        Shape = Enum.PartType.Ball,
-                                        EffectsToApply = {
-                                            {
-                                                Name = "Blindness",
-                                                Duration = 4,
-                                                Level = 1,
-                                            },
-                                        },
-                                        Connections = {
-                                            PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
-                                                CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 10, EXP = 20, Reason = "blinding the killer with Blindside"})
-                                            end,
-                                        }
-                                    })
-                                end)
-                            
-                                local Light = FunctionalGrenade:FindFirstChildWhichIsA("PointLight")
-                                Light.Enabled = true
-                                TweenService:Create(Light, TweenInfo.new(0.1), {Brightness = 0}):Play()
-                            
-                                FunctionalGrenade:FindFirstChildWhichIsA("ParticleEmitter"):Emit(80)
-                            
-                                self:AddConnection(task.delay(0.1, function()
-                                    FunctionalGrenade.Transparency = 1
-                                    Light.Enabled = false
-                                
-                                    Debris:AddItem(FunctionalGrenade, 8)
-                                end))
-                            end))
-                        end))
-
-                        return
-                    end
-                end,
+                Behaviour = BlindsideBehaviour,
             }),
 
             Reload = Ability.New({
@@ -116,24 +216,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
                 InputName = "SecondAbility",
                 SlownessLevel = 3,
                 -- Description = "Commander reloads his gun. He takes 5 seconds to do so and gets Slowness III while reloading.",
-                Behaviour = function(self)
-                    if RunService:IsServer() then
-                        self:AddConnection(task.delay(self.Duration, function()
-                            self.CharModule.GameplayConfig.Abilities.Justice:ChangeAbilityCharges("Set", 1)
-                        end))
-
-                        CommonFunctions.ApplyEffect({
-                            TargetHumanoid = self.OwnerProperties.Humanoid,
-                            EffectSettings = {
-                                Name = "Slowness",
-                                Level = 3,
-                                Duration = 5,
-                            },
-                        })
-
-                        return
-                    end
-                end,
+                Behaviour = ReloadBehaviour,
             }),
 
             Justice = Ability.New({
@@ -153,89 +236,14 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
                     Limited = true,
                 },
 
-                ExtraInit = function(self)
-                    self.JusticeModel = Utils.Instance.FindFirstChild(self.OwnerProperties.Character, "Deagle")
-                end,
+                ExtraInit = JusticeExtraInit,
 
-                Behaviour = function(self)
-                    if not RunService:IsServer() then
-                        return
-                    end
-                    
-                    --Shot Sound & Hitbox
-                    self:AddConnection(task.delay(1.17, function()
-                        task.spawn(function()
-                            Hitbox.New(self.Owner, {
-                                CFrameOffset = CFrame.new(0, 0, -(self.HitboxLength / 2)),
-                                Size = Vector3.new(3, 1.5, self.HitboxLength),
-                                Time = self.Duration,
-                                Reason = "The Gun Shot",
-                                Damage = self.Damage,
-                                EffectsToApply = {
-                                    {
-                                        Name = "Stunned",
-                                        Level = 1,
-                                        Duration = self.StunTime,
-                                        Subfolder = "KillerSpecific"
-                                    },
-                                },
-                                Connections = {
-                                    PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
-                                        CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 6, EXP = 14, Reason = "stunning the killer with Justice"})
-                                    end,
-                                }
-                            })
-                        end)
-                    
-                        local FirePart = self.JusticeModel.FirePart
-                        FirePart.Burst:Emit(4)
-                        FirePart.Front:Emit(12)
-                        FirePart.Smoke:Emit(8)
-                        FirePart.Flash:Emit(3)
-                        Sounds.PlaySound(self.ShotSound, {Volume = 2}, {
-                            Position = FirePart.Position,
-                        })
-                    end))
-                
-                    --Hide
-                    self:AddConnection(task.delay(2, function()
-                        for _, Part in self.JusticeModel:GetDescendants() do
-                            if Part:IsA("BasePart") then
-                                Part.Transparency = 1
-                            end
-                        end
-                    end))
-
-                    task.spawn(function()
-                        PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0.3)
-                        self:AddConnection(task.delay(self.UseAnimationTrack and self.UseAnimationTrack.Length or self.Duration, function()
-                            PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
-                        end))
-                    end)
-                
-                    --Show
-                    for _, Part in self.JusticeModel:GetDescendants() do
-                        if Part:IsA("BasePart") and not Part:HasTag("Transparent") then
-                            Part.Transparency = 0
-                        end
-                    end
-                end,
+                Behaviour = JusticeBehaviour,
             }),
         },
     },
 
-    OnHit = function(self, _hitbox, _damage)
-        CommonFunctions.ApplyEffect({
-            TargetHumanoid = self.OwnerProperties.Humanoid,
-            EffectSettings = {
-                Name = "Resistance",
-                Level = 5,
-                Duration = 1,
-            },
-        })
-
-        return
-    end,
+    OnHit = OnCommanderHit,
 })
 
 Commander.Config.Description = {
