@@ -143,7 +143,7 @@ local function placePathWaypoint(waypointModel, position: Vector3)
     Params.FilterType = Enum.RaycastFilterType.Exclude
     Params.FilterDescendantsInstances = {workspace.CurrentCamera, LocalPlayer.Character}
     local cast = workspace:Raycast(position + Vector3.new(0, 2.5, 0), Vector3.new(0, -10, 0), Params)
-	if cast.Instance then
+	if cast and cast.Instance then
         local hitPoint = cast.Position
 		waypointModel.CFrame = CFrame.new(hitPoint, hitPoint + cast.Normal)
 		waypointModel.Parent = getTrailDotParent()
@@ -251,7 +251,7 @@ function FailureWaypoint:NewDisplayModel(position)
     Params.FilterType = Enum.RaycastFilterType.Exclude
     Params.FilterDescendantsInstances = {workspace.CurrentCamera, LocalPlayer.Character}
     local cast = workspace:Raycast(position + Vector3.new(0, 2.5, 0), Vector3.new(0, -10, 0), Params)
-	if cast.Instance then
+	if cast and cast.Instance then
         local hitPoint = cast.Position
 		newDisplayModel.CFrame = CFrame.new(hitPoint, hitPoint + cast.Normal)
 		newDisplayModel.Parent = getTrailDotParent()

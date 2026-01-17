@@ -57,7 +57,7 @@ local function renderPoint(point: Vector3, isLast): ImageHandleAdornment?
     Params.FilterType = Enum.RaycastFilterType.Exclude
     Params.FilterDescendantsInstances = {Players.LocalPlayer.Character, workspace.CurrentCamera}
     local cast = workspace:Raycast(point + Vector3.new(0, 2, 0), Vector3.new(0, -8, 0), Params)
-	if not cast.Instance then
+	if not (cast and cast.Instance) then
 		return nil
 	end
     local hitPoint = cast.Position

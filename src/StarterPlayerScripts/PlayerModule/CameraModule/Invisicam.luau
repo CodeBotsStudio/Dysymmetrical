@@ -235,7 +235,7 @@ function Invisicam:CharacterOutlineBehavior(castPoints)
         Params.FilterDescendantsInstances = partsWhitelist
         local cast = workspace:Raycast(centerPoint + offset, -3 * offset, Params)
 
-		if cast.Instance then
+		if cast and cast.Instance then
             local hitPoint = cast.Position
 			-- Use hit point as the cast point, but nudge it slightly inside the character so that bumping up against
 			-- walls is less likely to cause a transparency glitch
@@ -286,7 +286,7 @@ function Invisicam:SmartCircleBehavior(castPoints)
         local cast = workspace:Raycast(torsoPoint, circlePoint - torsoPoint, Params)
 		local castPoint = circlePoint
 
-		if cast.Instance then
+		if cast and cast.Instance then
             local hitNormal = cast.Normal
 			local hprime = cast.Position + 0.1 * hitNormal.unit -- Slightly offset hit point from the hit surface
 			local v0 = hprime - torsoPoint -- Vector from torso to offset hit point
@@ -307,7 +307,7 @@ function Invisicam:SmartCircleBehavior(castPoints)
 				if castPoint.Magnitude > 0 then
                     local Cast = workspace:Raycast(hprime, castPoint - hprime, Params)
 
-					if Cast.Instance then
+					if Cast and Cast.Instance then
 						local hprime2 = Cast.Position + 0.1 * Cast.Normal.Unit
 						castPoint = hprime2
 					end
@@ -320,7 +320,7 @@ function Invisicam:SmartCircleBehavior(castPoints)
 
             local Cast = workspace:Raycast(torsoPoint, (castPoint - torsoPoint), Params)
 
-			if Cast.Instance then
+			if Cast and Cast.Instance then
 				local castPoint2 = Cast.Position - 0.1 * (castPoint - torsoPoint).unit
 				castPoint = castPoint2
 			end

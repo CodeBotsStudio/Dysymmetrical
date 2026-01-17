@@ -369,13 +369,15 @@ function VRNavigation:OnHeartbeat(dt)
             Params.FilterDescendantsInstances = ignoreTable
             local obstructCast = workspace:Raycast(currentPosition - Vector3.new(0, 1, 0), moveDir * 3, Params)
 
-			if obstructCast.Instance then
+			if obstructCast and obstructCast.Instance then
 				local heightOffset = Vector3.new(0, 100, 0)
                 local jumpCast = workspace:Raycast(obstructCast.Position + moveDir * 0.5 + heightOffset, -heightOffset, Params)
 
-				local heightDifference = jumpCast.Position.Y - currentPosition.Y
-				if heightDifference < 6 and heightDifference > -2 then
-					humanoid.Jump = true
+				if jumpCast then
+					local heightDifference = jumpCast.Position.Y - currentPosition.Y
+					if heightDifference < 6 and heightDifference > -2 then
+						humanoid.Jump = true
+					end
 				end
 			end
 

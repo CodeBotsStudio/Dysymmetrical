@@ -154,7 +154,7 @@ local function getCollisionPoint(origin, dir)
         Params.FilterDescendantsInstances = blacklist
         local cast = workspace:Raycast(origin, dir, Params)
 
-        local hitPart = cast.Instance
+        local hitPart = cast and cast.Instance
 
 		if hitPart then
 			if hitPart.CanCollide then
@@ -206,16 +206,18 @@ local function queryPoint(origin, unitDir, dist, lastPos)
                 params.FilterType = Enum.RaycastFilterType.Include
                 params.IgnoreWater = true
                 params.FilterDescendantsInstances = wl
-                local exitPart = workspace:Raycast(target, entryPos - target, params).Instance
+                local Cast = workspace:Raycast(target, entryPos - target, params)
+				local exitPart = Cast and Cast.Instance
 
 				local lim = (entryPos - origin).Magnitude
 
 				if exitPart and not earlyAbort then
 					local promote
 					if lastPos then
-                        promote =
+						local _cast =
                             (workspace:Raycast(lastPos, target - lastPos, params) or
-                            workspace:Raycast(target, lastPos - target, params)).Instance
+                            workspace:Raycast(target, lastPos - target, params))
+						promote = _cast and _cast.Instance
 					end
 
 					if promote then

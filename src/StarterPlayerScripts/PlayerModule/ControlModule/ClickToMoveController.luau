@@ -72,7 +72,7 @@ do
         Params.FilterType = Enum.RaycastFilterType.Exclude
         Params.FilterDescendantsInstances = ignoreList
         local cast = workspace:Raycast(ray.Origin, ray.Direction, Params)
-        local hitPart = cast.Instance
+        local hitPart = cast and cast.Instance
 		if hitPart then
             local hitPos = cast.Position
             local hitNorm = cast.Normal
@@ -645,7 +645,7 @@ local function Pather(endPoint, surfaceNormal, overrideUseDirectPath: boolean?)
     Params.FilterType = Enum.RaycastFilterType.Exclude
     Params.FilterDescendantsInstances = getIgnoreList()
     local cast = workspace:Raycast(offsetPoint, Vector3.new(0, -1, 0) * 50, Params)
-    local newHitPart = cast.Instance
+    local newHitPart = cast and cast.Instance
 	if newHitPart then
 		this.TargetPoint = cast.Position
 	end
