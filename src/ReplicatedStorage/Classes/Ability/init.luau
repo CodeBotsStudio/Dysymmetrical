@@ -192,9 +192,14 @@ function AbilityType:Init(charModule: Types.Killer | Types.Survivor, plr: Player
         self:Destroy()
     end, true)
 
-    if plr.Character:FindFirstChild("Effects") then
-        self:AddConnection(plr.Character:FindFirstChild("Effects").ChildAdded:Connect(function(newChild: Instance)
-            if newChild.Name == "Stunned" then
+    do
+        local Effects = self.Owner.Character:FindFirstChild("Effects")
+        if Effects then
+            self:AddConnection(Effects.ChildAdded:Connect(function(newChild: Instance)
+                if newChild.Name ~= "Stunned" then
+                    return
+                end
+                
                 for _, Connection in self.StunnableConnections do
                     if typeof(Connection) == "thread" then
                         if coroutine.running() ~= Connection then
@@ -204,12 +209,12 @@ function AbilityType:Init(charModule: Types.Killer | Types.Survivor, plr: Player
                         Connection:Disconnect()
                     end
                 end
-            end
-        end))
+            end))
+        end
     end
 
     if RunService:IsServer() then
-        Utils.Misc.Print("Initting "..self.Name.." ability for "..plr.Name)
+        Utils.Misc.Print("Initting "..self.Name.." ability for "..self.Owner.Name)
 
         --is this exploitable? yes.
         --do i give a fuck? no.
@@ -222,7 +227,7 @@ function AbilityType:Init(charModule: Types.Killer | Types.Survivor, plr: Player
         }
 
         self:AddConnection(Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
-            if player == plr and abilityName == self.Name and self:CanUse() then
+            if player == self.Owner and abilityName == self.Name and self:CanUse() then
                 task.defer(function()
                     if self.CharModule.Config.Voicelines and self.CharModule.Config.Voicelines[self.Name] then
                         Sounds.PlayVoiceline(self.Owner.Character, self.CharModule.Config.Voicelines[self.Name])
@@ -283,11 +288,13 @@ function AbilityType:Init(charModule: Types.Killer | Types.Survivor, plr: Player
         end)
     end
 
-    local InputAction = self.Owner.PlayerScripts.InputManager.InputActions.Default:FindFirstChild(self.InputName)
-    if InputAction then
-        self:AddConnection(InputAction.Pressed:Connect(function()
-            self:AttemptUse()
-        end))
+    do
+        local InputAction = self.Owner.PlayerScripts.InputManager.InputActions.Default:FindFirstChild(self.InputName)
+        if InputAction then
+            self:AddConnection(InputAction.Pressed:Connect(function()
+                self:AttemptUse()
+            end))
+        end
     end
 
     self:AddConnection(Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(abilityName: string)
@@ -312,9 +319,7 @@ function AbilityType:Init(charModule: Types.Killer | Types.Survivor, plr: Player
             end)
             --ability stuffs
             if self.Behaviour then
-                task.spawn(function()
-                    self:Behaviour()
-                end)
+                self:Behaviour()
             end
         end
     end))
@@ -342,10 +347,10 @@ function AbilityType:PlayUseAnimation()
     if self.UseAnimationTrack then
         self.UseAnimationTrack:Play(self.UseAnimationTransitionTime)
         self.OwnerProperties.TurnToMoveDirection:AddHeadPreventionFactor(self.Name)
-        task.delay(self.UseAnimationTrack.Length - (1/20 * 2), function()
+        self:AddConnection(task.delay(self.UseAnimationTrack.Length - (1/20 * 2), function()
             self.UseAnimationTrack:Stop(self.UseAnimationTransitionTime)
             self.OwnerProperties.TurnToMoveDirection:RemoveHeadPreventionFactor(self.Name)
-        end)
+        end))
     end
 end
 
