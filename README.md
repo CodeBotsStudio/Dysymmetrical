@@ -68,8 +68,6 @@ Credits to [@PirosMacska](https://github.com/PirosMacska) for making the `VideoP
 
 Credits to [@grayzcale](https://github.com/grayzcale/simplepath) for the `SimplePath` module
 
-Credits to [@Brawldude2](https://github.com/Brawldude2/RagdollService) for RagdollService being a reference for our adapted Ragdoll module
-
 ## Pull Request credits
 
 [@shroomii](https://github.com/shroomiii) in [#1](https://github.com/CodeBotsStudio/Dysymmetrical/pull/1) (clean .gitignore & GitHub Actions)
