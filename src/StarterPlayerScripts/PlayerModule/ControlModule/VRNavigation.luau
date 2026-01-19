@@ -20,6 +20,7 @@ local LocalPlayer = Players.LocalPlayer
 --[[ Constants ]]--
 local RECALCULATE_PATH_THRESHOLD = 4
 local NO_PATH_THRESHOLD = 12
+local MAX_PATHING_DISTANCE = 200
 local POINT_REACHED_THRESHOLD = 1
 local OFFTRACK_TIME_THRESHOLD = 2
 local THUMBSTICK_DEADZONE = 0.22
@@ -182,7 +183,7 @@ function VRNavigation:TryComputePath(startPos: Vector3, destination: Vector3)
 	local newPath = nil
 
 	while not newPath and numAttempts < 5 do
-        newPath = PathfindingService:FindPathAsync(startPos, destination)
+		newPath = PathfindingService:ComputeSmoothPathAsync(startPos, destination, MAX_PATHING_DISTANCE)
 		numAttempts = numAttempts + 1
 
 		if newPath.Status == Enum.PathStatus.ClosestNoPath or newPath.Status == Enum.PathStatus.ClosestOutOfRange then
@@ -364,20 +365,17 @@ function VRNavigation:OnHeartbeat(dt)
 				(game.Players.LocalPlayer :: Player).Character,
 				workspace.CurrentCamera
 			}
-            local Params = RaycastParams.new()
-            Params.FilterType = Enum.RaycastFilterType.Exclude
-            Params.FilterDescendantsInstances = ignoreTable
-            local obstructCast = workspace:Raycast(currentPosition - Vector3.new(0, 1, 0), moveDir * 3, Params)
+			local obstructRay = Ray.new(currentPosition - Vector3.new(0, 1, 0), moveDir * 3)
+			local obstructPart, obstructPoint, _obstructNormal = workspace:FindPartOnRayWithIgnoreList(obstructRay, ignoreTable)
 
-			if obstructCast and obstructCast.Instance then
+			if obstructPart then
 				local heightOffset = Vector3.new(0, 100, 0)
-                local jumpCast = workspace:Raycast(obstructCast.Position + moveDir * 0.5 + heightOffset, -heightOffset, Params)
+				local jumpCheckRay = Ray.new(obstructPoint + moveDir * 0.5 + heightOffset, -heightOffset)
+				local _jumpCheckPart, jumpCheckPoint, _jumpCheckNormal = workspace:FindPartOnRayWithIgnoreList(jumpCheckRay, ignoreTable)
 
-				if jumpCast then
-					local heightDifference = jumpCast.Position.Y - currentPosition.Y
-					if heightDifference < 6 and heightDifference > -2 then
-						humanoid.Jump = true
-					end
+				local heightDifference = jumpCheckPoint.Y - currentPosition.Y
+				if heightDifference < 6 and heightDifference > -2 then
+					humanoid.Jump = true
 				end
 			end
 

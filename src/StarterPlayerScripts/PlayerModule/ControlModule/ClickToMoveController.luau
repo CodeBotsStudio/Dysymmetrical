@@ -34,12 +34,12 @@ local UnreachableWaypointTimeout = 8
 
 --[[ Constants ]]--
 local movementKeys = {
-	[Enum.KeyCode.W] = true,
-	[Enum.KeyCode.A] = true,
-	[Enum.KeyCode.S] = true,
-	[Enum.KeyCode.D] = true,
-	[Enum.KeyCode.Up] = true,
-	[Enum.KeyCode.Down] = true,
+	[Enum.KeyCode.W] = true;
+	[Enum.KeyCode.A] = true;
+	[Enum.KeyCode.S] = true;
+	[Enum.KeyCode.D] = true;
+	[Enum.KeyCode.Up] = true;
+	[Enum.KeyCode.Down] = true;
 }
 
 local Player = Players.LocalPlayer
@@ -58,27 +58,20 @@ do
 			local humanoid = part:FindFirstChildOfClass("Humanoid")
 			if humanoid then
 				return part, humanoid
+			else
+				return FindCharacterAncestor(part.Parent)
 			end
-			return FindCharacterAncestor(part.Parent)
 		end
 
-        return
+		return
 	end
 	Utility.FindCharacterAncestor = FindCharacterAncestor
 
 	local function Raycast(ray, ignoreNonCollidable: boolean, ignoreList: {Model})
 		ignoreList = ignoreList or {}
-        local Params = RaycastParams.new()
-        Params.FilterType = Enum.RaycastFilterType.Exclude
-        Params.FilterDescendantsInstances = ignoreList
-        local cast = workspace:Raycast(ray.Origin, ray.Direction, Params)
-        local hitPart = cast and cast.Instance
+		local hitPart, hitPos, hitNorm, hitMat = workspace:FindPartOnRayWithIgnoreList(ray, ignoreList)
 		if hitPart then
-            local hitPos = cast.Position
-            local hitNorm = cast.Normal
-            local hitMat = cast.Material
-
-			if ignoreNonCollidable and not hitPart.CanCollide then
+			if ignoreNonCollidable and hitPart.CanCollide == false then
 				-- We always include character parts so a user can click on another character
 				-- to walk to them.
 				local _, humanoid = FindCharacterAncestor(hitPart)
@@ -95,7 +88,7 @@ do
 end
 
 local humanoidCache = {}
-local function findPlayerHumanoid(player: Player): Humanoid
+local function findPlayerHumanoid(player: Player)
 	local character = player and player.Character
 	if character then
 		local resultHumanoid = humanoidCache[player]
@@ -110,8 +103,8 @@ local function findPlayerHumanoid(player: Player): Humanoid
 			return humanoid
 		end
 	end
-    
-    return
+
+	return
 end
 
 --------------------------CHARACTER CONTROL-------------------------------
@@ -250,7 +243,7 @@ local function Pather(endPoint, surfaceNormal, overrideUseDirectPath: boolean?)
 	this.CurrentWaypointPosition = nil
 	this.CurrentWaypointPlaneNormal = ZERO_VECTOR3
 	this.CurrentWaypointPlaneDistance = 0
-	this.CurrentWaypointNeedsJump = false
+	this.CurrentWaypointNeedsJump = false;
 
 	this.CurrentHumanoidPosition = ZERO_VECTOR3
 	this.CurrentHumanoidVelocity = 0 :: Vector3 | number
@@ -585,7 +578,7 @@ local function Pather(endPoint, surfaceNormal, overrideUseDirectPath: boolean?)
 		end
 
 		-- Should we jump
-		this.CurrentWaypointNeedsJump = nextWaypoint.Action == Enum.PathWaypointAction.Jump
+		this.CurrentWaypointNeedsJump = nextWaypoint.Action == Enum.PathWaypointAction.Jump;
 
 		-- Remember next waypoint position
 		this.CurrentWaypointPosition = nextWaypoint.Position
@@ -640,14 +633,11 @@ local function Pather(endPoint, surfaceNormal, overrideUseDirectPath: boolean?)
 	end
 
 	--We always raycast to the ground in the case that the user clicked a wall.
-	local offsetPoint = this.TargetPoint + this.TargetSurfaceNormal * 1.5
-    local Params = RaycastParams.new()
-    Params.FilterType = Enum.RaycastFilterType.Exclude
-    Params.FilterDescendantsInstances = getIgnoreList()
-    local cast = workspace:Raycast(offsetPoint, Vector3.new(0, -1, 0) * 50, Params)
-    local newHitPart = cast and cast.Instance
+	local offsetPoint = this.TargetPoint + this.TargetSurfaceNormal*1.5
+	local ray = Ray.new(offsetPoint, Vector3.new(0,-1,0)*50)
+	local newHitPart, newHitPos = workspace:FindPartOnRayWithIgnoreList(ray, getIgnoreList())
 	if newHitPart then
-		this.TargetPoint = cast.Position
+		this.TargetPoint = newHitPos
 	end
 	this:ComputePath()
 
@@ -670,7 +660,7 @@ local function GetEquippedTool(character: Model?)
 		end
 	end
 
-    return
+	return
 end
 
 local ExistingPather = nil

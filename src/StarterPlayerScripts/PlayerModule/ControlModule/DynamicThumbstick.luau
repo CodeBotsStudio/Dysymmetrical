@@ -370,7 +370,7 @@ function DynamicThumbstick:BindContextActions()
 			self:OnInputEnded()
 		end
 
-        return
+		return
 	end
 
 	ContextActionService:BindActionAtPriority(

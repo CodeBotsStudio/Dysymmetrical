@@ -139,13 +139,13 @@ local function getTrailDotParent()
 end
 
 local function placePathWaypoint(waypointModel, position: Vector3)
-    local Params = RaycastParams.new()
-    Params.FilterType = Enum.RaycastFilterType.Exclude
-    Params.FilterDescendantsInstances = {workspace.CurrentCamera, LocalPlayer.Character}
-    local cast = workspace:Raycast(position + Vector3.new(0, 2.5, 0), Vector3.new(0, -10, 0), Params)
-	if cast and cast.Instance then
-        local hitPoint = cast.Position
-		waypointModel.CFrame = CFrame.new(hitPoint, hitPoint + cast.Normal)
+	local ray = Ray.new(position + Vector3.new(0, 2.5, 0), Vector3.new(0, -10, 0))
+	local hitPart, hitPoint, hitNormal = workspace:FindPartOnRayWithIgnoreList(
+		ray,
+		{ workspace.CurrentCamera, LocalPlayer.Character }
+	)
+	if hitPart then
+		waypointModel.CFrame = CFrame.new(hitPoint, hitPoint + hitNormal)
 		waypointModel.Parent = getTrailDotParent()
 	end
 end
@@ -247,13 +247,12 @@ end
 function FailureWaypoint:NewDisplayModel(position)
 	local newDisplayModel: Part = FailureWaypointTemplate:Clone()
 	placePathWaypoint(newDisplayModel, position)
-    local Params = RaycastParams.new()
-    Params.FilterType = Enum.RaycastFilterType.Exclude
-    Params.FilterDescendantsInstances = {workspace.CurrentCamera, LocalPlayer.Character}
-    local cast = workspace:Raycast(position + Vector3.new(0, 2.5, 0), Vector3.new(0, -10, 0), Params)
-	if cast and cast.Instance then
-        local hitPoint = cast.Position
-		newDisplayModel.CFrame = CFrame.new(hitPoint, hitPoint + cast.Normal)
+	local ray = Ray.new(position + Vector3.new(0, 2.5, 0), Vector3.new(0, -10, 0))
+	local hitPart, hitPoint, hitNormal = workspace:FindPartOnRayWithIgnoreList(
+		ray, { workspace.CurrentCamera, LocalPlayer.Character }
+	)
+	if hitPart then
+		newDisplayModel.CFrame = CFrame.new(hitPoint, hitPoint + hitNormal)
 		newDisplayModel.Parent = getTrailDotParent()
 	end
 	return newDisplayModel
@@ -271,7 +270,7 @@ function FailureWaypoint:RunFailureTween()
 		{ Rotation = 10 })
 	tweenLeftRoation:Play()
 
-	tweenLeft.Completed:wait()
+	tweenLeft.Completed:Wait()
 
 	-- Tween back and forth
 	tweenInfo = TweenInfo.new(FAILURE_TWEEN_LENGTH, Enum.EasingStyle.Sine, Enum.EasingDirection.Out,
@@ -336,9 +335,10 @@ end
 local function findPlayerHumanoid()
 	local character = LocalPlayer.Character
 	if character then
-		return character:FindFirstChildOfClass("Humanoid")
+		return character:FindFirstChildWhichIsA("Humanoid")
 	end
-    return
+
+	return
 end
 
 local function createTrailDots(wayPoints: {PathWaypoint}, originalEndWaypoint: Vector3)

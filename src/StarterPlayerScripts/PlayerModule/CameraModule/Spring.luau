@@ -39,13 +39,13 @@ function Spring.new(initial, clock)
 	local target = initial or 0
 	clock = clock or os.clock
 	return setmetatable({
-		_clock = clock,
-		_time0 = clock(),
-		_position0 = target,
-		_velocity0 = 0*target,
-		_target = target,
-		_damper = 1,
-		_speed = 1,
+		_clock = clock;
+		_time0 = clock();
+		_position0 = target;
+		_velocity0 = 0*target;
+		_target = target;
+		_damper = 1;
+		_speed = 1;
 	}, Spring)
 end
 

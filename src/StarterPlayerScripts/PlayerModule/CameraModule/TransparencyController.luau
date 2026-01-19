@@ -36,7 +36,9 @@ end
 
 function TransparencyController:IsValidPartToModify(part: BasePart)
 	if part:IsA('BasePart') or part:IsA('Decal') then
-		if table.find(ExcludeTable, part.Name) ~= nil then return false end
+		if table.find(ExcludeTable, part.Name) ~= nil then
+			return false
+		end
 		return not self:HasToolAncestor(part)
 	end
 	return false

@@ -16,7 +16,7 @@ local min = math.min
 local max = math.max
 local pi = math.pi
 
-local cameraMinZoomDistance, cameraMaxZoomDistance do
+local cameraMinZoomDistance: number, cameraMaxZoomDistance: number do
 	local Player = game:GetService("Players").LocalPlayer
 	assert(Player)
 
@@ -114,7 +114,7 @@ local Zoom = {} do
 		end
 
 		zoomSpring.minValue = MIN_FOCUS_DIST
-		zoomSpring.maxValue = min(cameraMaxZoomDistance :: number, poppedZoom)
+		zoomSpring.maxValue = min(cameraMaxZoomDistance, poppedZoom)
 
 		return zoomSpring:Step(renderDt)
 	end

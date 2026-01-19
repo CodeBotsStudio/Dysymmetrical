@@ -53,21 +53,18 @@ local function renderPoint(point: Vector3, isLast): ImageHandleAdornment?
 		return nil
 	end
 
-    local Params = RaycastParams.new()
-    Params.FilterType = Enum.RaycastFilterType.Exclude
-    Params.FilterDescendantsInstances = {Players.LocalPlayer.Character, workspace.CurrentCamera}
-    local cast = workspace:Raycast(point + Vector3.new(0, 2, 0), Vector3.new(0, -8, 0), Params)
-	if not (cast and cast.Instance) then
+	local rayDown = Ray.new(point + Vector3.new(0, 2, 0), Vector3.new(0, -8, 0))
+	local hitPart, hitPoint, hitNormal = workspace:FindPartOnRayWithIgnoreList(rayDown, { (Players.LocalPlayer :: Player).Character :: Model, workspace.CurrentCamera :: Camera })
+	if not hitPart then
 		return nil
 	end
-    local hitPoint = cast.Position
 
-	local pointCFrame = CFrame.new(hitPoint, hitPoint + cast.Normal)
+	local pointCFrame = CFrame.new(hitPoint, hitPoint + hitNormal)
 
-	local retrievedPoint = retrieveFromPool()
-	retrievedPoint.CFrame = pointCFrame
-	retrievedPoint.Parent = pointModel
-	return retrievedPoint
+	local Point = retrieveFromPool()
+	Point.CFrame = pointCFrame
+	Point.Parent = pointModel
+	return Point
 end
 
 function PathDisplay.setCurrentPoints(points)

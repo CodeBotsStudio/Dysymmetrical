@@ -12,6 +12,7 @@ local min = math.min
 local tan = math.tan
 local rad = math.rad
 local inf = math.huge
+local ray = Ray.new
 
 local function getTotalTransparency(part)
 	return 1 - (1 - part.Transparency)*(1 - part.LocalTransparencyModifier)
@@ -148,18 +149,15 @@ local QUERY_POINT_CAST_LIMIT = 64
 
 local function getCollisionPoint(origin, dir)
 	local originalSize = #blacklist
-    local Params = RaycastParams.new()
-    Params.FilterType = Enum.RaycastFilterType.Exclude
 	repeat
-        Params.FilterDescendantsInstances = blacklist
-        local cast = workspace:Raycast(origin, dir, Params)
-
-        local hitPart = cast and cast.Instance
+		local hitPart, hitPoint = workspace:FindPartOnRayWithIgnoreList(
+			ray(origin, dir), blacklist, false, true
+		)
 
 		if hitPart then
 			if hitPart.CanCollide then
 				eraseFromEnd(blacklist, originalSize)
-				return cast.Position, true
+				return hitPoint, true
 			end
 			blacklist[#blacklist + 1] = hitPart
 		end
@@ -185,39 +183,26 @@ local function queryPoint(origin, unitDir, dist, lastPos)
 	
 	local numPierced = 0
 
-    local Params = RaycastParams.new()
-    Params.FilterType = Enum.RaycastFilterType.Exclude
-    Params.IgnoreWater = true
 	repeat
-        Params.FilterDescendantsInstances = blacklist
-        local cast = workspace:Raycast(movingOrigin, target - movingOrigin, Params)
+		local entryPart, entryPos = workspace:FindPartOnRayWithIgnoreList(ray(movingOrigin, target - movingOrigin), blacklist, false, true)
 		numPierced += 1
 
-        local entryPart
-		if cast and cast.Instance then
-			entryPart = cast.Instance
-            local entryPos = cast.Position
+		if entryPart then
 			-- forces the current iteration into a hard limit to cap the number of raycasts
 			local earlyAbort = numPierced >= QUERY_POINT_CAST_LIMIT
 			
 			if canOcclude(entryPart) or earlyAbort then
 				local wl = {entryPart}
-                local params = RaycastParams.new()
-                params.FilterType = Enum.RaycastFilterType.Include
-                params.IgnoreWater = true
-                params.FilterDescendantsInstances = wl
-                local Cast = workspace:Raycast(target, entryPos - target, params)
-				local exitPart = Cast and Cast.Instance
+				local exitPart = workspace:FindPartOnRayWithWhitelist(ray(target, entryPos - target), wl, true)
 
 				local lim = (entryPos - origin).Magnitude
 
 				if exitPart and not earlyAbort then
-					local promote
+					local promote = false
 					if lastPos then
-						local _cast =
-                            (workspace:Raycast(lastPos, target - lastPos, params) or
-                            workspace:Raycast(target, lastPos - target, params))
-						promote = _cast and _cast.Instance
+						promote =
+							workspace:FindPartOnRayWithWhitelist(ray(lastPos, target - lastPos), wl, true) or
+							workspace:FindPartOnRayWithWhitelist(ray(target, lastPos - target), wl, true)
 					end
 
 					if promote then

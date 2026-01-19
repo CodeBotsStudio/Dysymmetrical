@@ -222,7 +222,7 @@ function ControlModule:GetEstimatedVRTorsoFrame(): CFrame
 	headAngle = -headAngle
 	if not VRService:GetUserCFrameEnabled(Enum.UserCFrame.RightHand) or 
 		not VRService:GetUserCFrameEnabled(Enum.UserCFrame.LeftHand) then
-		self.currentTorsoAngle = headAngle
+		self.currentTorsoAngle = headAngle;
 	else	
 		local leftHandPos = VRService:GetUserCFrame(Enum.UserCFrame.LeftHand)
 		local rightHandPos = VRService:GetUserCFrame(Enum.UserCFrame.RightHand)
@@ -483,15 +483,15 @@ function ControlModule:OnRenderStepped(dt)
 		end
 
 		-- Are we driving a vehicle ?
-		-- local vehicleConsumedInput = false
+		local _vehicleConsumedInput = false
 		if self.vehicleController then
-			moveVector, _ = self.vehicleController:Update(moveVector, cameraRelative, self.activeControlModule==Gamepad)
+			moveVector, _vehicleConsumedInput = self.vehicleController:Update(moveVector, cameraRelative, self.activeControlModule==Gamepad)
 		end
 
 		-- If not, move the player
-		-- Verification of vehicleConsumedInput is commented out to preserve legacy behavior,
+		-- Verification of _vehicleConsumedInput is commented out to preserve legacy behavior,
 		-- in case some game relies on Humanoid.MoveDirection still being set while in a VehicleSeat
-		--if not vehicleConsumedInput then
+		--if not _vehicleConsumedInput then
 		if cameraRelative then
 			moveVector = self:calculateRawMoveVector(self.humanoid, moveVector)
 		end

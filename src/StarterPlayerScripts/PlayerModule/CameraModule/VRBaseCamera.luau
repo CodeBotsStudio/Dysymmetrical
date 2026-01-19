@@ -225,8 +225,10 @@ function VRBaseCamera:UpdateFadeFromBlack(timeDelta: number)
 		if VRFade and VRFade.Brightness < 0 then
 			VRFade.Brightness = math.min(VRFade.Brightness + timeDelta * VR_FADE_SPEED, 0)
 		end
-	elseif VRFade then -- sanity check, VRFade off
-		VRFade.Brightness = 0
+	else
+		if VRFade then -- sanity check, VRFade off
+			VRFade.Brightness = 0
+		end
 	end
 end
 

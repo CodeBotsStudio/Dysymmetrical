@@ -39,7 +39,9 @@ end
 function TouchThumbstick:Enable(enable: boolean?, uiParentFrame)
 	if enable == nil then return false end			-- If nil, return false (invalid argument)
 	enable = enable and true or false				-- Force anything non-nil to boolean before comparison
-	if self.enabled == enable then return true end	-- If no state change, return true indicating already in requested state
+	if self.enabled == enable then
+		return true
+	end	-- If no state change, return true indicating already in requested state
 
 	self.moveVector = ZERO_VECTOR3
 	self.isJumping = false
@@ -56,7 +58,8 @@ function TouchThumbstick:Enable(enable: boolean?, uiParentFrame)
 		self:OnInputEnded()
 	end
 	self.enabled = enable
-    return
+
+	return
 end
 function TouchThumbstick:OnInputEnded()
 	self.thumbstickFrame.Position = self.screenPos

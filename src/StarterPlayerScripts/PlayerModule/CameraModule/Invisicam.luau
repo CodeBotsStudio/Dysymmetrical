@@ -230,13 +230,10 @@ function Invisicam:CharacterOutlineBehavior(castPoints)
 
 		offset = Vector3.new(offset.X, math.max(offset.Y, -2.25), offset.Z)
 
-        local Params = RaycastParams.new()
-        Params.FilterType = Enum.RaycastFilterType.Include
-        Params.FilterDescendantsInstances = partsWhitelist
-        local cast = workspace:Raycast(centerPoint + offset, -3 * offset, Params)
+		local ray = Ray.new(centerPoint + offset, -3 * offset)
+		local hit, hitPoint = game.Workspace:FindPartOnRayWithWhitelist(ray, partsWhitelist, false)
 
-		if cast and cast.Instance then
-            local hitPoint = cast.Position
+		if hit then
 			-- Use hit point as the cast point, but nudge it slightly inside the character so that bumping up against
 			-- walls is less likely to cause a transparency glitch
 			castPoints[#castPoints + 1] = hitPoint + 0.2 * (centerPoint - hitPoint).unit
@@ -280,15 +277,12 @@ function Invisicam:SmartCircleBehavior(castPoints)
 		-- Vector from camera to point on the circle being tested
 		local vp = circlePoint - self.camera.CFrame.p
 
-        local Params = RaycastParams.new()
-        Params.FilterType = Enum.RaycastFilterType.Exclude
-        Params.FilterDescendantsInstances = {self.char}
-        local cast = workspace:Raycast(torsoPoint, circlePoint - torsoPoint, Params)
+		local ray = Ray.new(torsoPoint, circlePoint - torsoPoint)
+		local hit, hp, hitNormal = game.Workspace:FindPartOnRayWithIgnoreList(ray, {self.char}, false, false )
 		local castPoint = circlePoint
 
-		if cast and cast.Instance then
-            local hitNormal = cast.Normal
-			local hprime = cast.Position + 0.1 * hitNormal.unit -- Slightly offset hit point from the hit surface
+		if hit then
+			local hprime = hp + 0.1 * hitNormal.unit -- Slightly offset hit point from the hit surface
 			local v0 = hprime - torsoPoint -- Vector from torso to offset hit point
 
 			local perp = (v0:Cross(vp)).unit
@@ -305,10 +299,11 @@ function Invisicam:SmartCircleBehavior(castPoints)
 				castPoint = RayIntersection(hprime, v1, circlePoint, vp)
 
 				if castPoint.Magnitude > 0 then
-                    local Cast = workspace:Raycast(hprime, castPoint - hprime, Params)
+					local SRay = Ray.new(hprime, castPoint - hprime)
+					local Hit, hitPoint, HitNormal = game.Workspace:FindPartOnRayWithIgnoreList(SRay, {self.char}, false, false )
 
-					if Cast and Cast.Instance then
-						local hprime2 = Cast.Position + 0.1 * Cast.Normal.Unit
+					if Hit then
+						local hprime2 = hitPoint + 0.1 * HitNormal.unit
 						castPoint = hprime2
 					end
 				else
@@ -318,10 +313,11 @@ function Invisicam:SmartCircleBehavior(castPoints)
 				castPoint = hprime
 			end
 
-            local Cast = workspace:Raycast(torsoPoint, (castPoint - torsoPoint), Params)
+			local SRay = Ray.new(torsoPoint, (castPoint - torsoPoint))
+			local Hit, hitPoint, _hitNormal = game.Workspace:FindPartOnRayWithIgnoreList(SRay, {self.char}, false, false )
 
-			if Cast and Cast.Instance then
-				local castPoint2 = Cast.Position - 0.1 * (castPoint - torsoPoint).unit
+			if Hit then
+				local castPoint2 = hitPoint - 0.1 * (castPoint - torsoPoint).unit
 				castPoint = castPoint2
 			end
 		end
