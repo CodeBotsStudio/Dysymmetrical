@@ -12,21 +12,21 @@ function CharacterStatsManager:Init()
     local UIPrefab = Utils.Instance.FindFirstChild(script, "Stats")
     
     Utils.Character.ObserveCharacter(LocalPlayer, function(char: Model)
-        self:_InitUI(char, UIPrefab:Clone())
+        CharacterStatsManager._InitUI(char, UIPrefab:Clone())
     end)
 end
 
-function CharacterStatsManager:_InitUI(Char: Model, UI: Frame)
-    if self.Connection then
-        self.Connection:Disconnect()
+function CharacterStatsManager._InitUI(Char: Model, UI: Frame)
+    if CharacterStatsManager.Connection then
+        CharacterStatsManager.Connection:Disconnect()
     end
-    if self.UI then
-        self.UI:Destroy()
+    if CharacterStatsManager.UI then
+        CharacterStatsManager.UI:Destroy()
     end
 
     if Char:FindFirstChild("Role").Value == "Spectator" then return end
 
-    self.UI = UI
+    CharacterStatsManager.UI = UI
     UI.Parent = LocalPlayer.PlayerGui.PlayerStats
     
     local Stamina = UI.Stamina
@@ -43,9 +43,9 @@ function CharacterStatsManager:_InitUI(Char: Model, UI: Frame)
     	MaxStamina = Char.PlayerAttributes.MaxStamina
     }
 
-    self.Connection = RunService.PreRender:Connect(function(delta: number)
-        if not self.UI then
-            self.Connection:Disconnect()
+    CharacterStatsManager.Connection = RunService.PreRender:Connect(function(delta: number)
+        if not CharacterStatsManager.UI then
+            CharacterStatsManager.Connection:Disconnect()
             return
         end
         

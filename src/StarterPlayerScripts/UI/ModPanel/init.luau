@@ -31,7 +31,7 @@ local Prefabs = {
 }
 
 function ModPanel:Init()
-    if self.Initted then
+    if ModPanel.Initted then
         return
     end
 
@@ -40,18 +40,18 @@ function ModPanel:Init()
         return
     end
 
-    self.Rank = Rank
+    ModPanel.Rank = Rank
 
-    self:Start()
-    self.Initted = true
+    ModPanel.Start()
+    ModPanel.Initted = true
 end
 
-function ModPanel:Start()
+function ModPanel.Start()
     local UI = Utils.Instance.FindFirstChild(script, "ModPanel")
     UI.Parent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
-    self.UIInstance = UI
+    ModPanel.UIInstance = UI
 
     local TopbarButton = TopbarPlus.new()
     TopbarButton:setOrder(0)
@@ -60,14 +60,14 @@ function ModPanel:Start()
     TopbarButton:setTextFont(Enum.Font.Bodoni)
     TopbarButton:bindEvent("deselected", function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-        if self.Opened then
-            self:Close(SideBar.ToggleDuration)
+        if ModPanel.Opened then
+            ModPanel.Close(SideBar.ToggleDuration)
         else
-            self:Open(SideBar.ToggleDuration)
+            ModPanel.Open(SideBar.ToggleDuration)
         end
     end)
 
-    SideBar.MenuModules["ModPanel"] = self
+    SideBar.MenuModules["ModPanel"] = ModPanel
 
     Utils.Instance.ObserveProperty(UI, "Size", function(value: UDim2)
         UI.Visible = value ~= Utils.UDim.Zero
@@ -82,7 +82,7 @@ function ModPanel:Start()
         local Command = require(Cmd)
         Command.RankRequired = Command.RankRequired or Utils.Ranks.ServerOwner
 
-        if self.Rank > Command.RankRequired or not Command.Type or not Prefabs[Command.Type] then
+        if ModPanel.Rank > Command.RankRequired or not Command.Type or not Prefabs[Command.Type] then
             return
         end
 
@@ -105,30 +105,30 @@ function ModPanel:Start()
     end
 end
 
-function ModPanel:Open(Time: number)
-    if not self.Enabled then
+function ModPanel.Open(Time: number)
+    if not ModPanel.Enabled then
         return "Prevented"
     end
 
-    SideBar:CloseAll(self)
+    SideBar.CloseAll(ModPanel)
 
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.542, 0.741)}):Play()
+        TweenService:Create(ModPanel.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.542, 0.741)}):Play()
     else
-        self.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
+        ModPanel.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
     end
-    self.Opened = true
+    ModPanel.Opened = true
 
     return
 end
 
-function ModPanel:Close(Time: number)
+function ModPanel.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        TweenService:Create(ModPanel.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        self.UIInstance.Size = Utils.UDim.Zero
+        ModPanel.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Opened = false
+    ModPanel.Opened = false
 end
 
 function ModPanel:Toggle()

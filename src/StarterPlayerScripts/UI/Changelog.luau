@@ -102,17 +102,17 @@ local Prefabs = {
 
 local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function Changelog:Init()
-    if self.UIInstance then
-        self.UIInstance.Parent = UIParent
-        self.UIInstance.Size = Utils.UDim.Zero
-        self.UIInstance.Visible = false
+    if Changelog.UIInstance then
+        Changelog.UIInstance.Parent = UIParent
+        Changelog.UIInstance.Size = Utils.UDim.Zero
+        Changelog.UIInstance.Visible = false
         return
     end
 
     local UI = Utils.Instance.FindFirstChild(script, "Changelog")
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
-    self.UIInstance = UI
+    Changelog.UIInstance = UI
     UI.Parent = UIParent
 
     local Content = UI.Content
@@ -123,8 +123,8 @@ function Changelog:Init()
 
     UI.Label.TextLabel.Text = CurrentChangelog.MenuTitle
 
-    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
-        self.UIInstance.Visible = value ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(Changelog.UIInstance, "Size", function(value: UDim2)
+        Changelog.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 
     for order, entry in CurrentChangelog.Entries do
@@ -136,43 +136,43 @@ function Changelog:Init()
 
     local Log = Utils.Instance.FindFirstChild(LocalPlayer, "PlayerData.Misc.LastSeenLog")
     if Log.Value < CurrentChangelog.PlaceVersion and Log.Value < ReplicatedStorage.PlaceVersion.Value and CurrentChangelog.PlaceVersion <= ReplicatedStorage.PlaceVersion.Value then
-        SideBar:OpenMenu(self)
+        SideBar.OpenMenu(Changelog)
     end
 end
 
-function Changelog:Open(Time: number)
-    if not self.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
+function Changelog.Open(Time: number)
+    if not Changelog.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
         return "Prevented"
     end
 
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.4, 0.7)}):Play()
+        TweenService:Create(Changelog.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.4, 0.7)}):Play()
     else
-        self.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
+        Changelog.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
     end
-    self.Opened = true
+    Changelog.Opened = true
 
     return
 end
 
-function Changelog:Close(Time: number)
+function Changelog.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        TweenService:Create(Changelog.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        self.UIInstance.Size = Utils.UDim.Zero
+        Changelog.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Opened = false
+    Changelog.Opened = false
 end
 
-function Changelog:Toggle(toggle: boolean)
-    if not self.Enabled and toggle then
-        self:Init()
+function Changelog.Toggle(toggle: boolean)
+    if not Changelog.Enabled and toggle then
+        Changelog:Init()
     end
-    if not toggle and self.Enabled then
-        self.UIInstance.Parent = script
-        self.UIInstance.Size = Utils.UDim.Zero
+    if not toggle and Changelog.Enabled then
+        Changelog.UIInstance.Parent = script
+        Changelog.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Enabled = toggle
+    Changelog.Enabled = toggle
 end
 
 return Changelog

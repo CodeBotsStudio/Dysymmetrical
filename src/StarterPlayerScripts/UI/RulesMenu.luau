@@ -76,23 +76,23 @@ local Prefabs = {
 
 local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function Rules:Init()
-    if self.UIInstance then
-        self.UIInstance.Parent = UIParent
-        self.UIInstance.Size = Utils.UDim.Zero
-        self.UIInstance.Visible = false
+    if Rules.UIInstance then
+        Rules.UIInstance.Parent = UIParent
+        Rules.UIInstance.Size = Utils.UDim.Zero
+        Rules.UIInstance.Visible = false
         return
     end
 
     local UI = Utils.Instance.FindFirstChild(script, "Rules")
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
-    self.UIInstance = UI
+    Rules.UIInstance = UI
     UI.Parent = UIParent
 
     local Content = UI.Content
 
-    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
-        self.UIInstance.Visible = value ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(Rules.UIInstance, "Size", function(value: UDim2)
+        Rules.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 
     for order, entry in Ruleset do
@@ -103,39 +103,39 @@ function Rules:Init()
     end
 end
 
-function Rules:Open(Time: number)
-    if not self.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
+function Rules.Open(Time: number)
+    if not Rules.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
         return "Prevented"
     end
 
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.4, 0.7)}):Play()
+        TweenService:Create(Rules.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.4, 0.7)}):Play()
     else
-        self.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
+        Rules.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
     end
-    self.Opened = true
+    Rules.Opened = true
 
     return
 end
 
-function Rules:Close(Time: number)
+function Rules.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        TweenService:Create(Rules.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        self.UIInstance.Size = Utils.UDim.Zero
+        Rules.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Opened = false
+    Rules.Opened = false
 end
 
-function Rules:Toggle(toggle: boolean)
-    if not self.Enabled and toggle then
-        self:Init()
+function Rules.Toggle(toggle: boolean)
+    if not Rules.Enabled and toggle then
+        Rules:Init()
     end
-    if not toggle and self.Enabled then
-        self.UIInstance.Parent = script
-        self.UIInstance.Size = Utils.UDim.Zero
+    if not toggle and Rules.Enabled then
+        Rules.UIInstance.Parent = script
+        Rules.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Enabled = toggle
+    Rules.Enabled = toggle
 end
 
 return Rules

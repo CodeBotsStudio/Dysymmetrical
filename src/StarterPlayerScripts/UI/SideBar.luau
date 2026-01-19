@@ -55,11 +55,11 @@ local function TweenInverted(BarButton, Inverted: boolean)
     end
 end
 
-function SideBar:Toggle(visible: boolean)
+function SideBar.Toggle(visible: boolean)
     UI.Visible = visible
-    self.Enabled = visible
+    SideBar.Enabled = visible
 
-    for _, m in self.MenuModules do
+    for _, m in SideBar.MenuModules do
         if not m.Button then
             continue
         end
@@ -67,11 +67,11 @@ function SideBar:Toggle(visible: boolean)
     end
 end
 
-function SideBar:CloseAll(Remaining: any)
-    for _, menu in self.MenuModules do
+function SideBar.CloseAll(Remaining: any)
+    for _, menu in SideBar.MenuModules do
         if menu == Remaining or not menu.CloseOnOtherOpen or not menu.UIInstance then continue end
         if menu.Opened then
-            menu:Close(self.ToggleDuration)
+            menu.Close(SideBar.ToggleDuration)
             if not menu.Button then
                 continue
             end
@@ -80,20 +80,20 @@ function SideBar:CloseAll(Remaining: any)
     end
 end
 
-function SideBar:OpenMenu(Menu)
+function SideBar.OpenMenu(Menu)
     Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
     if not Menu.Opened then
-        if Menu:Open(self.ToggleDuration) == "Prevented" then
+        if Menu.Open(SideBar.ToggleDuration) == "Prevented" then
             return
         end
         if Menu.Button then
             TweenInverted(Menu.Button, true)
         end
         if Menu.CloseOthersOnOpen then
-            self:CloseAll(Menu)
+            SideBar.CloseAll(Menu)
         end
     else
-        Menu:Close(self.ToggleDuration)
+        Menu.Close(SideBar.ToggleDuration)
         if Menu.Button then
             TweenInverted(Menu.Button, false)
         end
@@ -213,7 +213,7 @@ function SideBar:Init()
         Menu.CloseOnOtherOpen = button.CloseOnOtherOpen
         Menu.CloseOthersOnOpen = button.CloseOthersOnOpen
         BarButton.Button.MouseButton1Click:Connect(function()
-            self:OpenMenu(Menu)
+            SideBar.OpenMenu(Menu)
         end)
         Menu.Button = BarButton
 
@@ -221,7 +221,7 @@ function SideBar:Init()
         local OriginalSize = BarButton.Size
         local HoverSize = UDim2.fromScale(OriginalSize.X.Scale * 1.2, OriginalSize.Y.Scale * 1.2)
 
-        self.MenuModules[name] = Menu
+        SideBar.MenuModules[name] = Menu
         BarButton.Parent = ButtonContainer
 
         local OriginalYLabelBound = BarButton.Title.Holder.Label.AbsoluteSize.Y
@@ -249,12 +249,12 @@ function SideBar:Init()
             if not Menu.UIInstance then
                 return
             end
-            Menu:Toggle(char:FindFirstChild("Role").Value == "Spectator")
+            Menu.Toggle(char:FindFirstChild("Role").Value == "Spectator")
         end)
     end
 
     Utils.Character.ObserveCharacter(LocalPlayer, function(char: Model)
-        self:Toggle(char:FindFirstChild("Role").Value == "Spectator")
+        SideBar.Toggle(char:FindFirstChild("Role").Value == "Spectator")
     end)
 end
 

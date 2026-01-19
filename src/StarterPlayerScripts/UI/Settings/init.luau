@@ -26,10 +26,10 @@ local Prefabs = {
 local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 
 function Settings:Init()
-    if self.UIInstance then
-        self.UIInstance.Parent = UIParent
-        self.UIInstance.Size = Utils.UDim.Zero
-        self.UIInstance.Visible = false
+    if Settings.UIInstance then
+        Settings.UIInstance.Parent = UIParent
+        Settings.UIInstance.Size = Utils.UDim.Zero
+        Settings.UIInstance.Visible = false
         return
     end
 
@@ -37,7 +37,7 @@ function Settings:Init()
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
     UI.Parent = UIParent
-    self.UIInstance = UI
+    Settings.UIInstance = UI
     local Content = UI.SettingsContainer.Contents
 
     local CurrentLayoutOrder = 0
@@ -106,41 +106,41 @@ function Settings:Init()
         SettingSection.Parent = Content
     end
 
-    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
-        self.UIInstance.Visible = value ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(Settings.UIInstance, "Size", function(value: UDim2)
+        Settings.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 end
 
-function Settings:Open(Time: number)
-    if not self.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
+function Settings.Open(Time: number)
+    if not Settings.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
         return "Prevented"
     end
 
-    TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
-    self.Opened = true
+    TweenService:Create(Settings.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
+    Settings.Opened = true
 
     return
 end
 
-function Settings:Close(Time: number)
+function Settings.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        TweenService:Create(Settings.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        self.UIInstance.Size = Utils.UDim.Zero
-        self.UIInstance.Visible = false
+        Settings.UIInstance.Size = Utils.UDim.Zero
+        Settings.UIInstance.Visible = false
     end
-    self.Opened = false
+    Settings.Opened = false
 end
 
-function Settings:Toggle(toggle: boolean)
-    if not self.Enabled and toggle then
-        self:Init()
+function Settings.Toggle(toggle: boolean)
+    if not Settings.Enabled and toggle then
+        Settings:Init()
     end
-    if not toggle and self.Enabled then
-        self.UIInstance.Parent = script
-        self.UIInstance.Size = Utils.UDim.Zero
+    if not toggle and Settings.Enabled then
+        Settings.UIInstance.Parent = script
+        Settings.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Enabled = toggle
+    Settings.Enabled = toggle
 end
 
 return Settings

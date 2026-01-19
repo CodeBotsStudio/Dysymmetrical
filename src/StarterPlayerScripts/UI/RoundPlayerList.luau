@@ -20,26 +20,26 @@ local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "RoundPlay
 
 function RoundPlayerList:Init()
     Utils.Character.ObserveCharacter(LocalPlayer, function(Char: Model)
-        if self.UI then
-            self.UI:Destroy()
+        if RoundPlayerList.UI then
+            RoundPlayerList.UI:Destroy()
         end
-        for _, ConnectionList in self.Conns do
+        for _, ConnectionList in RoundPlayerList.Conns do
             for _, Connection in ConnectionList do
                 Connection:Disconnect()
             end
         end
-        self.Conns = {}
-        self:_InitUI(Char)
+        RoundPlayerList.Conns = {}
+        RoundPlayerList._InitUI(Char)
     end)
 end
 
-function RoundPlayerList:_InitUI(Char: Model)
+function RoundPlayerList._InitUI(Char: Model)
     if Char:FindFirstChild("Role").Value == "Spectator" then
         return
     end
 
     local UI = Prefabs.UI:Clone()
-    self.UI = UI
+    RoundPlayerList.UI = UI
 
     while RoundState.Value ~= "InRound" do
         task.wait()
@@ -130,7 +130,7 @@ function RoundPlayerList:_InitUI(Char: Model)
         Card.Parent = UI
     end
 
-    self.Conns = Conns
+    RoundPlayerList.Conns = Conns
     UI.Parent = UIParent
 end
 

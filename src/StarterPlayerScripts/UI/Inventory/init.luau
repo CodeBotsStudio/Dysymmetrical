@@ -88,18 +88,18 @@ local Templates = {
 
 local Sections = {}
 
-function Inventory:ReorderSkins()
+function Inventory.ReorderSkins()
     local Ordered = {}
     local LO = 0
 
-    for _, Skin in self.LoadedItems.Skins do
+    for _, Skin in Inventory.LoadedItems.Skins do
         table.insert(Ordered, Skin)
     end
 
     table.sort(Ordered, function(a, b)
         local Modules = {
-            A = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
-            B = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+            A = require(Utils.Instance.GetCharacterModule(Inventory.SelectedItem.Type, Inventory.SelectedItem.Name, a.Name)),
+            B = require(Utils.Instance.GetCharacterModule(Inventory.SelectedItem.Type, Inventory.SelectedItem.Name, b.Name)),
         }
 
         return
@@ -114,7 +114,7 @@ function Inventory:ReorderSkins()
 end
 
 
-function Inventory:CheckEquipLabels()
+function Inventory.CheckEquipLabels()
     local function RemoveEquippedLabel(card)
         if card.Container.Equipped.ImageTransparency ~= 1 then
             TweenService:Create(card.Container.Equipped, TweenInfo.new(0.2), {ImageTransparency = 1}):Play()
@@ -127,7 +127,7 @@ function Inventory:CheckEquipLabels()
         end
     end
 
-    for name, Type in self.LoadedItems do
+    for name, Type in Inventory.LoadedItems do
         if name == "Skins" then
             continue
         end
@@ -141,7 +141,7 @@ function Inventory:CheckEquipLabels()
     end
 end
 
-function Inventory:EquipItem()
+function Inventory.EquipItem()
     Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
     if not Inventory.Opened or Equipped["Equipped"..Inventory.SelectedItem.Type].Value == Inventory.SelectedItem.Name then
         return
@@ -153,7 +153,7 @@ function Inventory:EquipItem()
     if Equipped["Equipped"..Inventory.SelectedItem.Type].Value == lastEquipped then
         Equipped["Equipped"..Inventory.SelectedItem.Type].Changed:Wait()
     end
-    self:CheckEquipLabels()
+    Inventory.CheckEquipLabels()
 end
 
 local function SwitchSection(sectionName: string)
@@ -172,7 +172,7 @@ local function SwitchSection(sectionName: string)
     Inventory.SelectedSection = sectionName
 end
 
-function Inventory:ReloadEquippedEmotes()
+function Inventory.ReloadEquippedEmotes()
     for _, EmoteSlot in EmoteContainer.EmoteContainer:GetChildren() do
         local Value = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Emotes."..EmoteSlot.Name)
         if #Value <= 0 then
@@ -187,28 +187,28 @@ function Inventory:ReloadEquippedEmotes()
     end
 end
 
-function Inventory:ToggleSkinsMenu(Open: boolean?)
+function Inventory.ToggleSkinsMenu(Open: boolean?)
     if Open == nil then
-        Open = not self.SkinMenu.Open
+        Open = not Inventory.SkinMenu.Open
     end
 
     if Open then
-        self:ToggleInfoMenu(false)
+        Inventory.ToggleInfoMenu(false)
     end
     
     if Open then
-        for _, Skin in self.LoadedItems.Skins do
+        for _, Skin in Inventory.LoadedItems.Skins do
             Skin:Destroy()
         end
-        table.clear(self.LoadedItems.Skins)
-        self.ItemModules.Skins = self.ItemModules.Skins or {}
-        table.clear(self.ItemModules.Skins)
+        table.clear(Inventory.LoadedItems.Skins)
+        Inventory.ItemModules.Skins = Inventory.ItemModules.Skins or {}
+        table.clear(Inventory.ItemModules.Skins)
 
-        local charName = self.SelectedItem.Name
+        local charName = Inventory.SelectedItem.Name
         local EquippedSkin = Utils.PlayerData.GetPlayerEquipped(LocalPlayer, "Skins."..charName, false)
 
         local function CheckSkinEquipLabels()
-            for _, Skin in self.LoadedItems.Skins do
+            for _, Skin in Inventory.LoadedItems.Skins do
                 if #EquippedSkin.Value < 0 or EquippedSkin.Value ~= Skin.Name then
                     if Skin.Container.Equipped.ImageTransparency ~= 1 then
                         TweenService:Create(Skin.Container.Equipped, TweenInfo.new(0.2), {ImageTransparency = 1}):Play()
@@ -221,8 +221,8 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
             end
         end
 
-        for _, Skin in (LocalPlayer.PlayerData.Purchased.Skins:FindFirstChild(self.SelectedItem.Name) or Network:FireServerConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", self.SelectedItem.Name)):GetChildren() do
-            local Module = Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, Skin.Name)
+        for _, Skin in (LocalPlayer.PlayerData.Purchased.Skins:FindFirstChild(Inventory.SelectedItem.Name) or Network:FireServerConnection("CreateMissingPurchasedSkinValue", "REMOTE_FUNCTION", Inventory.SelectedItem.Name)):GetChildren() do
+            local Module = Utils.Instance.GetCharacterModule(Inventory.SelectedItem.Type, Inventory.SelectedItem.Name, Skin.Name)
             local Info = require(Module)
             local name = Module.Name
 
@@ -238,8 +238,8 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
                 Container.Outline.Size = Info.Config.CardFrame.Size or Container.Outline.Size
             end
 
-            self.LoadedItems.Skins[name] = Card
-            self.ItemModules.Skins[name] = Info
+            Inventory.LoadedItems.Skins[name] = Card
+            Inventory.ItemModules.Skins[name] = Info
 
             Container.Interact.MouseEnter:Connect(function()
                 TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
@@ -288,29 +288,29 @@ function Inventory:ToggleSkinsMenu(Open: boolean?)
 
         CheckSkinEquipLabels()
 
-        self:ReorderSkins()
+        Inventory.ReorderSkins()
 
         TweenService:Create(InventoryContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
         TweenService:Create(SkinContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
 
-        self.SkinMenu.Open = true
+        Inventory.SkinMenu.Open = true
     else
         TweenService:Create(InventoryContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
         TweenService:Create(SkinContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
 
-        self.SkinMenu.Open = false
+        Inventory.SkinMenu.Open = false
     end
 
     TweenService:Create(InfoContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
 end
 
-function Inventory:ToggleInfoMenu(Open: boolean?)
+function Inventory.ToggleInfoMenu(Open: boolean?)
     if Open == nil then
-        Open = not self.InfoMenu.Open
+        Open = not Inventory.InfoMenu.Open
     end
 
     if Open then
-        self:ToggleSkinsMenu(false)
+        Inventory.ToggleSkinsMenu(false)
     end
 
     if Open then
@@ -320,13 +320,13 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
             end
         end
 
-        local CharacterInfo = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name))
+        local CharacterInfo = require(Utils.Instance.GetCharacterModule(Inventory.SelectedItem.Type, Inventory.SelectedItem.Name))
 
         if not CharacterInfo.Config.Description then
             return
         end
 
-        self.InfoMenu.Open = true
+        Inventory.InfoMenu.Open = true
 
         local TextsToCheck = {}
 
@@ -394,8 +394,8 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
                 return TextService:GetTextSize(" ", textSize, font, Vector2.new(maxX, 1e5)).X
             end
         
-            while task.wait() and self.InfoMenu.Open do
-                local ui = self.UIInstance
+            while task.wait() and Inventory.InfoMenu.Open do
+                local ui = Inventory.UIInstance
                 local char = LocalPlayer.Character
                 local role = char and char:FindFirstChild("Role")
             
@@ -486,7 +486,7 @@ function Inventory:ToggleInfoMenu(Open: boolean?)
         TweenService:Create(InventoryContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
         TweenService:Create(InfoContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
 
-        self.InfoMenu.Open = false
+        Inventory.InfoMenu.Open = false
     end
 end
 
@@ -495,7 +495,7 @@ function Inventory:Init()
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
     UI.Parent = UIParent
-    self.UIInstance = UI
+    Inventory.UIInstance = UI
 
     local Container = UI.Container
     InventoryContainer = Container.InventoryContainer.Content
@@ -555,10 +555,10 @@ function Inventory:Init()
 
     local BoughtItems: Folder = LocalPlayer.PlayerData.Purchased
     JanitorInstance:Add(BoughtItems.DescendantAdded:Connect(function(_descendant: Instance)
-        self:ReloadContent()
+        Inventory.ReloadContent()
     end))
     JanitorInstance:Add(BoughtItems.DescendantRemoving:Connect(function(_descendant: Instance)
-        self:ReloadContent()
+        Inventory.ReloadContent()
     end))
 
     JanitorInstance:Add(Buttons.Equip.MouseEnter:Connect(function()
@@ -568,7 +568,7 @@ function Inventory:Init()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
     end))
     JanitorInstance:Add(Buttons.Equip.MouseButton1Click:Connect(function()
-        self:EquipItem()
+        Inventory.EquipItem()
     end))
 
     JanitorInstance:Add(Buttons.Skins.MouseEnter:Connect(function()
@@ -582,7 +582,7 @@ function Inventory:Init()
 
         TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play() --assuring the sidebar is open
 
-        self:ToggleSkinsMenu()
+        Inventory.ToggleSkinsMenu()
     end))
 
     JanitorInstance:Add(Buttons.Info.MouseEnter:Connect(function()
@@ -596,15 +596,15 @@ function Inventory:Init()
 
         TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play() --assuring the sidebar is open
 
-        self:ToggleInfoMenu()
+        Inventory.ToggleInfoMenu()
     end))
 
-    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
-        self.UIInstance.Visible = value ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(Inventory.UIInstance, "Size", function(value: UDim2)
+        Inventory.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 
     Utils.Instance.ObserveProperty(InfoContainer.Parent, "Size", function(value: UDim2)
-        if not self.InfoMenu.Open and value.X.Scale < 0.05 and #InfoContainer:GetChildren() > 0 then
+        if not Inventory.InfoMenu.Open and value.X.Scale < 0.05 and #InfoContainer:GetChildren() > 0 then
             for _, Child in InfoContainer:GetChildren() do
                 if not Child:IsA("UIComponent") then
                     Child:Destroy()
@@ -623,53 +623,53 @@ function Inventory:Init()
         JanitorInstance:Add(EmoteSlot.Button.MouseButton1Click:Connect(function()
             Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
 
-            if self.EmoteWindow then
+            if Inventory.EmoteWindow then
                 return
             end
 
             local Slot = EmoteSlot.Name:gsub("Emote", "")
-            self.EmoteWindow = EmoteEquipWindow.New(tonumber(Slot), InventoryContainer)
-            self.EmoteWindow.Equipped:Connect(function()
-                self:ReloadEquippedEmotes()
+            Inventory.EmoteWindow = EmoteEquipWindow.New(tonumber(Slot), InventoryContainer)
+            Inventory.EmoteWindow.Equipped:Connect(function()
+                Inventory.ReloadEquippedEmotes()
             end)
-            self.EmoteWindow.Removed:Connect(function()
-                self:ReloadEquippedEmotes()
-                self.EmoteWindow = nil
+            Inventory.EmoteWindow.Removed:Connect(function()
+                Inventory.ReloadEquippedEmotes()
+                Inventory.EmoteWindow = nil
             end)
         end))
     end
 
-    self:ReloadEquippedEmotes()
-    self:ReloadContent()
+    Inventory.ReloadEquippedEmotes()
+    Inventory.ReloadContent()
 end
 
-function Inventory:Open(Time: number)
-    if not self.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
+function Inventory.Open(Time: number)
+    if not Inventory.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
         return "Prevented"
     end
 
-    self:ToggleSkinsMenu(false)
-    self:ToggleInfoMenu(false)
+    Inventory.ToggleSkinsMenu(false)
+    Inventory.ToggleInfoMenu(false)
     PreviewInstances.Render.Image = ""
     SkinContainer.Parent.Size = Utils.UDim.FullY
     SideContainer.Size = Utils.UDim.FullY
     InfoContainer.Parent.Size = Utils.UDim.FullY
     InventoryContainer.Parent.Size = UDim2.fromScale(0.7, 1)
-    self.SkinMenu.Open = false
-    if self.EmoteWindow then
-        self.EmoteWindow:Hide(true)
-        self.EmoteWindow = nil
+    Inventory.SkinMenu.Open = false
+    if Inventory.EmoteWindow then
+        Inventory.EmoteWindow:Hide(true)
+        Inventory.EmoteWindow = nil
     end
 
     TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
-    self.Opened = true
+    Inventory.Opened = true
 
     return
 end
 
-function Inventory:Close(Time: number)
-    if self.EmoteWindow then
-        self.EmoteWindow:Hide()
+function Inventory.Close(Time: number)
+    if Inventory.EmoteWindow then
+        Inventory.EmoteWindow:Hide()
     end
     if Time > 0 then
         TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
@@ -677,39 +677,39 @@ function Inventory:Close(Time: number)
         UI.Size = Utils.UDim.Zero
         UI.Visible = false
     end
-    self.Opened = false
+    Inventory.Opened = false
 end
 
-function Inventory:Toggle(toggle: boolean)
-    if not self.Enabled and toggle then
-        self:Init()
+function Inventory.Toggle(toggle: boolean)
+    if not Inventory.Enabled and toggle then
+        Inventory.Init()
     end
-    if not toggle and self.Enabled then
-        table.clear(self.ItemModules)
-        self.LoadedItems = {
+    if not toggle and Inventory.Enabled then
+        table.clear(Inventory.ItemModules)
+        Inventory.LoadedItems = {
             Killers = {},
             Survivors = {},
             Skins = {},
         }
-        self.SelectedItem = {
+        Inventory.SelectedItem = {
             Name = "",
             Type = "",
         }
-        self.SelectedSection = "Survivors"
-        self.UIInstance:Destroy()
-        self.SkinMenu = {
+        Inventory.SelectedSection = "Survivors"
+        Inventory.UIInstance:Destroy()
+        Inventory.SkinMenu = {
             Open = false,
         }
-        if self.EmoteWindow then
-            self.EmoteWindow:Hide(true)
-            self.EmoteWindow = nil
+        if Inventory.EmoteWindow then
+            Inventory.EmoteWindow:Hide(true)
+            Inventory.EmoteWindow = nil
         end
     end
-    self.Enabled = toggle
+    Inventory.Enabled = toggle
 end
 
-function Inventory:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Survivor, Type: string)
-    if not self.Opened then return end
+function Inventory.OnCharButtonPress(codeName: string, info: Types.Killer | Types.Survivor, Type: string)
+    if not Inventory.Opened then return end
 
     PreviewInstances.Render.Image = info.Config.Render
     PreviewInstances.Title.Text = info.Config.Name
@@ -720,13 +720,13 @@ function Inventory:OnCharButtonPress(codeName: string, info: Types.Killer | Type
         Buttons.Equip.Title.Text = "Equip"
     end
 
-    self.SelectedItem.Name = codeName
-    self.SelectedItem.Type = Type
+    Inventory.SelectedItem.Name = codeName
+    Inventory.SelectedItem.Type = Type
 
     TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play()
 end
 
-function Inventory:ReloadContent()
+function Inventory.ReloadContent()
     local BoughtItems = LocalPlayer.PlayerData.Purchased
 
     --Killer frame reloading
@@ -737,14 +737,14 @@ function Inventory:ReloadContent()
     local function SetupCard(module, Type: "Killer" | "Survivor")
         local name = module.Name
 
-        if self.LoadedItems[Type.."s"][name] then
-            self.LoadedItems[Type.."s"][name].LayoutOrder = LO
+        if Inventory.LoadedItems[Type.."s"][name] then
+            Inventory.LoadedItems[Type.."s"][name].LayoutOrder = LO
             return
         end
         
         local Module = Utils.Instance.GetCharacterModule(Type, name)
         if not Module then
-            warn(`[Inventory:ReloadContent()]: Couldn't display card for {Type:lower()} "{name}", as their module doesn't exist! Ignoring for now...`)
+            warn(`[Inventory.ReloadContent()]: Couldn't display card for {Type:lower()} "{name}", as their module doesn't exist! Ignoring for now...`)
             return
         end
 
@@ -763,10 +763,10 @@ function Inventory:ReloadContent()
             Container.Outline.Size = Info.Config.CardFrame.Size or Container.Outline.Size
         end
 
-        self.ItemModules[Type.."s"] = self.ItemModules[Type.."s"] or {}
+        Inventory.ItemModules[Type.."s"] = Inventory.ItemModules[Type.."s"] or {}
 
-		self.LoadedItems[Type.."s"][name] = Card
-		self.ItemModules[Type.."s"][name] = Info
+		Inventory.LoadedItems[Type.."s"][name] = Card
+		Inventory.ItemModules[Type.."s"][name] = Info
 
 		Container.Interact.MouseEnter:Connect(function()
             TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
@@ -783,11 +783,11 @@ function Inventory:ReloadContent()
 		end)
 
         Container.Interact.MouseButton1Click:Connect(function()
-			if self.SkinMenu.Open then
+			if Inventory.SkinMenu.Open then
 				return
 			end
 			Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, { Volume = 0.8 })
-			self:OnCharButtonPress(name, Info, Type)
+			Inventory.OnCharButtonPress(name, Info, Type)
         end)
 
         if Info.Config.Origin and Info.Config.Origin.Icon then
@@ -846,7 +846,7 @@ function Inventory:ReloadContent()
     SetupBatch("Survivor")
     SetupBatch("Killer")
 
-    self:CheckEquipLabels()
+    Inventory.CheckEquipLabels()
 end
 
 return Inventory

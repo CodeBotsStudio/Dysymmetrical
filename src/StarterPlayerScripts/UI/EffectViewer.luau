@@ -13,11 +13,11 @@ function EffectViewer:Init()
     local UIPrefab = Utils.Instance.FindFirstChild(script, "StatusContainer")
 
     Utils.Character.ObserveCharacter(LocalPlayer, function(Char: Model)
-        self:_SetupUI(UIPrefab:Clone(), Char)
+        EffectViewer._SetupUI(UIPrefab:Clone(), Char)
     end)
 end
 
-function EffectViewer:_SetupUI(UI: Frame, char: Model)
+function EffectViewer._SetupUI(UI: Frame, char: Model)
     if char:FindFirstChild("Role").Value == "Spectator" then
         UI:Destroy()
         return

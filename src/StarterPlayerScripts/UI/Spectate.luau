@@ -23,15 +23,15 @@ local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 local ButtonTweenInfo = TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
 
 function Spectate:Init()
-    if self.UIInstance then
-        self.UIInstance.Visible = false
+    if Spectate.UIInstance then
+        Spectate.UIInstance.Visible = false
         return
     end
 
     local UI = Utils.Instance.FindFirstChild(script, "SpectateUI")
     UI.Visible = false
     UI.Parent = UIParent
-    self.UIInstance = UI
+    Spectate.UIInstance = UI
 
     UI.Buttons.Left.MouseEnter:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
@@ -52,15 +52,15 @@ function Spectate:Init()
 
     UI.Buttons.Left.MouseButton1Click:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-        self:ChangeSelection(-1)
+        Spectate.ChangeSelection(-1)
     end)
     UI.Buttons.Right.MouseButton1Click:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-        self:ChangeSelection(1)
+        Spectate.ChangeSelection(1)
     end)
 
     RunService.PreRender:Connect(function(_delta: number)
-        self:_Update()
+        Spectate._Update()
     end)
 
     local function OnCharacterAdded(Player: Player, Character: Model)
@@ -68,21 +68,21 @@ function Spectate:Init()
 
         if Role.Value == "Spectator" then
 
-            local FoundPlayer = table.find(self.PlayersAvailable, Player.Name)
+            local FoundPlayer = table.find(Spectate.PlayersAvailable, Player.Name)
             if FoundPlayer then
 
-                table.remove(self.PlayersAvailable, FoundPlayer)
+                table.remove(Spectate.PlayersAvailable, FoundPlayer)
 
-                if self.CurSelected <= FoundPlayer then
-                    self:ChangeSelection(-1)
+                if Spectate.CurSelected <= FoundPlayer then
+                    Spectate.ChangeSelection(-1)
                 end
 
             end
 
-        elseif not table.find(self.PlayersAvailable, Player.Name) then
+        elseif not table.find(Spectate.PlayersAvailable, Player.Name) then
             
-            table.insert(self.PlayersAvailable, Player.Name)
-            self:ChangeSelection()
+            table.insert(Spectate.PlayersAvailable, Player.Name)
+            Spectate.ChangeSelection()
         end
     end
 
@@ -92,61 +92,61 @@ function Spectate:Init()
         end)
     end)
 
-    self:ChangeSelection()
+    Spectate.ChangeSelection()
 end
 
-function Spectate:Open()
-    if not self.Enabled or not SideBar.Enabled or RoundState.Value == "Lobby" then
+function Spectate.Open()
+    if not Spectate.Enabled or not SideBar.Enabled or RoundState.Value == "Lobby" then
         return "Prevented"
     end
 
-    self.Opened = true
-    self.UIInstance.Visible = true
-    self:ChangeSelection()
-    self:_Update()
+    Spectate.Opened = true
+    Spectate.UIInstance.Visible = true
+    Spectate.ChangeSelection()
+    Spectate._Update()
 
     return
 end
 
-function Spectate:Close()
-    self.Opened = false
-    self.UIInstance.Visible = false
+function Spectate.Close()
+    Spectate.Opened = false
+    Spectate.UIInstance.Visible = false
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid") then
         workspace.CurrentCamera.CameraSubject = LocalPlayer.Character.Humanoid
     end
 end
 
-function Spectate:Toggle(toggle: boolean)
-    self:Close()
-    self.Enabled = toggle
+function Spectate.Toggle(toggle: boolean)
+    Spectate:Close()
+    Spectate.Enabled = toggle
 end
 
-function Spectate:ChangeSelection(amount: number?)
+function Spectate.ChangeSelection(amount: number?)
     amount = amount or 0
     
-    self.CurSelected = Utils.Math.WrapNum(self.CurSelected + amount, 1, #self.PlayersAvailable)
-    if #self.PlayersAvailable > 0 and not self.PlayersAvailable[self.CurSelected] then
-        self:ChangeSelection(amount ~= 0 and amount or 1)
+    Spectate.CurSelected = Utils.Math.WrapNum(Spectate.CurSelected + amount, 1, #Spectate.PlayersAvailable)
+    if #Spectate.PlayersAvailable > 0 and not Spectate.PlayersAvailable[Spectate.CurSelected] then
+        Spectate.ChangeSelection(amount ~= 0 and amount or 1)
     end
 end
 
-function Spectate:_Update()
-    if not self.UIInstance.Visible then
+function Spectate._Update()
+    if not Spectate.UIInstance.Visible then
         return
     end
 
-    if #self.PlayersAvailable <= 0 then
-        self.UIInstance.PlayerText.DisplayName.Text = "PlayerDisplayName"
-        self.UIInstance.PlayerText.Username.Text = "PlayerUsername"
-        self.UIInstance.PlayerText.CharacterName.Text = "CharacterName (SkinName)"
+    if #Spectate.PlayersAvailable <= 0 then
+        Spectate.UIInstance.PlayerText.DisplayName.Text = "PlayerDisplayName"
+        Spectate.UIInstance.PlayerText.Username.Text = "PlayerUsername"
+        Spectate.UIInstance.PlayerText.CharacterName.Text = "CharacterName (SkinName)"
 
-        self.UIInstance.PlayerText.Health.Text = "100%"
-        self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(75, 255, 75)
+        Spectate.UIInstance.PlayerText.Health.Text = "100%"
+        Spectate.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(75, 255, 75)
         
         return
     end
 
-    local Char = workspace.Players:FindFirstChild(self.PlayersAvailable[self.CurSelected])
+    local Char = workspace.Players:FindFirstChild(Spectate.PlayersAvailable[Spectate.CurSelected])
     if not Char then
         return
     end
@@ -159,22 +159,22 @@ function Spectate:_Update()
     local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
     workspace.CurrentCamera.CameraSubject = Humanoid
 
-    self.UIInstance.PlayerText.DisplayName.Text = Players:GetPlayerFromCharacter(Char).DisplayName
-    self.UIInstance.PlayerText.Username.Text = Char.Name
+    Spectate.UIInstance.PlayerText.DisplayName.Text = Players:GetPlayerFromCharacter(Char).DisplayName
+    Spectate.UIInstance.PlayerText.Username.Text = Char.Name
 
     local CharText = Char:GetAttribute("CharacterName")
     if Char:GetAttribute("CharacterSkinName") then
         CharText = CharText.." ("..Char:GetAttribute("CharacterSkinName")..")"
     end
-    self.UIInstance.PlayerText.CharacterName.Text = CharText
+    Spectate.UIInstance.PlayerText.CharacterName.Text = CharText
 
     local HealthPercentageMagnitude = Humanoid.Health / Humanoid.MaxHealth
-    self.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(
+    Spectate.UIInstance.PlayerText.Health.TextColor3 = Color3.fromRGB(
         Utils.Math.MapToRange(HealthPercentageMagnitude, 0, 1, 1, 0) * 180 + 75,
         HealthPercentageMagnitude * 180 + 75,
         75
     )
-    self.UIInstance.PlayerText.Health.Text = tostring(HealthPercentageMagnitude * 100).."%"
+    Spectate.UIInstance.PlayerText.Health.Text = tostring(HealthPercentageMagnitude * 100).."%"
 end
 
 return Spectate

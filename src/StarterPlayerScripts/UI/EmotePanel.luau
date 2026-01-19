@@ -31,10 +31,10 @@ function EmotePanel:Init()
     local SelectedEmote = ""
 
     local function CheckEmotePlay()
-        if not self.Open then
+        if not EmotePanel.Open then
             return
         end
-        self:_Close()
+        EmotePanel._Close()
 
         local EmoteToPlay = EmoteButtonContainer[SelectedEmote]:GetAttribute("Name")
         if LocalPlayer.Character and EmoteToPlay and #EmoteToPlay > 0 then
@@ -108,19 +108,19 @@ function EmotePanel:Init()
     end)
 
     InputManager:GetInputAction("Miscellaneous.EmotePanel").Pressed:Connect(function()
-        self:Toggle()
+        EmotePanel.Toggle()
     end)
 
     local function CheckMobileButton(ControlScheme: "Keyboard" | "Gamepad" | "Touch")
-        if ControlScheme == "Touch" and not self.TopbarButton then
-            self.TopbarButton = TopbarPlus.new()
-            self.TopbarButton:setOrder(10)
-            self.TopbarButton:oneClick(true)
-            self.TopbarButton:setLabel("Emote")
-            self.TopbarButton:setTextFont(Enum.Font.Bodoni)
-            self.TopbarButton:bindEvent("deselected", function()
+        if ControlScheme == "Touch" and not EmotePanel.TopbarButton then
+            EmotePanel.TopbarButton = TopbarPlus.new()
+            EmotePanel.TopbarButton:setOrder(10)
+            EmotePanel.TopbarButton:oneClick(true)
+            EmotePanel.TopbarButton:setLabel("Emote")
+            EmotePanel.TopbarButton:setTextFont(Enum.Font.Bodoni)
+            EmotePanel.TopbarButton:bindEvent("deselected", function()
                 if not LocalPlayer.Character then
-                    self:Toggle()
+                    EmotePanel.Toggle()
                     return
                 end
 
@@ -133,11 +133,11 @@ function EmotePanel:Init()
                 if EmoteManager.CurrentlyPlayingEmote then
                     EmoteManager:StopEmote(EmoteManager.CurrentlyPlayingEmote)
                 else
-                    self:Toggle()
+                    EmotePanel.Toggle()
                 end
             end)
-        elseif self.TopbarButton then
-            self.TopbarButton:Destroy()
+        elseif EmotePanel.TopbarButton then
+            EmotePanel.TopbarButton:Destroy()
         end
     end
 
@@ -145,23 +145,23 @@ function EmotePanel:Init()
     CheckMobileButton(InputManager.CurrentControlScheme)
 end
 
-function EmotePanel:Toggle()
-    if not self.Open then
-        self:_Open()
+function EmotePanel.Toggle()
+    if not EmotePanel.Open then
+        EmotePanel._Open()
     else
-        self:_Close()
+        EmotePanel._Close()
     end
 end
 
 local Info = TweenInfo.new(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out)
 
-function EmotePanel:_Open()
+function EmotePanel._Open()
     TweenService:Create(UI, Info, {Size = UISize}):Play()
-    self.Open = true
+    EmotePanel.Open = true
 end
 
-function EmotePanel:_Close()
-    self.Open = false
+function EmotePanel._Close()
+    EmotePanel.Open = false
     TweenService:Create(UI, Info, {Size = Utils.UDim.Zero}):Play()
 end
 

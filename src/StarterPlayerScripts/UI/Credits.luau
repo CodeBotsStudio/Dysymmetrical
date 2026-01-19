@@ -41,17 +41,17 @@ local Credits: {{ Name: string, Credits: {Credit} }} = {
 
 local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function CreditsMenu:Init()
-    if self.UIInstance then
-        self.UIInstance.Parent = UIParent
-        self.UIInstance.Size = Utils.UDim.Zero
-        self.UIInstance.Visible = false
+    if CreditsMenu.UIInstance then
+        CreditsMenu.UIInstance.Parent = UIParent
+        CreditsMenu.UIInstance.Size = Utils.UDim.Zero
+        CreditsMenu.UIInstance.Visible = false
         return
     end
 
     local UI = Utils.Instance.FindFirstChild(script, "CreditsMenu")
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
-    self.UIInstance = UI
+    CreditsMenu.UIInstance = UI
     UI.Parent = UIParent
 
     local Prefabs = {
@@ -85,40 +85,40 @@ function CreditsMenu:Init()
         end
     end
 
-    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
-        self.UIInstance.Visible = value ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(CreditsMenu.UIInstance, "Size", function(value: UDim2)
+        CreditsMenu.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 end
 
-function CreditsMenu:Open(Time: number)
-    if not self.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
+function CreditsMenu.Open(Time: number)
+    if not CreditsMenu.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
         return "Prevented"
     end
 
-    TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.475, 0.599)}):Play()
-    self.Opened = true
+    TweenService:Create(CreditsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.475, 0.599)}):Play()
+    CreditsMenu.Opened = true
 
     return
 end
 
-function CreditsMenu:Close(Time: number)
+function CreditsMenu.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        TweenService:Create(CreditsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        self.UIInstance.Size = Utils.UDim.Zero
+        CreditsMenu.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Opened = false
+    CreditsMenu.Opened = false
 end
 
-function CreditsMenu:Toggle(toggle: boolean)
-    if not self.Enabled and toggle then
-        self:Init()
+function CreditsMenu.Toggle(toggle: boolean)
+    if not CreditsMenu.Enabled and toggle then
+        CreditsMenu:Init()
     end
-    if not toggle and self.Enabled then
-        self.UIInstance.Parent = script
-        self.UIInstance.Size = Utils.UDim.Zero
+    if not toggle and CreditsMenu.Enabled then
+        CreditsMenu.UIInstance.Parent = script
+        CreditsMenu.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Enabled = toggle
+    CreditsMenu.Enabled = toggle
 end
 
 return CreditsMenu

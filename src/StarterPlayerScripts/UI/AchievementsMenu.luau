@@ -38,77 +38,77 @@ local CategoryButtonPrefab = Utils.Instance.FindFirstChild(Prefabs, "CategoryBut
 
 local UIParent = Utils.Instance.FindFirstChild(LocalPlayer.PlayerGui, "Menus")
 function AchievementsMenu:Init()
-    if self.UIInstance then
-        self.UIInstance.Parent = UIParent
-        self.UIInstance.Size = Utils.UDim.Zero
-        self.UIInstance.Visible = false
+    if AchievementsMenu.UIInstance then
+        AchievementsMenu.UIInstance.Parent = UIParent
+        AchievementsMenu.UIInstance.Size = Utils.UDim.Zero
+        AchievementsMenu.UIInstance.Visible = false
         return
     end
 
-    self.Janitor = Janitor.new()
+    AchievementsMenu.Janitor = Janitor.new()
 
     local UI = Utils.Instance.FindFirstChild(script, "Achievements")
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
-    self.UIInstance = UI
+    AchievementsMenu.UIInstance = UI
     UI.Parent = UIParent
 
-    self.Janitor:LinkToInstance(UI)
+    AchievementsMenu.Janitor:LinkToInstance(UI)
 
-    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
-        self.UIInstance.Visible = value ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(AchievementsMenu.UIInstance, "Size", function(value: UDim2)
+        AchievementsMenu.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 
-    self:_SetupAchievements()
+    AchievementsMenu._SetupAchievements()
 end
 
-function AchievementsMenu:Open(Time: number)
-    if not self.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
+function AchievementsMenu.Open(Time: number)
+    if not AchievementsMenu.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
         return "Prevented"
     end
 
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.5, 0.7)}):Play()
+        TweenService:Create(AchievementsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.5, 0.7)}):Play()
     else
-        self.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
+        AchievementsMenu.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
     end
-    self.Opened = true
+    AchievementsMenu.Opened = true
 
     return
 end
 
-function AchievementsMenu:Close(Time: number)
+function AchievementsMenu.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(self.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        TweenService:Create(AchievementsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
     else
-        self.UIInstance.Size = Utils.UDim.Zero
+        AchievementsMenu.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Opened = false
+    AchievementsMenu.Opened = false
 end
 
-function AchievementsMenu:Toggle(toggle: boolean)
-    if not self.Enabled and toggle then
-        self:Init()
+function AchievementsMenu.Toggle(toggle: boolean)
+    if not AchievementsMenu.Enabled and toggle then
+        AchievementsMenu:Init()
     end
-    if not toggle and self.Enabled then
-        self.UIInstance.Parent = script
-        self.UIInstance.Size = Utils.UDim.Zero
+    if not toggle and AchievementsMenu.Enabled then
+        AchievementsMenu.UIInstance.Parent = script
+        AchievementsMenu.UIInstance.Size = Utils.UDim.Zero
     end
-    self.Enabled = toggle
+    AchievementsMenu.Enabled = toggle
 end
 
-function AchievementsMenu:_SetupAchievements()
-    local Content = self.UIInstance.Content
+function AchievementsMenu._SetupAchievements()
+    local Content = AchievementsMenu.UIInstance.Content
 
     local AchievementGroupLayoutOrder = 0
 
-    local CategoryButtons = self.UIInstance.CategoryButtons
+    local CategoryButtons = AchievementsMenu.UIInstance.CategoryButtons
 
     local function IsAchievementUnlocked(AchievementValue: NumberValue | BoolValue, AchievementEquivalent: Types.Achievement): boolean
         return if AchievementEquivalent.Requirement ~= nil then AchievementValue.Value >= AchievementEquivalent.Requirement else (AchievementValue.Value :: boolean)
     end
 
-    local Counter = self.UIInstance.Label.TextLabel
+    local Counter = AchievementsMenu.UIInstance.Label.TextLabel
     local function ReloadCounter()
         local Total = 0
         local Unlocked = 0
@@ -210,21 +210,21 @@ function AchievementsMenu:_SetupAchievements()
                     Achievement.LockedOverlay.Visible = true
 
                     if AchievementEquivalent.HideTitleIfLocked then
-                        Achievement.Content.DisplayName.Text = AchievementEquivalent.HiddenTitle or self.Defaults.Hidden.Title
+                        Achievement.Content.DisplayName.Text = AchievementEquivalent.HiddenTitle or AchievementsMenu.Defaults.Hidden.Title
                     else
-                        Achievement.Content.DisplayName.Text = AchievementEquivalent.Title or self.Defaults.Shown.Title
+                        Achievement.Content.DisplayName.Text = AchievementEquivalent.Title or AchievementsMenu.Defaults.Shown.Title
                     end
 
                     if AchievementEquivalent.HideDescriptionIfLocked then
-                        Achievement.Content.Description.Text = AchievementEquivalent.HiddenDescription or self.Defaults.Hidden.Description
+                        Achievement.Content.Description.Text = AchievementEquivalent.HiddenDescription or AchievementsMenu.Defaults.Hidden.Description
                     else
-                        Achievement.Content.Description.Text = AchievementEquivalent.Description or self.Defaults.Shown.Description
+                        Achievement.Content.Description.Text = AchievementEquivalent.Description or AchievementsMenu.Defaults.Shown.Description
                     end
 
                     if AchievementEquivalent.HideIconIfLocked then
-                        Achievement.Icon.Image = AchievementEquivalent.LockIcon or self.Defaults.Hidden.Icon
+                        Achievement.Icon.Image = AchievementEquivalent.LockIcon or AchievementsMenu.Defaults.Hidden.Icon
                     else
-                        Achievement.Icon.Image = AchievementEquivalent.Icon or self.Defaults.Shown.Icon
+                        Achievement.Icon.Image = AchievementEquivalent.Icon or AchievementsMenu.Defaults.Shown.Icon
                     end
 
                     if AchievementEquivalent.Hide then
@@ -234,9 +234,9 @@ function AchievementsMenu:_SetupAchievements()
                     Achievement.LockedOverlay.Visible = false
                     Achievement.Visible = true
                     
-                    Achievement.Content.DisplayName.Text = AchievementEquivalent.Title or self.Defaults.Shown.Title
-                    Achievement.Content.Description.Text = AchievementEquivalent.Description or self.Defaults.Shown.Description
-                    Achievement.Icon.Image = AchievementEquivalent.Icon or self.Defaults.Shown.Icon
+                    Achievement.Content.DisplayName.Text = AchievementEquivalent.Title or AchievementsMenu.Defaults.Shown.Title
+                    Achievement.Content.Description.Text = AchievementEquivalent.Description or AchievementsMenu.Defaults.Shown.Description
+                    Achievement.Icon.Image = AchievementEquivalent.Icon or AchievementsMenu.Defaults.Shown.Icon
                 end
 
                 if AchievementEquivalent.Requirement then

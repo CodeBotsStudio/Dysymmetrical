@@ -94,15 +94,15 @@ local Sections = {}
 
 local LoadedEmoteTracks = {}
 
-function Shop:ReorderSkins()
+function Shop.ReorderSkins()
     local Ordered = {
         Owned = {},
         Unowned = {},
     }
     local LO = 0
 
-    for name, skin in self.LoadedItems.Skins do
-        if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..name) then
+    for name, skin in Shop.LoadedItems.Skins do
+        if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..Shop.SelectedItem.Name.."."..name) then
             table.insert(Ordered.Owned, skin)
         else
             table.insert(Ordered.Unowned, skin)
@@ -111,8 +111,8 @@ function Shop:ReorderSkins()
 
     table.sort(Ordered.Owned, function(a, b)
         local Modules = {
-            A = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
-            B = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+            A = require(Utils.Instance.GetCharacterModule(Shop.SelectedItem.Type, Shop.SelectedItem.Name, a.Name)),
+            B = require(Utils.Instance.GetCharacterModule(Shop.SelectedItem.Type, Shop.SelectedItem.Name, b.Name)),
         }
 
         return
@@ -121,8 +121,8 @@ function Shop:ReorderSkins()
     end)
     table.sort(Ordered.Unowned, function(a, b)
         local Modules = {
-            A = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, a.Name)),
-            B = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, b.Name)),
+            A = require(Utils.Instance.GetCharacterModule(Shop.SelectedItem.Type, Shop.SelectedItem.Name, a.Name)),
+            B = require(Utils.Instance.GetCharacterModule(Shop.SelectedItem.Type, Shop.SelectedItem.Name, b.Name)),
         }
 
         return
@@ -140,15 +140,15 @@ function Shop:ReorderSkins()
     end
 end
 
-function Shop:ToggleSkinsMenu(Open: boolean?)
+function Shop.ToggleSkinsMenu(Open: boolean?)
     if Open == nil then
-        Open = not self.SkinMenu.Open
+        Open = not Shop.SkinMenu.Open
     end
     
     if Open then
-        self:ToggleInfoMenu(false)
+        Shop.ToggleInfoMenu(false)
 
-        local Skins = ReplicatedStorage.Characters.Skins[self.SelectedItem.Type.."s"]:FindFirstChild(self.SelectedItem.Name)
+        local Skins = ReplicatedStorage.Characters.Skins[Shop.SelectedItem.Type.."s"]:FindFirstChild(Shop.SelectedItem.Name)
         if not Skins then
             return
         end
@@ -168,7 +168,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             return
         end
 
-        for _, skin in self.LoadedItems.Skins do
+        for _, skin in Shop.LoadedItems.Skins do
             if SkinContainer.SkinPreviewCache:FindFirstChild(skin.Name) then
                 SkinContainer.SkinPreviewCache[skin.Name]:Destroy()
             end
@@ -176,24 +176,24 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             skin:Destroy()
         end
 
-        table.clear(self.LoadedItems.Skins)
-        self.ItemModules.Skins = self.ItemModules.Skins or {}
-        table.clear(self.ItemModules.Skins)
+        table.clear(Shop.LoadedItems.Skins)
+        Shop.ItemModules.Skins = Shop.ItemModules.Skins or {}
+        table.clear(Shop.ItemModules.Skins)
 
         local function CheckSkinOwnLabels()
-            for name, skin in self.LoadedItems.Skins do
-                if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..self.SelectedItem.Name.."."..name) then
+            for name, skin in Shop.LoadedItems.Skins do
+                if Utils.PlayerData.GetPlayerOwned(LocalPlayer, "Skins."..Shop.SelectedItem.Name.."."..name) then
                     skin.Container.Owned.BackgroundTransparency = 0.55
                     skin.Container.Owned.TextLabel.TextTransparency = 0
                 end
             end
         end
 
-        SkinContainer.Parent.Label.TextLabel.Text = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name)).Config.Name.." Skins"
+        SkinContainer.Parent.Label.TextLabel.Text = require(Utils.Instance.GetCharacterModule(Shop.SelectedItem.Type, Shop.SelectedItem.Name)).Config.Name.." Skins"
 
-        local CanMakePreviews = self.PreviewsEnabled and Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
+        local CanMakePreviews = Shop.PreviewsEnabled and Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
         for _, Skin in VisibleSkins do
-            local Module = Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name, Skin.Name)
+            local Module = Utils.Instance.GetCharacterModule(Shop.SelectedItem.Type, Shop.SelectedItem.Name, Skin.Name)
 
             if Module:HasTag("Dev") or Module:HasTag("Milestone") then
                 continue
@@ -218,9 +218,9 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             local SkinPreview = Container.Preview.ViewportFrame
             if CanMakePreviews then
                 task.defer(function()
-                    local SkinModel = Utils.Instance.FindFirstChild(CharacterFolder, "Skins."..self.SelectedItem.Type.."."..self.SelectedItem.Name.."."..name, 0)
+                    local SkinModel = Utils.Instance.FindFirstChild(CharacterFolder, "Skins."..Shop.SelectedItem.Type.."."..Shop.SelectedItem.Name.."."..name, 0)
                     if not SkinModel then
-                        warn("[Shop:ToggleSkinsMenu]: Item preview model can't be found! Make sure it's located in ReplicatedStorage/Characters/Skins/"..self.SelectedItem.Type.."/"..self.SelectedItem.Name.."s! ("..name..")")
+                        warn("[Shop.ToggleSkinsMenu]: Item preview model can't be found! Make sure it's located in ReplicatedStorage/Characters/Skins/"..Shop.SelectedItem.Type.."/"..Shop.SelectedItem.Name.."s! ("..name..")")
                         return
                     end
 
@@ -258,11 +258,11 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             end
 
             --create tables if not there
-            self.ItemModules.Skins = self.ItemModules.Skins or {}
-            self.ItemModules.Skins[self.SelectedItem.Name] = self.ItemModules.Skins[self.SelectedItem.Name] or {}
+            Shop.ItemModules.Skins = Shop.ItemModules.Skins or {}
+            Shop.ItemModules.Skins[Shop.SelectedItem.Name] = Shop.ItemModules.Skins[Shop.SelectedItem.Name] or {}
 
-            self.LoadedItems.Skins[name] = Card
-            self.ItemModules.Skins[self.SelectedItem.Name][name] = Info
+            Shop.LoadedItems.Skins[name] = Card
+            Shop.ItemModules.Skins[Shop.SelectedItem.Name][name] = Info
 
             -- reminder that these connections disconnect automatically when the parent is destroyed! -dys
             Container.Interact.MouseEnter:Connect(function()
@@ -296,7 +296,7 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
             Container.Interact.MouseButton1Click:Connect(function()
                 Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
                 if Container.Owned.BackgroundTransparency >= 1 then
-                    self:CreateBuyWindow(Skin, true, UI, Card)
+                    Shop.CreateBuyWindow(Skin, true, UI, Card)
                 end
 
                 CheckSkinOwnLabels()
@@ -320,29 +320,29 @@ function Shop:ToggleSkinsMenu(Open: boolean?)
 
         CheckSkinOwnLabels()
 
-        self:ReorderSkins()
+        Shop.ReorderSkins()
 
         TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
         TweenService:Create(SkinContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
 
-        self.SkinMenu.Open = true
+        Shop.SkinMenu.Open = true
     else
         TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
         TweenService:Create(SkinContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
 
-        self.SkinMenu.Open = false
+        Shop.SkinMenu.Open = false
     end
 
     TweenService:Create(InfoContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
 end
 
-function Shop:ToggleInfoMenu(Open: boolean?)
+function Shop.ToggleInfoMenu(Open: boolean?)
     if Open == nil then
-        Open = not self.InfoMenu.Open
+        Open = not Shop.InfoMenu.Open
     end
 
     if Open then
-        self:ToggleSkinsMenu(false)
+        Shop.ToggleSkinsMenu(false)
     end
 
     if Open then
@@ -352,13 +352,13 @@ function Shop:ToggleInfoMenu(Open: boolean?)
             end
         end
 
-        local CharacterInfo = require(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name))
+        local CharacterInfo = require(Utils.Instance.GetCharacterModule(Shop.SelectedItem.Type, Shop.SelectedItem.Name))
 
         if not CharacterInfo.Config.Description then
             return
         end
 
-        self.InfoMenu.Open = true
+        Shop.InfoMenu.Open = true
 
         local TextsToCheck = {}
 
@@ -426,8 +426,8 @@ function Shop:ToggleInfoMenu(Open: boolean?)
                 return TextService:GetTextSize(" ", textSize, font, Vector2.new(maxX, 1e5)).X
             end
         
-            while task.wait() and self.InfoMenu.Open do
-                local ui = self.UIInstance
+            while task.wait() and Shop.InfoMenu.Open do
+                local ui = Shop.UIInstance
                 local char = LocalPlayer.Character
                 local role = char and char:FindFirstChild("Role")
             
@@ -518,7 +518,7 @@ function Shop:ToggleInfoMenu(Open: boolean?)
         TweenService:Create(ShopContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.7, 1)}):Play()
         TweenService:Create(InfoContainer.Parent, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.FullY}):Play()
 
-        self.InfoMenu.Open = false
+        Shop.InfoMenu.Open = false
     end
 end
 
@@ -543,7 +543,7 @@ function Shop:Init()
     UI.Size = Utils.UDim.Zero
     UI.Visible = false
     UI.Parent = UIParent
-    self.UIInstance = UI
+    Shop.UIInstance = UI
 
     local Container = UI.Container
     ShopContainer = Container.ShopContainer.Content
@@ -608,13 +608,13 @@ function Shop:Init()
     end))
     JanitorInstance:Add(Buttons.Purchase.MouseButton1Click:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-        if not Utils.PlayerData.GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
-            if self.SelectedItem.Type == "Emote" then
-                self:CreateBuyWindow(Utils.Instance.GetEmoteModule(self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
+        if not Utils.PlayerData.GetPlayerOwned(LocalPlayer, Shop.SelectedItem.Type.."s."..Shop.SelectedItem.Name) then
+            if Shop.SelectedItem.Type == "Emote" then
+                Shop.CreateBuyWindow(Utils.Instance.GetEmoteModule(Shop.SelectedItem.Name), false, UI, Shop.SelectedItem.Card)
                 return
             end
 
-            self:CreateBuyWindow(Utils.Instance.GetCharacterModule(self.SelectedItem.Type, self.SelectedItem.Name), false, UI, self.SelectedItem.Card)
+            Shop.CreateBuyWindow(Utils.Instance.GetCharacterModule(Shop.SelectedItem.Type, Shop.SelectedItem.Name), false, UI, Shop.SelectedItem.Card)
         end
     end))
 
@@ -629,7 +629,7 @@ function Shop:Init()
 
         TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play() --assuring the sidebar is open
 
-        self:ToggleSkinsMenu()
+        Shop.ToggleSkinsMenu()
     end))
 
     JanitorInstance:Add(Buttons.Info.MouseEnter:Connect(function()
@@ -643,15 +643,15 @@ function Shop:Init()
 
         TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play() --assuring the sidebar is open
 
-        self:ToggleInfoMenu()
+        Shop.ToggleInfoMenu()
     end))
 
-    Utils.Instance.ObserveProperty(self.UIInstance, "Size", function(value: UDim2)
-        self.UIInstance.Visible = value ~= Utils.UDim.Zero
+    Utils.Instance.ObserveProperty(Shop.UIInstance, "Size", function(value: UDim2)
+        Shop.UIInstance.Visible = value ~= Utils.UDim.Zero
     end)
 
     Utils.Instance.ObserveProperty(InfoContainer.Parent, "Size", function(value: UDim2)
-        if not self.InfoMenu.Open and value.X.Scale < 0.05 and #InfoContainer:GetChildren() > 0 then
+        if not Shop.InfoMenu.Open and value.X.Scale < 0.05 and #InfoContainer:GetChildren() > 0 then
             for _, Child in InfoContainer:GetChildren() do
                 if not Child:IsA("UIComponent") then
                     Child:Destroy()
@@ -664,16 +664,16 @@ function Shop:Init()
         SkinContainer.Parent.Label.TextLabel.Visible = value.X.Scale >= 0.05
     end)
 
-    self:ReloadContent(true)
+    Shop.ReloadContent(true)
 end
 
-function Shop:Open(Time: number)
-    if not self.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
+function Shop.Open(Time: number)
+    if not Shop.Enabled or not LocalPlayer.Character.Role or LocalPlayer.Character.Role.Value ~= "Spectator" or not SideBar.Enabled then
         return "Prevented"
     end
 
-    self:ToggleSkinsMenu(false)
-    self:ToggleInfoMenu(false)
+    Shop.ToggleSkinsMenu(false)
+    Shop.ToggleInfoMenu(false)
     PreviewInstances.Render.Image = ""
     PreviewInstances.Render.ImageTransparency = 0
     PreviewInstances.EmotePreview.Visible = false
@@ -695,17 +695,17 @@ function Shop:Open(Time: number)
     InfoContainer.Parent.Size = Utils.UDim.FullY
     SideContainer.Size = Utils.UDim.FullY
     ShopContainer.Parent.Size = UDim2.fromScale(0.7, 1)
-    self.SkinMenu.Open = false
+    Shop.SkinMenu.Open = false
 
     TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
-    self.Opened = true
+    Shop.Opened = true
 
     return
 end
 
-function Shop:Close(Time: number)
-    if self.BuyWindow then
-        self.BuyWindow:Hide(Time <= 0)
+function Shop.Close(Time: number)
+    if Shop.BuyWindow then
+        Shop.BuyWindow:Hide(Time <= 0)
     end
     if workspace.Sounds:FindFirstChild("EmotePreview") then
         workspace.Sounds.EmotePreview:Destroy()
@@ -716,43 +716,43 @@ function Shop:Close(Time: number)
         UI.Size = Utils.UDim.Zero
         UI.Visible = false
     end
-    self.Opened = false
+    Shop.Opened = false
 end
 
-function Shop:Toggle(toggle: boolean)
-    if not self.Enabled and toggle then
-        self:Init()
+function Shop.Toggle(toggle: boolean)
+    if not Shop.Enabled and toggle then
+        Shop:Init()
     end
-    if not toggle and self.Enabled then
-        if self.BuyWindow then
-            self.BuyWindow:Hide(true)
+    if not toggle and Shop.Enabled then
+        if Shop.BuyWindow then
+            Shop.BuyWindow:Hide(true)
         end
         if workspace.Sounds:FindFirstChild("EmotePreview") then
             workspace.Sounds.EmotePreview:Destroy()
         end
-        table.clear(self.ItemModules)
-        self.LoadedItems = {
+        table.clear(Shop.ItemModules)
+        Shop.LoadedItems = {
             Killers = {},
             Survivors = {},
             Emotes = {},
             Skins = {},
         }
-        self.SelectedItem = {
+        Shop.SelectedItem = {
             Name = "",
             Type = "",
             Card = nil,
         }
-        self.SelectedSection = "Survivors"
-        self.UIInstance:Destroy()
-        self.SkinMenu = {
+        Shop.SelectedSection = "Survivors"
+        Shop.UIInstance:Destroy()
+        Shop.SkinMenu = {
             Open = false,
         }
     end
-    self.Enabled = toggle
+    Shop.Enabled = toggle
 end
 
-function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Survivor | Types.Emote, Module: ModuleScript, Type: string, Card: Frame)
-    if not self.Opened then
+function Shop.OnCharButtonPress(codeName: string, info: Types.Killer | Types.Survivor | Types.Emote, Module: ModuleScript, Type: string, Card: Frame)
+    if not Shop.Opened then
         return
     end
 
@@ -767,9 +767,9 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
 
     ButtonsContainer.CurrentItemPrice.Text = info.Config.Price > 0 and tostring(info.Config.Price).."$" or "FREE"
 
-    self.SelectedItem.Name = codeName
-    self.SelectedItem.Type = Type
-    self.SelectedItem.Card = Card
+    Shop.SelectedItem.Name = codeName
+    Shop.SelectedItem.Type = Type
+    Shop.SelectedItem.Card = Card
 
     TweenService:Create(SideContainer, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Sizes.SideBar}):Play()
 
@@ -846,7 +846,7 @@ function Shop:OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
     end
 end
 
-function Shop:ReloadContent(CreateCards: boolean?)
+function Shop.ReloadContent(CreateCards: boolean?)
     if CreateCards == nil then
         CreateCards = false
     end
@@ -857,7 +857,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
     }
     local LO = 0
 
-    local CanMakePreviews = self.PreviewsEnabled and Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
+    local CanMakePreviews = Shop.PreviewsEnabled and Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Performance.SkinPreviews")
 
     local function SetupCard(module, Type: "Survivor" | "Killer" | "Emote")
         if module:HasTag("Dev") then
@@ -875,7 +875,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
 
         local name = module.Name
 
-        if self.LoadedItems[Type.."s"][name] then
+        if Shop.LoadedItems[Type.."s"][name] then
             return
         end
 
@@ -901,7 +901,7 @@ function Shop:ReloadContent(CreateCards: boolean?)
             task.defer(function()
                 local Model = Utils.Instance.FindFirstChild(CharacterFolder, Type.."."..name, 0)
                 if not Model then
-                    warn("[Shop:ReloadContent]: Item preview model can't be found! Make sure it's located in ReplicatedStorage/Characters/"..Type.."! ("..name..")")
+                    warn("[Shop.ReloadContent]: Item preview model can't be found! Make sure it's located in ReplicatedStorage/Characters/"..Type.."! ("..name..")")
                     return
                 end
 
@@ -944,10 +944,10 @@ function Shop:ReloadContent(CreateCards: boolean?)
         end
 
         --create table if not there
-        self.ItemModules[Type.."s"] = self.ItemModules[Type.."s"] or {}
+        Shop.ItemModules[Type.."s"] = Shop.ItemModules[Type.."s"] or {}
 
-        self.LoadedItems[Type.."s"][name] = Card
-        self.ItemModules[Type.."s"][name] = Info
+        Shop.LoadedItems[Type.."s"][name] = Card
+        Shop.ItemModules[Type.."s"][name] = Info
         Container.Interact.MouseEnter:Connect(function()
             if CanMakePreviews and Type ~= "Emote" then
                 TweenService:Create(Preview, TweenInfo.new(0.25), {
@@ -977,11 +977,11 @@ function Shop:ReloadContent(CreateCards: boolean?)
             Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHoverStop, {Volume = 0.2})
         end)
         Container.Interact.MouseButton1Click:Connect(function()
-            if self.SkinMenu.Open then
+            if Shop.SkinMenu.Open then
                 return
             end
             Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
-            self:OnCharButtonPress(name, Info, Module, Type, Card)
+            Shop.OnCharButtonPress(name, Info, Module, Type, Card)
         end)
 
         if Info.Config.Origin and Info.Config.Origin.Icon then
@@ -1049,26 +1049,26 @@ function Shop:ReloadContent(CreateCards: boolean?)
     SetupBatch("Emote")
 end
 
-function Shop:CreateBuyWindow(Module: ModuleScript, skin: boolean?, Parent: Frame, Card: Frame)
-    if self.BuyWindow then
+function Shop.CreateBuyWindow(Module: ModuleScript, skin: boolean?, Parent: Frame, Card: Frame)
+    if Shop.BuyWindow then
         return
     end
 
-    local Window = BuyWindow.New(self, Module, skin, Parent, Card)
+    local Window = BuyWindow.New(Shop, Module, skin, Parent, Card)
     Window.Purchased:Connect(function()
-        if Utils.PlayerData.GetPlayerOwned(LocalPlayer, self.SelectedItem.Type.."s."..self.SelectedItem.Name) then
+        if Utils.PlayerData.GetPlayerOwned(LocalPlayer, Shop.SelectedItem.Type.."s."..Shop.SelectedItem.Name) then
             Buttons.Purchase.Title.Text = "Purchased"
         else
             Buttons.Purchase.Title.Text = "Purchase"
         end
-        self:ReloadContent()
-        self:ReorderSkins()
+        Shop.ReloadContent()
+        Shop.ReorderSkins()
     end)
     Window.Removed:Connect(function()
-        self.BuyWindow = nil
+        Shop.BuyWindow = nil
     end)
 
-    self.BuyWindow = Window
+    Shop.BuyWindow = Window
 end
 
 return Shop
