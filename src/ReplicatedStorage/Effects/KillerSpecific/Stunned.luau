@@ -12,7 +12,7 @@ return Effect.New({
     Name = "Stunned",
     Description = "Keeps the player still and unable to use their abilities for a specific amount of time.",
     Duration = 3,
-    -- ShowInGUI = false, -- (true because of suggestions from Quinn)
+    ShowInGUI = true,
     ApplyEffect = function(_own: Types.Effect, _level: number, char: Model)
         if not RunService:IsServer() then
             return

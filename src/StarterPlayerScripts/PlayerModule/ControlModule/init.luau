@@ -171,7 +171,7 @@ function ControlModule.new()
 	end)
 
 	if UserInputService.TouchEnabled then
-		self.playerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
+		self.playerGui = Players.LocalPlayer:FindFirstChildWhichIsA("PlayerGui")
 		if self.playerGui then
 			self:CreateTouchGuiContainer()
 			self:OnLastInputTypeChanged(UserInputService:GetLastInputType())
@@ -519,10 +519,10 @@ function ControlModule:OnHumanoidSeated(active: boolean, currentSeatPart: BasePa
 end
 
 function ControlModule:OnCharacterAdded(char)
-	self.humanoid = char:FindFirstChildOfClass("Humanoid")
+	self.humanoid = char:FindFirstChildWhichIsA("Humanoid")
 	while not self.humanoid do
 		char.ChildAdded:wait()
-		self.humanoid = char:FindFirstChildOfClass("Humanoid")
+		self.humanoid = char:FindFirstChildWhichIsA("Humanoid")
 	end
 
 	self:UpdateTouchGuiVisibility()

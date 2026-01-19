@@ -97,7 +97,7 @@ local function adjustTouchPitchSensitivity(delta: Vector2): Vector2
 end
 
 local function isInDynamicThumbstickArea(pos: Vector3): boolean
-	local playerGui = player:FindFirstChildOfClass("PlayerGui")
+	local playerGui = player:FindFirstChildWhichIsA("PlayerGui")
 	local touchGui = playerGui and playerGui:FindFirstChild("TouchGui")
 	local touchFrame = touchGui and touchGui:FindFirstChild("TouchControlFrame")
 	local thumbstickFrame = touchFrame and touchFrame:FindFirstChild("DynamicThumbstickFrame")

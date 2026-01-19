@@ -40,7 +40,7 @@ function TouchJump:EnableButton(enable)
 		if not self.jumpButton then
 			self:Create()
 		end
-		local humanoid = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+		local humanoid = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
 		if humanoid and self.externallyEnabled then
 			if self.externallyEnabled then
 				if humanoid.JumpPower > 0 then
@@ -64,7 +64,7 @@ function TouchJump:UpdateEnabled()
 end
 
 function TouchJump:HumanoidChanged(prop)
-	local humanoid = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	local humanoid = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
 	if humanoid then
 		if prop == "JumpPower" then
 			self.jumpPower =  humanoid.JumpPower
@@ -90,10 +90,10 @@ function TouchJump:CharacterAdded(char)
 		self.humanoidChangeConn = nil
 	end
 
-	self.humanoid = char:FindFirstChildOfClass("Humanoid")
+	self.humanoid = char:FindFirstChildWhichIsA("Humanoid")
 	while not self.humanoid do
 		char.ChildAdded:wait()
-		self.humanoid = char:FindFirstChildOfClass("Humanoid")
+		self.humanoid = char:FindFirstChildWhichIsA("Humanoid")
 	end
 
 	self.humanoidJumpPowerConn = self.humanoid:GetPropertyChangedSignal("JumpPower"):Connect(function()

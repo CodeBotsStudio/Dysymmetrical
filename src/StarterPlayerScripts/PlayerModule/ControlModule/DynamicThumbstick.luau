@@ -196,7 +196,7 @@ function DynamicThumbstick:InputInFrame(inputObject: InputObject)
 end
 
 function DynamicThumbstick:DoFadeInBackground()
-	local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+	local playerGui = LocalPlayer:FindFirstChildWhichIsA("PlayerGui")
 	local hasFadedBackgroundInOrientation = false
 
 	-- only fade in/out the background once per orientation
@@ -543,10 +543,10 @@ function DynamicThumbstick:Create(parentFrame: GuiBase2d)
 		end
 	end)
 
-	local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+	local playerGui = LocalPlayer:FindFirstChildWhichIsA("PlayerGui")
 	while not playerGui do
 		LocalPlayer.ChildAdded:wait()
-		playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+		playerGui = LocalPlayer:FindFirstChildWhichIsA("PlayerGui")
 	end
 
 	local playerGuiChangedConn = nil

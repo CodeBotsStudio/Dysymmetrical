@@ -420,7 +420,7 @@ function Invisicam:Update(dt: number, desiredCameraCFrame: CFrame, desiredCamera
 	-- TODO: Move this to a GetHumanoidRootPart helper, probably combine with CheckTorsoReference
 	-- Make sure we still have a HumanoidRootPart
 	if not self.humanoidRootPart then
-		local humanoid = self.char:FindFirstChildOfClass("Humanoid")
+		local humanoid = self.char:FindFirstChildWhichIsA("Humanoid")
 		if humanoid and humanoid.RootPart then
 			self.humanoidRootPart = humanoid.RootPart
 		else

@@ -55,7 +55,7 @@ local Utility = {}
 do
 	local function FindCharacterAncestor(part)
 		if part then
-			local humanoid = part:FindFirstChildOfClass("Humanoid")
+			local humanoid = part:FindFirstChildWhichIsA("Humanoid")
 			if humanoid then
 				return part, humanoid
 			else
@@ -96,7 +96,7 @@ local function findPlayerHumanoid(player: Player)
 			return resultHumanoid
 		else
 			humanoidCache[player] = nil -- Bust Old Cache
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			local humanoid = character:FindFirstChildWhichIsA("Humanoid")
 			if humanoid then
 				humanoidCache[player] = humanoid
 			end

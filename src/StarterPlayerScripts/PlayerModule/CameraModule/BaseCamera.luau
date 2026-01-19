@@ -196,7 +196,7 @@ end
 function BaseCamera:GetHumanoidRootPart(): BasePart
 	if not self.humanoidRootPart then
 		if player.Character then
-			local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+			local humanoid = player.Character:FindFirstChildWhichIsA("Humanoid")
 			if humanoid then
 				self.humanoidRootPart = humanoid.RootPart
 			end
@@ -800,7 +800,7 @@ function BaseCamera:GetHumanoid(): Humanoid?
 			return resultHumanoid
 		else
 			self.humanoidCache[player] = nil -- Bust Old Cache
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			local humanoid = character:FindFirstChildWhichIsA("Humanoid")
 			if humanoid then
 				self.humanoidCache[player] = humanoid
 			end
