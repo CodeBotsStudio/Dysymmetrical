@@ -72,18 +72,18 @@ function SmoothShiftLock.new()
 	LocalPlayer:GetPropertyChangedSignal("DevComputerMovementMode"):Connect(function()
 		self:UpdateMouseLockAvailability()
 	end)
-	
-	if LocalPlayer.Character then
-		self.Character = LocalPlayer.Character
+
+	local function OnCharacterAdded(Character: Model)
+		self.Character = Character
 		self.Humanoid = self.Character:WaitForChild("Humanoid")
 		self.HumanoidRootPart = self.Character:WaitForChild("HumanoidRootPart")
 	end
 	
-	LocalPlayer.CharacterAdded:Connect(function(Character: Model)
-		self.Character = Character
-		self.Humanoid = self.Character:WaitForChild("Humanoid")
-		self.HumanoidRootPart = self.Character:WaitForChild("HumanoidRootPart")
-	end)
+	if LocalPlayer.Character then
+		OnCharacterAdded(LocalPlayer.Character)
+	end
+	
+	LocalPlayer.CharacterAdded:Connect(OnCharacterAdded)
 
 	self:UpdateMouseLockAvailability()
 

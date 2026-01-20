@@ -47,12 +47,14 @@ local USER_GAME_SETTINGS_PROPERTIES =
 
 --[[ Roblox Services ]]--
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local VRService = game:GetService("VRService")
 local UserGameSettings = UserSettings():GetService("UserGameSettings")
 
 -- Static camera utils
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local CameraUtils = require(script:WaitForChild("CameraUtils"))
 local CameraInput = require(script:WaitForChild("CameraInput"))
 
@@ -107,13 +109,8 @@ function CameraModule.new()
 	self.cameraSubjectChangedConn = nil
 	self.cameraTypeChangedConn = nil
 
-	-- Adds CharacterAdded and CharacterRemoving event handlers for all current players
-	for _,player in pairs(Players:GetPlayers()) do
-		self:OnPlayerAdded(player)
-	end
-
-	-- Adds CharacterAdded and CharacterRemoving event handlers for all players who join in the future
-	Players.PlayerAdded:Connect(function(player)
+	-- Adds CharacterAdded and CharacterRemoving event handlers for all players, present and future
+	Utils.Player.ObservePlayers(function(player: Player)
 		self:OnPlayerAdded(player)
 	end)
 
@@ -555,7 +552,7 @@ function CameraModule:OnCharacterRemoving(char, player)
 end
 
 function CameraModule:OnPlayerAdded(player)
-	player.CharacterAdded:Connect(function(char)
+	Utils.Character.ObserveCharacter(player, function(char: Model)
 		self:OnCharacterAdded(char, player)
 	end)
 	player.CharacterRemoving:Connect(function(char)
