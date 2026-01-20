@@ -303,6 +303,22 @@ function PlayerManager._RespawnPlayer(plr: Player, RigName: string?, RigType: ("
 
 		return LoadEmpty()
 	end
+
+	do
+		local Humanoid = char:FindFirstChildWhichIsA("Humanoid")
+		if not Humanoid then
+			warn("[PlayerManager._RespawnPlayer()]: Character rig is missing a `Humanoid` instance in the root model! Loading player character instead...")
+			warn(debug.traceback())
+
+			return LoadEmpty()
+		end
+
+		local Animator = Humanoid:FindFirstChildWhichIsA("Animator")
+		if not Animator then
+			Animator = Instance.new("Animator")
+			Animator.Parent = Humanoid
+		end
+	end
 	
 	char:SetAttribute("CharacterName", RigName)
 
