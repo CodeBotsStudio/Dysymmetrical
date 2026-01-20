@@ -39,6 +39,7 @@ function RoundPlayerList._InitUI(Char: Model)
     end
 
     local UI = Prefabs.UI:Clone()
+    UI.Parent = UIParent
     RoundPlayerList.UI = UI
 
     while RoundState.Value ~= "InRound" do
@@ -131,7 +132,6 @@ function RoundPlayerList._InitUI(Char: Model)
     end
 
     RoundPlayerList.Conns = Conns
-    UI.Parent = UIParent
 end
 
 return RoundPlayerList
