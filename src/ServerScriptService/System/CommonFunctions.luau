@@ -31,6 +31,7 @@ local BadgeService = game:GetService("BadgeService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local PlayerSpeedManager = require(ServerScriptService.Managers.PlayerManager.PlayerSpeedManager)
@@ -38,6 +39,7 @@ local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Types = require(ReplicatedStorage.Classes.Types)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Network = require(ReplicatedStorage.Modules.Network)
+local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 function CommonFunctions:Init()
     for _, CommandScript in ReplicatedStorage.Security.ModeratorCommands:GetChildren() do
@@ -563,6 +565,65 @@ function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, di
         Debris:AddItem(Att, 0.05)
         Debris:AddItem(LinearVel, 0.05)
 	end
+end
+
+type ApplyVelocitySettings = {
+	InitialVelocity: number?,
+	LerpTowardsLookVector: boolean?,
+	LerpDelta: number?,
+}
+function CommonFunctions.ApplyVelocity(Part: Model | BasePart, FuncSettings: ApplyVelocitySettings?): (LinearVelocity, Types.Janitor)
+	if Part:IsA("Model") then
+		Part = Utils.Character.GetRootPart(Part)
+	end
+
+	if not Part then
+		return
+	end
+
+	FuncSettings = FuncSettings or {}
+
+	local TotalMass = 0
+	for _, Descendant in Part.Parent:GetDescendants() do
+		if not (Descendant:IsA("BasePart") and not Descendant.Massless) then
+			continue
+		end
+
+		TotalMass += Descendant.AssemblyMass
+	end
+
+	local LookVector = Part.CFrame.LookVector
+	local LinearVel = Instance.new("LinearVelocity")
+	LinearVel.MaxForce = TotalMass * 300
+	LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
+	LinearVel.LineDirection = Vector3.new(LookVector.X, 0, LookVector.Z)
+	LinearVel.LineVelocity = FuncSettings.InitialVelocity or 0
+	
+	local Attachment = Instance.new("Attachment")
+	Attachment.CFrame = Part.CFrame
+	Attachment.Name = "ApplyVelocityAttachment"
+	Attachment.Parent = Part
+
+	LinearVel.Attachment0 = Attachment
+
+	local JanitorInstance = Janitor.new()
+	JanitorInstance:LinkToInstances(Part, LinearVel)
+
+	JanitorInstance:Add(Attachment, "Destroy")
+
+	if FuncSettings.LerpTowardsLookVector then
+		JanitorInstance:Add(RunService.PostSimulation:Connect(function(_delta: number)
+			if not (LinearVel.Active and Part.Parent) then
+				JanitorInstance:Destroy()
+				return
+			end
+
+			LookVector = Part.CFrame.LookVector
+			LinearVel.LineDirection = LinearVel.LineDirection:Lerp(Vector3.new(LookVector.X, 0, LookVector.Z), FuncSettings.LerpDelta or 0)
+		end))
+	end
+
+	return LinearVel, JanitorInstance
 end
 
 function CommonFunctions.GivePhysicalItemToPlayer(Player: Player, Item: Types.Item)
