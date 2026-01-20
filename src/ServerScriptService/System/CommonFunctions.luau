@@ -523,14 +523,22 @@ function CommonFunctions.GetPlayerPermissionRank(Player: Player): number
 end
 
 --- Checks if a player has a specific permission rank or higher.
+--- 
 --- The minimum rank should be grabbed from `CommonFunctions.Ranks` through its name.
+--- 
 --- Inputting a number is still possible but the existing ranks should be checked.
+--- 
 --- @return Will return if the player has the specified rank and its actual rank.
 function CommonFunctions.PlayerHasPermissionRank(Player: Player, MandatoryRank: string | number): (boolean, number)
 	local Rank = CommonFunctions.GetPlayerPermissionRank(Player)
 	return Rank < (typeof(MandatoryRank) == "string" and Utils.Ranks[MandatoryRank] or MandatoryRank), Rank
 end
 
+--- Applies an instant impulse to a character / part.
+--- 
+--- Useful for knockbacks.
+--- 
+--- For dashes, use `CommonFunctions.ApplyVelocity`.
 function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, direction: Vector3, allowAssembly: boolean?)
 	if magnitude <= 0 or direction == Vector3.zero then
 		return
@@ -568,21 +576,40 @@ function CommonFunctions.RigImpulse(Rig: Model | BasePart, magnitude: number, di
 end
 
 type ApplyVelocitySettings = {
+	--- The initial velocity to apply to this `LinearVelocity` when instancing it.
+	--- 
+	--- Defaults to `0`.
 	InitialVelocity: number?,
+	--- If `true`, the `LineDirection` of this `LinearVelocity` will gradually turn into the `LookVector` of the part it's applied on.
+	--- 
+	--- The delta value of this lerp is defined by `ApplyVelocitySettings.LerpDelta`.
+	--- 
+	--- Defaults to `false`.
 	LerpTowardsLookVector: boolean?,
+	--- The delta of the gradual change in the `LineDirection` of this `LinearVelocity` if `LerpTowardsLookVector` is `true`.
+	--- 
+	--- Defaults to `0.5`.
 	LerpDelta: number?,
 }
+--- Applies a `LinearVelocity` to a part / character.
+--- 
+--- Useful for dash abilities.
+--- 
+--- For a turning dash, check `ApplyVelocitySettings.LerpTowardsLookVector` in this function's parameters.
 function CommonFunctions.ApplyVelocity(Part: Model | BasePart, FuncSettings: ApplyVelocitySettings?): (LinearVelocity, Types.Janitor)
 	if Part:IsA("Model") then
 		Part = Utils.Character.GetRootPart(Part)
 	end
 
+	--if there's no part, don't do anything
 	if not Part then
 		return
 	end
 
+	--since every param of the settings is optional, just default it and make the param itself optional
 	FuncSettings = FuncSettings or {}
 
+	--calculate all of the mass of the model to correspondingly limit the force
 	local TotalMass = 0
 	for _, Descendant in Part.Parent:GetDescendants() do
 		if not (Descendant:IsA("BasePart") and not Descendant.Massless) then
@@ -592,47 +619,72 @@ function CommonFunctions.ApplyVelocity(Part: Model | BasePart, FuncSettings: App
 		TotalMass += Descendant.AssemblyMass
 	end
 
+	--get the initial look vector of the target
 	local LookVector = Part.CFrame.LookVector
+	--create the velocity
 	local LinearVel = Instance.new("LinearVelocity")
 	LinearVel.MaxForce = TotalMass * 300
+	--make it line for easier use
 	LinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
+	--set the direction (non-vertical)
 	LinearVel.LineDirection = Vector3.new(LookVector.X, 0, LookVector.Z)
+	--set FuncSettings.InitialVelocity if it's specified
 	LinearVel.LineVelocity = FuncSettings.InitialVelocity or 0
 	
+	--create the mandatory attachment and joint it to the target's pivot to set the origin point for the velocity
 	local Attachment = Instance.new("Attachment")
 	Attachment.CFrame = Part.CFrame
 	Attachment.Name = "ApplyVelocityAttachment"
 	Attachment.Parent = Part
 
+	--pass the attachment to the velocity for it to work
 	LinearVel.Attachment0 = Attachment
 
+	--create a janitor just in case anything related to the new velocity is destroyed (let it be the velocity itself or its parent)
 	local JanitorInstance = Janitor.new()
 	JanitorInstance:LinkToInstances(Part, LinearVel)
 
+	--add the attachment to the janitor just in case the velocity is destroyed to destroy it accordingly
 	JanitorInstance:Add(Attachment, "Destroy")
 
+	--make the lerp connection if specified to
 	if FuncSettings.LerpTowardsLookVector then
 		JanitorInstance:Add(RunService.PostSimulation:Connect(function(_delta: number)
-			if not (LinearVel.Active and Part.Parent) then
+			--if the part or its parent are gone, destroy
+			if not (Part and Part.Parent) then
 				JanitorInstance:Destroy()
 				return
 			end
 
+			--if the velocity is inactive, wait
+			if not LinearVel.Active then
+				return
+			end
+
+			--set the lookvector again
 			LookVector = Part.CFrame.LookVector
-			LinearVel.LineDirection = LinearVel.LineDirection:Lerp(Vector3.new(LookVector.X, 0, LookVector.Z), FuncSettings.LerpDelta or 0)
+			--set the lerped velocity accordingly relative to FuncSettings.LerpDelta or 0.5 (half point) if it's not specified
+			LinearVel.LineDirection = LinearVel.LineDirection:Lerp(Vector3.new(LookVector.X, 0, LookVector.Z), FuncSettings.LerpDelta or 0.5)
 		end))
 	end
 
+	--return all the stuffs
 	return LinearVel, JanitorInstance
 end
 
-function CommonFunctions.GivePhysicalItemToPlayer(Player: Player, Item: Types.Item)
+--- Gives an item (cola, medkit...) to a player if its character exists.
+function CommonFunctions.GivePhysicalItemToPlayer(Player: Player, Item: ModuleScript | Types.Item)
 	if not Player.Character then
 		return
 	end
 
 	if not Item then
 		return
+	end
+
+	--if it's not a table it's automatically guessed to be a module
+	if typeof(Item) ~= "table" then
+		Item = require(Item)
 	end
 
 	Utils.Type.CopyTable(Item):Init(Player)
