@@ -8,7 +8,6 @@ local RightShoulder = Torso:WaitForChild("Right Shoulder")
 local LeftShoulder = Torso:WaitForChild("Left Shoulder")
 local RightHip = Torso:WaitForChild("Right Hip")
 local LeftHip = Torso:WaitForChild("Left Hip")
-local TransitionTime = Figure:WaitForChild("PlayerAttributes"):WaitForChild("AnimationTransitionTime")
 local pose = "Standing"
 
 local EMOTE_TRANSITION_TIME = 0.1
@@ -188,10 +187,10 @@ local toolAnim = "None"
 local toolAnimTime = 0
 
 local jumpAnimTime = 0
-local jumpAnimDuration = TransitionTime.Value * 3
+local jumpAnimDuration = 0.3
 
-local toolTransitionTime = TransitionTime.Value
-local fallTransitionTime = TransitionTime.Value * 3
+local toolTransitionTime = 0.1
+local fallTransitionTime = 0.3
 
 -- functions
 
@@ -373,14 +372,14 @@ function onRunning(speed)
 	Speed = speed
 
 	if speed > 0.01 then
-		playAnimation("walk", TransitionTime.Value, Humanoid)
+		playAnimation("walk", 0.1, Humanoid)
 		if currentAnimInstance and currentAnimInstance.AnimationId == "http://www.roblox.com/asset/?id=180426354" then
 			setAnimationSpeed(speed / 14.5)
 		end
 		pose = "Running"
 	else
 		if emoteNames[currentAnim] == nil then
-			playAnimation("idle", TransitionTime.Value, Humanoid)
+			playAnimation("idle", 0.1, Humanoid)
 			pose = "Standing"
 		end
 	end
@@ -391,7 +390,7 @@ function onDied()
 end
 
 function onJumping()
-	playAnimation("jump", TransitionTime.Value, Humanoid)
+	playAnimation("jump", 0.1, Humanoid)
 	jumpAnimTime = jumpAnimDuration
 	pose = "Jumping"
 end
@@ -399,7 +398,7 @@ end
 function onClimbing(speed)
 	speed /= getRigScale()
 
-	playAnimation("climb", TransitionTime.Value, Humanoid)
+	playAnimation("climb", 0.1, Humanoid)
 	setAnimationSpeed(speed / 12.0)
 	pose = "Climbing"
 end

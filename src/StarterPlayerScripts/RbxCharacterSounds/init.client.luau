@@ -2,11 +2,9 @@
 -- Roblox character sound script
 
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
-local Utils = require(ReplicatedStorage.Modules.Utils)
 local AtomicBinding = require(script:WaitForChild("AtomicBinding"))
 
 type Playable = Sound | AudioPlayer
@@ -431,5 +429,9 @@ local function playerRemoving(player: Player)
 	end
 end
 
-Utils.Player.ObservePlayers(playerAdded)
+Players.PlayerAdded:Connect(playerAdded)
 Players.PlayerRemoving:Connect(playerRemoving)
+
+for _, player in ipairs(Players:GetPlayers()) do
+	playerAdded(player)
+end

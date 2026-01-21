@@ -5,8 +5,6 @@
 --------------------------------------------------------------------------------
 
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local camera = game.Workspace.CurrentCamera
 
@@ -69,7 +67,10 @@ local blacklist = {} do
 			refreshIgnoreList()
 		end
 
-		Utils.Character.ObserveCharacter(player, characterAdded)
+		player.CharacterAdded:Connect(characterAdded)
+		if player.Character then
+			characterAdded(player.Character)
+		end
 		player.CharacterRemoving:Connect(characterRemoving)
 	end
 
@@ -78,8 +79,12 @@ local blacklist = {} do
 		refreshIgnoreList()
 	end
 
-	Utils.Player.ObservePlayers(playerAdded)
+	Players.PlayerAdded:Connect(playerAdded)
 	Players.PlayerRemoving:Connect(playerRemoving)
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		playerAdded(player)
+	end
 
 	refreshIgnoreList()
 end
