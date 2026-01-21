@@ -633,12 +633,13 @@ function CommonFunctions.ApplyVelocity(Part: Model | BasePart, FuncSettings: App
 	
 	--create the mandatory attachment and joint it to the target's pivot to set the origin point for the velocity
 	local Attachment = Instance.new("Attachment")
-	Attachment.CFrame = Part.CFrame
 	Attachment.Name = "ApplyVelocityAttachment"
 	Attachment.Parent = Part
 
 	--pass the attachment to the velocity for it to work
 	LinearVel.Attachment0 = Attachment
+	--parent it to the part
+	LinearVel.Parent = Part
 
 	--create a janitor just in case anything related to the new velocity is destroyed (let it be the velocity itself or its parent)
 	local JanitorInstance = Janitor.new()
