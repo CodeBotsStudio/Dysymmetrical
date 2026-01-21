@@ -13,6 +13,8 @@ local Utils = {
     },
 
     --- The levels of each mod rank.
+    --- 
+    --- The higher the number, the lower the rank.
     Ranks = {
 		Owner = 1,
 		LeadDeveloper = 5,
@@ -27,12 +29,19 @@ local Utils = {
 
     -- requiring all children like this to have proper autocompletion
 
+    --- Utils related to players.
     Player = require(script.PlayerUtils),
+    --- Utils related to characters.
     Character = require(script.CharacterUtils),
+    --- Utils related to general instances.
     Instance = require(script.InstanceUtils),
+    --- Other utils that might be useful.
     Misc = require(script.MiscellaneousUtils),
+    --- Utils related to specific types (mostly tables).
     Type = require(script.TypeUtils),
+    --- Utils related to player data (saves).
     PlayerData = require(script.PlayerDataUtils),
+    --- Utils related to formulas and other mathematic methods.
     Math = require(script.MathUtils),
 }
 

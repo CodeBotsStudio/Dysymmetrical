@@ -27,7 +27,7 @@
         },
         {
             "className": "SoundGroup",
-            "name": "VoiceLines",
+            "name": "Voicelines",
             "properties": {
                 "Volume": 1
             }

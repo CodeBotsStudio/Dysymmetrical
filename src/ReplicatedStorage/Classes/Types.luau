@@ -885,7 +885,7 @@ export type HitboxSettings = {
         OverwriteExisting: boolean?,
 	}}?,
     --- Any callbacks for events fired in the hitbox's functionality.
-    -- TODO: write what connections there are and what they do
+    --- TODO: write what connections there are and what they do
     Connections: {[string]: (any?) -> ()}?,
 }
 
@@ -917,7 +917,7 @@ export type Projectile = {
     --- It has to have a `CollisionBox` part inside of it that acts as a hitbox for `DestroyOnCollision` if it's `true`.
     --- If it's a model, make a `Pivot` part inside it that represents the center and make it the `PrimaryPart` property.
     --- Then, weld every other part in the model to it.
-    -- TODO: fix MODEL projectiles since only BasePart projectiles work properly
+    --- TODO: fix MODEL projectiles since only BasePart projectiles work properly
     Model: (Model | BasePart),
     --- The initial position of the projectile.
     StartingCFrame: CFrame?,

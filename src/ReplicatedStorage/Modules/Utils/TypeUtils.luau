@@ -219,4 +219,36 @@ function TypeUtils.SplitTableIntoChunks<T>(TableToSplit: T & {}, ChunkSize: numb
     return Chunks
 end
 
+--[[
+	Function for converting a ValueObject tree into a table.
+
+	Used to turn the valueobjects used to store playerdata into a format we can save to the datastore.
+
+	Eventually, this will probably be made two-way, and more functionality may be added to it.
+]]--
+function TypeUtils.ConvertInstanceTreeToTable(TargetInstance: Instance, Depth: number?): ({[string]: {any}})
+	local tree = {}
+
+	-- A cap for maximum allowed depth– leaving it arbitrary feels like a recipe for disaster 
+	Depth = (Depth or -1) + 1
+
+	-- Iterate through all of the instance's children
+	for _index, value in ipairs(TargetInstance:GetChildren()) do
+
+		-- If the child is a folder, run this function again on it to create another nest.
+		if value:IsA("Folder") and Depth < 50 then -- Customize the depth cap as you please. Realistically, nothing will ever go this deep, but to avoid a permanant hang or an infinite loop, you can never be too sure...
+
+			tree[value.Name] = TypeUtils.ConvertInstanceTreeToTable(value, Depth)
+
+			-- If the child is a valueobject, grab its value and add it to the table.
+		elseif value:IsA("ValueBase") then
+			tree[value.Name] = value.Value
+		end
+
+	end
+
+	-- Return the completed table to whatever called the function.
+	return tree
+end
+
 return TypeUtils

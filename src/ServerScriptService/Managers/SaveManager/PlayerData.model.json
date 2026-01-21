@@ -1,0 +1,617 @@
+{
+    "className": "Folder",
+    "children": [
+        {
+            "name": "Achievements",
+            "className": "Folder"
+        },
+        {
+            "name": "Equipped",
+            "className": "Folder",
+            "children": [
+                {
+                    "name": "Emotes",
+                    "className": "Folder",
+                    "children": [
+                        {
+                            "name": "Emote1",
+                            "className": "StringValue"
+                        },
+                        {
+                            "name": "Emote2",
+                            "className": "StringValue"
+                        },
+                        {
+                            "name": "Emote3",
+                            "className": "StringValue"
+                        },
+                        {
+                            "name": "Emote4",
+                            "className": "StringValue"
+                        },
+                        {
+                            "name": "Emote5",
+                            "className": "StringValue"
+                        },
+                        {
+                            "name": "Emote6",
+                            "className": "StringValue"
+                        },
+                        {
+                            "name": "Emote7",
+                            "className": "StringValue"
+                        },
+                        {
+                            "name": "Emote8",
+                            "className": "StringValue"
+                        }
+                    ]
+                },
+                {
+                    "name": "Skins",
+                    "className": "Folder"
+                },
+                {
+                    "name": "Killer",
+                    "className": "StringValue",
+                    "properties": {
+                        "Value": "NullexVoyd"
+                    }
+                },
+                {
+                    "name": "Survivor",
+                    "className": "StringValue",
+                    "properties": {
+                        "Value": "Commander"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Misc",
+            "className": "Folder",
+            "children": [
+                {
+                    "name": "LastSeenLog",
+                    "className": "NumberValue"
+                }
+            ]
+        },
+        {
+            "name": "Purchased",
+            "className": "Folder",
+            "children": [
+                {
+                    "name": "Emotes",
+                    "className": "Folder"
+                },
+                {
+                    "name": "Killers",
+                    "className": "Folder",
+                    "children": [
+                        {
+                            "name": "NullexVoyd",
+                            "className": "NumberValue"
+                        }
+                    ]
+                },
+                {
+                    "name": "Skins",
+                    "className": "Folder"
+                },
+                {
+                    "name": "Survivors",
+                    "className": "Folder",
+                    "children": [
+                        {
+                            "name": "Commander",
+                            "className": "NumberValue"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Settings",
+            "className": "Folder",
+            "children": [
+                {
+                    "name": "Accessibility",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Accessibility",
+                        "LayoutOrder": 4
+                    },
+                    "children": [
+                        {
+                            "name": "EpilepsyMode",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Epilepsy Mode",
+                                "DisplayDescription": "<b>WARNING: Even with this enabled, it's still recommended to avoid playing if you're epileptic!</b>",
+                                "LayoutOrder": 1
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Performance",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Performance",
+                        "LayoutOrder": 3
+                    },
+                    "children": [
+                        {
+                            "name": "SkinPreviews",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Skin Previews",
+                                "DisplayDescription": "When checked, skin previews will show in the shop and in the inventory when hovering over them.",
+                                "LayoutOrder": 1
+                            },
+                            "properties": {
+                                "Value": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Advanced",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Advanced / Dev",
+                        "LayoutOrder": 7
+                    },
+                    "children": [
+                        {
+                            "name": "ShowHitboxes",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Visible Attack Hitboxes",
+                                "DisplayDescription": "Makes all attack hitboxes visible to you",
+                                "LayoutOrder": 1
+                            },
+                            "properties": {
+                                "Value": true
+                            }
+                        },
+                        {
+                            "name": "ShowPlayerHitboxes",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Visible Collision Hitboxes",
+                                "DisplayDescription": "Makes all player attack collision hitboxes visible to you",
+                                "LayoutOrder": 2
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        },
+                        {
+                            "name": "SillyRagdolls",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Silly Ragdolls",
+                                "DisplayDescription": "Adds a slightly big force to ragdolls when instanced (LOCAL ONLY).",
+                                "LayoutOrder": 3
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Audio",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Audio",
+                        "LayoutOrder": 2
+                    },
+                    "children": [
+                        {
+                            "name": "MusicVolume",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Music Volume",
+                                "DisplayDescription": "How loud the music (e. g. lobby music, ambience...) is.",
+                                "LayoutOrder": 1,
+                                "MinValue": 0,
+                                "MaxValue": 200,
+                                "PostDisplayTitle": "%"
+                            },
+                            "properties": {
+                                "Value": 100
+                            }
+                        },
+                        {
+                            "name": "SFXVolume",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "SFX Volume",
+                                "DisplayDescription": "How loud sound effects (footsteps, attacks...) are",
+                                "LayoutOrder": 2,
+                                "MinValue": 0,
+                                "MaxValue": 200,
+                                "PostDisplayTitle": "%"
+                            },
+                            "properties": {
+                                "Value": 100
+                            }
+                        },
+                        {
+                            "name": "UIVolume",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "UI Volume",
+                                "DisplayDescription": "How loud UI sound effects (buttons...) are",
+                                "LayoutOrder": 4,
+                                "MinValue": 0,
+                                "MaxValue": 200,
+                                "PostDisplayTitle": "%"
+                            },
+                            "properties": {
+                                "Value": 100
+                            }
+                        },
+                        {
+                            "name": "VoicelineVolume",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Voiceline Volume",
+                                "DisplayDescription": "How loud the voicelines said by characters are.",
+                                "LayoutOrder": 3,
+                                "MinValue": 0,
+                                "MaxValue": 200,
+                                "PostDisplayTitle": "%"
+                            },
+                            "properties": {
+                                "Value": 100
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Customization",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Customization",
+                        "LayoutOrder": 7
+                    },
+                    "children": [
+                        {
+                            "name": "ScreenDesaturation",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Screen Desaturation When Low",
+                                "DisplayDescription": "If checked, a desaturation effect will be applied to the camera when low on health",
+                                "LayoutOrder": 2
+                            },
+                            "properties": {
+                                "Value": true
+                            }
+                        },
+                        {
+                            "name": "ScreenShakeEnabled",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Screen Shaking Enabled",
+                                "DisplayDescription": "If unchecked, every screen shake effect in the game will be disabled",
+                                "LayoutOrder": 1
+                            },
+                            "properties": {
+                                "Value": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Game",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Game",
+                        "LayoutOrder": 1
+                    },
+                    "children": [
+                        {
+                            "name": "AFK",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "AFK Mode",
+                                "DisplayDescription": "Keeps you from being put into matches when enabled.",
+                                "LayoutOrder": 2
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        },
+                        {
+                            "name": "FieldOfView",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Field Of View",
+                                "DisplayDescription": "Your camera's FOV.",
+                                "LayoutOrder": 1,
+                                "MinValue": 20,
+                                "MaxValue": 80
+                            },
+                            "properties": {
+                                "Value": 70
+                            }
+                        },
+                        {
+                            "name": "MaliceDisabled",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Disable Being Killer",
+                                "DisplayDescription": "When enabled, you won't gain any malice, lessening your chance to become killer.",
+                                "LayoutOrder": 3
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Miscellaneous",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Miscellaneous / Fun",
+                        "LayoutOrder": 6
+                    },
+                    "children": [
+                        {
+                            "name": "DisableKillerIntros",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Disable Killer Intros",
+                                "DisplayDescription": "If checked, the selected killer's intro when starting a match won't load nor play.",
+                                "LayoutOrder": 3
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        },
+                        {
+                            "name": "HitsoundID",
+                            "className": "StringValue",
+                            "attributes": {
+                                "DisplayTitle": "Hitsound ID",
+                                "DisplayDescription": "The ID of the sound that'll play when landing a hit (when the hitmarker shows up)",
+                                "LayoutOrder": 1
+                            },
+                            "properties": {
+                                "Value": ""
+                            }
+                        },
+                        {
+                            "name": "ImageFlashOnHit",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Image Flash On Hit",
+                                "DisplayDescription": "(MEME SETTING) Shows a random image for a brief moment whenever you're hit or you hit someone",
+                                "LayoutOrder": 2
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        },
+                        {
+                            "name": "ShowRewardNotifications",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Show Reward Notifications",
+                                "DisplayDescription": "If unchecked, the notifications that show up when you gain money or EXP won't show up.",
+                                "LayoutOrder": 4
+                            },
+                            "properties": {
+                                "Value": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Privacy",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Privacy",
+                        "LayoutOrder": 5
+                    },
+                    "children": [
+                        {
+                            "name": "HideKillerWins",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Hide Killer Wins",
+                                "DisplayDescription": "Hides the amount of times you've won as Killer.",
+                                "LayoutOrder": 2
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        },
+                        {
+                            "name": "HideMoney",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Hide Money",
+                                "DisplayDescription": "Hides the money you currently have in your player list label in others' screens.",
+                                "LayoutOrder": 4
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        },
+                        {
+                            "name": "HidePlaytime",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Hide Playtime",
+                                "DisplayDescription": "Hides the amount of time that you've been playing the game for.",
+                                "LayoutOrder": 1
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        },
+                        {
+                            "name": "HideSurvivorWins",
+                            "className": "BoolValue",
+                            "attributes": {
+                                "DisplayTitle": "Hide Survivor Wins",
+                                "DisplayDescription": "Hides the amount of times you've won as Survivor.",
+                                "LayoutOrder": 3
+                            },
+                            "properties": {
+                                "Value": false
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Stats",
+            "className": "Folder",
+            "children": [
+                {
+                    "name": "Currency",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Survivor Stats",
+                        "LayoutOrder": 4
+                    },
+                    "children": [
+                        {
+                            "name": "Money",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayInLeaderstats": true,
+                                "DisplayTitle": "Player Points",
+                                "LayoutOrder": 1,
+                                "PostDisplayTitle": "$"
+                            },
+                            "properties": {
+                                "Value": 5000
+                            }
+                        },
+                        {
+                            "name": "NetWorth",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Net Worth",
+                                "LayoutOrder": 2,
+                                "PostDisplayTitle": "$"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "General",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Survivor Stats",
+                        "LayoutOrder": 1
+                    },
+                    "children": [
+                        {
+                            "name": "Malice",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayInLeaderstats": true,
+                                "DisplayTitle": "Chance to Become Killer",
+                                "LayoutOrder": 2
+                            },
+                            "properties": {
+                                "Value": 1
+                            }
+                        },
+                        {
+                            "name": "TimePlayed",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Time Played",
+                                "FormatTime": true,
+                                "LayoutOrder": 1,
+                                "PostDisplayTitle": "[D:]H:M:S"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "KillerStats",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Survivor Stats",
+                        "LayoutOrder": 3
+                    },
+                    "children": [
+                        {
+                            "name": "KillerLosses",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Killer Losses",
+                                "LayoutOrder": 2
+                            }
+                        },
+                        {
+                            "name": "KillerWins",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Killer Wins",
+                                "LayoutOrder": 1
+                            }
+                        },
+                        {
+                            "name": "Kills",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Total Kills",
+                                "LayoutOrder": 3
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "SurvivorStats",
+                    "className": "Folder",
+                    "attributes": {
+                        "DisplayTitle": "Survivor Stats",
+                        "LayoutOrder": 2
+                    },
+                    "children": [
+                        {
+                            "name": "SurvivorLosses",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Survivor Losses",
+                                "LayoutOrder": 2
+                            }
+                        },
+                        {
+                            "name": "SurvivorWins",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Survivor Wins",
+                                "LayoutOrder": 1
+                            }
+                        },
+                        {
+                            "name": "ObjectivesCompleted",
+                            "className": "NumberValue",
+                            "attributes": {
+                                "DisplayTitle": "Objectives Completed As Survivor",
+                                "LayoutOrder": 3
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

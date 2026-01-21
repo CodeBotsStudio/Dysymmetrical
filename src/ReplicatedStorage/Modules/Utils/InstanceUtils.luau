@@ -274,7 +274,7 @@ function InstanceUtils.GetCharacterModule(charType: "Survivor" | "Killer", charN
 		doWarn = true
 	end
 
-    local CharFolder = ReplicatedStorage.Characters
+    local CharFolder = ReplicatedStorage.Content.Characters
 
     local Module
 
@@ -311,7 +311,7 @@ end
 
 --- Gets an emote's module. Just used as a shortcut, and also serves use for tracing errors (it has a custom error message).
 function InstanceUtils.GetEmoteModule(EmoteName: string): ModuleScript
-    local EmoteFolder = ReplicatedStorage.Assets.Emotes
+    local EmoteFolder = ReplicatedStorage.Content.Emotes
 
     local Module = EmoteFolder:FindFirstChild(EmoteName)
 
@@ -334,7 +334,7 @@ function InstanceUtils.GetEffectModule(name: string, subfolder: string?, module:
 	local Effect: ModuleScript
 
 	local path = (subfolder and #subfolder > 0) and subfolder.."."..name or name
-	Effect = InstanceUtils.FindFirstChild(ReplicatedStorage.Effects, path, 0)
+	Effect = InstanceUtils.FindFirstChild(ReplicatedStorage.Content.Effects, path, 0)
 
     if not Effect:IsA("ModuleScript") then
         return
