@@ -165,7 +165,7 @@ local function OnCommanderHit(self: Types.Ability, _hitbox: Types.HitboxDetails,
         TargetHumanoid = self.OwnerProperties.Humanoid,
         EffectSettings = {
             Name = "Resistance",
-            Level = 5,
+            Level = 2,
             Duration = 1,
         },
     })
