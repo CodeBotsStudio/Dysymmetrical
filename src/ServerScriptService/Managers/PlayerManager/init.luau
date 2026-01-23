@@ -58,8 +58,30 @@ function PlayerManager:Init()
 			
 			local Role = char:FindFirstChild("Role")
 
-			if char:GetAttribute("BaseSpeed") == nil then
+			--[[if char:GetAttribute("BaseSpeed") == nil then
 				char:SetAttribute("BaseSpeed", 10.5)
+			end]]
+			
+			if char:GetAttribute("BaseSpeed") == nil then
+				local defaultSpeed = 10.5
+				local charName = char:GetAttribute("CharacterName")
+				local charSkin = char:GetAttribute("CharacterSkinName")
+				local roleValue
+				if char:FindFirstChild("Role") then
+					roleValue = char.Role.Value
+				end
+				
+				if roleValue and charName and #charName > 0 then
+					local moduleInstance = Utils.Instance.GetCharacterModule(roleValue, charName, charName)
+					if moduleInstance then
+						local success, mod = pcall(require, moduleInstance)
+						if success and mod.GameplayConfig and type(mod.GameplayConfig.BaseSpeed) == "number" then
+							defaultSpeed = mod.GameplayConfig.BaseSpeed
+						end
+					end
+				end
+				
+				char:SetAttribute("BaseSpeed", defaultSpeed)
 			end
 
 			char.Parent = PlayerFolder

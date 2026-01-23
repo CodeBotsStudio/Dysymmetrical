@@ -218,7 +218,9 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                             or (collidedpart.Parent:FindFirstChild("Role") and collidedpart.Parent.Role.Value or Char.Role.Value)
                         ) ~= Char.Role.Value) then
                     continue
-                end
+				end
+				
+				--[[
                 -- If the hitbox has no preset anchor, the anchor its using is the HumanoidRootPart of the user– perform some sanity checks to ensure the target isn't getting hit through a wall or similar.
                 if not Config.CFrame then
 
@@ -243,6 +245,33 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                         continue
                     end
                 end
+                ]]
+				
+				-- Check if there's a wall between player and target
+				if not Config.CFrame then
+					local HRoot = collidedpart.Parent:FindFirstChild("HumanoidRootPart")
+					if HRoot then
+						local function isBlockedByObstacle(): boolean
+							for _, offset in {-2, 0, -2} do
+								local origin = Root.Position + Vector3.yAxis * offset
+								local target = HRoot.Position + Vector3.yAxis * offset
+								local cast = workspace:Raycast(origin, target - origin, RayParams)
+								
+								if cast
+									and not cast.Instance:IsDescendantOf(collidedpart.Parent)
+									and cast.Instance.Transparency ~= 1
+									and not cast.Instance:GetAttribute("Hitbox") then
+									return true
+								end
+							end
+							return false
+						end
+						
+						if isBlockedByObstacle() then
+							continue
+						end
+					end
+				end
 
                 -- Otherwise, add the player to two different tracking tables.
                 table.insert(Props.HumanoidsHit, Humanoid)

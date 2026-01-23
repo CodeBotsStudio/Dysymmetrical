@@ -24,10 +24,33 @@ function PlayerSpeedManager:Init()
                     return
                 end
 
-                local CurrentSpeed = Character:GetAttribute("BaseSpeed")
+                --[[local CurrentSpeed = Character:GetAttribute("BaseSpeed")
                 if CurrentSpeed == nil then
                     CurrentSpeed = 10.5
-                end
+                end]]
+				
+				local CurrentSpeed = Character:GetAttribute("BaseSpeed")
+				if CurrentSpeed == nil then
+					local fallBackSpeed = 10.5
+					local charName = Character:GetAttribute("CharacterName")
+					local charSkin = Character:GetAttribute("CharacterSkinName")
+					local roleValue
+					if Character:FindFirstChild("Role") then
+						roleValue = Character.Role.Value
+					end
+					
+					if roleValue and charName and #charName > 0 then
+						local moduleInstance = Utils.Instance.GetCharacterModule(roleValue, charName, charName)
+						if moduleInstance then
+							local success, mod = pcall(require, moduleInstance)
+							if success and mod.GameplayConfig and type(mod.GameplayConfig.BaseSpeed) == "number" then
+								fallBackSpeed = mod.GameplayConfig.BaseSpeed
+							end
+						end
+					end
+					
+					CurrentSpeed = fallBackSpeed
+				end
 
                 local TotalFactor = 1
                 for _, factor in PlayerSpeedManager.ManagedPlayers[Player].Factors do
