@@ -1,0 +1,8 @@
+{
+    "className": "Configuration",
+    "attributes": {
+        "Time": 0,
+        "State": "",
+        "EnoughPlayers": false
+    }
+}

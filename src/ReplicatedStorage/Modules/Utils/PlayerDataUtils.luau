@@ -136,9 +136,10 @@ function PlayerDataUtils.CreateMissingPurchasedSkinValue(SourcePlayer: Player, n
     return SkinFolder
 end
 
+--- Retrieves an achievement's `ValueBase` from a player.
 function PlayerDataUtils.GetAchievementObject(SourcePlayer: Player, path: string): NumberValue | BoolValue
-    local AchievementFolder = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Achievements", 5)
-    local AchievementObject = InstanceUtils.FindFirstChild(AchievementFolder, path, 5)
+    local AchievementFolder = PlayerDataUtils.GetSpecificObject(SourcePlayer, "Achievements")
+    local AchievementObject = InstanceUtils.FindFirstChild(AchievementFolder, path, 0)
     
     if not AchievementObject then
         local steps = TypeUtils.SplitStringPath(path)
@@ -159,6 +160,14 @@ function PlayerDataUtils.GetAchievementObject(SourcePlayer: Player, path: string
     end
 
     return AchievementObject
+end
+
+--- Similar to `Utils.Instance.FindFirstChild()` but only for a player's `PlayerData` folder.
+--- 
+--- This method is mainly used for readability.
+function PlayerDataUtils.GetSpecificObject(Player: Player, Path: string): ValueBase
+    local PlayerData = Player:FindFirstChild("PlayerData")
+    return InstanceUtils.FindFirstChild(PlayerData, Path, 0)
 end
 
 return PlayerDataUtils
