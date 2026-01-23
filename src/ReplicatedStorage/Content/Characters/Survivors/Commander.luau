@@ -146,7 +146,7 @@ local function JusticeBehaviour(self: Types.Ability)
     end))
 
     task.spawn(function()
-        PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0.3)
+        PlayerSpeedManager.AddFactor(self.Owner, self.Name, 0.3)
         self:AddConnection(task.delay(self.UseAnimationTrack and self.UseAnimationTrack.Length or self.Duration, function()
             PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
         end))

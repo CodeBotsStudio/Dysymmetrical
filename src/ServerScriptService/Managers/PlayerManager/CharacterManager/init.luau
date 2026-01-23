@@ -8,6 +8,10 @@ local CharacterManager = {
         Sprinting = false,
         AnimationTransitionTime = 0.1,
         Role = "Spectator",
+        MaxStamina = 100,
+        Stamina = 100,
+        StaminaGain = 18,
+        StaminaDrain = 10,
     },
 }
 

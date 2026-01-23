@@ -57,7 +57,7 @@ local function DataAnchorBehaviour(self: Types.Ability)
             self.Cooldown = self.SecondCooldown
             self.Setup = true
         
-            self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0)
+            self.OwnerProperties.SpeedManager:AddFactor(self.Name, 0)
         
             self:PlayUseAnimation()
             self:AddConnection(task.delay((self.UseAnimationTrack.Length or 1.7) + 0.4, function()
@@ -69,7 +69,7 @@ end
 
 local function CallbackPingBehaviour(self: Types.Ability)
     if RunService:IsServer() then
-        PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0.18)
+        PlayerSpeedManager.AddFactor(self.Owner, self.Name, 0.18)
         self.OwnerProperties.Character:SetAttribute("PreventSlash", true)
 
         self:AddConnection(task.delay(self.Duration, function()

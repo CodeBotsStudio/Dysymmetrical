@@ -1,4 +1,6 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
 
 local CharacterManager = require(script.Parent.CharacterManager)
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -42,11 +44,35 @@ function PlayerRespawnManager.LoadDefaultCharacter(Player: Player): Model
     --prevent next automatic respawn
     PlayerRespawnManager.CancelAutoRespawn(Player)
     --respawn
-    Player:LoadCharacterAsync()
-    --add missing core attributes
-    CharacterManager._SetupDefaultAttributes(Player.Character)
+    local Character = Players:CreateHumanoidModelFromUserIdAsync(Player.UserId)
+    --removing all scripts generated
+    for _, Script in Character:GetDescendants() do
+        if not Script:IsA("BaseScript") then
+            continue
+        end
 
-    return Player.Character
+        Script:Destroy()
+    end
+    --renaming
+    Character.Name = Player.Name
+    --clone all stuff from startercharacterscripts over to the new character
+    for _, Item in StarterPlayer.StarterCharacterScripts:GetChildren() do
+        Item:Clone().Parent = Character
+    end
+    --replace some humanoid properties
+    do
+        local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
+        Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+        Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+    end
+    --add missing core attributes
+    CharacterManager._SetupDefaultAttributes(Character)
+    --parent the character to the folder properly
+    Character.Parent = workspace.Players
+    --actually sets the character and fires CharacterAdded
+    Player.Character = Character
+
+    return Character
 end
 
 return PlayerRespawnManager
