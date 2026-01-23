@@ -18,24 +18,28 @@ return {
                 local HRP = Utils.Character.GetRootPart(Character)
                 local thread
                 Humanoid.StateChanged:Connect(function(_old: Enum.HumanoidStateType, new: Enum.HumanoidStateType)
-                    if new == Enum.HumanoidStateType.Landed then
-                        if thread then
-                            return
-                        end
-                        local Vel = math.abs(HRP.AssemblyLinearVelocity.Y)
-                        local Mult = 40 / Vel / 1.5
-                        local Recovery = Vel / 40 * 0.25
-                        PlayerSpeedManager.ManagedPlayers[Player].Factors.FallSlowness = Mult
-                        thread = task.defer(function()
-                            local elapsed = 0
-                            local alpha = 0
-                            repeat
-                                alpha = math.clamp(elapsed / Recovery, 0, 1)
-                                PlayerSpeedManager.ManagedPlayers[Player].Factors.FallSlowness = math.lerp(Mult, 1, TweenService:GetValue(alpha, Enum.EasingStyle.Circular, Enum.EasingDirection.In))
-                                elapsed += task.wait()
-                            until alpha == 1 or not Humanoid or not PlayerSpeedManager.ManagedPlayers[Player].Factors.FallSlowness
-                        end)
+                    if new ~= Enum.HumanoidStateType.Landed then
+                        return
                     end
+
+                    if thread then
+                        return
+                    end
+                    
+                    local Vel = math.abs(HRP.AssemblyLinearVelocity.Y)
+                    local Mult = 40 / Vel / 1.5
+                    local Recovery = Vel / 40 * 0.25
+                    PlayerSpeedManager.AddFactor(Player, "FallSlowness", Mult)
+                    thread = task.defer(function()
+                        local elapsed = 0
+                        local alpha = 0
+                        repeat
+                            alpha = math.clamp(elapsed / Recovery, 0, 1)
+                            PlayerSpeedManager.ManagedPlayers[Player].Factors.FallSlowness = math.lerp(Mult, 1, TweenService:GetValue(alpha, Enum.EasingStyle.Circular, Enum.EasingDirection.In))
+                            elapsed += task.wait()
+                        until alpha == 1 or not Humanoid or not PlayerSpeedManager.ManagedPlayers[Player].Factors.FallSlowness
+                        PlayerSpeedManager.RemoveFactor(Player, "FallSlowness")
+                    end)
                 end)
             end)
         end)
