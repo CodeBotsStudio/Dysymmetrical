@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Network = require(ReplicatedStorage.Modules.Network)
-local CharacterManager = require(script.CharacterManager)
+local PlayerRespawnManager = require(script.PlayerRespawnManager)
 local Utils = require(ReplicatedStorage.Modules.Utils)
 
 local PlayerManager = {}
@@ -10,7 +10,7 @@ function PlayerManager:Init()
     Network:SetConnection("AddLoadedPlayer", "REMOTE_EVENT", PlayerManager._OnPlayerLoaded)
 
     Utils.Player.ObservePlayers(function(Player: Player)
-        CharacterManager.LoadDefaultCharacter(Player)
+        PlayerRespawnManager.LoadDefaultCharacter(Player)
     end)
 end
 

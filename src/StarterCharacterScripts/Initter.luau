@@ -5,20 +5,17 @@ return {
 
         local Location = IsServer and Server or Char
 
-        local AnimationManager = Char:FindFirstChild("AnimationManager")
-        if not IsServer then
-            require(AnimationManager):Init()
-        end
-
         for _, Module in Location:GetDescendants() do
-            if not Module:IsA("ModuleScript") or Module == AnimationManager or (not IsServer and Module:IsDescendantOf(Server)) then
+            if Module == script or not Module:IsA("ModuleScript") or (not IsServer and Module:IsDescendantOf(Server)) then
                 continue
             end
         
             debug.setmemorycategory(Module.Name)
-            local Scr = require(Module)
-            if type(Scr) == "table" and Scr["Init"] and type(Scr["Init"]) == "function" then
-                Scr:Init()
+            local Code = require(Module)
+            if typeof(Code) == "function" then
+                Code()
+            elseif typeof(Code) == "table" and Code.Init ~= nil and typeof(Code.Init) == "function" then
+                Code:Init()
             end
         end
 

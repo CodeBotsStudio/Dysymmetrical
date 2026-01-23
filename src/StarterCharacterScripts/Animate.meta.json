@@ -1,6 +1,6 @@
 {
     "ignoreUnknownInstances": true,
     "properties": {
-        "Enabled": true
+        "Enabled": false
     }
 }
