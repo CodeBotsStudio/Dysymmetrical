@@ -31,7 +31,7 @@ function PlayerSpeedManager:Init()
 					local roleValue = Character:GetAttribute("Role")
 					
 					if roleValue and charName and #charName > 0 then
-						local moduleInstance = Utils.Instance.GetCharacterModule(roleValue, charName, charName)
+						local moduleInstance = Utils.Instance.GetCharacterModule(roleValue, charName, Character:GetAttribute("CharacterSkinName"))
 						if moduleInstance then
 							local success, mod = pcall(require, moduleInstance)
 							if success and mod.GameplayConfig and type(mod.GameplayConfig.BaseSpeed) == "number" then

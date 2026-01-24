@@ -35,6 +35,30 @@ function CharacterUtils.GetPlayerHumanoid(player: Player) : Humanoid
 	return character:FindFirstChildWhichIsA("Humanoid")
 end
 
+--- Checks if one of the ancestors of `RootInstance` contains a `Humanoid` instance in its children.
+--- 
+--- Useful for fetching `Humanoid`s from accessories, hurtboxes, etc.
+function CharacterUtils.FindHumanoidInModel(RootInstance: Instance): Humanoid?
+	if not RootInstance then
+		return
+	end
+	
+	--starting from the RootInstance itself to make 100% sure it's not inside it
+	-- local CurrentAncestor = RootInstance.Parent
+	local CurrentAncestor = RootInstance
+	while CurrentAncestor and CurrentAncestor ~= workspace do
+		--should we make this recursive?
+		--nah -Dys
+		local Humanoid = CurrentAncestor:FindFirstChildWhichIsA("Humanoid")
+		if Humanoid then
+			return Humanoid
+		end
+		CurrentAncestor = CurrentAncestor.Parent
+	end
+	
+	return
+end
+
 --- Equal to `Humanoid.Died:Connect()` but managed by Janitor.
 function CharacterUtils.ObserveOnDeath(humanoid: Humanoid, callback: () -> ()): Types.Janitor
 	local mainJanitor = Janitor.new()

@@ -350,6 +350,8 @@ export type Survivor = {
     GameplayConfig: {
         --- Amount of health.
         Health: number,
+        --- Priority of the character's hurtbox. Higher = checked first.
+		HitboxPriority: number,
         --- The base number of the speed of this character (the walking speed).
         BaseSpeed: number,
         --- The number that the base speed will be multiplied by when sprinting.
@@ -699,6 +701,8 @@ export type Killer = {
     GameplayConfig: {
         --- Amount of health.
         Health: number,
+        --- Priority of the character's hurtbox. Higher = checked first.
+		HitboxPriority: number,
         --- The base number of the speed of this character (the walking speed).
         BaseSpeed: number,
         --- The number that the base speed will be multiplied by when sprinting.
@@ -871,6 +875,14 @@ export type HitboxSettings = {
     --- 
     --- TODO: **Fill this field with examples as this property is a bit weird to use and research is needed.**
     ExecutionAnimation: string?,
+	--- Minimum wall height required to block hits.
+	---
+	--- Walls shorter than this height will be ignored when checking for wall intersections.
+	---
+	--- Defaults to 3 studs.
+	MinBlockingWallHeight: number?,
+	--- If `true`, this hitbox will not execute wall checking, thus be able to hit through walls.
+	IgnoreWalls: boolean?,
     --- Optional parameter to specify certain status effects that'll be applied to whoever's hit.
     EffectsToApply: {{
         --- Name of the effect in the files.
