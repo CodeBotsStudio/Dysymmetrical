@@ -50,7 +50,8 @@ function CharTypes.GetDefaultSurvivorSettings(): Types.Survivor
 
         GameplayConfig = {
             Health = 100,
-            BaseSpeed = 10.5,
+            HitboxPriority = 1,
+			BaseSpeed = 10.5,
             SprintSpeedMultiplier = 26 / 10.5,
             StaminaProperties = {
                 MaxStamina = 100,
@@ -122,8 +123,9 @@ function CharTypes.GetDefaultKillerSettings(): Types.Killer
         },
 
         GameplayConfig = {
-            Health = 1200,
-            BaseSpeed = 10.5,
+			Health = 1200,
+			HitboxPriority = 1,
+			BaseSpeed = 10.5,
             SprintSpeedMultiplier = 26 / 10.5,
             StaminaProperties = {
                 MaxStamina = 110,

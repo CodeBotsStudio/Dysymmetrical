@@ -99,7 +99,7 @@ function AntiNoclip:Init()
 						end
 
 						local Origin = NoclipPart.Position
-						local Direction = Part.Position
+						local Direction = (Part.Position - NoclipPart.Position)
 
 						local RayResults = workspace:Raycast(Origin, Direction, RayParams)
 				

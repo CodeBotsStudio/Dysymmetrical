@@ -168,6 +168,20 @@ function CharacterUtils.ObserveHumanoid(
 	end)
 end
 
+--- Searches up the hierarchy from a part to find a Humanoid.
+--- Useful for detecting characters from accessories or nested folders.
+function CharacterUtils.FindHumanoid(part: Instance): Humanoid?
+	if not part then return nil end
+	
+	local current = part.Parent
+	while current and current ~= workspace do
+		local hum = current:FindFirstChildWhichIsA("Humanoid")
+		if hum then return hum end
+		current = current.Parent
+	end
+	return nil
+end
+
 --- Checks if a player has an effect.
 --- @return Returns a `boolean` indicating if the specified player has the effect and the level if it's true.
 function CharacterUtils.CheckPlayerEffect(Player: Player, effectName: string): (boolean, number?)
