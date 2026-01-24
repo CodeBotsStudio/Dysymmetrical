@@ -98,7 +98,7 @@ return {
                 end
 
                 --lerp the ghost's position to its supposed target position
-                Ghost.Position = Ghost.Position:Lerp(targetPosition, delta * 9)
+                Ghost.Position = Ghost.Position:Lerp(targetPosition, delta * 16.5)
             end
         end))
     end,
