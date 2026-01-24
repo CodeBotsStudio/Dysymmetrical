@@ -72,7 +72,7 @@ function PlayerManager:Init()
 				end
 				
 				if roleValue and charName and #charName > 0 then
-					local moduleInstance = Utils.Instance.GetCharacterModule(roleValue, charName, charName)
+					local moduleInstance = Utils.Instance.GetCharacterModule(roleValue, charName, charSkin)
 					if moduleInstance then
 						local success, mod = pcall(require, moduleInstance)
 						if success and mod.GameplayConfig and type(mod.GameplayConfig.BaseSpeed) == "number" then
@@ -232,6 +232,23 @@ end
 function PlayerManager._SetupHitboxes(Character: Model)
 	local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
 	local HumanoidRootPart = Utils.Character.GetRootPart(Character)
+	
+	-- Get character config for priority
+	local hurtboxPriority = 1 -- fallback
+	local charName = Character:GetAttribute("CharacterName")
+	local charSkin = Character:GetAttribute("CharacterSkinName")
+	local roleValue = Character:FindFirstChild("Role") and Character.Role.Value
+	
+	if roleValue and charName and #charName > 0 then
+		local moduleInstance = Utils.Instance.GetCharacterModule(roleValue, charName, charSkin)
+		if moduleInstance then
+			local success, mod = pcall(require, moduleInstance)
+			if success and mod.GameplayConfig and type(mod.GameplayConfig.HitboxPriority) == "number" then
+				hurtboxPriority = mod.GameplayConfig.HitboxPriority
+			end
+		end
+	end
+	
 	local HitboxFolder = Instance.new("Folder")
 	HitboxFolder.Name = "Hitboxes"
 	HitboxFolder.Parent = Character
@@ -241,6 +258,7 @@ function PlayerManager._SetupHitboxes(Character: Model)
 		Weld.Name = hitbox.Name
 		Weld.Parent = HumanoidRootPart
 		local h = hitbox:Clone()
+		h:SetAttribute("HitboxPriority", hurtboxPriority)
 		h.Parent = HitboxFolder
 		h.CFrame = HumanoidRootPart.CFrame
 		Weld.Part0 = HumanoidRootPart

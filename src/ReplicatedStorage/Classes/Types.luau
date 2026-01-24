@@ -349,9 +349,11 @@ export type Survivor = {
     --- Gameplay mechanics config that will affect how the character works.
     GameplayConfig: {
         --- Amount of health.
-        Health: number,
+		Health: number,
+		--- Priority for the character's hurtbox. Higher = checked first.
+		HitboxPriority: number,
         --- The base number of the speed of this character (the walking speed).
-        BaseSpeed: number,
+		BaseSpeed: number,
         --- The number that the base speed will be multiplied by when sprinting.
         SprintSpeedMultiplier: number,
         --- Useful stamina properties that you can change.
@@ -698,7 +700,9 @@ export type Killer = {
     --- Gameplay mechanics config that will affect how the character works.
     GameplayConfig: {
         --- Amount of health.
-        Health: number,
+		Health: number,
+		--- Priority of the character's hurtbox. Higher = checked first.
+		HitboxPriority: number,
         --- The base number of the speed of this character (the walking speed).
         BaseSpeed: number,
         --- The number that the base speed will be multiplied by when sprinting.
@@ -858,7 +862,7 @@ export type HitboxSettings = {
     --- Info boolean that indicates if this hitbox is originated from a projectile.
     IsProjectile: boolean?,
     --- If true, the hitbox will be able to hit anyone.
-    FriendlyFire: boolean?,
+	FriendlyFire: boolean?,
     --- Reason ID for custom behaviours on hit. Please assign this.
     Reason: string,
     --- The shape of the hitbox.
@@ -870,7 +874,15 @@ export type HitboxSettings = {
     --- Will be looked up automatically if this isn't set.
     --- 
     --- TODO: **Fill this field with examples as this property is a bit weird to use and research is needed.**
-    ExecutionAnimation: string?,
+	ExecutionAnimation: string?,
+	--- Minimum wall height required to block hits.
+	---
+	--- Walls shoretr than this are ignored.
+	---
+	--- Default is 3 studs
+	MinBlockingWallHeight: number?,
+	--- If true, hitbox will not be blocked by walls.
+	IgnoreWalls: boolean?,
     --- Optional parameter to specify certain status effects that'll be applied to whoever's hit.
     EffectsToApply: {{
         --- Name of the effect in the files.
