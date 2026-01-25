@@ -321,7 +321,7 @@ function PlayerUtils._Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
         PlayerUtils.FadeFrame.BackgroundTransparency = StartTransparency or 1
         PlayerUtils.FadeFrame.BackgroundColor3 = FadeColor and Color3.fromRGB(FadeColor.R, FadeColor.G, FadeColor.B) or Color3.fromRGB(0, 0, 0)
         PlayerUtils.FadeFrame.Size = UDim2.fromScale(1, 1)
-        PlayerUtils.FadeFrame.Parent = InstanceUtils.FindFirstChild(Players.LocalPlayer.PlayerGui, "KillerIntros")
+        PlayerUtils.FadeFrame.Parent = InstanceUtils.AwaitChild(Players.LocalPlayer.PlayerGui, "KillerIntros")
 
         if Duration <= 0 then
             PlayerUtils.FadeFrame.BackgroundTransparency = 0

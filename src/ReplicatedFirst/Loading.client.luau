@@ -113,7 +113,7 @@ task.delay(10, function()
     end
 end)
 
-while #loadedAssets < #assets - 100 or loaded do
+while #loadedAssets < #assets - 100 and not loaded do
     task.wait()
 end
 

@@ -67,7 +67,7 @@ function GlobalTimeManager:Init()
 end
 
 function GlobalTimeManager._EnoughPlayersPresent()
-    return Utils.Player.GetLoadedPlayers(false) >= GlobalTimeManager.Config.MinimumPlayerCount
+    return #Utils.Player.GetLoadedPlayers(false) >= GlobalTimeManager.Config.MinimumPlayerCount
 end
 
 --- You can use this instead of changing the value directly. It works better.

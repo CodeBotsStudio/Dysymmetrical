@@ -195,7 +195,7 @@ end
 --- Checks if a player has an effect.
 --- @return Returns a `boolean` indicating if the specified player has the effect and the level if it's true.
 function CharacterUtils.CheckPlayerEffect(Player: Player, effectName: string): (boolean, number?)
-    if Player.Character and InstanceUtils.FindFirstChild(Player.Character, "Effects."..effectName) then
+    if Player.Character and InstanceUtils.AwaitChild(Player.Character, "Effects."..effectName) then
         return true, Player.Character.Effects[effectName].Value
     end
 

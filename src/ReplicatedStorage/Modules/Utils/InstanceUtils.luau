@@ -213,10 +213,16 @@ function InstanceUtils.ObserveAttribute(
 	return mainJanitor
 end
 
---- Equivalent to `Instance:WaitForChild()` but it uses `Instance:FindFirstChild()` first to check if it's already there and not have to do `Instance:WaitForChild()`.
-function InstanceUtils.FindFirstChild(Parent: Instance, ChildPath: string, Timeout: number?): Instance
+--- Tries to execute `Parent:FindFirstChild(...)`, but with support for pathing instead of method chaining and,
+--- if it returns `nil` and a `Timeout` parameter isn't specified or is greater than 0,
+--- it will execute `Parent:WaitForChild(..., Timeout or 3)` instead.
+--- 
+--- Useful for when you want to use `WaitForChild()` while saving a bit of memory and yielding by using `FindFirstChild()` first.
+--- 
+--- Commonly used to shorten `local Thing = Instance:FindFirstChild("Thing") or Instance:WaitForChild("Thing")` or even `local Thing = Instance:FindFirstChild("Parent"):FindFirstChild("Thing")`.
+function InstanceUtils.AwaitChild(Parent: Instance, ChildPath: string, Timeout: number?): Instance
     if not Parent then
-        warn("[Utils.Instance.FindFirstChild()] `Parent` is nil!")
+        warn("[Utils.Instance.AwaitChild()] `Parent` is nil!")
         return
     end
 
@@ -235,7 +241,7 @@ function InstanceUtils.FindFirstChild(Parent: Instance, ChildPath: string, Timeo
     end
 
     if not Result or Result == Parent then
-        -- warn("[Utils.Instance.FindFirstChild()] Couldn't find \""..Parent.Name.."."..ChildPath.."\"!", debug.traceback())
+        -- warn("[Utils.Instance.AwaitChild()] Couldn't find \""..Parent.Name.."."..ChildPath.."\"!", debug.traceback())
         return
     end
 
@@ -334,7 +340,7 @@ function InstanceUtils.GetEffectModule(name: string, subfolder: string?, module:
 	local Effect: ModuleScript
 
 	local path = (subfolder and #subfolder > 0) and subfolder.."."..name or name
-	Effect = InstanceUtils.FindFirstChild(ReplicatedStorage.Content.Effects, path, 0)
+	Effect = InstanceUtils.AwaitChild(ReplicatedStorage.Content.Effects, path, 0)
 
     if not Effect:IsA("ModuleScript") then
         return

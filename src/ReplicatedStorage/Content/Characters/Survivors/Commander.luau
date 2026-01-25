@@ -93,7 +93,7 @@ local function ReloadBehaviour(self: Types.Ability)
 end
 
 local function JusticeExtraInit(self: Types.Ability)
-    self.JusticeModel = Utils.Instance.FindFirstChild(self.OwnerProperties.Character, "Deagle")
+    self.JusticeModel = Utils.Instance.AwaitChild(self.OwnerProperties.Character, "Deagle")
 end
 
 local function JusticeBehaviour(self: Types.Ability)

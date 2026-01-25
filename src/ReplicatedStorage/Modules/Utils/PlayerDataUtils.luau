@@ -17,7 +17,7 @@ function PlayerDataUtils.GetPlayerEquipped(Player: Player, path: string, value: 
     end
 
     local splitPath = TypeUtils.SplitStringPath(path)
-    local Equipped = InstanceUtils.FindFirstChild(Player, "PlayerData.Equipped", 5)
+    local Equipped = InstanceUtils.AwaitChild(Player, "PlayerData.Equipped", 5)
     if #splitPath == 1 then
         local Child = Equipped:FindFirstChild(splitPath[1])
         return value and Child.Value or Child
@@ -60,8 +60,8 @@ function PlayerDataUtils.GetPlayerOwned(Player: Player, path: string, value: boo
         value = true
     end
 
-    local PurchasedFolder = InstanceUtils.FindFirstChild(Player, "PlayerData.Purchased", 5)
-    local Child = InstanceUtils.FindFirstChild(PurchasedFolder, path, 0)
+    local PurchasedFolder = InstanceUtils.AwaitChild(Player, "PlayerData.Purchased", 5)
+    local Child = InstanceUtils.AwaitChild(PurchasedFolder, path, 0)
     return value and (Child and Child.Value or false) or Child
 end
 
@@ -73,15 +73,15 @@ function PlayerDataUtils.GetPlayerStat(Player: Player, path: string, value: bool
         value = true
     end
 
-    local Stats = InstanceUtils.FindFirstChild(Player, "PlayerData.Stats", 5)
-    local Stat = InstanceUtils.FindFirstChild(Stats, path, 0)
+    local Stats = InstanceUtils.AwaitChild(Player, "PlayerData.Stats", 5)
+    local Stat = InstanceUtils.AwaitChild(Stats, path, 0)
     return value and Stat.Value or Stat
 end
 
 --- Retrieves a player's setting value through a string path.
 function PlayerDataUtils.GetPlayerSetting(Player: Player, path: string): any
     local splitPath = TypeUtils.SplitStringPath(path)
-    local PlayerSettings = InstanceUtils.FindFirstChild(Player, "PlayerData.Settings", 5)
+    local PlayerSettings = InstanceUtils.AwaitChild(Player, "PlayerData.Settings", 5)
     if #splitPath == 1 then
         return PlayerSettings:FindFirstChild(splitPath[1]).Value
     else
@@ -100,10 +100,10 @@ end
 --- INTERNAL | SERVER FUNCTION: Used to create a character's equipped skin value for a player if it's missing.
 function PlayerDataUtils.CreateMissingSkinValue(SourcePlayer: Player, name: string): StringValue
     if not RunService:IsServer() then
-        return InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins."..name, 5) :: StringValue | any
+        return InstanceUtils.AwaitChild(SourcePlayer, "PlayerData.Equipped.Skins."..name, 5) :: StringValue | any
     end
 
-    local EquippedSkins = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Equipped.Skins", 5)
+    local EquippedSkins = InstanceUtils.AwaitChild(SourcePlayer, "PlayerData.Equipped.Skins", 5)
     local SkinValue = EquippedSkins:FindFirstChild(name)
     if SkinValue then
         return SkinValue
@@ -120,11 +120,11 @@ end
 --- INTERNAL | SERVER FUNCTION: Used to create a character's purchased skins folder for a player if it's missing.
 function PlayerDataUtils.CreateMissingPurchasedSkinValue(SourcePlayer: Player, name: string): Folder
     if not RunService:IsServer() then
-        return InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins."..name, 5) :: Folder | any
+        return InstanceUtils.AwaitChild(SourcePlayer, "PlayerData.Purchased.Skins."..name, 5) :: Folder | any
     end
 
-    local PurchasedSkins = InstanceUtils.FindFirstChild(SourcePlayer, "PlayerData.Purchased.Skins", 5)
-    local SkinFolder = InstanceUtils.FindFirstChild(PurchasedSkins, name, 0)
+    local PurchasedSkins = InstanceUtils.AwaitChild(SourcePlayer, "PlayerData.Purchased.Skins", 5)
+    local SkinFolder = InstanceUtils.AwaitChild(PurchasedSkins, name, 0)
     if SkinFolder then
         return SkinFolder
     end
@@ -139,7 +139,7 @@ end
 --- Retrieves an achievement's `ValueBase` from a player.
 function PlayerDataUtils.GetAchievementObject(SourcePlayer: Player, path: string): NumberValue | BoolValue
     local AchievementFolder = PlayerDataUtils.GetSpecificObject(SourcePlayer, "Achievements")
-    local AchievementObject = InstanceUtils.FindFirstChild(AchievementFolder, path, 0)
+    local AchievementObject = InstanceUtils.AwaitChild(AchievementFolder, path, 0)
     
     if not AchievementObject then
         local steps = TypeUtils.SplitStringPath(path)
@@ -162,12 +162,12 @@ function PlayerDataUtils.GetAchievementObject(SourcePlayer: Player, path: string
     return AchievementObject
 end
 
---- Similar to `Utils.Instance.FindFirstChild()` but only for a player's `PlayerData` folder.
+--- Similar to `Utils.Instance.AwaitChild()` but only for a player's `PlayerData` folder.
 --- 
 --- This method is mainly used for readability.
 function PlayerDataUtils.GetSpecificObject(Player: Player, Path: string): ValueBase
     local PlayerData = Player:FindFirstChild("PlayerData")
-    return InstanceUtils.FindFirstChild(PlayerData, Path, 0)
+    return InstanceUtils.AwaitChild(PlayerData, Path, 0)
 end
 
 return PlayerDataUtils

@@ -76,7 +76,7 @@ function BadgeItemGranter.CheckPlayer(Player: Player, PlayerData: Folder)
                     continue
                 end
 
-                local Purchased = Utils.Instance.FindFirstChild(PurchasedFolder, "Skins."..ItemTable.Item.RootCharacterName, 0) or Utils.PlayerData.CreateMissingPurchasedSkinValue(Player, ItemTable.Item.RootCharacterName)
+                local Purchased = Utils.Instance.AwaitChild(PurchasedFolder, "Skins."..ItemTable.Item.RootCharacterName, 0) or Utils.PlayerData.CreateMissingPurchasedSkinValue(Player, ItemTable.Item.RootCharacterName)
                 if Purchased:FindFirstChild(ItemTable.Item.Name) then
                     continue
                 end

@@ -1,8 +1,8 @@
 {
     "className": "Configuration",
     "attributes": {
-        "Time": 0,
-        "State": "",
+        "Time": 45,
+        "State": "Lobby",
         "EnoughPlayers": false
     }
 }
