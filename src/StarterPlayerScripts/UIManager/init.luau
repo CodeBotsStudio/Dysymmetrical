@@ -28,7 +28,7 @@ UIManager.DefaultGuiInfo = {
         ResetOnSpawn = true,
     },
     {
-        Name = "PlayerStats",
+        Name = "PlayerVitals",
     },
     {
         Name = "Effects",

@@ -69,6 +69,7 @@ function PlayerRespawnManager.LoadDefaultCharacter(Player: Player): Model
     CharacterManager._SetupDefaultAttributes(Character)
     --parent the character to the folder properly
     Character.Parent = workspace.Players
+    --TODO: fix character respawning disabling all UI and locking the camera in place for no apparent reason at all
     --actually sets the character and fires CharacterAdded
     Player.Character = Character
 
