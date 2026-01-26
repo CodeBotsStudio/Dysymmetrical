@@ -149,6 +149,9 @@ function UIManager.CreateScreenGui(Info: GuiItem): ScreenGui
     end
     if ScreenGui.ResetOnSpawn then
         ScreenGui.ResetOnSpawn = false
+        --why am I doing this instead of `ScreenGui:ClearAllChildren()`
+        --it's been proved that just redoing the ScrenGui is more performant than clearing its children because it doesn't have to reparent every single child individually
+        --cool sauce i love reading random stuff like this in devforum out of nowhere
         local JanitorInstance = Utils.Character.ObserveCharacter(Players.LocalPlayer, function(_Character: Model)
             ScreenGui:Destroy()
             UIManager.ManagedScreenGuis[Info.Name] = UIManager.CreateScreenGui(Info)
