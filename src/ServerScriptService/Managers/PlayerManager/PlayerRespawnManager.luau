@@ -15,7 +15,7 @@ function PlayerRespawnManager:Init()
             Utils.Character.ObserveOnDeath(Humanoid, function()
                 --sets a thread to wait for 3 seconds to respawn the player automatically
                 PlayerRespawnManager.PendingAutoRespawns[Player.UserId] =
-                    task.delay(3, CharacterManager.LoadDefaultCharacter, Player)
+                    task.delay(3, PlayerRespawnManager.LoadDefaultCharacter, Player)
             end)
         end)
     end)
@@ -55,6 +55,8 @@ function PlayerRespawnManager.LoadDefaultCharacter(Player: Player): Model
     end
     --renaming
     Character.Name = Player.Name
+    local Root = Utils.Character.GetRootPart(Character)
+    Character.PrimaryPart = Root
     --clone all stuff from startercharacterscripts over to the new character
     for _, Item in StarterPlayer.StarterCharacterScripts:GetChildren() do
         Item:Clone().Parent = Character
@@ -70,6 +72,10 @@ function PlayerRespawnManager.LoadDefaultCharacter(Player: Player): Model
     --parent the character to the folder properly
     Character.Parent = workspace.Players
     --TODO: fix character respawning disabling all UI and locking the camera in place for no apparent reason at all
+    if Player.Character then
+        Player.Character:Destroy()
+        Player.Character = nil
+    end
     --actually sets the character and fires CharacterAdded
     Player.Character = Character
 

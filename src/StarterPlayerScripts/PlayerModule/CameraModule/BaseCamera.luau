@@ -38,8 +38,10 @@ local CameraUI = require(script.Parent:WaitForChild("CameraUI"))
 
 --[[ Roblox Services ]]--
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local VRService = game:GetService("VRService")
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local UserGameSettings = UserSettings():GetService("UserGameSettings")
 
 local SmoothShiftLockSettings = require(script.Parent:WaitForChild("SmoothShiftLock"):WaitForChild("Settings"))
@@ -114,12 +116,9 @@ function BaseCamera.new()
 	-- Initialization things used to always execute at game load time, but now these camera modules are instantiated
 	-- when needed, so the code here may run well after the start of the game
 
-	player.CharacterAdded:Connect(function(char)
+	Utils.Character.ObserveCharacter(player, function(char)
 		self:OnCharacterAdded(char)
 	end)
-	if player.Character then
-		self:OnCharacterAdded(player.Character)
-	end
 
 	if self.playerCameraModeChangeConn then self.playerCameraModeChangeConn:Disconnect() end
 	self.playerCameraModeChangeConn = player:GetPropertyChangedSignal("CameraMode"):Connect(function()

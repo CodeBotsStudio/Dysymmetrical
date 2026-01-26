@@ -19,11 +19,13 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local UserGameSettings = UserSettings():GetService("UserGameSettings")
 local VRService = game:GetService("VRService")
 
 -- Roblox User Input Control Modules - each returns a new() constructor function used to create controllers as needed
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local Keyboard = require(script:WaitForChild("Keyboard"))
 local Gamepad = require(script:WaitForChild("Gamepad"))
 local DynamicThumbstick = require(script:WaitForChild("DynamicThumbstick"))
@@ -131,8 +133,12 @@ function ControlModule.new()
 
 	self.vehicleController = VehicleController.new(CONTROL_ACTION_PRIORITY)
 
-	Players.LocalPlayer.CharacterAdded:Connect(function(char) self:OnCharacterAdded(char) end)
-	Players.LocalPlayer.CharacterRemoving:Connect(function(char) self:OnCharacterRemoving(char) end)
+	Utils.Character.ObserveCharacter(Players.LocalPlayer, function(char)
+		self:OnCharacterAdded(char)
+	end)
+	Players.LocalPlayer.CharacterRemoving:Connect(function(char)
+		self:OnCharacterRemoving(char)
+	end)
 
 	if Players.LocalPlayer.Character then
 		self:OnCharacterAdded(Players.LocalPlayer.Character)

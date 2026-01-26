@@ -2,9 +2,11 @@
 -- Roblox character sound script
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
+local Utils = require(ReplicatedStorage.Modules.Utils)
 local AtomicBinding = require(script:WaitForChild("AtomicBinding"))
 
 type Playable = Sound | AudioPlayer
@@ -391,8 +393,6 @@ local binding = AtomicBinding.new({
 	rootPart = "HumanoidRootPart",
 }, initializeSoundSystem)
 
-local playerConnections = {}
-
 local function characterAdded(character)
 	binding:bindRoot(character)
 end
@@ -402,36 +402,15 @@ local function characterRemoving(character)
 end
 
 local function playerAdded(player: Player)
-	local connections = playerConnections[player]
-	if not connections then
-		connections = {}
-		playerConnections[player] = connections
-	end
-
-	if player.Character then
-		characterAdded(player.Character)
-	end
-	table.insert(connections, player.CharacterAdded:Connect(characterAdded))
-	table.insert(connections, player.CharacterRemoving:Connect(characterRemoving))
+	local JanitorInstance = Utils.Character.ObserveCharacter(player, characterAdded)
+	JanitorInstance:Add(player.CharacterRemoving:Connect(characterRemoving))
 end
 
 local function playerRemoving(player: Player)
-	local connections = playerConnections[player]
-	if connections then
-		for _, conn in ipairs(connections) do
-			conn:Disconnect()
-		end
-		playerConnections[player] = nil
-	end
-
 	if player.Character then
 		characterRemoving(player.Character)
 	end
 end
 
-Players.PlayerAdded:Connect(playerAdded)
+Utils.Player.ObservePlayers(playerAdded)
 Players.PlayerRemoving:Connect(playerRemoving)
-
-for _, player in ipairs(Players:GetPlayers()) do
-	playerAdded(player)
-end
