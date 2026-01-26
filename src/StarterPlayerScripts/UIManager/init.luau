@@ -25,7 +25,7 @@ UIManager.DefaultGuiInfo = {
     {
         Name = "Time",
         IgnoreGuiInset = true,
-        ResetOnSpawn = true,
+        ResetOnSpawn = false,
     },
     {
         Name = "PlayerVitals",
@@ -131,7 +131,7 @@ end
 --- 
 --- Similar to `UIManager.FetchScreenGui` but takes `GuiItem` as a parameter, letting you create a `ScreenGui` from scratch with custom properties already set.
 function UIManager.CreateScreenGui(Info: GuiItem): ScreenGui
-    local ScreenGui = UIManager.ManagedScreenGuis[Info.Name] or Players.LocalPlayer.PlayerGui:FindFirstChild(Info.Name)
+    local ScreenGui = UIManager.ManagedScreenGuis[Info.Name]
     if ScreenGui then
         return ScreenGui
     end
@@ -147,12 +147,20 @@ function UIManager.CreateScreenGui(Info: GuiItem): ScreenGui
     if Info.ResetOnSpawn ~= nil then
         ScreenGui.ResetOnSpawn = Info.ResetOnSpawn
     end
+    if ScreenGui.ResetOnSpawn then
+        ScreenGui.ResetOnSpawn = false
+        local JanitorInstance = Utils.Character.ObserveCharacter(Players.LocalPlayer, function(_Character: Model)
+            ScreenGui:Destroy()
+            UIManager.ManagedScreenGuis[Info.Name] = UIManager.CreateScreenGui(Info)
+        end)
+        JanitorInstance:LinkToInstance(ScreenGui)
+    end
     -- override -> order in default table -> default to last in default table
     ScreenGui.DisplayOrder = Info.DisplayOrder or table.find(UIManager.DefaultGuiInfo, Info) or Utils.Type.GetCountOfDict(UIManager.ManagedScreenGuis)
+    ScreenGui.Parent = Players.LocalPlayer.PlayerGui
     if Info.Callback then
         Info.Callback(ScreenGui)
     end
-    ScreenGui.Parent = Players.LocalPlayer.PlayerGui
 
     return ScreenGui
 end
@@ -164,13 +172,24 @@ function UIManager.FetchScreenGui(Name: string): ScreenGui
         return Result
     end
 
-    Result = Players.LocalPlayer.PlayerGui:FindFirstChild(Name)
-    if Result then
-        UIManager.ManagedScreenGuis[Name] = Result
-        return Result
+    --removed this due to remaking ResetOnSpawn behaviour
+    -- Result = Players.LocalPlayer.PlayerGui:FindFirstChild(Name)
+    -- if Result then
+    --     UIManager.ManagedScreenGuis[Name] = Result
+    --     return Result
+    -- end
+
+    return UIManager.CreateScreenGUI(UIManager._GetDefaultInfoByName(Name) or {Name = Name})
+end
+
+function UIManager._GetDefaultInfoByName(Name: string): GuiItem
+    for _, Info: GuiItem in UIManager.DefaultGuiInfo do
+        if Info.Name == Name then
+            return Info
+        end
     end
 
-    return UIManager.CreateScreenGUI({Name = Name})
+    return
 end
 
 return UIManager
