@@ -35,7 +35,15 @@ function PlayerRespawnManager.CancelAutoRespawn(Player: Player)
     end
 end
 
---- Loads a player's character directly, as a spectator.
+--- Loads a rig to a player to replace its custom player model.
+--- 
+--- All of the needed attributes for it to work will be automatically set just in case.
+--- 
+--- If the rig has an attribute named `KeepRigScripts` set to `true`, none of the scripts inside of the rig will be remmoved.
+--- 
+--- If not, every single script inside of the rig will be automatically destroyed.
+--- 
+--- @return The rig that ended up loading into the player.
 function PlayerRespawnManager.LoadRigOntoPlayer(Player: Player, Character: Model, Callback: ((Character: Model, Humanoid: Humanoid) -> ())?): Model
     if not Player.Parent then
         return
@@ -80,22 +88,33 @@ function PlayerRespawnManager.LoadRigOntoPlayer(Player: Player, Character: Model
 end
 
 local function _GetCharacterRigFromService(ServiceName: "ReplicatedStorage"  | "ServerStorage", CharacterRole: string, CharacterName: string, CharacterSkin: string?): Model
+    --get the set service, Replicated or Server Storage
     local Service = game:GetService(ServiceName)
+    --if it was mispelled, halt
     if not Service then
         return
     end
 
+    --get the root character folder
     local CharacterFolder = Utils.Instance.FindFirstChild(Service, "Assets.Characters")
 
-    local Path = `{CharacterRole}s.{CharacterName}`
+    --making a var for the loaded rig
+    local Character
+    --if there is a skin to be loaded, load it
     if CharacterSkin ~= nil then
-        Path = `Skins.{Path}.{CharacterSkin}`
+        --try to fetch the skin
+        Character = Utils.Instance.FindFirstChild(CharacterFolder, `Skins.{CharacterRole}s.{CharacterName}.{CharacterSkin}`)
+    end
+    --if the character still hasn't been found (either because there was no skin to be found or because it failed to find it), load the character's base rig if possible
+    if not Character then
+        Character = Utils.Instance.FindFirstChild(CharacterFolder, `{CharacterRole}s.{CharacterName}`)
     end
 
-    local Character = Utils.Instance.FindFirstChild(CharacterFolder, Path) --using Utils.Instance.FindFirstChild() for using path strings
     return Character
 end
+--separated in another local function to improve reading LoadCharacter()
 local function GetCharacterRig(CharacterRole: string, CharacterName: string, CharacterSkin: string?): Model
+    --look in ReplicatedStorage first, then in ServerStorage
     return
         _GetCharacterRigFromService("ReplicatedStorage", CharacterRole, CharacterName, CharacterSkin)
         or _GetCharacterRigFromService("ServerStorage", CharacterRole, CharacterName, CharacterSkin)
@@ -107,18 +126,35 @@ type LoadCharacterSettings = {
     Skin: string?,
     LoadCallback: ((Character: Model, Humanoid: Humanoid) -> ())?,
 }
+--- Loads a character onto a player.
+--- 
+--- If `FuncSettings.Role` or `FuncSettings.Name` aren't specified, or if `FuncSettings.Role` is set to `"Spectator"`, the default player model will load instead as a Spectator.
+--- 
+--- If they both are, it'll load a character from either `ReplicatedStorage.Assets.Characters` or `ServerStorage.Assets.Characters`.
+--- 
+--- If `CharacterSkin` is specified and its rig isn't found, then the character's base rig will load instead.
+--- 
+--- If no rig is found at the end, the default player model will load instead.
+--- 
+--- @return The rig that ended up loading into the player.
 function PlayerRespawnManager.LoadCharacter(Player: Player, FuncSettings: LoadCharacterSettings?): Model
+    --defaults
     FuncSettings = FuncSettings or {} :: LoadCharacterSettings
 
-    if not FuncSettings.Role or not FuncSettings.Name then
+    --load default rig if there is nothing to find or if it's a spectator
+    --this last condition can be removed if spectators have a custom preset rig
+    if not FuncSettings.Role or not FuncSettings.Name or FuncSettings.Role == "Spectator" then
         print("loading default")
         return PlayerRespawnManager.LoadRigOntoPlayer(Player, Players:CreateHumanoidModelFromUserIdAsync(Player.UserId))
     end
 
+    --find a character rig
     local CharacterRig = GetCharacterRig(FuncSettings.Role, FuncSettings.Name, FuncSettings.Skin)
+    --clone the rig if it is found
     if CharacterRig ~= nil then
         CharacterRig = CharacterRig:Clone()
     end
+    --if the rig isn't found, just use the default one
     return PlayerRespawnManager.LoadRigOntoPlayer(Player, CharacterRig or Players:CreateHumanoidModelFromUserIdAsync(Player.UserId), FuncSettings.LoadCallback)
 end
 
