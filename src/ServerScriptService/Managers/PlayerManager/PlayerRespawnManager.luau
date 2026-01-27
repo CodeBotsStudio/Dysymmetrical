@@ -154,8 +154,17 @@ function PlayerRespawnManager.LoadCharacter(Player: Player, FuncSettings: LoadCh
     if CharacterRig ~= nil then
         CharacterRig = CharacterRig:Clone()
     end
-    --if the rig isn't found, just use the default one
-    return PlayerRespawnManager.LoadRigOntoPlayer(Player, CharacterRig or Players:CreateHumanoidModelFromUserIdAsync(Player.UserId), FuncSettings.LoadCallback)
+    --load the character
+    --if the rig isn't found, load the default player rig
+    local Character = PlayerRespawnManager.LoadRigOntoPlayer(Player, CharacterRig or Players:CreateHumanoidModelFromUserIdAsync(Player.UserId), FuncSettings.LoadCallback)
+    --set the role beforehand to make sure everything works fine
+    Character:SetAttribute("Role", FuncSettings.Role)
+    --set the character specific attributes
+    Character:SetAttribute("CharacterName", FuncSettings.Name)
+    --if it's nil it won't even show up so i'm not gonna wrap this in an unnecessary if
+    Character:SetAttribute("CharacterSkin", FuncSettings.Skin)
+    --return le thing
+    return Character
 end
 
 return PlayerRespawnManager

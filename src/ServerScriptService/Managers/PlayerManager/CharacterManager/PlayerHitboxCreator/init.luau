@@ -79,7 +79,7 @@ function PlayerHitboxCreator.CreateHitboxesForPlayer(Player: Player, Character: 
     PlayerHitboxCreator._SetupHitboxViewConnections(Player, Character, ManagedHitboxes)
 end
 
-local Framerate = 1/20
+local Framerate = 1/15
 --- Sets up all available hitboxes for the passed character.
 function PlayerHitboxCreator._SetupHitboxViewConnections(Player: Player, Character: Model, ManagedHitboxes: {[number]: BasePart})
     local JanitorInstance = Janitor.new()
