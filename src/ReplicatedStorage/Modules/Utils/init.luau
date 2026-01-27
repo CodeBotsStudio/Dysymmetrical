@@ -83,6 +83,10 @@ function Utils:Init()
         Network:SetConnection("RevealPlayerAura", "REMOTE_EVENT", function(RevealedPlayer: Player | Model, Duration: number?, Color: Color3?)
             Utils.Player.RevealPlayerAura(RevealedPlayer, Duration, Color)
         end)
+		
+		Network:SetConnection("HighlightInstance", "REMOTE_EVENT", function(instance: Instance, duration: number?, color: Color3?)
+			Utils.Instance.HighlightInstance(instance, duration, color)
+		end)
 
         Network:SetConnection("Fade", "REMOTE_EVENT", function(FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
             Utils.Player._Fade(FadeType, Duration, Yield, StartTransparency, FadeColor)

@@ -1,7 +1,11 @@
+local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local Achievements = require(ReplicatedStorage.Content.Achievements)
 local Types = require(ReplicatedStorage.Classes.Types)
+local Network = require(ReplicatedStorage.Modules.Network)
 local TypeUtils = require(script.Parent.TypeUtils)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
@@ -414,6 +418,60 @@ function InstanceUtils.GetInvisPart(cf: CFrame?, parent: Instance?): Part
     end
 
     return Part
+end
+
+--- CLIENT FUNCTION: Highlights an instance for the local player
+function InstanceUtils.HighlightInstance(instance: Instance, duration: number?, color: Color3?)
+	if RunService:IsServer() then return end
+	if not instance or not instance:IsDescendantOf(workspace) then return end
+
+	local existingHighlight = instance:FindFirstChild("InstanceHighlight")
+	if existingHighlight then
+		existingHighlight:Destroy()
+	end
+
+	local usedColor = color or Color3.fromRGB(255, 255, 255)
+	local usedDuration = duration or 10
+
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "InstanceHighlight"
+	highlight.FillColor = usedColor
+	highlight.OutlineColor = usedColor
+	highlight.Parent = instance
+
+	Debris:AddItem(highlight, usedDuration + 2)
+
+	-- Fade in
+	highlight.FillTransparency = 1
+	highlight.OutlineTransparency = 1
+	TweenService:Create(highlight, TweenInfo.new(1), {
+		FillTransparency = 0.5,
+		OutlineTransparency = 0
+	}):Play()
+
+	-- Fade out before destruction
+	task.delay(usedDuration - 1, function()
+		if highlight and highlight.Parent then
+			highlight.Name = "FadingOut"
+			TweenService:Create(highlight, TweenInfo.new(1), {
+				FillTransparency = 1,
+				OutlineTransparency = 1
+			}):Play()
+		end
+	end)
+end
+
+--- SERVER FUNCTION: Highlights an instance for specific player(s)
+function InstanceUtils.HighlightInstanceFor(players: Player | {Player}, instance: Instance, duration: number?, color: Color3?)
+	if not RunService:IsServer() then return end
+
+	if typeof(players) == "table" then
+		for _, player in players do
+			Network:FireClientConnection(player, "HighlightInstance", "REMOTE_EVENT", instance, duration, color)
+		end
+	else
+		Network:FireClientConnection(players, "HighlightInstance", "REMOTE_EVENT", instance, duration, color)
+	end
 end
 
 return InstanceUtils
