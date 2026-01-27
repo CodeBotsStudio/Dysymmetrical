@@ -261,7 +261,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
                 ]]
 
 				-- Check if there's a wall between player and target
-				if not Config.CFrame and not Config.IgnoreWalls then
+				if not Config.IgnoreWalls then
 					local HRoot = Humanoid.Parent:FindFirstChild("HumanoidRootPart")
 					if HRoot then
 						local function isBlockedByObstacle(): boolean
