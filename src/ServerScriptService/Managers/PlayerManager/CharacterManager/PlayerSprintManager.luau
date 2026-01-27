@@ -1,3 +1,4 @@
+--TODO: comment this script from 9 months ago that i barely understand now and has like 7 tabs of indentation like holy shit
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
