@@ -40,6 +40,7 @@
 ]]
 
 local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
 
 --- Class used to connect the server and the clients more efficiently by encapsulating everything in a single place.
 local Network = {
@@ -124,24 +125,48 @@ end
 --- @param Callback (`function`):                                                               The code that will execute when the connection fires.
 function Network:_SetupConnection(instance: RemoteEvent | UnreliableRemoteEvent | RemoteFunction | BindableEvent, Callback: (any) -> (any)): RBXScriptConnection | nil
     if instance:IsA("BindableEvent") then
-        return instance.Event:Connect(Callback)
+        return instance.Event:Connect(function(...)
+            local Arguments = {...}
+            local Decompressed = self:_UnpackArgumentsFromNetwork(Arguments)
+            return Callback(unpack(Decompressed))
+        end)
+    end
+
+    if RunService:IsServer() then
+        if instance:IsA("RemoteEvent") or instance:IsA("UnreliableRemoteEvent") then
+            return instance.OnServerEvent:Connect(function(player, ...)
+                local Arguments = {...}
+                local Decompressed = self:_UnpackArgumentsFromNetwork(Arguments)
+                Callback(player, unpack(Decompressed))
+            end)
+        elseif instance:IsA("RemoteFunction") then
+            instance.OnServerInvoke = function(player, ...)
+                local Arguments = {...}
+                local Decompressed = self:_UnpackArgumentsFromNetwork(Arguments)
+                -- Handle the callback and then compress the return value
+                local Result = { Callback(player, unpack(Decompressed)) }
+                local CompressedResult = self:_PackArgumentsForNetwork(Result)
+                return unpack(CompressedResult)
+            end
+        end
     else
-        if RunService:IsServer() then
-            if instance:IsA("RemoteEvent") or instance:IsA("UnreliableRemoteEvent") then
-                return instance.OnServerEvent:Connect(Callback)
-            elseif instance:IsA("RemoteFunction") then
-                instance.OnServerInvoke = Callback
+        if instance:IsA("RemoteEvent") or instance:IsA("UnreliableRemoteEvent") then
+            return instance.OnClientEvent:Connect(function(...)
+                local Arguments = {...}
+                local Decompressed = self:_UnpackArgumentsFromNetwork(Arguments)
+                Callback(unpack(Decompressed))
+            end)
+        elseif instance:IsA("RemoteFunction") then
+            instance.OnClientInvoke = function(...)
+                local Arguments = {...}
+                local Decompressed = self:_UnpackArgumentsFromNetwork(Arguments)
+                local Result = { Callback(unpack(Decompressed)) }
+                local CompressedResult = self:_PackArgumentsForNetwork(Result)
+                return unpack(CompressedResult)
             end
-            return
-        else
-            if instance:IsA("RemoteEvent") or instance:IsA("UnreliableRemoteEvent") then
-                return instance.OnClientEvent:Connect(Callback)
-            elseif instance:IsA("RemoteFunction") then
-                instance.OnClientInvoke = Callback
-            end
-            return
         end
     end
+    return
 end
 
 --- Adds a connection to a specific event / function instance.
@@ -187,13 +212,18 @@ function Network:FireClientConnection(target: Player | {Player}, name: string, T
     while not self:IsLive() do
         task.wait()
     end
-    if not RunService:IsServer() or not self.Folders[Type]:FindFirstChild(name) then return end
+    if not RunService:IsServer() then return end
 
     local event = self.Folders[Type]:FindFirstChild(name)
+    if not event then return end
+    local Arguments = {...}
+    local CompressedArguments = self:_PackArgumentsForNetwork(Arguments)
 
     local function Fire(player: Player, ...)
         if event:IsA("RemoteFunction") then
-            return event:InvokeClient(player, ...)
+            local Results = { event:InvokeClient(player, ...) }
+            local DecompressedResults = self:_UnpackArgumentsFromNetwork(Results)
+            return unpack(DecompressedResults)
         else
             event:FireClient(player, ...)
         end
@@ -201,14 +231,14 @@ function Network:FireClientConnection(target: Player | {Player}, name: string, T
     end
 
     if typeof(target) == "table" then
-        local results = {}
+        local Results = {}
         for _, player: Player in target do
-            results[player.UserId] = Fire(player, ...)
+            Results[player.UserId] = Fire(player, unpack(CompressedArguments))
         end
-        return results
-    else
-        return Fire(target, ...)
+        return Results
     end
+    
+    return Fire(target, unpack(CompressedArguments))
 end
 
 --- Fires an event's connections to every single connected client. If the type of the object is a RemoteFunction, it won't do anything.
@@ -219,9 +249,18 @@ function Network:FireAllClientConnection(name: string, Type: "REMOTE_EVENT" | "U
     while not self:IsLive() do
         task.wait()
     end
-    if not RunService:IsServer() or Type == "REMOTE_FUNCTION" or not self.Folders[Type]:FindFirstChild(name) then return end
+    if not RunService:IsServer() or Type == "REMOTE_FUNCTION" then
+        return
+    end
+    local instance = self.Folders[Type]:FindFirstChild(name)
+    if not instance then
+        return
+    end
 
-    self.Folders[Type]:FindFirstChild(name):FireAllClients(...)
+    local Arguments = {...}
+    local CompressedArguments = self:_PackArgumentsForNetwork(Arguments)
+
+    instance:FireAllClients(unpack(CompressedArguments))
 end
 
 --- Fires a server's event / function connections.
@@ -232,14 +271,26 @@ function Network:FireServerConnection(name: string, Type: "REMOTE_EVENT" | "UREM
     while not self:IsLive() do
         task.wait()
     end
-    if not RunService:IsClient() or not self.Folders[Type]:FindFirstChild(name) then return end
+    if not RunService:IsClient() then
+        return
+    end
 
     local instance = self.Folders[Type]:FindFirstChild(name)
-    if instance:IsA("RemoteFunction") then
-        return instance:InvokeServer(...)
-    else
-        instance:FireServer(...)
+    if not self.Folders[Type]:FindFirstChild(name) then
+        return
     end
+
+    local Arguments = {...}
+    local CompressedArguments = self:_PackArgumentsForNetwork(Arguments)
+
+    if instance:IsA("RemoteFunction") then
+        local Results = { instance:InvokeServer(unpack(CompressedArguments)) }
+        local DecompressedResults = self:_UnpackArgumentsFromNetwork(Results)
+        return unpack(DecompressedResults)
+    end
+
+    instance:FireServer(unpack(CompressedArguments))
+    
     return
 end
 
@@ -250,9 +301,13 @@ function Network:FireConnection(name: string, ...)
     while not self:IsLive() do
         task.wait()
     end
-    if not self.Folders["BINDABLE_EVENT"]:FindFirstChild(name) then return end
+    local Bindable = self.Folders["BINDABLE_EVENT"]:FindFirstChild(name)
+    if not Bindable then return end
 
-    self.Folders["BINDABLE_EVENT"]:FindFirstChild(name):Fire(...)
+    local Arguments = {...}
+    local CompressedArguments = self:_PackArgumentsForNetwork(Arguments)
+
+    Bindable:Fire(unpack(CompressedArguments))
 end
 
 --- Returns an object instance
@@ -281,6 +336,75 @@ function Network:_FoldersAvailable()
         end
     end
     return availableIndex == #self._FolderNames
+end
+
+--- Internal function to unpack a buffer using HttpService.
+function Network:_UnpackBuffer(buf: buffer)
+    return HttpService:JSONDecode(buffer.tostring(buf))
+end
+
+--- Internal function to recursively decompress values (Buffer -> Table/Value).
+function Network:_DecompressValue(ValueToDecompress: any)
+    if typeof(ValueToDecompress) == "buffer" then
+        return self:_UnpackBuffer(ValueToDecompress)
+    end
+    
+    if typeof(ValueToDecompress) == "table" then
+        local NewValue = {}
+        for Key, Value in ValueToDecompress do
+            NewValue[Key] = self:_DecompressValue(Value)
+        end
+        return NewValue
+    end
+
+    return ValueToDecompress
+end
+
+--TODO: make support for differemt types of numbers to reduce even more bandwidth
+
+--- Internal function to recursively compress values (Value -> JSON -> Buffer).
+function Network:_CompressValue(ValueToCompress: any)
+    if typeof(ValueToCompress) == "Instance" then
+        return ValueToCompress
+    elseif typeof(ValueToCompress) == "table" then
+        local NewValue = {}
+        for Key, Value in ValueToCompress do
+            NewValue[Key] = self:_CompressValue(Value)
+        end
+        return NewValue
+    else
+        local encoded = HttpService:JSONEncode(ValueToCompress)
+        if encoded == "null" then
+            if workspace:GetAttribute("DebugAllowed") == true then
+                warn("[DysNetworking:_CompressValue()]: Data Type "..typeof(ValueToCompress).." cannot be converted to JSON.")
+            end
+            return
+        end
+
+        return buffer.fromstring(encoded)
+    end
+end
+
+--- Internal function to prepare argument lists for network transmission.
+function Network:_PackArgumentsForNetwork(Arguments: {any})
+    local PackedArguments = {}
+
+    for Key, Value in Arguments do
+        if Key ~= "n" then
+            PackedArguments[Key] = self:_CompressValue(Value)
+        end
+    end
+
+    return PackedArguments
+end
+
+--- Internal function to decode argument lists received from network.
+function Network:_UnpackArgumentsFromNetwork(Arguments: {any})
+    local UnpackedArguments = {}
+    for Key, Value in Arguments do
+        UnpackedArguments[Key] = self:_DecompressValue(Value)
+        end
+    return UnpackedArguments
 end
 
 return Network
