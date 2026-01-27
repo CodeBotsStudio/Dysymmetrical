@@ -84,7 +84,11 @@ function Utils:Init()
         end)
         Network:SetConnection("ShakeCamera", "REMOTE_EVENT", function(Magnitude: number, Duration: number)
             return Utils.Player.ShakeCamera(Magnitude, Duration)
-        end)
+		end)
+		
+		Network:SetConnection("HighlightInstance", "REMOTE_EVENT", function(instance: Instance, duration: number?, color: Color3?)
+			Utils.Instance.HighlightInstance(instance, duration, color)
+		end)
 
         return
     end
