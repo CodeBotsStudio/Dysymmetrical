@@ -226,6 +226,10 @@ function InstanceUtils.AwaitChild(Parent: Instance, ChildPath: string, Timeout: 
         return
     end
 
+	if Timeout and Timeout <= 0 then
+		return InstanceUtils.FindFirstChild(Parent, ChildPath)
+	end
+
     local SplitPath = TypeUtils.SplitStringPath(ChildPath)
 
     local Result = Parent
@@ -242,6 +246,41 @@ function InstanceUtils.AwaitChild(Parent: Instance, ChildPath: string, Timeout: 
 
     if not Result or Result == Parent then
         -- warn("[Utils.Instance.AwaitChild()] Couldn't find \""..Parent.Name.."."..ChildPath.."\"!", debug.traceback())
+        return
+    end
+
+    return Result
+end
+
+--- Finds a child of an `Instance` in the `ChildPath` path.
+--- 
+--- Works the same way as `Utils.Instance.AwaitChild()` but without any waiting.
+--- 
+--- This was made for better readability and to not have to call `Utils.Instance.AwaitChild()` with a `Timeout` of `0`.
+--- 
+--- You can use this instead of `Utils.Instance.AwaitChild()` if you KNOW that the instance you want to find *is* there.
+function InstanceUtils.FindFirstChild(Parent: Instance, ChildPath: string): Instance
+    if not Parent then
+        warn("[Utils.Instance.AwaitChild()] `Parent` is nil!")
+        return
+    end
+
+    local SplitPath = TypeUtils.SplitStringPath(ChildPath)
+
+    local Result = Parent
+
+    for _, step in SplitPath do
+        local P = Result
+
+        Result = P:FindFirstChild(step)
+
+        if not Result then
+            break
+        end
+    end
+
+    if not Result or Result == Parent then
+        -- warn("[Utils.Instance.FindFirstChild()] Couldn't find \""..Parent.Name.."."..ChildPath.."\"!", debug.traceback())
         return
     end
 

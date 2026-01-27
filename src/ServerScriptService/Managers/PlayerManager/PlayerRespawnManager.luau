@@ -15,7 +15,7 @@ function PlayerRespawnManager:Init()
             Utils.Character.ObserveOnDeath(Humanoid, function()
                 --sets a thread to wait for 3 seconds to respawn the player automatically
                 PlayerRespawnManager.PendingAutoRespawns[Player.UserId] =
-                    task.delay(3, PlayerRespawnManager.LoadDefaultCharacter, Player)
+                    task.delay(3, PlayerRespawnManager.LoadCharacter, Player)
             end)
         end)
     end)
@@ -36,22 +36,22 @@ function PlayerRespawnManager.CancelAutoRespawn(Player: Player)
 end
 
 --- Loads a player's character directly, as a spectator.
-function PlayerRespawnManager.LoadDefaultCharacter(Player: Player): Model
+function PlayerRespawnManager.LoadRigOntoPlayer(Player: Player, Character: Model, Callback: ((Character: Model, Humanoid: Humanoid) -> ())?): Model
     if not Player.Parent then
         return
     end
 
     --prevent next automatic respawn
     PlayerRespawnManager.CancelAutoRespawn(Player)
-    --respawn
-    local Character = Players:CreateHumanoidModelFromUserIdAsync(Player.UserId)
-    --removing all scripts generated
-    for _, Script in Character:GetDescendants() do
-        if not Script:IsA("BaseScript") then
-            continue
-        end
+    --removing all scripts generated if allowed
+    if not Character:GetAttribute("KeepRigScripts") then
+        for _, Script in Character:GetDescendants() do
+            if not Script:IsA("BaseScript") then
+                continue
+            end
 
-        Script:Destroy()
+            Script:Destroy()
+        end
     end
     --renaming
     Character.Name = Player.Name
@@ -62,24 +62,64 @@ function PlayerRespawnManager.LoadDefaultCharacter(Player: Player): Model
         Item:Clone().Parent = Character
     end
     --replace some humanoid properties
-    do
-        local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
-        Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-        Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
-    end
+    local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
+    Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+    Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
     --add missing core attributes
     CharacterManager._SetupDefaultAttributes(Character)
     --parent the character to the folder properly
     Character.Parent = workspace.Players
-    --TODO: fix character respawning disabling all UI and locking the camera in place for no apparent reason at all
-    if Player.Character then
-        Player.Character:Destroy()
-        Player.Character = nil
-    end
     --actually sets the character and fires CharacterAdded
     Player.Character = Character
 
+    if Callback then
+        Callback(Character, Humanoid)
+    end
+
     return Character
+end
+
+local function _GetCharacterRigFromService(ServiceName: "ReplicatedStorage"  | "ServerStorage", CharacterRole: string, CharacterName: string, CharacterSkin: string?): Model
+    local Service = game:GetService(ServiceName)
+    if not Service then
+        return
+    end
+
+    local CharacterFolder = Utils.Instance.FindFirstChild(Service, "Assets.Characters")
+
+    local Path = `{CharacterRole}s.{CharacterName}`
+    if CharacterSkin ~= nil then
+        Path = `Skins.{Path}.{CharacterSkin}`
+    end
+
+    local Character = Utils.Instance.FindFirstChild(CharacterFolder, Path) --using Utils.Instance.FindFirstChild() for using path strings
+    return Character
+end
+local function GetCharacterRig(CharacterRole: string, CharacterName: string, CharacterSkin: string?): Model
+    return
+        _GetCharacterRigFromService("ReplicatedStorage", CharacterRole, CharacterName, CharacterSkin)
+        or _GetCharacterRigFromService("ServerStorage", CharacterRole, CharacterName, CharacterSkin)
+end
+
+type LoadCharacterSettings = {
+    Role: ("Killer" | "Survivor" | "Spectator")?,
+    Name: string?,
+    Skin: string?,
+    LoadCallback: ((Character: Model, Humanoid: Humanoid) -> ())?,
+}
+function PlayerRespawnManager.LoadCharacter(Player: Player, FuncSettings: LoadCharacterSettings?): Model
+    FuncSettings = FuncSettings or {} :: LoadCharacterSettings
+
+    if not FuncSettings.Role or not FuncSettings.Name then
+        print("loading default")
+        return PlayerRespawnManager.LoadRigOntoPlayer(Player, Players:CreateHumanoidModelFromUserIdAsync(Player.UserId))
+    end
+
+    local CharacterRig = GetCharacterRig(FuncSettings.Role, FuncSettings.Name, FuncSettings.Skin)
+    if CharacterRig ~= nil then
+        CharacterRig = CharacterRig:Clone()
+    end
+    return PlayerRespawnManager.LoadRigOntoPlayer(Player, CharacterRig or Players:CreateHumanoidModelFromUserIdAsync(Player.UserId), FuncSettings.LoadCallback)
 end
 
 return PlayerRespawnManager

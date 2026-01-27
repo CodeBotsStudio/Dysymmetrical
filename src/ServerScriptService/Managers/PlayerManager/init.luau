@@ -10,7 +10,7 @@ function PlayerManager:Init()
     Network:SetConnection("AddLoadedPlayer", "REMOTE_EVENT", PlayerManager._OnPlayerLoaded)
 
     Utils.Player.ObservePlayers(function(Player: Player)
-        PlayerRespawnManager.LoadDefaultCharacter(Player)
+        PlayerRespawnManager.LoadCharacter(Player)
     end)
 end
 
