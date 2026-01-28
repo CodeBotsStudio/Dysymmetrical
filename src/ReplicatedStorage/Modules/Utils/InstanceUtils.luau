@@ -343,14 +343,8 @@ function InstanceUtils.GetCharacterModule(charType: "Survivor" | "Killer", charN
     --obv errors if there's none
     if not Module then
 
-        -- Was erroring on that warn statement, as skins are optional– but you cannot concatenate a string with nil, so if no skin was specified, this error-handling message... Caused an error, lol.
-        if not skinName then
-            skinName = "[N/A]"
-        end
-
 		if doWarn then
-        	warn("Can't find character module! ("..charType..", "..charName..", "..skinName..")")
-        	warn(debug.traceback())
+			warn(`Can't find character module! ({charType}, {charName}, {skinName or "[N/A]"})`, debug.traceback())
 		end
         return
     end
