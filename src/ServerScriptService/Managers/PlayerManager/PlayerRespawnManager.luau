@@ -144,7 +144,6 @@ function PlayerRespawnManager.LoadCharacter(Player: Player, FuncSettings: LoadCh
     --load default rig if there is nothing to find or if it's a spectator
     --this last condition can be removed if spectators have a custom preset rig
     if not FuncSettings.Role or not FuncSettings.Name or FuncSettings.Role == "Spectator" then
-        print("loading default")
         return PlayerRespawnManager.LoadRigOntoPlayer(Player, Players:CreateHumanoidModelFromUserIdAsync(Player.UserId))
     end
 
