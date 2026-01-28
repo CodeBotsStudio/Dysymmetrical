@@ -1,4 +1,5 @@
 local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
@@ -14,9 +15,27 @@ local Sounds = {
         ButtonHoverStop = "rbxassetid://7249903719",
         ButtonPress = "rbxassetid://112754501285226",
     },
+    LobbyTheme = "rbxassetid://138524894251708",
 }
 
 function Sounds:Init()
+    if not RunService:IsServer() then
+        Utils.Misc.PreloadAssets(Sounds.CommonlyUsedSounds)
+
+        Utils.Character.ObserveCharacter(Players.LocalPlayer, function(Character: Model)
+            if Character:GetAttribute("Role") ~= "Spectator" then
+                Sounds.StopTheme(Sounds.LobbyTheme)
+                return
+            end
+
+            Sounds.PlayTheme(Sounds.LobbyTheme, {Priority = 1, Volume = 0.2})
+        end)
+    end
+    Utils.Instance.ObserveChildren(workspace.Themes,
+        Sounds.UpdateThemes
+    ):Add(workspace.Themes.ChildRemoved:Connect(
+        Sounds.UpdateThemes
+    ))
 end
 
 --- Tries to get a `Sound` instance from the loaded sounds folder.
@@ -46,7 +65,7 @@ function Sounds.GetSound(ID: string, Clone: boolean?): Sound
         Sound.Name = ID
         Sound.SoundId = ID
         Sound.SoundGroup = SoundService.SoundGroups.Master.SFX
-        Sound.RollOffMode = SoundService.RollOffMode.Linear
+        Sound.RollOffMode = Enum.RollOffMode.Linear
         Sound.RollOffMinDistance = 12
         Sound.RollOffMaxDistance = 60
         Sound.Parent = LoadedSounds
@@ -146,8 +165,8 @@ function Sounds.PlaySound(ID: string | {string} | {[any]: string}, Properties: {
 
     --if there's a specific position in the properties, 
     if Properties.Position then
-        --make an invis part to parent the sound to at the correspondant CFrame, parented to workspace.Sounds 
-        Part = Utils.Instance.GetInvisPart(typeof(Properties.Position) == "Vector3" and CFrame.new(Properties.Position) or Properties.Position, workspace.Sounds)
+        --make an invis part to parent the sound to at the correspondant CFrame, parented to workspace.TempObjectFolders.Sounds 
+        Part = Utils.Instance.GetInvisPart(typeof(Properties.Position) == "Vector3" and CFrame.new(Properties.Position) or Properties.Position, workspace.TempObjectFolders.Sounds)
         --naming n shi
         Part.Name = Sound.Name
         Sound.Parent = Part
@@ -175,7 +194,7 @@ function Sounds.PlaySound(ID: string | {string} | {[any]: string}, Properties: {
 
     --setting the parent if it's not set
     if not Sound.Parent then
-        Sound.Parent = workspace.Sounds
+        Sound.Parent = workspace.TempObjectFolders.Sounds
     end
 
     --return the damn thing
