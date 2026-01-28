@@ -339,14 +339,17 @@ function Network:_FoldersAvailable()
 end
 
 --- Internal function to unpack a buffer using HttpService.
-function Network:_UnpackBuffer(buf: buffer)
-    return HttpService:JSONDecode(buffer.tostring(buf))
+function Network:_UnpackBuffer(Buffer: buffer)
+    return HttpService:JSONDecode(buffer.tostring(Buffer))
 end
 
 --- Internal function to recursively decompress values (Buffer -> Table/Value).
 function Network:_DecompressValue(ValueToDecompress: any)
     if typeof(ValueToDecompress) == "buffer" then
-        return self:_UnpackBuffer(ValueToDecompress)
+        local Success, Decompressed = pcall(function()
+            return self:_UnpackBuffer(ValueToDecompress)
+        end)
+        return if Success then Decompressed else ValueToDecompress
     end
     
     if typeof(ValueToDecompress) == "table" then
@@ -360,11 +363,9 @@ function Network:_DecompressValue(ValueToDecompress: any)
     return ValueToDecompress
 end
 
---TODO: make support for differemt types of numbers to reduce even more bandwidth
-
 --- Internal function to recursively compress values (Value -> JSON -> Buffer).
 function Network:_CompressValue(ValueToCompress: any)
-    if typeof(ValueToCompress) == "Instance" then
+    if typeof(ValueToCompress) == "Instance" or typeof(ValueToCompress) == "buffer" then
         return ValueToCompress
     elseif typeof(ValueToCompress) == "table" then
         local NewValue = {}
