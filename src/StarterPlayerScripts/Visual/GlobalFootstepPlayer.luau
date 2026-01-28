@@ -24,6 +24,9 @@ function GlobalFootstepPlayer:Init()
 	end)
 end
 
+--- Will play a footstep sound on a player's character's feet.
+--- 
+--- If applicable, a preset custom footstep will play. This is set through character modules.
 function GlobalFootstepPlayer.PlayFootstep(player: Player, Anchor: BasePart)
     --if the character is emoting or being affected by a constraint, halt
 	if Anchor:FindFirstChildWhichIsA("Constraint") or Anchor.Parent:GetAttribute("Emoting") then return end
@@ -39,7 +42,8 @@ function GlobalFootstepPlayer.PlayFootstep(player: Player, Anchor: BasePart)
 	})
 end
 
-function FootstepPlayer._SetupChar(player: Player, character: Model)
+--- INTERNAL FUNCTION: Sets up a character's connections to automatically play footsteps based on animations.
+function GlobalFootstepPlayer._SetupChar(player: Player, character: Model)
     --if there is no humanoid, halt
 	local Humanoid = character:FindFirstChildWhichIsA("Humanoid")
 	if not Humanoid then
