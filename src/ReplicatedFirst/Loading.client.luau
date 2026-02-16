@@ -17,31 +17,56 @@ local assets = {}
 local loadedAssets = {}
 local function addAssetsToLoad(assetList)
     for _, asset in assetList do
-        table.insert(assets, asset)
+        if asset then
+            table.insert(assets, asset)
+        end
     end
 end
-addAssetsToLoad(workspace:GetDescendants())
-addAssetsToLoad(game:GetService("ReplicatedStorage"):GetDescendants())
-addAssetsToLoad(game:GetService("StarterPlayer"):GetDescendants())
-addAssetsToLoad(game:GetService("StarterGui"):GetDescendants())
+
+local success = pcall(function()
+    addAssetsToLoad(workspace:GetDescendants())
+    addAssetsToLoad(game:GetService("ReplicatedStorage"):GetDescendants())
+    addAssetsToLoad(game:GetService("StarterPlayer"):GetDescendants())
+    addAssetsToLoad(game:GetService("StarterGui"):GetDescendants())
+end)
+
+if not success then
+    warn("Failed to load asset list")
+end
 
 local assetAmount = #assets
 local loaded = false
 function updateProgress()
     if not loaded then
-        Percent.Text = tostring(math.floor(#loadedAssets / assetAmount * 100 - 1)).."%"
-        AmountTxt.Text = "("..tostring(#loadedAssets - 1).."/"..tostring(assetAmount)..")"
+        local progress = math.floor(math.max(#loadedAssets / math.max(1, assetAmount) * 100 - 1, 0))
+        pcall(function()
+            Percent.Text = tostring(progress).."%"
+            AmountTxt.Text = "("..tostring(#loadedAssets - 1).."/"..tostring(assetAmount)..")"
+        end)
     end
 end
 
 local ContentProvider = game:GetService("ContentProvider")
+local preloadStart = os.clock()
+local preloadTimeout = 120
+
 for index, asset in assets do
-    task.delay(index / (assetAmount / 0.75), function()
-        ContentProvider:PreloadAsync({
-            asset
-        })
-        table.insert(loadedAssets, asset)
-        updateProgress()
+    if os.clock() - preloadStart > preloadTimeout then
+        warn("Asset preloading timeout")
+        break
+    end
+    
+    task.delay(math.min(index / (math.max(1, assetAmount) / 0.75), 60), function()
+        if loaded then return end
+        
+        local preloadSuccess = pcall(function()
+            ContentProvider:PreloadAsync({asset})
+        end)
+        
+        if preloadSuccess then
+            table.insert(loadedAssets, asset)
+            updateProgress()
+        end
     end)
 end
 
@@ -49,57 +74,98 @@ local TweenService = game:GetService("TweenService")
 
 local function Finish()
     if not game:GetService("RunService"):IsStudio() then
-        --don't remove this or you'll get in trouble! salutations! (unless you mention the engine in the game's description)
-        print(require(game:GetService("ReplicatedStorage").Modules.Utils).Credits)
+        local creditsSuccess, utils = pcall(function()
+            return require(game:GetService("ReplicatedStorage").Modules.Utils)
+        end)
+        if creditsSuccess and utils and utils.Credits then
+            print(utils.Credits)
+        end
     end
     
     task.spawn(function()
-        require(game:GetService("ReplicatedStorage").Modules.Network):FireServerConnection("AddLoadedPlayer", "REMOTE_EVENT")
+        local networkSuccess, Network = pcall(function()
+            return require(game:GetService("ReplicatedStorage").Modules.Network)
+        end)
+        
+        if networkSuccess and Network then
+            local remoteSuccess = pcall(function()
+                Network:FireServerConnection("AddLoadedPlayer", "REMOTE_EVENT")
+            end)
+            if not remoteSuccess then
+                warn("Failed to notify server of client load")
+            end
+        else
+            warn("Network module not available")
+        end
     end)
 
     loaded = true
 
-    Percent.Text = "100%"
-    AmountTxt.Text = "("..tostring(assetAmount).."/"..tostring(assetAmount)..")"
+    pcall(function()
+        Percent.Text = "100%"
+        AmountTxt.Text = "("..tostring(assetAmount).."/"..tostring(assetAmount)..")"
 
-    TweenService:Create(CurrentlyInitting, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-        TextTransparency = 1
-    }):Play()
-    TweenService:Create(Percent.UIStroke, TweenInfo.new(0.666), {
-        Transparency = 1
-    }):Play()
-    TweenService:Create(Percent.UIStroke, TweenInfo.new(2), {
-        Thickness = 20
-    }):Play()
-    TweenService:Create(AmountTxt.UIStroke, TweenInfo.new(0.666), {
-        Transparency = 1
-    }):Play()
-    TweenService:Create(AmountTxt.UIStroke, TweenInfo.new(2), {
-        Thickness = 20
-    }):Play()
-    TweenService:Create(Skip, TweenInfo.new(0.666), {
-        TextTransparency = 1
-    }):Play()
-    task.wait(1)
-    TweenService:Create(Percent, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-        TextTransparency = 1
-    }):Play()
-    TweenService:Create(AmountTxt, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-        TextTransparency = 1
-    }):Play()
-    task.wait(0.5)
-    TweenService:Create(Main, TweenInfo.new(0.75), {
-        BackgroundTransparency = 1
-    }):Play()
+        TweenService:Create(CurrentlyInitting, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+            TextTransparency = 1
+        }):Play()
+        TweenService:Create(Percent.UIStroke, TweenInfo.new(0.666), {
+            Transparency = 1
+        }):Play()
+        TweenService:Create(Percent.UIStroke, TweenInfo.new(2), {
+            Thickness = 20
+        }):Play()
+        TweenService:Create(AmountTxt.UIStroke, TweenInfo.new(0.666), {
+            Transparency = 1
+        }):Play()
+        TweenService:Create(AmountTxt.UIStroke, TweenInfo.new(2), {
+            Thickness = 20
+        }):Play()
+        TweenService:Create(Skip, TweenInfo.new(0.666), {
+            TextTransparency = 1
+        }):Play()
+        task.wait(1)
+        TweenService:Create(Percent, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+            TextTransparency = 1
+        }):Play()
+        TweenService:Create(AmountTxt, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+            TextTransparency = 1
+        }):Play()
+        task.wait(0.5)
+        TweenService:Create(Main, TweenInfo.new(0.75), {
+            BackgroundTransparency = 1
+        }):Play()
 
-    game:GetService("Debris"):AddItem(LoadingGui, 0.8)
-    game:GetService("StarterGui"):SetCore("ResetButtonCallback", true)
+        game:GetService("Debris"):AddItem(LoadingGui, 0.8)
+        game:GetService("StarterGui"):SetCore("ResetButtonCallback", true)
 
-    task.wait(0.8)
+        task.wait(0.8)
 
-    workspace:SetAttribute("ClientLoaded", true)
+        workspace:SetAttribute("ClientLoaded", true)
+    end)
 end
 
+-- Skip button handler
+if Skip then
+    Skip.Activated:Connect(function()
+        loaded = true
+    end)
+end
+
+-- Timeout protection - finish after max wait time
+task.delay(120, function()
+    if not loaded then
+        warn("Client loading timeout - forcing completion")
+        loaded = true
+    end
+end)
+
+-- Wait for assets to preload (but don't finish yet)
+local assetWaitStart = os.clock()
+while #loadedAssets < assetAmount and os.clock() - assetWaitStart < 120 do
+    task.wait(1)
+end
+
+-- Show skip button if still loading after 10 seconds
 task.delay(10, function()
     if not loaded then
         Skip.Visible = true
@@ -108,12 +174,12 @@ task.delay(10, function()
         }):Play()
         Skip.MouseButton1Click:Once(function()
             loaded = true
-            Finish()
         end)
     end
 end)
 
-while #loadedAssets < #assets - 100 or loaded do
+-- Wait for enough assets to be loaded
+while #loadedAssets < #assets - 100 and not loaded do
     task.wait()
 end
 
@@ -133,13 +199,16 @@ local function InitScripts(module: ModuleScript)
     end
 end
 
+-- Initialize modules
 InitScripts(game:GetService("ReplicatedStorage").Initter)
 InitScripts(game:GetService("Players").LocalPlayer.PlayerScripts.PlayerInitter)
 
+-- Wait for server to complete initialization
 while not workspace:GetAttribute("ServerLoaded") do
     task.wait()
 end
 
-if loaded then return end
-
-Finish()
+-- Now finish and show the main UI
+if not loaded then
+    Finish()
+end

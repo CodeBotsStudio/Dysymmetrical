@@ -227,37 +227,60 @@ function PlayerUtils.RevealPlayerAura(RevealedPlayer: Player | Model, Duration: 
         return
     end
 
+    if not RevealedPlayer then
+        warn("RevealPlayerAura: RevealedPlayer is nil")
+        return
+    end
+
     local Character = RevealedPlayer and RevealedPlayer:IsA("Player") and RevealedPlayer.Character or RevealedPlayer
-    local LocalPlayer = Players.LocalPlayer
-    local LocalCharacter = LocalPlayer.Character
+    if not Character or not Character.Parent then
+        return
+    end
     
-    if Character and LocalCharacter and (not Character.Effects:FindFirstChild("Undetectable") or Character.Role.Value == LocalCharacter.Role.Value) then
-        local ExistingAura = Character:FindFirstChild("PlayerAura")
-        if ExistingAura then
-            ExistingAura:Destroy()
+    local LocalPlayer = Players.LocalPlayer
+    if not LocalPlayer then return end
+    
+    local LocalCharacter = LocalPlayer.Character
+    if not LocalCharacter then return end
+    
+    local Effects = Character:FindFirstChild("Effects")
+    local Role = Character:FindFirstChild("Role")
+    local LocalRole = LocalCharacter:FindFirstChild("Role")
+    
+    if Effects and Role and LocalRole then
+        if not Effects:FindFirstChild("Undetectable") or Role.Value == LocalRole.Value then
+            local ExistingAura = Character:FindFirstChild("PlayerAura")
+            if ExistingAura then
+                pcall(function() ExistingAura:Destroy() end)
+            end
+            
+            local UsedColor = Color or PlayerUtils.AuraColors[Role.Value] or PlayerUtils.AuraColors.Spectator
+
+            local Highlight = Instance.new("Highlight")
+            Highlight.Name = "PlayerAura"
+            Highlight.FillColor = UsedColor
+            Highlight.OutlineColor = UsedColor
+            Highlight.Parent = Character
+
+            Debris:AddItem(Highlight, (Duration or 10) + 2)
+
+            if not ExistingAura then
+                Highlight.FillTransparency = 1
+                Highlight.OutlineTransparency = 1
+                pcall(function()
+                    TweenService:Create(Highlight, TweenInfo.new(1), {FillTransparency = 0.5, OutlineTransparency = 0}):Play()
+                end)
+            end
+
+            task.delay((Duration or 10) - 1, function()
+                if Highlight and Highlight.Parent then
+                    Highlight.Name = "buhbye"
+                    pcall(function()
+                        TweenService:Create(Highlight, TweenInfo.new(1), {FillTransparency = 1, OutlineTransparency = 1}):Play()
+                    end)
+                end
+            end)
         end
-        
-        local UsedColor = Color or PlayerUtils.AuraColors[Character.Role.Value] or PlayerUtils.AuraColors.Spectator
-
-        local Highlight = Instance.new("Highlight")
-        Highlight.Name = "PlayerAura"
-        Highlight.FillColor = UsedColor
-        Highlight.OutlineColor = UsedColor
-        Highlight.Parent = Character
-
-        Debris:AddItem(Highlight, (Duration or 10) + 2)
-
-        --if the aura didn't already exist then it starts off completely transparent
-        if not ExistingAura then
-            Highlight.FillTransparency = 1
-            Highlight.OutlineTransparency = 1
-            TweenService:Create(Highlight, TweenInfo.new(1), {FillTransparency = 0.5, OutlineTransparency = 0}):Play()
-        end
-
-        task.delay((Duration or 10) - 1, function()
-            Highlight.Name = "buhbye" --ipad went buhbye -Noli real
-            TweenService:Create(Highlight, TweenInfo.new(1), {FillTransparency = 1, OutlineTransparency = 1}):Play()
-        end)
     end
 end
 
@@ -267,10 +290,17 @@ function PlayerUtils.RevealPlayerAuraTo(Player: Player | Model, RevealedPlayer: 
     if not RunService:IsServer() then
         return
     end
-    if Player and Player:IsA("Model") then
+    if not Player or not RevealedPlayer then
+        return
+    end
+    
+    if Player:IsA("Model") then
         Player = Players:GetPlayerFromCharacter(Player)
     end
-    Network:FireClientConnection(Player, "RevealPlayerAura", "REMOTE_EVENT", RevealedPlayer, Duration, Color)
+    
+    if Player then
+        Network:FireClientConnection(Player, "RevealPlayerAura", "REMOTE_EVENT", RevealedPlayer, Duration, Color)
+    end
 end
 
 --- Shows a black fade in/out in a player's UI.
@@ -279,20 +309,26 @@ end
 --- 
 --- If it's called from client, it can't be sent to other clients.
 function PlayerUtils.Fade(Target: Player | {Player}, FadeType: "In" | "Out", Duration: number, Yield: boolean?, StartTransparency: number?, FadeColor: {R: number, G: number, B: number}?)
+    if not Target then return end
+    
     if RunService:IsServer() then
         if typeof(Target) == "table" then
             for _, Player in Target do
-                Network:FireClientConnection(Player, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
+                if Player and Player.Parent then
+                    Network:FireClientConnection(Player, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
+                end
             end
         else
-            Network:FireClientConnection(Target, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
+            if Target and Target.Parent then
+                Network:FireClientConnection(Target, "Fade", "REMOTE_EVENT", FadeType, Duration, Yield, StartTransparency, FadeColor)
+            end
         end
 
-        if Yield and Duration > 0 then
+        if Yield and Duration and Duration > 0 then
             task.wait(Duration)
         end
     else
-        PlayerUtils._Fade(FadeType, Duration, Yield, FadeColor)
+        PlayerUtils._Fade(FadeType, Duration, Yield, StartTransparency, FadeColor)
     end
 end
 
@@ -317,22 +353,34 @@ function PlayerUtils._Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
             return
         end
         
+        local LocalPlayer = Players.LocalPlayer
+        if not LocalPlayer or not LocalPlayer.PlayerGui then return end
+        
+        local KillerIntros = InstanceUtils.FindFirstChild(LocalPlayer.PlayerGui, "KillerIntros")
+        if not KillerIntros then return end
+        
         PlayerUtils.FadeFrame = Instance.new("Frame")
         PlayerUtils.FadeFrame.Name = "Fade"
         PlayerUtils.FadeFrame.BackgroundTransparency = StartTransparency or 1
         PlayerUtils.FadeFrame.BackgroundColor3 = FadeColor and Color3.fromRGB(FadeColor.R, FadeColor.G, FadeColor.B) or Color3.fromRGB(0, 0, 0)
         PlayerUtils.FadeFrame.Size = UDim2.fromScale(1, 1)
-        PlayerUtils.FadeFrame.Parent = InstanceUtils.FindFirstChild(Players.LocalPlayer.PlayerGui, "KillerIntros")
+        PlayerUtils.FadeFrame.Parent = KillerIntros
 
         if Duration <= 0 then
             PlayerUtils.FadeFrame.BackgroundTransparency = 0
             return
         end
 
-        local Twn = TweenService:Create(PlayerUtils.FadeFrame, TweenInfo.new(Duration), {BackgroundTransparency = 0})
-        Twn:Play()
-        if Yield then
-            Twn.Completed:Wait()
+        local success = pcall(function()
+            local Twn = TweenService:Create(PlayerUtils.FadeFrame, TweenInfo.new(Duration), {BackgroundTransparency = 0})
+            Twn:Play()
+            if Yield then
+                Twn.Completed:Wait()
+            end
+        end)
+        
+        if not success then
+            warn("Failed to create fade tween")
         end
     elseif FadeType == "Out" then
         if not PlayerUtils.FadeFrame or not PlayerUtils.FadeFrame.Parent then
@@ -340,16 +388,22 @@ function PlayerUtils._Fade(FadeType: "In" | "Out", Duration: number, Yield: bool
             return
         end
 
-        if Duration <= 0 then
-            PlayerUtils.FadeFrame:Destroy()
+        if Duration and Duration <= 0 then
+            pcall(function() PlayerUtils.FadeFrame:Destroy() end)
             return
         end
 
-        local Twn = TweenService:Create(PlayerUtils.FadeFrame, TweenInfo.new(Duration), {BackgroundTransparency = 1})
-        Debris:AddItem(PlayerUtils.FadeFrame, Duration)
-        Twn:Play()
-        if Yield then
-            Twn.Completed:Wait()
+        local success = pcall(function()
+            local Twn = TweenService:Create(PlayerUtils.FadeFrame, TweenInfo.new(Duration or 0.4), {BackgroundTransparency = 1})
+            Debris:AddItem(PlayerUtils.FadeFrame, (Duration or 0.4) + 0.1)
+            Twn:Play()
+            if Yield then
+                Twn.Completed:Wait()
+            end
+        end)
+        
+        if not success then
+            warn("Failed to create fade out tween")
         end
     else
         warn("[Utils.Player.Fade()] Fade type not specified! Preventing fade execution...")
@@ -363,13 +417,19 @@ function PlayerUtils.GetLoadedPlayers(IncludeAFK: boolean?): {Player}
     end
 
     local t: {Player} = {}
+    local LoadedPlayers = ReplicatedStorage:FindFirstChild("LoadedPlayers")
+    
+    if not LoadedPlayers then
+        return t
+    end
 
-    for _, Player: ObjectValue in ReplicatedStorage.LoadedPlayers:GetChildren() do
-        if not IncludeAFK and PlayerDataUtils.GetPlayerSetting(Player.Value, "Game.AFK") then
-            continue
+    for _, Player in LoadedPlayers:GetChildren() do
+        if Player:IsA("ObjectValue") and Player.Value and Player.Value:IsA("Player") and Player.Value.Parent then
+            if not IncludeAFK and PlayerDataUtils.GetPlayerSetting(Player.Value, "Game.AFK") then
+                continue
+            end
+            table.insert(t, Player.Value)
         end
-
-        table.insert(t, Player.Value)
     end
 
     return t
@@ -377,7 +437,11 @@ end
 
 --- Shakes the local player's camera. Yeah, pretty intuitive, isn't it?
 function PlayerUtils.ShakeCamera(Magnitude: number, Duration: number)
-    if RunService:IsServer() or not PlayerDataUtils.GetPlayerSetting(Players.LocalPlayer, "Customization.ScreenShakeEnabled") then
+    if RunService:IsServer() or not Magnitude or not Duration then
+        return
+    end
+    
+    if not PlayerDataUtils.GetPlayerSetting(Players.LocalPlayer, "Customization.ScreenShakeEnabled") then
         return
     end
 
@@ -392,37 +456,50 @@ function PlayerUtils.ShakeCamera(Magnitude: number, Duration: number)
         end
         local TargetPos = Vector3.new(AxisTable.X, AxisTable.Y, AxisTable.Z)
         local Cam = workspace.CurrentCamera
-        Cam.CFrame *= CFrame.new(TargetPos)
+        if Cam then
+            pcall(function()
+                Cam.CFrame = Cam.CFrame * CFrame.new(TargetPos)
+            end)
+        end
         if Left >= 1 then
-            Conn:Disconnect()
+            if Conn and Conn.Connected then
+                Conn:Disconnect()
+            end
         end
     end)
 end
 
 --- SERVER FUNCTION: Shakes the camera of one or more players.
 function PlayerUtils.ShakeCameraOf(Target: Player | {Player}, Magnitude: number, Duration: number)
-    if not RunService:IsServer() then
+    if not RunService:IsServer() or not Target or not Magnitude or not Duration then
         return
     end
 
     if typeof(Target) == "table" then
         for _, Player in Target do
-            Network:FireClientConnection(Player, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
+            if Player and Player.Parent then
+                Network:FireClientConnection(Player, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
+            end
         end
         return
     end
-    Network:FireClientConnection(Target, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
+    
+    if Target and Target.Parent then
+        Network:FireClientConnection(Target, "ShakeCamera", "REMOTE_EVENT", Magnitude, Duration)
+    end
 end
 
 --- CLIENT FUNCTION: Starts or stops listening for a double-tap of a key.
 --- When double-tap is detected, fires "DoubleTapResponse" to server with the action name.
 function PlayerUtils.DoubleTapListen(actionName: string, shouldListen: boolean, keyCode: Enum.KeyCode?, interval: number?)
     if RunService:IsServer() then return end
+    if not actionName then return end
     
     PlayerUtils._doubleTapConnections = PlayerUtils._doubleTapConnections or {}
     
-    if PlayerUtils._doubleTapConnections[actionName] then
-        PlayerUtils._doubleTapConnections[actionName]:Disconnect()
+    local existing = PlayerUtils._doubleTapConnections[actionName]
+    if existing and existing.Connected then
+        pcall(function() existing:Disconnect() end)
         PlayerUtils._doubleTapConnections[actionName] = nil
     end
     
@@ -433,8 +510,7 @@ function PlayerUtils.DoubleTapListen(actionName: string, shouldListen: boolean, 
     local lastTime = 0
     
     PlayerUtils._doubleTapConnections[actionName] = UserInputService.InputBegan:Connect(function(input, gpe)
-        if gpe then return end
-        if input.KeyCode ~= key then return end
+        if gpe or not input or input.KeyCode ~= key then return end
         
         local now = os.clock()
         if now - lastTime < tapInterval then
@@ -448,10 +524,13 @@ end
 
 --- SERVER FUNCTION: Tells a player's client to start or stop listening for a double-tap.
 function PlayerUtils.DoubleTapListenFor(player: Player, actionName: string, shouldListen: boolean, keyCode: string?, interval: number?)
-    if not RunService:IsServer() then return end
+    if not RunService:IsServer() or not player or not player.Parent or not actionName then 
+        return 
+    end
     
     Network:FireClientConnection(player, "DoubleTapListen", "REMOTE_EVENT", actionName, shouldListen, keyCode, interval)
 end
 
 
 return PlayerUtils
+

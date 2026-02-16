@@ -1,4 +1,4 @@
--- TODO: intro lighting support
+-- Intro lighting support: Allows intros to have custom lighting that transitions back to normal
 
 local Debris = game:GetService("Debris")
 local Lighting = game:GetService("Lighting")
@@ -26,6 +26,7 @@ local LightingModule = {
         FogStart = 0,
     },
     CurrentLighting = nil,
+    _IntroLightingStack = {}, -- Stack to save/restore lighting during intros
 }
 
 function LightingModule:Init()
@@ -114,6 +115,72 @@ function LightingModule.SetDefaultLighting()
         for _, Child in script:GetChildren() do
             Child:Clone().Parent = Lighting
         end
+    end
+end
+
+--- Push intro lighting onto stack (saves current lighting state)
+---@param introProperies {[any]: any} | Instance Intro lighting properties
+---@return function Function to pop/restore lighting when intro ends
+function LightingModule.PushIntroLighting(introProperies: any): () -> ()
+    -- Save current lighting state
+    local savedState = {
+        currentLighting = LightingModule.CurrentLighting,
+        lightingProps = {},
+    }
+    
+    -- Save current property values
+    for name, _ in LightingModule.Properties do
+        if typeof(Lighting[name]) ~= "userdata" then
+            savedState.lightingProps[name] = Lighting[name]
+        end
+    end
+    
+    -- Push to stack
+    table.insert(LightingModule._IntroLightingStack, savedState)
+    
+    -- Apply intro lighting
+    LightingModule.SetCustomLighting(introProperies)
+    
+    -- Return function to restore lighting
+    return function()
+        LightingModule.PopIntroLighting()
+    end
+end
+
+--- Pop intro lighting from stack (restores previous lighting state)
+function LightingModule.PopIntroLighting()
+    if #LightingModule._IntroLightingStack == 0 then
+        return
+    end
+    
+    local savedState = table.remove(LightingModule._IntroLightingStack)
+    
+    -- Restore lighting
+    if savedState.currentLighting then
+        LightingModule.SetCustomLighting(savedState.currentLighting)
+    else
+        LightingModule.SetCustomLighting(savedState.lightingProps)
+    end
+end
+
+--- Set intro lighting with automatic restoration after duration
+---@param introProperies {[any]: any} | Instance Intro lighting properties
+---@param duration number Duration in seconds before returning to normal
+---@return function Function to manually end intro early
+function LightingModule.SetIntroLighting(introProperies: any, duration: number): () -> ()
+    local restoreFn = LightingModule.PushIntroLighting(introProperies)
+    
+    local connection
+    connection = task.delay(duration, function()
+        restoreFn()
+    end)
+    
+    return function()
+        if connection then
+            task.cancel(connection)
+            connection = nil
+        end
+        restoreFn()
     end
 end
 

@@ -90,7 +90,7 @@ function PlayerManager:Init()
         	Humanoid.BreakJointsOnDeath = false
 
 			local KillerValue
-			if Role.Value ~= "Spectator" then
+			if Role and Role.Value ~= "Spectator" then
 				PlayerManager._SetupHitboxes(char)
 
 				local CollisionGroup = Role.Value

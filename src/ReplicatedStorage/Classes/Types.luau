@@ -890,8 +890,9 @@ export type HitboxSettings = {
     --- The specific execution animation to use if `ExecuteOnKill` is `true`.
     --- 
     --- Will be looked up automatically if this isn't set.
-    --- 
-    --- TODO: **Fill this field with examples as this property is a bit weird to use and research is needed.**
+    --- Examples: `rbxassetid://75034945737494`, `rbxassetid://75034945737499`
+    --- Must be a valid animation ID accessible by the player.
+    --- If nil, system will attempt to find a default execution animation.
 	ExecutionAnimation: string?,
 	--- Minimum wall height required to block hits.
 	---
@@ -915,7 +916,11 @@ export type HitboxSettings = {
         OverwriteExisting: boolean?,
 	}}?,
     --- Any callbacks for events fired in the hitbox's functionality.
-    -- TODO: write what connections there are and what they do
+    --- Available connection keys:
+    ---   - "OnHit": Called when hitbox hits a humanoid (args: hitboxDetails, humanoid)
+    ---   - "OnCancel": Called when hitbox is cancelled
+    ---   - "OnDestroy": Called when hitbox is destroyed
+    ---   - "OnStunned": Called when creator is stunned
     Connections: {[string]: (any?) -> ()}?,
 }
 
@@ -944,10 +949,10 @@ export type Projectile = {
     --- The player that created the projectile.
     SourcePlayer: Player,
     --- The model of the projectile.
-    --- It has to have a `CollisionBox` part inside of it that acts as a hitbox for `DestroyOnCollision` if it's `true`.
-    --- If it's a model, make a `Pivot` part inside it that represents the center and make it the `PrimaryPart` property.
-    --- Then, weld every other part in the model to it.
-    -- TODO: fix MODEL projectiles since only BasePart projectiles work properly
+    --- For BasePart: Single part will be cloned and moved
+    --- For Model: Must have a `Pivot` part as PrimaryPart with welded children.
+    --- Must have a `CollisionBox` part inside (for DestroyOnCollision).
+    --- Note: Model projectiles have better positioning but higher performance cost.
     Model: (Model | BasePart),
     --- The initial position of the projectile.
     StartingCFrame: CFrame?,

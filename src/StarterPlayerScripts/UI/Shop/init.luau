@@ -914,10 +914,16 @@ function Shop.ReloadContent(CreateCards: boolean?)
                 Preview.CurrentCamera = Camera
 
                 Model = Model:Clone()
-                if not Model.Humanoid:FindFirstChildWhichIsA("Animator") then
-                    Instance.new("Animator").Parent = Model.Humanoid
+                local Humanoid = Model:FindFirstChildWhichIsA("Humanoid")
+                if Humanoid and not Humanoid:FindFirstChildWhichIsA("Animator") then
+                    Instance.new("Animator").Parent = Humanoid
                 end
-                Utils.Character.GetRootPart(Model).Anchored = true
+                
+                local RootPart = Utils.Character.GetRootPart(Model)
+                if RootPart then
+                    RootPart.Anchored = true
+                end
+                
                 Model:PivotTo(CFrame.new(0, 10000, 0) * CFrame.fromEulerAnglesXYZ(0, math.rad(180), 0))
 
                 Camera.CFrame = CFrame.new(0, 10000, 6 * Model:GetExtentsSize().Y)

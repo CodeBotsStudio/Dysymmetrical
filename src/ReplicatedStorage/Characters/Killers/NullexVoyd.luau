@@ -28,11 +28,30 @@ local function DataAnchorBehaviour(self: Types.Ability)
         
             self.PositionInfo = nil
             self.Setup = false
+            
+            -- Remove slowness when recalling
+            if PlayerSpeedManager and PlayerSpeedManager.ManagedPlayers[self.Owner] then
+                PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
+            end
         else
             self.Setup = true
+            
+            -- Apply slowness when placing
+            if PlayerSpeedManager and PlayerSpeedManager.ManagedPlayers[self.Owner] then
+                PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0.4)
+            end
+            
+            -- FAILSAFE: Auto-remove slowness after 15 seconds if ability wasn't recalled
+            self:AddConnection(task.delay(15, function()
+                if self.Setup and PlayerSpeedManager and PlayerSpeedManager.ManagedPlayers[self.Owner] then
+                    -- Ability wasn't recalled, remove slowness forcefully
+                    PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
+                    warn("[DataAnchor] Forcefully removed slowness after timeout")
+                end
+            end))
         
             self:AddConnection(task.delay(0.75, function()
-                self.DevicePosition = self.OwnerProperties.Character.HumanoidRootPart.Position - Vector3.new(0, 3 * self.OwnerProperties.Character:GetScale(), 0)
+                self.DevicePosition = self.OwnerProperties.Character.HumanoidRootPart.Position
                 Sounds.PlaySound(self.PlaceSound, {
                     Position = self.DevicePosition,
                     RollOffMaxDistance = 35,
@@ -44,7 +63,15 @@ local function DataAnchorBehaviour(self: Types.Ability)
             self:AddConnection(task.delay(0.917, function()
                 local TpInstance = self.CharModule.Config.TeleporterPrefab:Clone()
                 TpInstance:PivotTo(CFrame.new(self.DevicePosition))
-                TpInstance.Parent = workspace.Map.InGame
+                
+                local Map = workspace:FindFirstChild("Map")
+                if Map then
+                    local InGame = Map:FindFirstChild("InGame")
+                    if InGame then
+                        TpInstance.Parent = InGame
+                    end
+                end
+                
                 self.PositionInfo = self.OwnerProperties.Character:GetPivot()
                 self.TeleporterInstance = TpInstance
             end))
@@ -57,12 +84,7 @@ local function DataAnchorBehaviour(self: Types.Ability)
             self.Cooldown = self.SecondCooldown
             self.Setup = true
         
-            self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0)
-        
             self:PlayUseAnimation()
-            self:AddConnection(task.delay((self.UseAnimationTrack.Length or 1.7) + 0.4, function()
-                self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
-            end))
         end
     end
 end
@@ -73,7 +95,7 @@ local function CallbackPingBehaviour(self: Types.Ability)
         self.OwnerProperties.Character:SetAttribute("PreventSlash", true)
 
         self:AddConnection(task.delay(self.Duration, function()
-            PlayerSpeedManager.RemoveSpeedFactor(self.owner, self.Name)
+            PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
             self.OwnerProperties.Character:SetAttribute("PreventSlash", false)
         end))
 
@@ -195,6 +217,20 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
                 PositionInfo = CFrame.new(),
 
                 Behaviour = DataAnchorBehaviour,
+                
+                OnDestroy = function(self)
+                    -- Cleanup: Remove slowness if ability is destroyed while active
+                    if self.Setup and PlayerSpeedManager and PlayerSpeedManager.ManagedPlayers[self.Owner] then
+                        pcall(function()
+                            PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
+                        end)
+                    end
+                    
+                    -- Destroy teleporter if it exists
+                    if self.TeleporterInstance and self.TeleporterInstance.Parent then
+                        self.TeleporterInstance:Destroy()
+                    end
+                end,
             }),
 
             CallbackPing = Ability.New({

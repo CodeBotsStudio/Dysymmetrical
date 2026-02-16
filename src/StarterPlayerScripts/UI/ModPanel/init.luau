@@ -80,15 +80,25 @@ function ModPanel.Start()
         end
 
         local Command = require(Cmd)
-        Command.RankRequired = Command.RankRequired or Utils.Ranks.ServerOwner
+        if not Command then
+            return
+        end
+        
+        local rankRequired = Command.RankRequired
+        if rankRequired == nil then
+            rankRequired = (Utils.Ranks and Utils.Ranks.ServerOwner) or 9999
+        end
+        
+        local cmdType = Command.Type or "Bool"
+        local playerRank = ModPanel.Rank or 9999
 
-        if ModPanel.Rank > Command.RankRequired or not Command.Type or not Prefabs[Command.Type] then
+        if playerRank > rankRequired or not cmdType or not Prefabs[cmdType] then
             return
         end
 
         LO += 1
 
-        local Content = Prefabs[Command.Type].New(Cmd, UI)
+        local Content = Prefabs[cmdType].New(Cmd, UI)
         Content.LayoutOrder = LO
     end
 

@@ -30,6 +30,7 @@ SmoothShiftLock.__index = SmoothShiftLock
 --// Services
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 -- local ContextActionService = game:GetService("ContextActionService")
 local Settings = UserSettings()
@@ -44,6 +45,9 @@ local Maid = require(script.Parent:WaitForChild("Maid"))
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
+local RoundInfo = ReplicatedStorage:WaitForChild("RoundInfo")
+local RoundStateValue = RoundInfo:WaitForChild("CurrentState")
+
 --// Configuration
 local Config = require(script:WaitForChild("Settings"))
 
@@ -55,7 +59,20 @@ function SmoothShiftLock.new()
 	self.isEnabled = false
 	self.isMouseLocked = false
 	self.mouseLockToggledEvent = Instance.new("BindableEvent")
-	
+	self._roundState = RoundStateValue.Value
+	self._neck = nil
+	self._neckOriginalC0 = nil
+	RoundStateValue:GetPropertyChangedSignal("Value"):Connect(function()
+		local previous = self._roundState
+		self._roundState = RoundStateValue.Value
+		if self._roundState == "Lobby" then
+			self:_ResetNeck()
+		end
+		if previous == "Lobby" and self._roundState ~= "Lobby" then
+			self:_ResetNeck()
+		end
+	end)
+
 	--// Check for client setting changes
 	GameSettings.Changed:Connect(function(property)
 		if property == "ControlMode" or property == "ComputerMovementMode" then
@@ -73,10 +90,12 @@ function SmoothShiftLock.new()
 		self:UpdateMouseLockAvailability()
 	end)
 
-	local function OnCharacterAdded(Character: Model)
+	local function OnCharacterAdded(Character)
 		self.Character = Character
 		self.Humanoid = self.Character:WaitForChild("Humanoid")
 		self.HumanoidRootPart = self.Character:WaitForChild("HumanoidRootPart")
+		self._neck = nil
+		self._neckOriginalC0 = nil
 	end
 	
 	if LocalPlayer.Character then
@@ -91,6 +110,54 @@ function SmoothShiftLock.new()
 end
 
 -- [[ Functions ]]:
+
+function SmoothShiftLock:_GetNeckMotor()
+	if not self.Character then
+		return nil
+	end
+	local existing = self._neck
+	if existing and existing.Parent then
+		return existing
+	end
+	local neck = self.Character:FindFirstChild("Neck", true)
+	if neck and neck:IsA("Motor6D") then
+		self._neck = neck
+		return neck
+	end
+	for _, desc in ipairs(self.Character:GetDescendants()) do
+		if desc:IsA("Motor6D") and desc.Name == "Neck" then
+			self._neck = desc
+			return desc
+		end
+	end
+	return nil
+end
+
+function SmoothShiftLock:_ResetNeck()
+	local neck = self:_GetNeckMotor()
+	if neck and self._neckOriginalC0 then
+		neck.C0 = self._neckOriginalC0
+	end
+end
+
+function SmoothShiftLock:_UpdateLobbyNeckRotation()
+	if not self.Character or not self.HumanoidRootPart then
+		return
+	end
+	local neck = self:_GetNeckMotor()
+	if not neck then
+		return
+	end
+	if not self._neckOriginalC0 then
+		self._neckOriginalC0 = neck.C0
+	end
+	local relativeLook = self.HumanoidRootPart.CFrame:VectorToObjectSpace(Camera.CFrame.LookVector)
+	local yaw = math.atan2(-relativeLook.X, -relativeLook.Z)
+	local pitch = math.asin(math.clamp(relativeLook.Y, -1, 1))
+	yaw = math.clamp(yaw, math.rad(-70), math.rad(70))
+	pitch = math.clamp(pitch, math.rad(-35), math.rad(35))
+	neck.C0 = self._neckOriginalC0 * CFrame.Angles(pitch, yaw, 0)
+end
 
 --// Update MouseLock availability
 function SmoothShiftLock:UpdateMouseLockAvailability()
@@ -111,7 +178,7 @@ function SmoothShiftLock:GetBindableToggleEvent()
 end
 
 --// Enable or disable MouseLock
-function SmoothShiftLock:EnableMouseLock(Enable: boolean)
+function SmoothShiftLock:EnableMouseLock(Enable)
 	if Enable ~= self.isEnabled then
 		self.isEnabled = Enable
 		
@@ -135,12 +202,6 @@ function SmoothShiftLock:DoMouseLockSwitch(name, state, input)
 end
 
 --// Bind keybinds
--- function SmoothShiftLock:BindContextActions()
--- 	ContextActionService:BindActionAtPriority(CONTEXT_ACTION_NAME, function(name, state, input)
--- 		return self:DoMouseLockSwitch(name, state, input)
--- 	end, false, MOUSELOCK_ACTION_PRIORITY, unpack(Config.SHIFT_LOCK_KEYBINDS))
--- end
-
 function SmoothShiftLock:BindContextActions()
 	self.ContextActionConnection = InputManager:GetInputAction("Miscellaneous.ShiftLock").Pressed:Connect(function()
 		self:DoMouseLockSwitch(nil, Enum.UserInputState.Begin, nil)
@@ -156,14 +217,14 @@ function SmoothShiftLock:UnbindContextActions()
 end
 
 --// Toggle shift lock
-function SmoothShiftLock:ToggleShiftLock(Toggle: boolean)
+function SmoothShiftLock:ToggleShiftLock(Toggle)
 	self.isMouseLocked = Toggle
 
 	if (self.isMouseLocked) then
 		CameraUtils.setMouseIconOverride(Config.LOCKED_MOUSE_ICON)
 		--// Start
 		if (self.isMouseLocked) and self.Character then
-			self._runtimeMaid:GiveTask(RunService.RenderStepped:Connect(function(Delta: number)
+			self._runtimeMaid:GiveTask(RunService.RenderStepped:Connect(function(Delta)
 				if not self.Humanoid or not self.HumanoidRootPart then return end
 				self.Humanoid.AutoRotate = not self.isMouseLocked
 				--// Rotate character
@@ -179,6 +240,7 @@ function SmoothShiftLock:ToggleShiftLock(Toggle: boolean)
 		end
 	else
 		self._runtimeMaid:Destroy()
+		self:_ResetNeck()
 		if self.Humanoid then
 			self.Humanoid.AutoRotate = not self.isMouseLocked
 		end

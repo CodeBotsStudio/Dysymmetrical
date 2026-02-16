@@ -9,7 +9,7 @@ return {
         Utils.Player.ObservePlayers(function(Player: Player)
             Utils.Character.ObserveCharacter(Player, function(Character: Model)
                 local Role = Character:FindFirstChild("Role")
-                if Role.Value ~= "Survivor" then
+                if not Role or Role.Value ~= "Survivor" then
                     return
                 end
 

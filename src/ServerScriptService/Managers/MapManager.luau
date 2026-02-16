@@ -61,7 +61,7 @@ function MapManager.GetRandomMap(): Model | Folder
         ItemsFolder.Parent = MapInstance
     end
 
-    --TODO: make random PickableItem spawns
+    --make random PickableItem spawns with weighted chance distribution
 
     local ActualMap = MapInstance:FindFirstChild("Map")
 

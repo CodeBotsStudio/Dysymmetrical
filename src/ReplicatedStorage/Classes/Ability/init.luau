@@ -7,6 +7,7 @@ local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 local Signal = require(ReplicatedStorage.Utils.Signal)
+local AbilityStateValidator = require(ReplicatedStorage.Classes.AbilityStateValidator)
 
 local AbilityType = {}
 AbilityType.__index = AbilityType
@@ -228,6 +229,14 @@ function AbilityType:Init(charModule: Types.Killer | Types.Survivor, plr: Player
 
         self:AddConnection(Network:SetConnection("UsePlayerAbility", "REMOTE_EVENT", function(player: Player, abilityName: string)
             if player == self.Owner and abilityName == self.Name and self:CanUse() then
+                -- Validate ability state before execution
+                local isValid, errMsg = AbilityStateValidator.ValidateAbilityState(self)
+                if not isValid then
+                    print(`[Ability] State validation failed for {self.Name}: {errMsg}`)
+                    AbilityStateValidator.RecoverAbilityState(self)
+                    return
+                end
+                
                 task.defer(function()
                     if self.CharModule.Config.Voicelines and self.CharModule.Config.Voicelines[self.Name] then
                         Sounds.PlayVoiceline(self.Owner.Character, self.CharModule.Config.Voicelines[self.Name])
@@ -495,6 +504,12 @@ function AbilityType:AddStunnableConnection<T>(Connection: T & (RBXScriptConnect
 end
 
 function AbilityType:CanUse(): boolean
+    -- Validate state first
+    local isValid, _ = AbilityStateValidator.ValidateAbilityState(self)
+    if not isValid then
+        return false
+    end
+    
     --if it's limited then it should have to have enough uses left
     local EnoughUses = true
     if workspace:GetAttribute("ChargesEnabled") and self.UseSettings.Limited then

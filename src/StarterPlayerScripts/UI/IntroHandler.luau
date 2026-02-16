@@ -43,8 +43,14 @@ return {
             local KillerName = Char:GetAttribute("CharacterName")
             local KillerSkin = Char:GetAttribute("CharacterSkinName")
 
-            --TODO: multi-killer toast support
-            KillerPlayerNames[1] = Char.Name
+            -- Support for multi-killer scenarios in same game
+            -- Check if this is a new killer or the existing one
+            local newKillerName = Char.Name
+            if KillerPlayerNames[1] ~= newKillerName then
+                table.insert(KillerPlayerNames, newKillerName)
+            else
+                KillerPlayerNames[1] = newKillerName  -- Update existing
+            end
 
 		    if Utils.PlayerData.GetPlayerSetting(Players.LocalPlayer, "Miscellaneous.DisableKillerIntros") then
 		    	task.spawn(require(ToastPrefab), IntroContainer, KillerPlayerNames)

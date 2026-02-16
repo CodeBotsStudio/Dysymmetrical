@@ -41,6 +41,64 @@
 
 local RunService = game:GetService("RunService")
 
+--- Simple signal class for event-driven initialization
+local Signal = {}
+Signal.__index = Signal
+
+function Signal.new()
+	local self = setmetatable({}, Signal)
+	self._Connections = {}
+	self._Fired = false
+	return self
+end
+
+function Signal:Connect(callback)
+	if self._Fired then
+		task.spawn(callback)
+		return {Disconnect = function() end}
+	end
+	
+	local connection = {
+		Connected = true,
+		Disconnect = function(self)
+			self.Connected = false
+			for i, conn in ipairs(self._Signal._Connections) do
+				if conn == self then
+					table.remove(self._Signal._Connections, i)
+					break
+				end
+			end
+		end,
+		_Signal = self
+	}
+	table.insert(self._Connections, connection)
+	return connection
+end
+
+function Signal:Wait()
+	if self._Fired then return end
+	local thread = coroutine.running()
+	local connection
+	connection = self:Connect(function()
+		if connection and connection.Connected then
+			connection:Disconnect()
+		end
+		task.spawn(thread)
+	end)
+	coroutine.yield()
+end
+
+function Signal:Fire()
+	if self._Fired then return end
+	self._Fired = true
+	for _, connection in ipairs(self._Connections) do
+		if connection.Connected then
+			task.spawn(connection[1])
+		end
+	end
+	self._Connections = {}
+end
+
 --- Class used to connect the server and the clients more efficiently by encapsulating everything in a single place.
 local Network = {
     Folders = {
@@ -57,6 +115,8 @@ local Network = {
     },
     InstanceCreator = nil,
     ServiceLive = false,
+	_InitSignal = Signal.new(),
+	_Connections = {},
 }
 
 --- Initializes the networking system in the current environment.
@@ -78,23 +138,60 @@ function Network:Init()
         self.InstanceCreator.Parent = script
 
         self.InstanceCreator.OnServerInvoke = function(_player: Player, name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION" | "BINDABLE_EVENT")
-            return self:_CreateInstance(name, Type)
+            local success, result = pcall(function()
+                return self:_CreateInstance(name, Type)
+            end)
+            if not success then
+                warn("Network: Failed to create instance", name, Type, result)
+                return nil
+            end
+            return result
         end
     else
+        local creatorFound = false
         for _, name in self._FolderNames do
-            self.Folders[name] = script:FindFirstChild(name) or script:WaitForChild(name)
-        end
-
-        if not script:FindFirstChild("InstanceCreator") then
-            while not script.InstanceCreator do
-                task.wait()
+            local folder = script:FindFirstChild(name)
+            if not folder then
+                folder = script:WaitForChild(name, 10)
+            end
+            if folder then
+                self.Folders[name] = folder
+            else
+                warn("Network: Failed to find folder", name)
             end
         end
 
-        self.InstanceCreator = script.InstanceCreator
+        local creator = script:FindFirstChild("InstanceCreator")
+        if not creator then
+            creator = script:WaitForChild("InstanceCreator", 10)
+        end
+        
+        if creator then
+            self.InstanceCreator = creator
+            creatorFound = true
+        else
+            warn("Network: InstanceCreator not found - RemoteFunction creation will fail")
+        end
     end
 
     self.ServiceLive = true
+    self._InitSignal:Fire()
+end
+
+--- Wait for the network to be initialized with timeout
+function Network:_WaitForInit(timeout: number?)
+	timeout = timeout or 30
+	if self:IsLive() then return true end
+	
+	local startTime = os.clock()
+	while not self:IsLive() do
+		if os.clock() - startTime > timeout then
+			warn("Network: Initialization timeout after", timeout, "seconds")
+			return false
+		end
+		task.wait(0.05)
+	end
+	return true
 end
 
 --- Creates an instance of a specific type for later usage.
@@ -103,6 +200,7 @@ end
 --- @return `RemoteEvent | UnreliableRemoteEvent | RemoteFunction | BindableEvent`              The instance that has been created.
 function Network:_CreateInstance(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION" | "BINDABLE_EVENT"): RemoteEvent | UnreliableRemoteEvent | RemoteFunction | BindableEvent
     if not RunService:IsServer() then return end
+    
     local instance
     if Type == "REMOTE_EVENT" then
         instance = Instance.new("RemoteEvent")
@@ -114,6 +212,10 @@ function Network:_CreateInstance(name: string, Type: "REMOTE_EVENT" | "UREMOTE_E
         instance = Instance.new("BindableEvent")
     end
 
+    if not instance then
+        error("Invalid Type: " .. tostring(Type))
+    end
+
     instance.Name = name
     instance.Parent = self.Folders[Type]
     return instance
@@ -123,6 +225,8 @@ end
 --- @param instance (`RemoteEvent | UnreliableRemoteEvent | RemoteFunction | BindableEvent`):   The instance to set up the connection of.
 --- @param Callback (`function`):                                                               The code that will execute when the connection fires.
 function Network:_SetupConnection(instance: RemoteEvent | UnreliableRemoteEvent | RemoteFunction | BindableEvent, Callback: (any) -> (any)): RBXScriptConnection | nil
+    if not instance or not Callback then return nil end
+    
     if instance:IsA("BindableEvent") then
         return instance.Event:Connect(Callback)
     else
@@ -150,9 +254,11 @@ end
 --- @param Callback                (`function`):    The code that will run when the connection is fired.
 --- @return `RBXScriptConnection`                   The set connection for further usage in the script from where this is called.
 function Network:SetConnection(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION" | "BINDABLE_EVENT", Callback: (...any) -> (...any)): RBXScriptConnection
-    while not self:IsLive() do
-        task.wait()
+    if not self:_WaitForInit() then
+        warn("Network: Failed to initialize in SetConnection for", name)
+        return nil
     end
+    
     local instance
     if RunService:IsServer() then
         if not self.Folders[Type]:FindFirstChild(name) then
@@ -162,19 +268,47 @@ function Network:SetConnection(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVE
         end
     else
         if not self.Folders[Type]:FindFirstChild(name) then
-            instance = self.InstanceCreator:InvokeServer(name, Type)
+            if self.InstanceCreator then
+                local success, result = pcall(function()
+                    return self.InstanceCreator:InvokeServer(name, Type)
+                end)
+                if success then
+                    instance = result
+                else
+                    warn("Network: Failed to create instance on server:", result)
+                    return nil
+                end
+            else
+                warn("Network: InstanceCreator not available")
+                return nil
+            end
         else
             instance = self.Folders[Type]:FindFirstChild(name)
         end
     end
+    
     return self:_SetupConnection(instance, Callback)
 end
 
 --- Destroys the Network instance. Only called when the server closes.
 function Network:Destroy()
-    for _, RemoteFunction in self.Folders.REMOTE_FUNCTION:GetChildren() do
-        if not RemoteFunction:IsA("RemoteFunction") then continue end
-        RemoteFunction.OnServerInvoke = function() end
+    for _, remote in ipairs(self._Connections) do
+        pcall(function()
+            if remote and remote.Connected then
+                remote:Disconnect()
+            end
+        end)
+    end
+    self._Connections = {}
+    
+    if self.Folders.REMOTE_FUNCTION then
+        for _, RemoteFunction in self.Folders.REMOTE_FUNCTION:GetChildren() do
+            if RemoteFunction:IsA("RemoteFunction") then
+                pcall(function()
+                    RemoteFunction.OnServerInvoke = function() end
+                end)
+            end
+        end
     end
 end
 
@@ -184,20 +318,31 @@ end
 --- @param Type    (`string`):  The type of instance to fire the connections of
 --- @param ...                  Any parameters to pass to the connection
 function Network:FireClientConnection(target: Player | {Player}, name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION", ...): any | nil
-    while not self:IsLive() do
-        task.wait()
-    end
-    if not RunService:IsServer() or not self.Folders[Type]:FindFirstChild(name) then return end
+    if not self:_WaitForInit() then return nil end
+    if not RunService:IsServer() or not self.Folders[Type]:FindFirstChild(name) then return nil end
 
     local event = self.Folders[Type]:FindFirstChild(name)
+    if not event then return nil end
 
     local function Fire(player: Player, ...)
+        if not player or not player.Parent then return nil end
+        
+        local args = {...}
+        local success, result
         if event:IsA("RemoteFunction") then
-            return event:InvokeClient(player, ...)
+            success, result = pcall(function()
+                return event:InvokeClient(player, unpack(args))
+            end)
         else
-            event:FireClient(player, ...)
+            success, result = pcall(function()
+                event:FireClient(player, unpack(args))
+            end)
         end
-        return
+        
+        if not success then
+            warn("Network: Failed to fire client connection:", result)
+        end
+        return result
     end
 
     if typeof(target) == "table" then
@@ -216,12 +361,19 @@ end
 --- @param Type    (`string`):  The type of the event (Reliable / Unreliable)
 --- @param ...                  Any parameters to pass to the connection
 function Network:FireAllClientConnection(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION", ...)
-    while not self:IsLive() do
-        task.wait()
-    end
+    if not self:_WaitForInit() then return end
     if not RunService:IsServer() or Type == "REMOTE_FUNCTION" or not self.Folders[Type]:FindFirstChild(name) then return end
 
-    self.Folders[Type]:FindFirstChild(name):FireAllClients(...)
+    local event = self.Folders[Type]:FindFirstChild(name)
+    if event then
+        local args = {...}
+        local success, result = pcall(function()
+            event:FireAllClients(unpack(args))
+        end)
+        if not success then
+            warn("Network: Failed to fire all clients:", result)
+        end
+    end
 end
 
 --- Fires a server's event / function connections.
@@ -229,30 +381,45 @@ end
 --- @param Type    (`string`):  The type of instance to fire the connections of
 --- @param ...                  Any parameters to pass to the connection
 function Network:FireServerConnection(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION", ...): any | nil
-    while not self:IsLive() do
-        task.wait()
-    end
-    if not RunService:IsClient() or not self.Folders[Type]:FindFirstChild(name) then return end
+    if not self:_WaitForInit() then return nil end
+    if not RunService:IsClient() or not self.Folders[Type]:FindFirstChild(name) then return nil end
 
     local instance = self.Folders[Type]:FindFirstChild(name)
+    if not instance then return nil end
+    
+    local args = {...}
+    local success, result
     if instance:IsA("RemoteFunction") then
-        return instance:InvokeServer(...)
+        success, result = pcall(function()
+            return instance:InvokeServer(unpack(args))
+        end)
     else
-        instance:FireServer(...)
+        success, result = pcall(function()
+            instance:FireServer(unpack(args))
+        end)
     end
-    return
+    
+    if not success then
+        warn("Network: Failed to fire server connection:", result)
+    end
+    return result
 end
 
 --- Fires a BindableEvent's connections
 --- @param name (`string`): The name of the desired BindableEvent
 --- @param ...              Any parameters to pass to the connection
 function Network:FireConnection(name: string, ...)
-    while not self:IsLive() do
-        task.wait()
+    if not self:_WaitForInit() then return end
+    local event = self.Folders["BINDABLE_EVENT"]:FindFirstChild(name)
+    if event then
+        local args = {...}
+        local success, result = pcall(function()
+            event:Fire(unpack(args))
+        end)
+        if not success then
+            warn("Network: Failed to fire connection:", result)
+        end
     end
-    if not self.Folders["BINDABLE_EVENT"]:FindFirstChild(name) then return end
-
-    self.Folders["BINDABLE_EVENT"]:FindFirstChild(name):Fire(...)
 end
 
 --- Returns an object instance
@@ -260,10 +427,7 @@ end
 --- @param Type    (`string`):    The type of the desired instance inside of the script (e. g. "REMOTE_EVENT")
 --- @return `any`                 May return the desired instance
 function Network:GetInstance(name: string, Type: "REMOTE_EVENT" | "UREMOTE_EVENT" | "REMOTE_FUNCTION" | "BINDABLE_EVENT")
-    while not self:IsLive() do
-        task.wait()
-    end
-    if not self.Folders[Type]:FindFirstChild(name) then return end
+    if not self:_WaitForInit() then return nil end
     return self.Folders[Type]:FindFirstChild(name)
 end
 

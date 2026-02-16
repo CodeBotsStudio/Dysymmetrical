@@ -19,9 +19,16 @@ function InstanceUtils.ObserveChildren(
 	predicate: (child: Instance) -> boolean?
 ): Types.Janitor
 	local mainJanitor = Janitor.new()
+	
+	if not parent or not parent.Parent then
+		warn("InstanceUtils.ObserveChildren: Parent is nil or has no parent")
+		return mainJanitor
+	end
+	
 	mainJanitor:LinkToInstance(parent)
 
 	local function onChildAdded(child: Instance)
+		if not child or not child.Parent then return end
 		if predicate and not predicate(child) then
 			return
 		end
@@ -33,7 +40,9 @@ function InstanceUtils.ObserveChildren(
 	end
 	mainJanitor:Add(parent.ChildAdded:Connect(onChildAdded))
 	mainJanitor:Add(parent.ChildRemoved:Connect(function(child: Instance)
-		mainJanitor:Remove(child)
+		if child then
+			mainJanitor:Remove(child)
+		end
 	end))
 
 	return mainJanitor
@@ -46,9 +55,16 @@ function InstanceUtils.ObserveDescendants(
 	paredicate: (descendant: Instance) -> boolean?
 ): Types.Janitor
 	local mainJanitor = Janitor.new()
+	
+	if not parent or not parent.Parent then
+		warn("InstanceUtils.ObserveDescendants: Parent is nil or has no parent")
+		return mainJanitor
+	end
+	
 	mainJanitor:LinkToInstance(parent)
 
 	local function onDescendantAdded(descendant: Instance)
+		if not descendant or not descendant.Parent then return end
 		if paredicate and not paredicate(descendant) then
 			return
 		end
@@ -60,7 +76,9 @@ function InstanceUtils.ObserveDescendants(
 	end
 	mainJanitor:Add(parent.DescendantAdded:Connect(onDescendantAdded))
 	mainJanitor:Add(parent.DescendantRemoving:Connect(function(descendant: Instance)
-		mainJanitor:Remove(descendant)
+		if descendant then
+			mainJanitor:Remove(descendant)
+		end
 	end))
 
 	return mainJanitor
@@ -72,8 +90,13 @@ function InstanceUtils.ObserveChildrenWhichIsA(
 	className: string,
 	callback: (child: Instance, childJanitor: Types.Janitor) -> ()
 ): Types.Janitor
+	if not parent or not className then
+		warn("InstanceUtils.ObserveChildrenWhichIsA: Invalid parent or className")
+		return Janitor.new()
+	end
+	
 	return InstanceUtils.ObserveChildren(parent, callback, function(child: Instance)
-		return child:IsA(className)
+		return child and child:IsA(className)
 	end)
 end
 
@@ -83,8 +106,13 @@ function InstanceUtils.ObserveDescendantsWhichIsA(
 	className: string,
 	callback: (descendant: Instance, descendantJanitor: Types.Janitor) -> ()
 ): Types.Janitor
+	if not parent or not className then
+		warn("InstanceUtils.ObserveDescendantsWhichIsA: Invalid parent or className")
+		return Janitor.new()
+	end
+	
 	return InstanceUtils.ObserveDescendants(parent, callback, function(descendant: Instance)
-		return descendant:IsA(className)
+		return descendant and descendant:IsA(className)
 	end)
 end
 
@@ -94,8 +122,13 @@ function InstanceUtils.ObserveChildrenOfName(
 	name: string,
 	callback: (child: Instance, childJanitor: Types.Janitor) -> ()
 ): Types.Janitor
+	if not parent or not name then
+		warn("InstanceUtils.ObserveChildrenOfName: Invalid parent or name")
+		return Janitor.new()
+	end
+	
 	return InstanceUtils.ObserveChildren(parent, callback, function(child: Instance)
-		return child.Name == name
+		return child and child.Name == name
 	end)
 end
 

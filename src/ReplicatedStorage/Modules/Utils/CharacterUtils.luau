@@ -13,16 +13,29 @@ local CharacterUtils = {}
 
 --- Waits for a character to properly load.
 function CharacterUtils.WaitForCharacterLoaded(character: Model)
+	if not character or not character.Parent then
+		warn("CharacterUtils.WaitForCharacterLoaded: Character is nil")
+		return
+	end
+	
 	if not character.PrimaryPart then
-		character:GetPropertyChangedSignal("PrimaryPart"):Wait()
+		local startTime = os.clock()
+		while not character.PrimaryPart and os.clock() - startTime < 10 do
+			character:GetPropertyChangedSignal("PrimaryPart"):Wait()
+		end
 	end
 
 	if not character:IsDescendantOf(workspace) then
-		character.AncestryChanged:Wait()
+		local startTime = os.clock()
+		while not character:IsDescendantOf(workspace) and os.clock() - startTime < 10 do
+			character.AncestryChanged:Wait()
+		end
 	end
 	
-	local Hum = InstanceUtils.WaitForChildWhichIsA(character, "Humanoid")
-	InstanceUtils.WaitForChildWhichIsA(Hum, "Animator")
+	local Hum = InstanceUtils.WaitForChildWhichIsA(character, "Humanoid", 10)
+	if Hum then
+		InstanceUtils.WaitForChildWhichIsA(Hum, "Animator", 10)
+	end
 end
 
 --- Gets a player's character's humanoid.
@@ -100,17 +113,36 @@ end
 
 --- Gets the root part of a player's character.
 function CharacterUtils.GetRootPart(character: Player | Model) : BasePart?
-	character = (character:IsA("Player") and character.Character or character)
 	if not character then
-		return
+		return nil
 	end
+	
+	if character:IsA("Player") then
+		if not character.Character then
+			return nil
+		end
+		character = character.Character
+	end
+	
+	if not character.Parent then
+		return nil
+	end
+	
 	local HRP = character:FindFirstChild("HumanoidRootPart")
-	if HRP then
+	if HRP and HRP.Parent then
 		return HRP
 	end
 
 	local Humanoid = character:FindFirstChildWhichIsA("Humanoid")
-	return Humanoid and Humanoid.RootPart or character.PrimaryPart
+	if Humanoid and Humanoid.RootPart and Humanoid.RootPart.Parent then
+		return Humanoid.RootPart
+	end
+	
+	if character.PrimaryPart and character.PrimaryPart.Parent then
+		return character.PrimaryPart
+	end
+	
+	return nil
 end
 
 --- Gets the humanoid of a player's alive character.
@@ -171,12 +203,17 @@ end
 --- Searches up the hierarchy from a part to find a Humanoid.
 --- Useful for detecting characters from accessories or nested folders.
 function CharacterUtils.FindHumanoid(part: Instance): Humanoid?
-	if not part then return nil end
+	if not part or not part.Parent then return nil end
 	
 	local current = part.Parent
-	while current and current ~= workspace do
+	local maxDepth = 0
+	
+	while current and current ~= workspace and maxDepth < 50 do
+		maxDepth += 1
 		local hum = current:FindFirstChildWhichIsA("Humanoid")
-		if hum then return hum end
+		if hum and hum.Parent then
+			return hum
+		end
 		current = current.Parent
 	end
 	return nil
@@ -198,19 +235,23 @@ end
 --- 
 --- Can also be used in non-humanoid rigs as it looks for an Animator recursively, regardless of the hierarchy of the rig.
 function CharacterUtils.LoadAnimationFromID(Rig: Model, ID: string | {string} | {[string]: string}, YieldUntilLoad: boolean?): AnimationTrack
-    if not Rig then
-        error("[Utils:LoadAnimationFromID()]: Rig not provided or nil.")
-        return
+    if not Rig or not Rig.Parent then
+        warn("[Utils:LoadAnimationFromID()]: Rig not provided or not in game.")
+        return nil
     end
 
-    if not ID or #ID <= 0 then
-        error("[Utils:LoadAnimationFromID()]: Animation ID invalid or nil.")
-        return
+    if not ID or (typeof(ID) == "string" and #ID <= 0) then
+        warn("[Utils:LoadAnimationFromID()]: Animation ID invalid or nil.")
+        return nil
     end
 
     if typeof(ID) == "table" then
-        ID = TypeUtils.DictToTable(ID)
-        ID = ID[Rand:NextInteger(1, #ID)]
+        local idTable = TypeUtils.DictToTable(ID)
+        if not idTable or #idTable <= 0 then
+            warn("[Utils:LoadAnimationFromID()]: ID table is empty.")
+            return nil
+        end
+        ID = idTable[Rand:NextInteger(1, #idTable)]
     end
 
     if YieldUntilLoad == nil then
@@ -220,35 +261,70 @@ function CharacterUtils.LoadAnimationFromID(Rig: Model, ID: string | {string} | 
     local Animator = Rig:FindFirstChild("Animator", true)
     if not Animator then
         local timeout = 0
-		while not (Animator or timeout > 30) do
+        local startTime = os.clock()
+        while not Animator and os.clock() - startTime < 30 do
             timeout += task.wait(0.1)
             Animator = Rig:FindFirstChild("Animator", true)
-		end
+        end
+    end
+    
+    if not Animator then
+        warn("[Utils:LoadAnimationFromID()]: Animator not found in rig.")
+        return nil
     end
 
     local AnimInstances = Rig:FindFirstChild("AnimationInstances")
     if not AnimInstances then
-        AnimInstances = Instance.new("Folder")
-        AnimInstances.Name = "AnimationInstances"
-        AnimInstances.Parent = Rig
+        local success = pcall(function()
+            AnimInstances = Instance.new("Folder")
+            AnimInstances.Name = "AnimationInstances"
+            AnimInstances.Parent = Rig
+        end)
+        if not success then
+            warn("[Utils:LoadAnimationFromID()]: Failed to create AnimationInstances folder.")
+            return nil
+        end
     end
 
     local Animation: Animation = AnimInstances:FindFirstChild(ID)
     if Animation then
-        return Animator:LoadAnimation(Animation)
+        local success, track = pcall(function()
+            return Animator:LoadAnimation(Animation)
+        end)
+        if success then
+            return track
+        else
+            warn("[Utils:LoadAnimationFromID()]: Failed to load animation:", track)
+            return nil
+        end
     else
-        Animation = Instance.new("Animation")
-        Animation.Name = ID
-        Animation.AnimationId = ID
-        Animation.Parent = AnimInstances
+        local success = pcall(function()
+            Animation = Instance.new("Animation")
+            Animation.Name = ID
+            Animation.AnimationId = ID
+            Animation.Parent = AnimInstances
+        end)
         
-        local Track = Animator:LoadAnimation(Animation)
+        if not success or not Animation then
+            warn("[Utils:LoadAnimationFromID()]: Failed to create animation object.")
+            return nil
+        end
+        
+        local trackSuccess, Track = pcall(function()
+            return Animator:LoadAnimation(Animation)
+        end)
+        
+        if not trackSuccess or not Track then
+            warn("[Utils:LoadAnimationFromID()]: Failed to load new animation:", Track)
+            return nil
+        end
 
-        local Timeout = 0
         if YieldUntilLoad and Track.Length <= 0 then
-			while not (Track.Length > 0 or Timeout >= 25) do
-				Timeout += task.wait()
-			end
+            local Timeout = 0
+            local startTime = os.clock()
+            while (Track.Length <= 0 or Timeout < 0.1) and os.clock() - startTime < 25 do
+                Timeout += task.wait()
+            end
         end
 
         return Track

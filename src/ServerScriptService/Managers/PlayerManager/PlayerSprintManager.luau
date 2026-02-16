@@ -59,7 +59,7 @@ function PlayerSprintManager:Init()
 
                     --killer's stamina should only deplete when other survivors are close
                     --using `playersFolder` is fine since spectators will be around 1000 studs away in the lobby
-                    if Role.Value == "Killer" then
+                    if Role and Role.Value == "Killer" then
                         local found = false
                         for _, otherChar in workspace.Players:GetChildren() do
                             if otherChar == Character then
@@ -71,8 +71,8 @@ function PlayerSprintManager:Init()
                                 continue
                             end
 
-                            local Role = otherChar:FindFirstChild("Role")
-                            if not Role or Role.Value ~= "Survivor" then
+                            local OtherRole = otherChar:FindFirstChild("Role")
+                            if not OtherRole or OtherRole.Value ~= "Survivor" then
                                 continue
                             end
 
