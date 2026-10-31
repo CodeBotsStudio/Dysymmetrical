@@ -351,7 +351,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 
 					-- If the survivor/killer has a function callback for being hit, and they nullify the hit for one reason or another, skip them and move on.
 					if CharacterModule and CharacterModule.OnHit ~= nil then
-						if CharacterModule:OnHit(Props, Damage) == "Ignored" then
+						if CharacterModule:OnHit(Props, Damage, Humanoid) == "Ignored" then
 							continue
 						end
 					end

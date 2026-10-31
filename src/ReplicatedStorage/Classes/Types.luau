@@ -381,7 +381,7 @@ export type Survivor = {
     --- SERVER FUNCTION: An empty function that you can replace to execute custom behaviour when this character gets hit.
     --- 
     --- If you want the character to not get affected by the hit, you can return `"Ignored"`.
-    OnHit: (self: Survivor, hitbox: HitboxDetails, damage: number) -> (string?)?,
+    OnHit: (self: Survivor, hitbox: HitboxDetails, damage: number, humanoid: Humanoid) -> (string?)?,
     --- SERVER FUNCTION: An empty function that you can replace to execute custom behaviour when this character takes damage from any source.
     --- 
     --- If you want the character to not take damage, return `"Ignored"`.
@@ -741,7 +741,7 @@ export type Killer = {
     --- SERVER FUNCTION: An empty function that you can replace to execute custom behaviour when this character gets hit.
     --- 
     --- If you want the character to not get affected by the hit, you can return `"Ignored"`.
-    OnHit: (self: Killer, hitbox: any, damage: number) -> (string?)?,
+    OnHit: (self: Killer, hitbox: any, damage: number, humanoid: Humanoid) -> (string?)?,
     --- SERVER FUNCTION: An empty function that you can replace to execute custom behaviour when this character takes damage from any source.
     --- 
     --- If you want the character to not take damage, return `"Ignored"`.

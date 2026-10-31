@@ -160,9 +160,9 @@ local function JusticeBehaviour(self: Types.Ability)
     end
 end
 
-local function OnCommanderHit(self: Types.Ability, _hitbox: Types.HitboxDetails, _damage: number)
+local function OnCommanderHit(_self: Types.Survivor, _hitbox: Types.HitboxDetails, _damage: number, humanoid: Humanoid)
     CommonFunctions.ApplyEffect({
-        TargetHumanoid = self.OwnerProperties.Humanoid,
+        TargetHumanoid = humanoid,
         EffectSettings = {
             Name = "Resistance",
             Level = 2,
