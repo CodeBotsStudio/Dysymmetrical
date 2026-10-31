@@ -17,3 +17,5 @@ commitdraft.txt
 aftman.toml
 
 *.DS_Store
+build/
+.mcp.json
