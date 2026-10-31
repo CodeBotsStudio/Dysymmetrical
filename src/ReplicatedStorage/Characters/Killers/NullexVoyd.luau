@@ -30,7 +30,11 @@ local function DataAnchorBehaviour(self: Types.Ability)
             self.Setup = false
         else
             self.Setup = true
-        
+
+            PlayerSpeedManager.AddSpeedFactor(self.Owner, self.Name, 0)
+            self:AddConnection(task.delay(2.1, function()
+                PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
+            end))
             self:AddConnection(task.delay(0.75, function()
                 self.DevicePosition = self.OwnerProperties.Character.HumanoidRootPart.Position - Vector3.new(0, 3 * self.OwnerProperties.Character:GetScale(), 0)
                 Sounds.PlaySound(self.PlaceSound, {
@@ -56,13 +60,7 @@ local function DataAnchorBehaviour(self: Types.Ability)
         else
             self.Cooldown = self.SecondCooldown
             self.Setup = true
-        
-            self.OwnerProperties.SpeedManager:AddSpeedFactor(self.Name, 0)
-        
             self:PlayUseAnimation()
-            self:AddConnection(task.delay((self.UseAnimationTrack.Length or 1.7) + 0.4, function()
-                self.OwnerProperties.SpeedManager:RemoveSpeedFactor(self.Name)
-            end))
         end
     end
 end
@@ -73,7 +71,7 @@ local function CallbackPingBehaviour(self: Types.Ability)
         self.OwnerProperties.Character:SetAttribute("PreventSlash", true)
 
         self:AddConnection(task.delay(self.Duration, function()
-            PlayerSpeedManager.RemoveSpeedFactor(self.owner, self.Name)
+            PlayerSpeedManager.RemoveSpeedFactor(self.Owner, self.Name)
             self.OwnerProperties.Character:SetAttribute("PreventSlash", false)
         end))
 
