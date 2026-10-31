@@ -160,7 +160,7 @@ function TerrorRadiusManager:PlayLayer4(Subfolder: string, delta: number)
     end
     self.Playing = true
 
-    for _, s: Sound in self.LayerMagnitudes[Subfolder] do
+    for _, s: Sound in self.LayerMagnitudes[Subfolder] or {} do
         if s.Name == "L4" then
             s:Play()
             self:TweenVolume(s, 0.5, delta)
@@ -341,7 +341,7 @@ function TerrorRadiusManager:_CheckAsKiller(delta: number)
 
     self.InChase = if self.InChase then ClosestDistance <= Radiuses.L1 else ClosestDistance <= Radiuses.L4
 
-    for r: number, s: Sound in self.LayerMagnitudes[self.LocalPlayerProps.Char.Name] do
+    for r: number, s: Sound in self.LayerMagnitudes[self.LocalPlayerProps.Char.Name] or {} do
         if s.Name == "L4" then
             self:TweenVolume(s, self.InChase and 0.5 or 0, delta)
         end
