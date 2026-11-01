@@ -147,11 +147,11 @@ local prompt = workspace.Map:FindFirstChild("Generators", true)["{name}"].Panel:
 prompt:InputHoldBegin() task.wait(0.1) prompt:InputHoldEnd()''', "Client")
         if mode == "hit":
             out = wait_for(f'local g = workspace.Map:FindFirstChild("Generators", true)["{name}"] return tostring(g:GetAttribute("Repaired")) .. " " .. tostring(g:GetAttribute("Progress")) .. " " .. tostring(workspace:GetAttribute("GeneratorsRepaired"))', "true", timeout=25)
-            check("generator repairs in 6 checks", out.startswith("true 6 1"), out)
+            check("generator repairs in 6 checks", out.startswith("true 6 1"), f"{name} {out}")
         else:
             out = wait_for('return tostring(_G.GenEnded)', "true", "Client", timeout=6)
             progress = luau(f'return tostring(workspace.Map:FindFirstChild("Generators", true)["{name}"]:GetAttribute("Progress"))')
-            check("missed check fails the repair", out == "true" and progress == "0", f"ended={out} progress={progress}")
+            check("missed check fails the repair", out == "true" and progress == "0", f"{name} ended={out} progress={progress}")
 
     luau(f'''local panel = workspace.Map:FindFirstChild("Generators", true)["{generators[2]}"].Panel
 local spot = panel.Position + panel.CFrame.LookVector * 12

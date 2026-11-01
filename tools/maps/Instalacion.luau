@@ -143,66 +143,158 @@ local function lamp(parent: Instance, pos: Vector3, flicker: boolean, ceiling: b
 	end
 end
 
-part(MapModel, Vector3.new(210, 2, 210), Vector3.new(0, -1, 0), Color3.fromRGB(74, 76, 82), Enum.Material.Asphalt, "Ground")
+local HALF = Vector2.new(160, 140)
+part(MapModel, Vector3.new(HALF.X * 2 + 20, 2, HALF.Y * 2 + 20), Vector3.new(0, -1, 0), Color3.fromRGB(74, 76, 82), Enum.Material.Asphalt, "Ground")
 
-wall(Yard, Vector2.new(-100, -100), Vector2.new(100, -100), 20, nil, DARK_CONCRETE)
-wall(Yard, Vector2.new(-100, 100), Vector2.new(100, 100), 20, nil, DARK_CONCRETE)
-wall(Yard, Vector2.new(-100, -100), Vector2.new(-100, 100), 20, nil, DARK_CONCRETE)
-wall(Yard, Vector2.new(100, -100), Vector2.new(100, 100), 20, nil, DARK_CONCRETE)
-for _, side in { Vector3.new(0, 45, -101), Vector3.new(0, 45, 101), Vector3.new(-101, 45, 0), Vector3.new(101, 45, 0) } do
-	local barrier = part(Yard, if side.X == 0 then Vector3.new(204, 50, 1) else Vector3.new(1, 50, 204), side, CONCRETE, Enum.Material.SmoothPlastic, "Barrier")
+wall(Yard, Vector2.new(-HALF.X, -HALF.Y), Vector2.new(HALF.X, -HALF.Y), 20, nil, DARK_CONCRETE)
+wall(Yard, Vector2.new(-HALF.X, HALF.Y), Vector2.new(HALF.X, HALF.Y), 20, { { 0, 18 } }, DARK_CONCRETE)
+wall(Yard, Vector2.new(-HALF.X, -HALF.Y), Vector2.new(-HALF.X, HALF.Y), 20, nil, DARK_CONCRETE)
+wall(Yard, Vector2.new(HALF.X, -HALF.Y), Vector2.new(HALF.X, HALF.Y), 20, nil, DARK_CONCRETE)
+part(Yard, Vector3.new(18, 12, 0.6), Vector3.new(0, 6, HALF.Y), METAL, Enum.Material.DiamondPlate, "MainGate")
+for _, side in { Vector3.new(0, 45, -HALF.Y - 1), Vector3.new(0, 45, HALF.Y + 1), Vector3.new(-HALF.X - 1, 45, 0), Vector3.new(HALF.X + 1, 45, 0) } do
+	local barrier = part(Yard, if side.X == 0 then Vector3.new(HALF.X * 2 + 4, 50, 1) else Vector3.new(1, 50, HALF.Y * 2 + 4), side, CONCRETE, Enum.Material.SmoothPlastic, "Barrier")
 	barrier.Transparency = 1
 end
 
-room(Building, "MainBuilding", Vector2.new(0, 0), Vector2.new(60, 50), 14, {
-	north = { { 0, 8 } },
-	south = { { -15, 8 }, { 15, 8 } },
-	west = { { 0, 8 } },
-	east = { { 10, 8 } },
+local Lab = folder("LabComplex", Building)
+room(Lab, "Shell", Vector2.new(-35, -80), Vector2.new(150, 80), 16, {
+	north = { { -85, 8 } },
+	south = { { -95, 8 }, { -45, 12 }, { 15, 8 } },
+	west = { { -80, 10 } },
+	east = { { -80, 10 } },
 })
-local InteriorWalls = Instance.new("Model")
-InteriorWalls.Name = "InteriorWalls"
-InteriorWalls.Parent = Building
-wall(InteriorWalls, Vector2.new(-10, -25), Vector2.new(-10, 25), 14, { { -12, 6 }, { 12, 6 } })
-wall(InteriorWalls, Vector2.new(10, -25), Vector2.new(10, 25), 14, { { -5, 6 }, { 18, 6 } })
-wall(InteriorWalls, Vector2.new(10, 0), Vector2.new(30, 0), 14, { { 20, 6 } })
-for _, p in { Vector3.new(0, 8, -32), Vector3.new(-15, 8, 32), Vector3.new(15, 8, 32), Vector3.new(-37, 8, 0), Vector3.new(37, 8, 10), Vector3.new(-70, 7, -55), Vector3.new(55, 7, 65) } do
-	fillLight(Building, p)
+wall(Lab, Vector2.new(-110, -85), Vector2.new(40, -85), 16, { { -85, 8 }, { -35, 10 }, { 15, 8 } })
+wall(Lab, Vector2.new(-110, -75), Vector2.new(40, -75), 16, { { -92, 8 }, { -45, 12 }, { 12, 8 } })
+wall(Lab, Vector2.new(-60, -120), Vector2.new(-60, -85), 16, { { -100, 7 } })
+wall(Lab, Vector2.new(-10, -120), Vector2.new(-10, -85), 16, { { -110, 7 } })
+wall(Lab, Vector2.new(-75, -75), Vector2.new(-75, -40), 16, { { -58, 7 } })
+wall(Lab, Vector2.new(-15, -75), Vector2.new(-15, -40), 16, { { -50, 7 } })
+local cell = Instance.new("Model")
+cell.Name = "ContainmentCell"
+cell.Parent = Lab
+for _, side in { { Vector2.new(-43, -112), Vector2.new(-27, -112), nil }, { Vector2.new(-43, -98), Vector2.new(-27, -98), { { -35, 6 } } }, { Vector2.new(-43, -112), Vector2.new(-43, -98), nil }, { Vector2.new(-27, -112), Vector2.new(-27, -98), nil } } do
+	wall(cell, side[1], side[2], 10, side[3], Color3.fromRGB(150, 190, 200))
 end
-for _, p in { Vector3.new(-20, 13.2, -12), Vector3.new(-20, 13.2, 12), Vector3.new(0, 13.2, -14), Vector3.new(0, 13.2, 14), Vector3.new(20, 13.2, -12), Vector3.new(20, 13.2, 12) } do
-	lamp(Building, p, p.X == 0 and p.Z > 0 or p.X == 20 and p.Z < 0, true)
+for _, glass in cell:GetChildren() do
+	if glass:IsA("BasePart") then
+		glass.Material = Enum.Material.Glass
+		glass.Transparency = 0.8
+		glass.Color = Color3.fromRGB(190, 225, 235)
+	end
+end
+local alarm = part(cell, Vector3.new(1.2, 1.2, 1.2), Vector3.new(-35, 10.6, -105), Color3.fromRGB(255, 40, 30), Enum.Material.Neon, "Alarm")
+alarm.CastShadow = false
+local alarmLight = Instance.new("PointLight")
+alarmLight.Color = alarm.Color
+alarmLight.Range = 24
+alarmLight.Brightness = 2
+alarmLight.Parent = alarm
+for _, p in { Vector3.new(-85, 15.2, -102), Vector3.new(15, 15.2, -102), Vector3.new(-92, 15.2, -58), Vector3.new(-45, 15.2, -58), Vector3.new(12, 15.2, -58), Vector3.new(-80, 15.2, -80), Vector3.new(-20, 15.2, -80), Vector3.new(25, 15.2, -80) } do
+	lamp(Lab, p, p.X == -20 or p.X == 15, true)
 end
 
-local Sheds = folder("Sheds", MapModel)
-room(Sheds, "ShedNorthWest", Vector2.new(-70, -70), Vector2.new(24, 20), 10, { south = { { -70, 7 } }, east = { { -70, 6 } } })
-room(Sheds, "ShedSouthEast", Vector2.new(70, 65), Vector2.new(20, 24), 10, { west = { { 65, 7 } }, north = { { 70, 6 } } })
-lamp(Sheds, Vector3.new(-70, 9.2, -70), true, true)
-lamp(Sheds, Vector3.new(70, 9.2, 65), false, true)
+local Reactor = folder("ReactorHall", Building)
+room(Reactor, "Shell", Vector2.new(105, -85), Vector2.new(90, 70), 22, {
+	west = { { -80, 12 } },
+	south = { { 85, 10 }, { 130, 8 } },
+})
+local core = part(Reactor, Vector3.new(18, 14, 14), Vector3.new(105, 9, -92), METAL, Enum.Material.DiamondPlate, "ReactorCore")
+core.Shape = Enum.PartType.Cylinder
+core.CFrame = CFrame.new(ORIGIN + Vector3.new(105, 9, -92)) * CFrame.Angles(0, 0, math.rad(90))
+local ring = part(Reactor, Vector3.new(1, 15, 15), Vector3.new(105, 12, -92), Color3.fromRGB(70, 170, 255), Enum.Material.Neon, "CoreRing")
+ring.Shape = Enum.PartType.Cylinder
+ring.CFrame = CFrame.new(ORIGIN + Vector3.new(105, 12, -92)) * CFrame.Angles(0, 0, math.rad(90))
+ring.CanCollide = false
+local coreLight = Instance.new("PointLight")
+coreLight.Color = ring.Color
+coreLight.Range = 45
+coreLight.Brightness = 2.2
+for _, p in { Vector3.new(75, 10, -95), Vector3.new(135, 10, -95), Vector3.new(105, 10, -60) } do
+	fillLight(Reactor, p)
+end
+coreLight.Parent = ring
+local chimney = part(Reactor, Vector3.new(60, 9, 9), Vector3.new(100, 30, -131), DARK_CONCRETE, Enum.Material.Concrete, "Chimney")
+chimney.Shape = Enum.PartType.Cylinder
+chimney.CFrame = CFrame.new(ORIGIN + Vector3.new(100, 30, -131)) * CFrame.Angles(0, 0, math.rad(90))
+local beacon = part(Reactor, Vector3.new(1.5, 1.5, 1.5), Vector3.new(100, 61, -131), Color3.fromRGB(255, 40, 30), Enum.Material.Neon, "Beacon")
+beacon.CastShadow = false
+beacon:SetAttribute("Flicker", true)
+part(Reactor, Vector3.new(20, 1, 14), Vector3.new(50, 10.5, -80), METAL, Enum.Material.CorrodedMetal, "WalkwayRoof")
+for _, p in { Vector3.new(80, 21.2, -70), Vector3.new(130, 21.2, -70), Vector3.new(80, 21.2, -105), Vector3.new(130, 21.2, -105) } do
+	lamp(Reactor, p, p.X == 130 and p.Z == -105, true)
+end
+
+local Warehouse = folder("Warehouse", Building)
+room(Warehouse, "Shell", Vector2.new(-110, 100), Vector2.new(80, 60), 18, {
+	north = { { -125, 10 }, { -90, 14 } },
+	east = { { 110, 8 } },
+})
+for _, z in { 85, 100, 115 } do
+	wall(Warehouse, Vector2.new(-142, z), Vector2.new(-104, z), 9, { { -123, 5 } }, WOOD)
+end
+for _, p in { Vector3.new(-130, 17.2, 92), Vector3.new(-95, 17.2, 92), Vector3.new(-130, 17.2, 120), Vector3.new(-95, 17.2, 120) } do
+	lamp(Warehouse, p, p.X == -130 and p.Z == 120, true)
+end
+
+local Barracks = folder("Barracks", Building)
+for i, c in { Vector2.new(70, 90), Vector2.new(115, 90), Vector2.new(70, 122), Vector2.new(115, 122) } do
+	local door = if c.Y < 100 then { north = { { c.X, 6 } }, south = { { c.X + 6, 6 } } } else { north = { { c.X - 5, 6 } }, east = { { c.Y, 6 } } }
+	room(Barracks, "Hut" .. i, c, Vector2.new(24, 16), 10, door)
+	lamp(Barracks, Vector3.new(c.X, 9.2, c.Y), i == 3, true)
+end
+room(Barracks, "GuardBooth", Vector2.new(24, 126), Vector2.new(12, 10), 9, { north = { { 24, 5 } }, west = { { 126, 4 } } })
+
+local Loops = folder("Loops", Yard)
+local function lshape(center: Vector3, rotY: number)
+	local model = Instance.new("Model")
+	model.Name = "LWall"
+	model.Parent = Loops
+	local long = part(model, Vector3.new(14, 8, WALL_THICKNESS), center + Vector3.new(0, 4, -6), CONCRETE, Enum.Material.Concrete, "Wall")
+	part(model, Vector3.new(WALL_THICKNESS, 8, 8), center + Vector3.new(-6.25, 4, -1.25), CONCRETE, Enum.Material.Concrete, "Wall")
+	part(model, Vector3.new(WALL_THICKNESS, 3, 4), center + Vector3.new(6.25, 1.5, -3.25), CONCRETE, Enum.Material.Concrete, "LowWall")
+	model.PrimaryPart = long
+	model:PivotTo(long.CFrame * CFrame.Angles(0, math.rad(rotY), 0))
+end
+for _, l in { { Vector3.new(-120, 0, 5), 0 }, { Vector3.new(60, 0, 0), 90 }, { Vector3.new(-60, 0, 45), 180 }, { Vector3.new(120, 0, 30), -90 }, { Vector3.new(5, 0, 60), 45 } } do
+	lshape(l[1], l[2])
+end
+
+local tower = folder("WaterTower", Yard)
+for _, o in { Vector3.new(-5, 0, -5), Vector3.new(5, 0, -5), Vector3.new(-5, 0, 5), Vector3.new(5, 0, 5) } do
+	part(tower, Vector3.new(1.2, 30, 1.2), Vector3.new(-20, 15, 10) + o, METAL, Enum.Material.CorrodedMetal, "Leg")
+end
+local tank = part(tower, Vector3.new(12, 16, 16), Vector3.new(-20, 36, 10), RUST, Enum.Material.CorrodedMetal, "Tank")
+tank.Shape = Enum.PartType.Cylinder
+tank.CFrame = CFrame.new(ORIGIN + Vector3.new(-20, 36, 10)) * CFrame.Angles(0, 0, math.rad(90))
 
 local function container(pos: Vector3, rotY: number, color: Color3)
 	local c = part(Yard, Vector3.new(16, 8, 7), pos + Vector3.new(0, 4, 0), color, Enum.Material.CorrodedMetal, "Container")
 	c.CFrame = CFrame.new(ORIGIN + pos + Vector3.new(0, 4, 0)) * CFrame.Angles(0, math.rad(rotY), 0)
 end
-container(Vector3.new(55, 0, -40), 20, RUST)
-container(Vector3.new(-65, 0, 35), 90, Color3.fromRGB(46, 66, 78))
-container(Vector3.new(-35, 0, 80), 5, RUST)
-container(Vector3.new(-35, 8, 80), 0, Color3.fromRGB(70, 74, 52))
-container(Vector3.new(35, 0, -82), -10, Color3.fromRGB(46, 66, 78))
-container(Vector3.new(82, 0, 15), 80, RUST)
+container(Vector3.new(-90, 0, -20), 20, RUST)
+container(Vector3.new(-140, 0, 40), 90, Color3.fromRGB(46, 66, 78))
+container(Vector3.new(30, 0, 25), 5, RUST)
+container(Vector3.new(30, 8, 25), 0, Color3.fromRGB(70, 74, 52))
+container(Vector3.new(95, 0, -25), -10, Color3.fromRGB(46, 66, 78))
+container(Vector3.new(145, 0, 60), 80, RUST)
+container(Vector3.new(-40, 0, 110), 90, Color3.fromRGB(70, 74, 52))
 
-for _, p in { Vector3.new(-45, 0, -45), Vector3.new(45, 0, 40), Vector3.new(-50, 0, 10), Vector3.new(30, 0, 60), Vector3.new(-20, 0, -60), Vector3.new(65, 0, -10) } do
+for _, p in { Vector3.new(-100, 0, 25), Vector3.new(80, 0, 40), Vector3.new(-30, 0, -20), Vector3.new(40, 0, -30), Vector3.new(-60, 0, 85), Vector3.new(20, 0, 95), Vector3.new(140, 0, -10), Vector3.new(-145, 0, -20) } do
 	local barrier = part(Yard, Vector3.new(9, 3, 1.5), p + Vector3.new(0, 1.5, 0), CONCRETE, Enum.Material.Concrete, "JerseyBarrier")
 	barrier.CFrame = CFrame.new(ORIGIN + p + Vector3.new(0, 1.5, 0)) * CFrame.Angles(0, math.rad((p.X * 7 + p.Z * 3) % 90), 0)
 end
 
-for _, p in { Vector3.new(-82, 0, -30), Vector3.new(48, 0, 82), Vector3.new(-12, 0, 52), Vector3.new(84, 0, -60) } do
+for _, p in { Vector3.new(-150, 0, -60), Vector3.new(146, 0, 125), Vector3.new(-12, 0, 130), Vector3.new(60, 0, 60) } do
 	part(Yard, Vector3.new(4, 4, 4), p + Vector3.new(0, 2, 0), WOOD, Enum.Material.WoodPlanks, "Crate")
 	part(Yard, Vector3.new(4, 4, 4), p + Vector3.new(4.2, 2, 0.5), WOOD, Enum.Material.WoodPlanks, "Crate")
 	part(Yard, Vector3.new(4, 4, 4), p + Vector3.new(2, 6, 0.2), WOOD, Enum.Material.WoodPlanks, "Crate")
 end
 
-for i, p in { Vector3.new(-50, 12, -45), Vector3.new(50, 12, 45), Vector3.new(-50, 12, 45), Vector3.new(50, 12, -45), Vector3.new(0, 12, 70), Vector3.new(0, 12, -70), Vector3.new(-85, 12, 0), Vector3.new(85, 12, -30) } do
-	lamp(Lamps, p, i % 3 == 0, false, i % 2 == 1)
+for i, p in { Vector3.new(-130, 12, -20), Vector3.new(-60, 12, -20), Vector3.new(10, 12, -25), Vector3.new(75, 12, -30), Vector3.new(140, 12, -30), Vector3.new(-120, 12, 55), Vector3.new(-50, 12, 70), Vector3.new(15, 12, 40), Vector3.new(90, 12, 60), Vector3.new(-10, 12, 115), Vector3.new(140, 12, 105), Vector3.new(-150, 12, -125) } do
+	lamp(Lamps, p, i % 3 == 0, false, i % 3 == 1)
+end
+for _, p in { Vector3.new(-45, 8, -33), Vector3.new(-95, 8, -33), Vector3.new(15, 8, -33), Vector3.new(-117, 8, -80), Vector3.new(50, 8, -80), Vector3.new(85, 8, -43), Vector3.new(-90, 8, 63), Vector3.new(-125, 8, 63), Vector3.new(92, 8, 100) } do
+	fillLight(Building, p)
 end
 
 local Generators = folder("Generators", MapModel)
@@ -223,11 +315,11 @@ local function generator(name: string, pos: Vector3, rotY: number)
 	model.PrimaryPart = base
 	model:PivotTo(CFrame.new(ORIGIN + pos + Vector3.new(0, 2, 0)) * CFrame.Angles(0, math.rad(rotY), 0))
 end
-generator("WestRoom", Vector3.new(-22, 0, 16), 0)
-generator("EastRoom", Vector3.new(22, 0, -16), 180)
-generator("ShedNorthWest", Vector3.new(-73, 0, -74), 90)
-generator("ShedSouthEast", Vector3.new(72, 0, 70), -90)
-generator("Yard", Vector3.new(8, 0, 84), 0)
+generator("LabA", Vector3.new(-100, 0, -102), -90)
+generator("Reactor", Vector3.new(85, 0, -70), 180)
+generator("Warehouse", Vector3.new(-85, 0, 120), 0)
+generator("Barracks", Vector3.new(92, 0, 106), 0)
+generator("WaterTower", Vector3.new(-20, 0, 20), 180)
 
 local Props = folder("ReactiveProps", MapModel)
 local function looseProp(pos: Vector3, barrel: boolean)
@@ -241,11 +333,14 @@ local function looseProp(pos: Vector3, barrel: boolean)
 	p:AddTag("Reactive")
 end
 for _, spot in {
-	{Vector3.new(-26, 0, 12), false}, {Vector3.new(-25, 0, 20), true},
-	{Vector3.new(26, 0, -12), true}, {Vector3.new(18, 0, -20), false},
-	{Vector3.new(-69, 0, -78), false}, {Vector3.new(68, 0, 66), true},
-	{Vector3.new(4, 0, 88), true}, {Vector3.new(13, 0, 80), false},
-	{Vector3.new(-40, 0, 60), false}, {Vector3.new(45, 0, -55), true},
+	{Vector3.new(-104, 0, -95), false}, {Vector3.new(-103, 0, -110), true},
+	{Vector3.new(78, 0, -76), true}, {Vector3.new(92, 0, -76), false},
+	{Vector3.new(-80, 0, 126), false}, {Vector3.new(-92, 0, 126), true},
+	{Vector3.new(86, 0, 110), true}, {Vector3.new(98, 0, 112), false},
+	{Vector3.new(-26, 0, 26), false}, {Vector3.new(-14, 0, 27), true},
+	{Vector3.new(-45, 0, -80), true}, {Vector3.new(-5, 0, -80), false},
+	{Vector3.new(-40, 0, -55), false}, {Vector3.new(130, 0, 70), true},
+	{Vector3.new(-125, 0, 108), false}, {Vector3.new(25, 0, 112), true},
 } do
 	looseProp(spot[1], spot[2])
 end
@@ -259,7 +354,7 @@ local function spawnPoint(parent: Instance, pos: Vector3)
 	p.CanQuery = false
 	p.CanTouch = false
 end
-for i, layout in { { survivors = Vector3.new(-80, 0, 80), killer = Vector3.new(80, 0, -80) }, { survivors = Vector3.new(80, 0, -80), killer = Vector3.new(-80, 0, 80) } } do
+for i, layout in { { survivors = Vector3.new(0, 0, 116), killer = Vector3.new(-35, 0, -105) }, { survivors = Vector3.new(-120, 0, 50), killer = Vector3.new(130, 0, -60) } } do
 	local l = folder("Layout" .. i, SpawnPoints)
 	local survivors, killers = folder("Survivors", l), folder("Killers", l)
 	for _, offset in { Vector3.new(-4, 0, -4), Vector3.new(4, 0, -4), Vector3.new(-4, 0, 4), Vector3.new(4, 0, 4) } do
