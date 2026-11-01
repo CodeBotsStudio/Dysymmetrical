@@ -205,6 +205,30 @@ for i, p in { Vector3.new(-50, 12, -45), Vector3.new(50, 12, 45), Vector3.new(-5
 	lamp(Lamps, p, i % 3 == 0, false, i % 2 == 1)
 end
 
+local Generators = folder("Generators", MapModel)
+local function generator(name: string, pos: Vector3, rotY: number)
+	local model = Instance.new("Model")
+	model.Name = name
+	model.Parent = Generators
+	local base = part(model, Vector3.new(5, 4, 3), Vector3.new(0, 2, 0), Color3.fromRGB(120, 104, 52), Enum.Material.DiamondPlate, "Base")
+	part(model, Vector3.new(3.2, 2.2, 0.3), Vector3.new(0, 2.4, -1.6), Color3.fromRGB(30, 32, 36), Enum.Material.Metal, "Panel")
+	part(model, Vector3.new(0.4, 2.5, 0.4), Vector3.new(1.8, 5.2, 0.8), METAL, Enum.Material.Metal, "Exhaust")
+	local status = part(model, Vector3.new(0.8, 0.8, 0.8), Vector3.new(-1.6, 4.4, -1), Color3.fromRGB(200, 40, 30), Enum.Material.Neon, "Status")
+	status.CastShadow = false
+	local light = Instance.new("PointLight")
+	light.Range = 12
+	light.Brightness = 1.5
+	light.Color = status.Color
+	light.Parent = status
+	model.PrimaryPart = base
+	model:PivotTo(CFrame.new(ORIGIN + pos + Vector3.new(0, 2, 0)) * CFrame.Angles(0, math.rad(rotY), 0))
+end
+generator("WestRoom", Vector3.new(-22, 0, 16), 0)
+generator("EastRoom", Vector3.new(22, 0, -16), 180)
+generator("ShedNorthWest", Vector3.new(-73, 0, -74), 90)
+generator("ShedSouthEast", Vector3.new(72, 0, 70), -90)
+generator("Yard", Vector3.new(8, 0, 84), 0)
+
 local SpawnPoints = folder("SpawnPoints", MapModel)
 local function spawnPoint(parent: Instance, pos: Vector3)
 	local p = part(parent, Vector3.new(1, 1, 1), pos + Vector3.new(0, 3, 0), CONCRETE, Enum.Material.SmoothPlastic, if parent.Name == "Killers" then "KillerSpawn" else "SurvivorSpawn")
