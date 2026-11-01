@@ -61,7 +61,7 @@ function RoundManager.StartRound()
     MapManager.GetRandomMap()
     
     --gets the killers for the round
-    for killerIndex = 1, workspace:GetAttribute("KillersAllowed") do
+    for killerIndex = 1, workspace:GetAttribute("KillersAllowed") or 1 do
         RoundManager.CurrentRound.Killers[killerIndex] = {
             Player = PlayersOrderedByMalice[killerIndex],
             Character = nil
@@ -71,7 +71,7 @@ function RoundManager.StartRound()
 
     --sets up every player
     for index, Player: Player in PlayersOrderedByMalice do
-        local IsKiller = index <= workspace:GetAttribute("KillersAllowed")
+        local IsKiller = index <= (workspace:GetAttribute("KillersAllowed") or 1)
         RoundManager.Utils.SetupPlayer(Player, IsKiller and index or nil)
 
         --if it's a survivor then add it to the PlayersRemaining list

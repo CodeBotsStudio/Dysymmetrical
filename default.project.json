@@ -55,6 +55,13 @@
     "SoundService": {
       "$className": "SoundService",
       "$path": "src/SoundService"
+    },
+
+    "Lighting": {
+      "$className": "Lighting",
+      "$properties": {
+        "Technology": "Future"
+      }
     }
   }
 }

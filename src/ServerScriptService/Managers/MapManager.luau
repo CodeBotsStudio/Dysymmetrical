@@ -133,7 +133,7 @@ function MapManager.GetRandomMap(): Model | Folder
     --checks if there's more than 1 layout available
     local Spawnpoints = ActualMap:FindFirstChild("SpawnPoints")
     local AvailableLayouts = Spawnpoints:GetChildren()
-    if #AvailableLayouts > 2 then
+    if #AvailableLayouts > 1 then
         --chooses a random layout from the spawnpoint pool
         local ChosenLayout = AvailableLayouts[Rand:NextInteger(1, #AvailableLayouts)]
         --destroys the rest to ensure that the chosen one is the only one available
