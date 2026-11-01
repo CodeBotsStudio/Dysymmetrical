@@ -190,6 +190,7 @@ def slash():
 def killer_phase():
     if not debug_round(True):
         return
+    wait_for('return tostring(#game.Players.LocalPlayer.PlayerGui.KillerIntros:GetChildren() == 0)', "true", "Client", 15)
     luau('''local panel = workspace.Map:FindFirstChild("Generators", true):GetChildren()[1].Panel
 local base = panel.Position + panel.CFrame.LookVector * 14
 local char = game.Players:GetPlayers()[1].Character
