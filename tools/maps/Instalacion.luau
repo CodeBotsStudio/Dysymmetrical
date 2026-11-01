@@ -229,6 +229,27 @@ generator("ShedNorthWest", Vector3.new(-73, 0, -74), 90)
 generator("ShedSouthEast", Vector3.new(72, 0, 70), -90)
 generator("Yard", Vector3.new(8, 0, 84), 0)
 
+local Props = folder("ReactiveProps", MapModel)
+local function looseProp(pos: Vector3, barrel: boolean)
+	local size = if barrel then Vector3.new(2.6, 2, 2) else Vector3.new(2, 2, 2)
+	local p = part(Props, size, pos + Vector3.new(0, size.Y / 2, 0), if barrel then RUST else WOOD, if barrel then Enum.Material.CorrodedMetal else Enum.Material.WoodPlanks, if barrel then "Barrel" else "Crate")
+	if barrel then
+		p.Shape = Enum.PartType.Cylinder
+		p.CFrame *= CFrame.Angles(0, 0, math.rad(90))
+	end
+	p.Anchored = false
+	p:AddTag("Reactive")
+end
+for _, spot in {
+	{Vector3.new(-26, 0, 12), false}, {Vector3.new(-25, 0, 20), true},
+	{Vector3.new(26, 0, -12), true}, {Vector3.new(18, 0, -20), false},
+	{Vector3.new(-69, 0, -78), false}, {Vector3.new(68, 0, 66), true},
+	{Vector3.new(4, 0, 88), true}, {Vector3.new(13, 0, 80), false},
+	{Vector3.new(-40, 0, 60), false}, {Vector3.new(45, 0, -55), true},
+} do
+	looseProp(spot[1], spot[2])
+end
+
 local SpawnPoints = folder("SpawnPoints", MapModel)
 local function spawnPoint(parent: Instance, pos: Vector3)
 	local p = part(parent, Vector3.new(1, 1, 1), pos + Vector3.new(0, 3, 0), CONCRETE, Enum.Material.SmoothPlastic, if parent.Name == "Killers" then "KillerSpawn" else "SurvivorSpawn")

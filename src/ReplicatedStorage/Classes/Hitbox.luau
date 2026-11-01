@@ -6,6 +6,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local TimeManager = RunService:IsServer() and require(ServerScriptService.Managers.TimeManager) or nil
 local CommonFunctions = RunService:IsServer() and require(ServerScriptService.System.CommonFunctions) or nil
+local ImpactManager = RunService:IsServer() and require(ServerScriptService.Managers.ImpactManager) or nil
 local Types = require(script.Parent.Types)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Utils = require(ReplicatedStorage.Modules.Utils)
@@ -150,6 +151,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 		Part.Size = Config.Size
 		Part.Shape = Config.Shape
 
+		local SurfaceProbed = Config.IsProjectile
 		while not Props.Cancelled and Props.TimePast < Config.Time do
 			if not (Config.HitMultiple or #Props.HumanoidsHit <= 0) then
 				break
@@ -166,6 +168,11 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 
 			CheckPart.CFrame = (Config.CFrame and (typeof(Config.CFrame) == "function" and Config.CFrame() or Config.CFrame) or Root.CFrame) * Config.CFrameOffset
 			CheckPart.Parent = HitboxFolder
+
+			if not SurfaceProbed then
+				SurfaceProbed = true
+				ImpactManager.ProbeHitbox(SourcePlayer, CheckPart.CFrame, CheckPart.Size, Config.Damage, RayParams)
+			end
 
 			-- The hitbox itself lingers for a little while, even after parsing it, so it can be seen for those who have hitboxes enabled in their client settings(?).
 			Debris:AddItem(CheckPart, 0.75)
@@ -360,6 +367,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 
 				-- If theres a function set to be executed on player hit for this hitbox, toss the humanoid to it.
 				Hitbox._RunCallback(Config.Connections, "Hit", Config, Humanoid, Index == 1)
+				ImpactManager.Body(SourcePlayer, TargetCharacter, HRoot, Damage)
 
 				-- Store the user as the last player whom hit the target, to give a readout of their killer if they are to die from a status effect or similar.
 				if TargetCharacter:FindFirstChild("Killer") then
