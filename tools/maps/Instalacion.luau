@@ -106,7 +106,7 @@ local function room(container: Instance, name: string, center: Vector2, size: Ve
 	wall(parent, Vector2.new(x1, z0), Vector2.new(x1, z1), height, gaps.east)
 	part(parent, Vector3.new(size.X + 2, 1, size.Y + 2), Vector3.new(center.X, height + 0.5, center.Y), METAL, Enum.Material.CorrodedMetal, "Roof")
 	local lab = container.Name == "LabComplex"
-	part(parent, Vector3.new(size.X, 0.2, size.Y), Vector3.new(center.X, 0.1, center.Y), if lab then Color3.fromRGB(124, 126, 120) else DARK_CONCRETE, if lab then Enum.Material.CeramicTiles else Enum.Material.Concrete, "Floor")
+	part(parent, Vector3.new(size.X, 0.2, size.Y), Vector3.new(center.X, 0.1, center.Y), if lab then Color3.fromRGB(96, 98, 94) else DARK_CONCRETE, if lab then Enum.Material.CeramicTiles else Enum.Material.Concrete, "Floor")
 end
 
 local function fillLight(parent: Instance, pos: Vector3)
@@ -138,7 +138,7 @@ local function lamp(parent: Instance, pos: Vector3, flicker: boolean, ceiling: b
 	spot.Face = Enum.NormalId.Bottom
 	spot.Angle = 100
 	spot.Range = if ceiling then 26 else 42
-	spot.Brightness = 6
+	spot.Brightness = if ceiling then 3.5 else 6
 	spot.Color = Color3.fromRGB(255, 176, 110)
 	spot.Shadows = shadows == true
 	spot.Parent = head
@@ -147,6 +147,19 @@ local function lamp(parent: Instance, pos: Vector3, flicker: boolean, ceiling: b
 	glow.Brightness = 1
 	glow.Color = spot.Color
 	glow.Parent = head
+	local top, bottom = Instance.new("Attachment"), Instance.new("Attachment")
+	bottom.Position = Vector3.new(0, -headY + 0.2, 0)
+	top.Parent, bottom.Parent = head, head
+	local cone = Instance.new("Beam")
+	cone.Attachment0, cone.Attachment1 = top, bottom
+	cone.FaceCamera = true
+	cone.Width0, cone.Width1 = 1.8, if ceiling then 9 else 16
+	cone.LightEmission = 1
+	cone.Color = ColorSequence.new(spot.Color)
+	cone.Transparency = NumberSequence.new(0.92, 1)
+	cone.Segments = 1
+	cone:AddTag("Detail")
+	cone.Parent = head
 	if flicker then
 		head:SetAttribute("Flicker", true)
 	end
@@ -379,6 +392,7 @@ end
 
 local function sign(text: string, pos: Vector3, face: Enum.NormalId, color: Color3)
 	local s = detail(part(Details, Vector3.new(#text * 0.8 + 2, 2.4, 0.2), pos, Color3.fromRGB(28, 30, 34), Enum.Material.Metal, "Sign"))
+	s:RemoveTag("Detail")
 	local gui = Instance.new("SurfaceGui")
 	gui.Face = face
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
@@ -415,6 +429,29 @@ for _, p in { Vector3.new(-70, 0, 20), Vector3.new(15, 0, 50), Vector3.new(-15, 
 		puddle.CFrame *= CFrame.Angles(0, 0, math.rad(90))
 		puddle.Transparency = 0.45
 	end
+end
+
+local Fog = folder("GroundFog", Details)
+for _, c in { Vector2.new(-90, 30), Vector2.new(0, 50), Vector2.new(90, 40), Vector2.new(-30, 110), Vector2.new(110, -15), Vector2.new(-120, -30) } do
+	local area = detail(part(Fog, Vector3.new(60, 1, 50), Vector3.new(c.X, 0.6, c.Y), CONCRETE, Enum.Material.SmoothPlastic, "FogArea"))
+	area.Transparency = 1
+	local mist = Instance.new("ParticleEmitter")
+	mist.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	mist.Shape = Enum.ParticleEmitterShape.Box
+	mist.EmissionDirection = Enum.NormalId.Top
+	mist.Rate = 3
+	mist.Lifetime = NumberRange.new(10, 14)
+	mist.Speed = NumberRange.new(0.3, 1)
+	mist.SpreadAngle = Vector2.new(70, 70)
+	mist.Size = NumberSequence.new(14, 24)
+	mist.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.3, 0.76), NumberSequenceKeypoint.new(1, 1) })
+	mist.Color = ColorSequence.new(Color3.fromRGB(150, 160, 185))
+	mist.LightInfluence = 1
+	mist.Rotation = NumberRange.new(0, 360)
+	mist.RotSpeed = NumberRange.new(-6, 6)
+	mist.Acceleration = Vector3.new(0, -0.05, 0)
+	mist:AddTag("Detail")
+	mist.Parent = area
 end
 
 local SpawnPoints = folder("SpawnPoints", MapModel)
@@ -463,7 +500,7 @@ LightingModule.Source = [[return {
 LightingModule.Parent = Root
 
 local atmosphere = Instance.new("Atmosphere")
-atmosphere.Density = 0.3
+atmosphere.Density = 0.36
 atmosphere.Offset = 0.05
 atmosphere.Color = Color3.fromRGB(96, 104, 124)
 atmosphere.Decay = Color3.fromRGB(36, 38, 52)
@@ -488,32 +525,90 @@ bloom.Parent = LightingModule
 local sky = Instance.new("Sky")
 sky.StarCount = 1200
 sky.CelestialBodiesShown = true
+sky.MoonAngularSize = 16
 sky.Parent = LightingModule
+
+local depth = Instance.new("DepthOfFieldEffect")
+depth.FarIntensity = 0.18
+depth.FocusDistance = 40
+depth.InFocusRadius = 60
+depth.NearIntensity = 0
+depth:AddTag("Detail")
+depth.Parent = LightingModule
 
 local Behaviour = Instance.new("ModuleScript")
 Behaviour.Name = "Behaviour"
 Behaviour.Source = [[--!strict
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
-local function flicker(bulb: BasePart)
-	local lights = bulb:GetChildren()
-	local rand = Random.new()
-	local function set(on: boolean)
-		bulb.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
-		for _, light in lights do
-			if light:IsA("Light") then
-				light.Enabled = on
-			end
+local DRAIN_RADIUS = 18
+local STUTTER_RADIUS = 40
+
+local function setLit(bulb: BasePart, on: boolean)
+	bulb.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
+	for _, light in bulb:GetChildren() do
+		if light:IsA("Light") then
+			light.Enabled = on
+		elseif light:IsA("Beam") then
+			light.Enabled = on and not Players.LocalPlayer:GetAttribute("Potato")
 		end
 	end
+end
+
+local function blink(bulb: BasePart, rand: Random)
+	setLit(bulb, false)
+	task.wait(rand:NextNumber(0.03, 0.12))
+	if not bulb:GetAttribute("Drained") then
+		setLit(bulb, true)
+	end
+end
+
+local function flicker(bulb: BasePart)
+	local rand = Random.new()
 	while bulb:IsDescendantOf(workspace) do
 		task.wait(rand:NextNumber(0.4, 4))
 		for _ = 1, rand:NextInteger(1, 4) do
-			set(false)
-			task.wait(rand:NextNumber(0.03, 0.12))
-			set(true)
+			if not bulb:GetAttribute("Drained") then
+				blink(bulb, rand)
+			end
 			task.wait(rand:NextNumber(0.03, 0.2))
 		end
+	end
+end
+
+local function killerPositions(): { Vector3 }
+	local list = {}
+	for _, player in Players:GetPlayers() do
+		local char = player.Character
+		local role = char and char:FindFirstChild("Role") :: StringValue?
+		local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+		local effects = char and char:FindFirstChild("Effects")
+		if role and root and role.Value == "Killer" and not (effects and effects:FindFirstChild("Undetectable")) then
+			table.insert(list, root.Position)
+		end
+	end
+	return list
+end
+
+local function drainNearKiller(bulbs: { BasePart })
+	local rand = Random.new()
+	while #bulbs > 0 and bulbs[1]:IsDescendantOf(workspace) do
+		local killers = killerPositions()
+		for _, bulb in bulbs do
+			local near = math.huge
+			for _, pos in killers do
+				near = math.min(near, (pos - bulb.Position).Magnitude)
+			end
+			local drained = near < DRAIN_RADIUS
+			if drained ~= (bulb:GetAttribute("Drained") == true) then
+				bulb:SetAttribute("Drained", drained)
+				setLit(bulb, not drained)
+			elseif not drained and near < STUTTER_RADIUS and rand:NextNumber() < 0.3 then
+				task.spawn(blink, bulb, rand)
+			end
+		end
+		task.wait(0.25)
 	end
 end
 
@@ -522,11 +617,16 @@ return {
 		if not RunService:IsClient() then
 			return
 		end
+		local bulbs = {}
 		for _, bulb in workspace:WaitForChild("Map"):GetDescendants() do
-			if bulb:IsA("BasePart") and bulb:GetAttribute("Flicker") then
-				task.spawn(flicker, bulb)
+			if bulb:IsA("BasePart") and bulb.Name == "Bulb" then
+				table.insert(bulbs, bulb)
+				if bulb:GetAttribute("Flicker") then
+					task.spawn(flicker, bulb)
+				end
 			end
 		end
+		task.spawn(drainNearKiller, bulbs)
 	end,
 }]]
 Behaviour.Parent = Root
