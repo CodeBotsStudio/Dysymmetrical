@@ -433,14 +433,14 @@ room(Reactor, "Shell", Vector2.new(105, -85), Vector2.new(90, 70), 22, {
 local core = part(Reactor, Vector3.new(18, 14, 14), Vector3.new(105, 9, -92), METAL, Enum.Material.DiamondPlate, "ReactorCore")
 core.Shape = Enum.PartType.Cylinder
 core.CFrame = CFrame.new(ORIGIN + Vector3.new(105, 9, -92)) * CFrame.Angles(0, 0, math.rad(90))
-local ring = part(Reactor, Vector3.new(1, 15, 15), Vector3.new(105, 12, -92), Color3.fromRGB(70, 170, 255), Enum.Material.Neon, "CoreRing")
+local ring = part(Reactor, Vector3.new(1, 15, 15), Vector3.new(105, 12, -92), Color3.fromRGB(255, 45, 35), Enum.Material.Neon, "CoreRing")
 ring.Shape = Enum.PartType.Cylinder
 ring.CFrame = CFrame.new(ORIGIN + Vector3.new(105, 12, -92)) * CFrame.Angles(0, 0, math.rad(90))
 ring.CanCollide = false
 local coreLight = Instance.new("PointLight")
 coreLight.Color = ring.Color
 coreLight.Range = 45
-coreLight.Brightness = 2.2
+coreLight.Brightness = 3.2
 for _, p in { Vector3.new(75, 10, -95), Vector3.new(135, 10, -95), Vector3.new(105, 10, -60) } do
 	fillLight(Reactor, p)
 end
@@ -710,8 +710,8 @@ dome.Transparency = 0.58
 dome.CastShadow = false
 local core = part(Landmarks, Vector3.new(6, 6, 6), Vector3.new(-35, 34, -62), DOME_GLOW, Enum.Material.Neon, "DomeCore")
 core.Shape = Enum.PartType.Ball
-glowLight(core, "PointLight", DOME_GLOW, 60, 5)
-glowLight(part(Landmarks, Vector3.new(0.4, 0.4, 0.4), Vector3.new(-35, 50, -62), DOME_GLOW, Enum.Material.Neon, "DomeTop"), "PointLight", DOME_GLOW, 40, 3)
+glowLight(core, "PointLight", DOME_GLOW, 60, 5).Shadows = true
+glowLight(part(Landmarks, Vector3.new(0.4, 0.4, 0.4), Vector3.new(-35, 50, -62), DOME_GLOW, Enum.Material.Neon, "DomeTop"), "PointLight", DOME_GLOW, 40, 3).Shadows = true
 for _, angle in { 0, 45, 90, 135 } do
 	local rib = part(Landmarks, Vector3.new(0.7, 34.6, 34.6), Vector3.new(-35, 31, -62), Color3.fromRGB(255, 190, 255), Enum.Material.Neon, "DomeRib")
 	rib.Shape = Enum.PartType.Cylinder
@@ -771,6 +771,90 @@ for i = 0, 11 do
 		glowLight(stud, "PointLight", Color3.fromRGB(120, 200, 255), 8, 1)
 	end
 end
+
+local Interiors = folder("Interiors", MapModel)
+local LIQUID = Color3.fromRGB(150, 60, 220)
+local function capsule(x: number, z: number, broken: boolean)
+	local m = Instance.new("Model")
+	m.Name = "ContainmentCapsule"
+	m.Parent = Interiors
+	local function disc(size: Vector3, y: number, color: Color3, material: Enum.Material, name: string): Part
+		local d = part(m, size, Vector3.new(x, y, z), color, material, name)
+		d.Shape = Enum.PartType.Cylinder
+		d.CFrame *= CFrame.Angles(0, 0, math.rad(90))
+		return d
+	end
+	disc(Vector3.new(1.4, 8, 8), 0.7, METAL, Enum.Material.DiamondPlate, "Base")
+	disc(Vector3.new(1.2, 8, 8), 13.4, METAL, Enum.Material.Metal, "Cap")
+	disc(Vector3.new(0.3, 7.6, 7.6), 1.5, LIQUID, Enum.Material.Neon, "BaseGlow").CastShadow = false
+	if broken then
+		for i = 0, 4 do
+			local a = math.rad(i * 72 + 20)
+			local shard = part(m, Vector3.new(1.6, 0.15, 1), Vector3.new(x + math.cos(a) * (5 + i % 2 * 2), 0.1, z + math.sin(a) * (5 + i % 2 * 2)), Color3.fromRGB(200, 170, 230), Enum.Material.Glass, "Shard")
+			shard.Transparency = 0.4
+			shard.CanCollide = false
+			shard.CFrame *= CFrame.Angles(0, a, 0)
+		end
+		local spill = disc(Vector3.new(0.05, 12, 14), 0.06, LIQUID, Enum.Material.Glass, "Spill")
+		spill.Transparency = 0.35
+		spill.CanCollide = false
+		glowLight(disc(Vector3.new(0.3, 2, 2), 12.5, LIQUID, Enum.Material.Neon, "Spark"), "PointLight", LIQUID, 18, 1.5)
+	else
+		local liquid = disc(Vector3.new(11, 6.4, 6.4), 7, LIQUID, Enum.Material.Neon, "Liquid")
+		liquid.Transparency = 0.55
+		liquid.CanCollide = false
+		liquid.CastShadow = false
+		local glass = disc(Vector3.new(11.6, 7.2, 7.2), 7.2, Color3.fromRGB(210, 190, 240), Enum.Material.Glass, "Glass")
+		glass.Transparency = 0.6
+		part(m, Vector3.new(1.4, 3, 0.8), Vector3.new(x, 7.5, z), Color3.fromRGB(14, 10, 18), Enum.Material.SmoothPlastic, "Specimen").CanCollide = false
+		local head = part(m, Vector3.new(1.2, 1.2, 1.2), Vector3.new(x, 9.7, z), Color3.fromRGB(14, 10, 18), Enum.Material.SmoothPlastic, "SpecimenHead")
+		head.Shape = Enum.PartType.Ball
+		head.CanCollide = false
+		glowLight(liquid, "PointLight", LIQUID, 16, 1.4)
+	end
+end
+capsule(0, -113, false)
+capsule(13, -113, false)
+capsule(26, -113, true)
+capsule(36, -96, false)
+local table_ = part(Interiors, Vector3.new(11, 0.6, 5), Vector3.new(10, 3.2, -98), Color3.fromRGB(150, 155, 160), Enum.Material.Metal, "ExperimentTable")
+for _, o in { Vector3.new(-5, 0, -2), Vector3.new(5, 0, -2), Vector3.new(-5, 0, 2), Vector3.new(5, 0, 2) } do
+	part(Interiors, Vector3.new(0.4, 3, 0.4), Vector3.new(10, 1.5, -98) + o, METAL, Enum.Material.Metal, "TableLeg")
+end
+local stain = part(Interiors, Vector3.new(4, 0.05, 2.2), Vector3.new(11, 3.53, -98), Color3.fromRGB(90, 10, 14), Enum.Material.SmoothPlastic, "Stain")
+stain.CanCollide = false
+table_.CastShadow = true
+
+local DESK = Color3.fromRGB(46, 48, 54)
+part(Interiors, Vector3.new(18, 3.6, 3), Vector3.new(-45, 1.8, -62), DESK, Enum.Material.Metal, "ReceptionDesk")
+part(Interiors, Vector3.new(18.6, 0.3, 3.6), Vector3.new(-45, 3.75, -62), Color3.fromRGB(120, 124, 130), Enum.Material.Marble, "DeskTop")
+for _, x in { -51, -45, -39 } do
+	local screen = part(Interiors, Vector3.new(2.4, 1.6, 0.2), Vector3.new(x, 4.9, -62.6), Color3.fromRGB(60, 150, 255), Enum.Material.Neon, "Monitor")
+	screen.CastShadow = false
+	glowLight(screen, "SurfaceLight", Color3.fromRGB(80, 160, 255), 8, 1).Face = Enum.NormalId.Back
+end
+for _, x in { -68, -22 } do
+	part(Interiors, Vector3.new(8, 1.6, 2.4), Vector3.new(x, 0.8, -46), Color3.fromRGB(70, 40, 40), Enum.Material.Fabric, "WaitingBench")
+end
+
+local Catwalk = folder("Catwalk", Interiors)
+local WALK_Y, WALK_Z = 10, -114
+part(Catwalk, Vector3.new(82, 0.6, 6), Vector3.new(105, WALK_Y, WALK_Z), METAL, Enum.Material.DiamondPlate, "Walkway")
+part(Catwalk, Vector3.new(70, 3, 0.3), Vector3.new(105, WALK_Y + 1.8, WALK_Z + 3), RUST, Enum.Material.CorrodedMetal, "Railing").Transparency = 0.3
+for x = 66, 144, 13 do
+	part(Catwalk, Vector3.new(0.6, WALK_Y, 0.6), Vector3.new(x, WALK_Y / 2, WALK_Z + 2.7), RUST, Enum.Material.CorrodedMetal, "Strut")
+end
+local RAMP_RUN = 20
+for _, x in { 67, 143 } do
+	local ramp = part(Catwalk, Vector3.new(6, 0.6, math.sqrt(RAMP_RUN ^ 2 + WALK_Y ^ 2)), Vector3.new(x, WALK_Y / 2, WALK_Z + 3 + RAMP_RUN / 2), METAL, Enum.Material.DiamondPlate, "Ramp")
+	ramp.CFrame *= CFrame.Angles(math.atan2(WALK_Y, RAMP_RUN), 0, 0)
+end
+local hazardRing = part(Interiors, Vector3.new(0.05, 26, 26), Vector3.new(105, 0.04, -92), Color3.fromRGB(255, 40, 30), Enum.Material.Neon, "HazardRing")
+hazardRing.Shape = Enum.PartType.Cylinder
+hazardRing.CFrame *= CFrame.Angles(0, 0, math.rad(90))
+hazardRing.Transparency = 0.75
+hazardRing.CanCollide = false
+hazardRing.CastShadow = false
 
 local Fog = folder("GroundFog", Details)
 for _, c in { Vector2.new(-90, 30), Vector2.new(0, 50), Vector2.new(90, 40), Vector2.new(-30, 110), Vector2.new(110, -15), Vector2.new(-120, -30) } do
