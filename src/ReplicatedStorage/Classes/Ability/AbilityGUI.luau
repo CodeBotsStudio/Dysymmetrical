@@ -45,7 +45,7 @@ function AbilityGUI.InitGUI()
     --creating the entire gui
     local Container = Prefabs.Container:Clone()
     Container.Name = Character:GetAttribute("CharacterName")
-    Container.Parent = Players.LocalPlayer.PlayerGui.CharacterGUI
+    Container.Parent = Players.LocalPlayer.PlayerGui:WaitForChild("CharacterGUI")
 
     local Abilities: {Ability} = {}
 

@@ -27,7 +27,7 @@ function CharacterStatsManager._InitUI(Char: Model, UI: Frame)
     if Char:FindFirstChild("Role").Value == "Spectator" then return end
 
     CharacterStatsManager.UI = UI
-    UI.Parent = LocalPlayer.PlayerGui.PlayerStats
+    UI.Parent = LocalPlayer.PlayerGui:WaitForChild("PlayerStats")
     
     local Stamina = UI.Stamina
     local StaminaText = Stamina.TextLabel

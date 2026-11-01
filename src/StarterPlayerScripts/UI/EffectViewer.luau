@@ -23,7 +23,7 @@ function EffectViewer._SetupUI(UI: Frame, char: Model)
         return
     end
 
-    UI.Parent = LocalPlayer.PlayerGui.Effects
+    UI.Parent = LocalPlayer.PlayerGui:WaitForChild("Effects")
 
     local EffectManager = require(char.PlayerAttributeScripts.EffectManager)
     

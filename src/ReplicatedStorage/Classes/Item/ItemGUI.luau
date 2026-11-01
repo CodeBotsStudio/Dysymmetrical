@@ -34,7 +34,7 @@ function ItemGUI.InitGUI()
 
     local Container = Prefabs.Container:Clone()
     Container.Name = "Backpack"
-    Container.Parent = Players.LocalPlayer.PlayerGui.CharacterGUI
+    Container.Parent = Players.LocalPlayer.PlayerGui:WaitForChild("CharacterGUI")
 
     local JanitorInstance = Janitor.new()
     JanitorInstance:LinkToInstances(Container, Character)
