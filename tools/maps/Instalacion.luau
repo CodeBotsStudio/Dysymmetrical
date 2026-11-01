@@ -124,7 +124,7 @@ local function room(container: Instance, name: string, center: Vector2, size: Ve
 	wall(parent, Vector2.new(x1, z0), Vector2.new(x1, z1), height, gaps.east)
 	part(parent, Vector3.new(size.X + 2, 1, size.Y + 2), Vector3.new(center.X, height + 0.5, center.Y), METAL, Enum.Material.CorrodedMetal, "Roof")
 	local lab = container.Name == "LabComplex"
-	part(parent, Vector3.new(size.X, 0.2, size.Y), Vector3.new(center.X, 0.1, center.Y), if lab then Color3.fromRGB(96, 98, 94) else DARK_CONCRETE, if lab then Enum.Material.CeramicTiles else Enum.Material.Concrete, "Floor")
+	part(parent, Vector3.new(size.X, 0.2, size.Y), Vector3.new(center.X, 0.1, center.Y), if lab then Color3.fromRGB(96, 98, 94) else DARK_CONCRETE, if lab then Enum.Material.CeramicTiles else Enum.Material.Concrete, "Floor").Reflectance = if lab then 0.12 else 0
 end
 
 local function fillLight(parent: Instance, pos: Vector3)
@@ -150,14 +150,15 @@ local function lamp(parent: Instance, pos: Vector3, flicker: boolean, ceiling: b
 	if not ceiling then
 		part(model, Vector3.new(0.6, pos.Y, 0.6), Vector3.new(pos.X, pos.Y / 2, pos.Z), METAL, Enum.Material.Metal, "Pole")
 	end
-	local head = part(model, Vector3.new(2.2, 0.5, 2.2), Vector3.new(pos.X, headY, pos.Z), Color3.fromRGB(255, 196, 140), Enum.Material.Neon, "Bulb")
+	local tint = if ceiling then Color3.fromRGB(150, 205, 255) else Color3.fromRGB(205, 215, 255)
+	local head = part(model, if ceiling then Vector3.new(6, 0.35, 0.8) else Vector3.new(2.2, 0.5, 2.2), Vector3.new(pos.X, headY, pos.Z), tint, Enum.Material.Neon, "Bulb")
 	head.CastShadow = false
 	local spot = Instance.new("SpotLight")
 	spot.Face = Enum.NormalId.Bottom
 	spot.Angle = 100
 	spot.Range = if ceiling then 26 else 42
 	spot.Brightness = if ceiling then 3.5 else 6
-	spot.Color = Color3.fromRGB(255, 176, 110)
+	spot.Color = tint
 	spot.Shadows = shadows == true
 	spot.Parent = head
 	local glow = Instance.new("PointLight")
@@ -504,40 +505,40 @@ local LightingModule = Instance.new("ModuleScript")
 LightingModule.Name = "Lighting"
 LightingModule.Source = [[return {
 	ClockTime = 0.2,
-	Brightness = 1.4,
-	Ambient = Color3.fromRGB(80, 82, 102),
-	OutdoorAmbient = Color3.fromRGB(100, 106, 136),
-	EnvironmentDiffuseScale = 0.35,
-	EnvironmentSpecularScale = 0.6,
+	Brightness = 0.8,
+	Ambient = Color3.fromRGB(14, 14, 24),
+	OutdoorAmbient = Color3.fromRGB(40, 44, 74),
+	EnvironmentDiffuseScale = 0.12,
+	EnvironmentSpecularScale = 1,
 	GlobalShadows = true,
-	ShadowSoftness = 0.35,
-	ExposureCompensation = 0.7,
+	ShadowSoftness = 0.2,
+	ExposureCompensation = 0.1,
 	ColorShift_Top = Color3.fromRGB(0, 0, 0),
 	ColorShift_Bottom = Color3.fromRGB(0, 0, 0),
 }]]
 LightingModule.Parent = Root
 
 local atmosphere = Instance.new("Atmosphere")
-atmosphere.Density = 0.36
-atmosphere.Offset = 0.05
-atmosphere.Color = Color3.fromRGB(96, 104, 124)
-atmosphere.Decay = Color3.fromRGB(36, 38, 52)
+atmosphere.Density = 0.42
+atmosphere.Offset = 0
+atmosphere.Color = Color3.fromRGB(34, 38, 66)
+atmosphere.Decay = Color3.fromRGB(8, 8, 18)
 atmosphere.Glare = 0
-atmosphere.Haze = 1
+atmosphere.Haze = 2
 atmosphere.Parent = LightingModule
 
 local grade = Instance.new("ColorCorrectionEffect")
 grade.Name = "Grade"
-grade.Brightness = -0.02
-grade.Contrast = 0.2
-grade.Saturation = -0.35
-grade.TintColor = Color3.fromRGB(214, 224, 255)
+grade.Brightness = -0.03
+grade.Contrast = 0.38
+grade.Saturation = 0.12
+grade.TintColor = Color3.fromRGB(206, 212, 255)
 grade.Parent = LightingModule
 
 local bloom = Instance.new("BloomEffect")
-bloom.Intensity = 0.7
-bloom.Size = 28
-bloom.Threshold = 1.4
+bloom.Intensity = 1.2
+bloom.Size = 24
+bloom.Threshold = 0.9
 bloom.Parent = LightingModule
 
 local sky = Instance.new("Sky")
