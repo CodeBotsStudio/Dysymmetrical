@@ -95,7 +95,7 @@ def play(start):
 
 def debug_round(as_killer):
     luau(f'''local m = game.ServerScriptService.Managers
-m.TimeManager.Source = m.TimeManager.Source:gsub("LobbyTime = 45,", "LobbyTime = 5,"):gsub("MinimumPlayerAmount = 2,", "MinimumPlayerAmount = 1,")
+m.TimeManager.Source = m.TimeManager.Source:gsub("LobbyTime = 45,", "LobbyTime = 5,")
 m.RoundManager.Source = m.RoundManager.Source:gsub("CanSpawnKiller = %a+,","CanSpawnKiller = {str(as_killer).lower()},")
 workspace:SetAttribute("KillersAllowed", {int(as_killer)})''', "Edit")
     play(True)
@@ -172,10 +172,10 @@ part.CFrame = root.CFrame * CFrame.new(0, 0, -15) part.Parent = fake fake.Primar
 local role = Instance.new("StringValue") role.Name = "Role" role.Value = "Killer" role.Parent = fake
 fake.Parent = workspace.Players''')
     time.sleep(1)
-    near = luau('local e = game.Players.LocalPlayer.PlayerGui.TerrorPulse:FindFirstChildOfClass("CanvasGroup") local lo, hi = 1, 0 for _ = 1, 8 do lo = math.min(lo, e.GroupTransparency) hi = math.max(hi, e.GroupTransparency) task.wait(0.1) end return string.format("%.2f %.2f", lo, hi)', "Client")
+    near = luau('local e = game.Players.LocalPlayer.PlayerGui.TerrorPulse.Frame local lo, hi = 1, 0 for _ = 1, 8 do local t = if e.Visible then e.Frame.BackgroundTransparency else 1 lo = math.min(lo, t) hi = math.max(hi, t) task.wait(0.1) end return string.format("%.2f %.2f", lo, hi)', "Client")
     luau('workspace.Players.TestKiller:Destroy()')
     time.sleep(0.5)
-    far = luau('return string.format("%.2f", game.Players.LocalPlayer.PlayerGui.TerrorPulse:FindFirstChildOfClass("CanvasGroup").GroupTransparency)', "Client")
+    far = luau('local e = game.Players.LocalPlayer.PlayerGui.TerrorPulse.Frame return if e.Visible then string.format("%.2f", e.Frame.BackgroundTransparency) else "1.00"', "Client")
     lo, hi = map(float, near.split())
     check("terror edge pulses near the killer", lo < 0.9 and hi - lo > 0.03 and far == "1.00", f"near {near}, gone {far}")
     errors = console_errors()

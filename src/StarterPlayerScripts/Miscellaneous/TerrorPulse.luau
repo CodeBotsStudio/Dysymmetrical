@@ -36,11 +36,12 @@ return {
         gui.IgnoreGuiInset = true
         gui.ResetOnSpawn = false
         gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-        local edge = Instance.new("CanvasGroup")
+        local edge = Instance.new("Frame")
         edge.Size = UDim2.fromScale(1, 1)
         edge.BackgroundTransparency = 1
-        edge.GroupTransparency = 1
+        edge.Visible = false
         edge.Parent = gui
+        local bands = {}
         for _, side in {
             { UDim2.fromScale(1, 0.22), UDim2.fromScale(0, 0), 90 },
             { UDim2.fromScale(1, 0.22), UDim2.fromScale(0, 0.78), -90 },
@@ -48,6 +49,7 @@ return {
             { UDim2.fromScale(0.16, 1), UDim2.fromScale(0.84, 0), 180 },
         } do
             local band = Instance.new("Frame")
+            table.insert(bands, band)
             band.Size = side[1]
             band.Position = side[2]
             band.BackgroundColor3 = EDGE_COLOR
@@ -78,20 +80,23 @@ return {
 
             janitor:Add(RunService.PreRender:Connect(function()
                 if role.Value ~= "Survivor" or RoundState.Value ~= "InRound" then
-                    edge.GroupTransparency = 1
+                    edge.Visible = false
                     return
                 end
                 local closeness = 1 - math.clamp(nearestKillerDistance(root) / TERROR_RADIUS, 0, 1)
                 if closeness <= 0 then
-                    edge.GroupTransparency = 1
+                    edge.Visible = false
                     return
                 end
                 local calm = Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Accessibility.EpilepsyMode") == true
                 local beat = if calm then 0 else (math.sin(os.clock() * math.pi * 2 * (0.9 + 1.6 * closeness)) + 1) / 2
-                edge.GroupTransparency = 1 - closeness * (0.25 + 0.2 * beat)
+                edge.Visible = true
+                for _, band in bands do
+                    band.BackgroundTransparency = 1 - closeness * (0.25 + 0.2 * beat)
+                end
             end))
             janitor:Add(function()
-                edge.GroupTransparency = 1
+                edge.Visible = false
             end, true)
         end)
     end,
