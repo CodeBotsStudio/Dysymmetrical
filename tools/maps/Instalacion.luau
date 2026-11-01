@@ -41,6 +41,13 @@ local Building = folder("Building", MapModel)
 local Yard = folder("Yard", MapModel)
 local Lamps = folder("Lamps", MapModel)
 
+local VARIANTS = {
+	[Enum.Material.Concrete] = "AnomalisConcrete",
+	[Enum.Material.CorrodedMetal] = "AnomalisRustMetal",
+	[Enum.Material.Asphalt] = "AnomalisAsphalt",
+	[Enum.Material.CeramicTiles] = "AnomalisLabTile",
+}
+
 local function part(parent: Instance, size: Vector3, pos: Vector3, color: Color3, material: Enum.Material, name: string?): Part
 	local p = Instance.new("Part")
 	p.Name = name or "Part"
@@ -49,6 +56,7 @@ local function part(parent: Instance, size: Vector3, pos: Vector3, color: Color3
 	p.CFrame = CFrame.new(ORIGIN + pos)
 	p.Color = color
 	p.Material = material
+	p.MaterialVariant = VARIANTS[material] or ""
 	p.TopSurface = Enum.SurfaceType.Smooth
 	p.BottomSurface = Enum.SurfaceType.Smooth
 	p.Parent = parent
@@ -97,7 +105,8 @@ local function room(container: Instance, name: string, center: Vector2, size: Ve
 	wall(parent, Vector2.new(x0, z0), Vector2.new(x0, z1), height, gaps.west)
 	wall(parent, Vector2.new(x1, z0), Vector2.new(x1, z1), height, gaps.east)
 	part(parent, Vector3.new(size.X + 2, 1, size.Y + 2), Vector3.new(center.X, height + 0.5, center.Y), METAL, Enum.Material.CorrodedMetal, "Roof")
-	part(parent, Vector3.new(size.X, 0.2, size.Y), Vector3.new(center.X, 0.1, center.Y), DARK_CONCRETE, Enum.Material.Concrete, "Floor")
+	local lab = container.Name == "LabComplex"
+	part(parent, Vector3.new(size.X, 0.2, size.Y), Vector3.new(center.X, 0.1, center.Y), if lab then Color3.fromRGB(124, 126, 120) else DARK_CONCRETE, if lab then Enum.Material.CeramicTiles else Enum.Material.Concrete, "Floor")
 end
 
 local function fillLight(parent: Instance, pos: Vector3)
@@ -357,6 +366,55 @@ for _, spot in {
 	{Vector3.new(-125, 0, 108), false}, {Vector3.new(25, 0, 112), true},
 } do
 	looseProp(spot[1], spot[2])
+end
+
+local Details = folder("Details", MapModel)
+local function detail(p: BasePart): BasePart
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CastShadow = false
+	p:AddTag("Detail")
+	return p
+end
+
+local function sign(text: string, pos: Vector3, face: Enum.NormalId, color: Color3)
+	local s = detail(part(Details, Vector3.new(#text * 0.8 + 2, 2.4, 0.2), pos, Color3.fromRGB(28, 30, 34), Enum.Material.Metal, "Sign"))
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = face
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 40
+	gui.LightInfluence = 1
+	gui.Parent = s
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBlack
+	label.TextColor3 = color
+	label.Parent = gui
+end
+local WHITE, RED, AMBER = Color3.fromRGB(220, 224, 230), Color3.fromRGB(210, 40, 36), Color3.fromRGB(230, 170, 40)
+sign("ANOMALIS RESEARCH SITE 7", Vector3.new(0, 16, 138.6), Enum.NormalId.Front, WHITE)
+sign("SECTOR C  LABORATORIES", Vector3.new(-35, 12, -39.1), Enum.NormalId.Back, WHITE)
+sign("CONTAINMENT  AUTHORIZED ONLY", Vector3.new(-35, 10, -84.1), Enum.NormalId.Back, RED)
+sign("REACTOR 02  RADIATION", Vector3.new(105, 16, -49.1), Enum.NormalId.Back, AMBER)
+sign("STORAGE B", Vector3.new(-110, 10, 69.1), Enum.NormalId.Front, WHITE)
+sign("BARRACKS", Vector3.new(92, 9, 81.9), Enum.NormalId.Front, WHITE)
+
+for _, z in { -83.4, -76.6 } do
+	detail(part(Details, Vector3.new(148, 1.1, 1.1), Vector3.new(-35, 14.6, z), METAL, Enum.Material.Metal, "Pipe")).Shape = Enum.PartType.Cylinder
+end
+detail(part(Details, Vector3.new(88, 1.6, 1.6), Vector3.new(105, 19, -118), RUST, Enum.Material.CorrodedMetal, "Pipe")).Shape = Enum.PartType.Cylinder
+
+for _, p in { Vector3.new(-70, 0, 20), Vector3.new(15, 0, 50), Vector3.new(-15, 0, 95), Vector3.new(70, 0, 10), Vector3.new(-125, 0, -45), Vector3.new(125, 0, 80), Vector3.new(40, 0, 105) } do
+	for i, o in { Vector3.zero, Vector3.new(3, 0, 1.5), Vector3.new(-2, 0, 2) } do
+		local d = 6 - i
+		local puddle = detail(part(Details, Vector3.new(0.05, d, d * 1.3), p + o + Vector3.new(0, 0.03, 0), Color3.fromRGB(58, 64, 72), Enum.Material.Glass, "Puddle"))
+		puddle.Shape = Enum.PartType.Cylinder
+		puddle.CFrame *= CFrame.Angles(0, 0, math.rad(90))
+		puddle.Transparency = 0.45
+	end
 end
 
 local SpawnPoints = folder("SpawnPoints", MapModel)
