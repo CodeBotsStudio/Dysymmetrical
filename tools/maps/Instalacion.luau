@@ -184,14 +184,205 @@ local function lamp(parent: Instance, pos: Vector3, flicker: boolean, ceiling: b
 	end
 end
 
-local HALF = Vector2.new(160, 140)
-part(MapModel, Vector3.new(HALF.X * 2 + 20, 2, HALF.Y * 2 + 20), Vector3.new(0, -1, 0), Color3.fromRGB(74, 76, 82), Enum.Material.Asphalt, "Ground")
+local HALF = Vector2.new(230, 210)
+local CORE = Vector2.new(160, 140)
+local BEACON_RED = Color3.fromRGB(255, 40, 30)
+part(MapModel, Vector3.new(CORE.X * 2 + 20, 2, CORE.Y * 2 + 20), Vector3.new(0, -1, 0), Color3.fromRGB(74, 76, 82), Enum.Material.Asphalt, "Ground")
+part(MapModel, Vector3.new(HALF.X * 2 + 500, 2, HALF.Y * 2 + 500), Vector3.new(0, -1.15, 0), Color3.fromRGB(64, 72, 52), Enum.Material.Grass, "Grass")
+part(MapModel, Vector3.new(20, 2, 300), Vector3.new(0, -0.98, CORE.Y + 150), Color3.fromRGB(58, 60, 66), Enum.Material.Asphalt, "Road")
+for z = CORE.Y + 6, CORE.Y + 296, 10 do
+	local stripe = part(MapModel, Vector3.new(0.5, 0.05, 5), Vector3.new(0, 0.05, z), Color3.fromRGB(220, 180, 50), Enum.Material.SmoothPlastic, "RoadLine")
+	stripe.CanCollide = false
+	stripe.CastShadow = false
+end
+for _, z in { CORE.Y + 20, CORE.Y + 45, HALF.Y + 30, HALF.Y + 70 } do
+	for _, x in { -12, 12 } do
+		local post = part(MapModel, Vector3.new(0.6, 14, 0.6), Vector3.new(x, 7, z), METAL, Enum.Material.Metal, "StreetLamp")
+		local head = part(MapModel, Vector3.new(2.4, 0.5, 1.2), Vector3.new(x - math.sign(x) * 1.2, 14, z), Color3.fromRGB(255, 205, 140), Enum.Material.Neon, "StreetLampHead")
+		head.CastShadow = false
+		local warm = Instance.new("SpotLight")
+		warm.Face = Enum.NormalId.Bottom
+		warm.Angle = 110
+		warm.Range = 26
+		warm.Brightness = 3
+		warm.Color = Color3.fromRGB(255, 190, 120)
+		warm.Parent = head
+		post.CastShadow = true
+	end
+end
 
-wall(Yard, Vector2.new(-HALF.X, -HALF.Y), Vector2.new(HALF.X, -HALF.Y), 20, nil, DARK_CONCRETE)
-wall(Yard, Vector2.new(-HALF.X, HALF.Y), Vector2.new(HALF.X, HALF.Y), 20, { { 0, 18 } }, DARK_CONCRETE)
-wall(Yard, Vector2.new(-HALF.X, -HALF.Y), Vector2.new(-HALF.X, HALF.Y), 20, nil, DARK_CONCRETE)
-wall(Yard, Vector2.new(HALF.X, -HALF.Y), Vector2.new(HALF.X, HALF.Y), 20, nil, DARK_CONCRETE)
-part(Yard, Vector3.new(18, 12, 0.6), Vector3.new(0, 6, HALF.Y), METAL, Enum.Material.DiamondPlate, "MainGate")
+local function beacon(parent: Instance, pos: Vector3)
+	local bulb = part(parent, Vector3.new(0.9, 0.9, 0.9), pos, BEACON_RED, Enum.Material.Neon, "Beacon")
+	bulb.Shape = Enum.PartType.Ball
+	bulb.CastShadow = false
+	local glow = Instance.new("PointLight")
+	glow.Color = BEACON_RED
+	glow.Range = 12
+	glow.Brightness = 2.6
+	glow.Parent = bulb
+end
+
+local Fence = folder("Fence", Yard)
+local function fenceSide(alongX: boolean, fixed: number, from: number, to: number, gap: number?)
+	local function at(t: number, y: number): Vector3
+		return if alongX then Vector3.new(t, y, fixed) else Vector3.new(fixed, y, t)
+	end
+	local runs = if gap then { { from, -gap / 2 }, { gap / 2, to } } else { { from, to } }
+	for _, run in runs do
+		local len = run[2] - run[1]
+		local mid = (run[1] + run[2]) / 2
+		local function span(height: number, y: number, thick: number, name: string, material: Enum.Material): Part
+			return part(Fence, if alongX then Vector3.new(len, height, thick) else Vector3.new(thick, height, len), at(mid, y), METAL, material, name)
+		end
+		local mesh = span(10, 5.4, 0.12, "Mesh", Enum.Material.DiamondPlate)
+		mesh.Color = Color3.fromRGB(130, 136, 148)
+		mesh.Transparency = 0.62
+		mesh.CastShadow = false
+		span(0.35, 10.6, 0.35, "Rail", Enum.Material.Metal)
+		span(0.25, 0.6, 0.25, "Rail", Enum.Material.Metal)
+		local wire = span(0.9, 11.6, 0.9, "BarbedWire", Enum.Material.Metal)
+		wire.Shape = Enum.PartType.Cylinder
+		wire.CFrame *= if alongX then CFrame.identity else CFrame.Angles(0, math.rad(90), 0)
+		wire.Color = Color3.fromRGB(150, 155, 165)
+		wire.Transparency = 0.2
+		local posts = math.ceil(len / 12)
+		for i = 0, posts do
+			local t = run[1] + len * i / posts
+			part(Fence, Vector3.new(0.6, 12, 0.6), at(t, 6), METAL, Enum.Material.Metal, "Post")
+			if i % 5 == 0 then
+				beacon(Fence, at(t, 12.5))
+			end
+		end
+	end
+end
+fenceSide(true, -HALF.Y, -HALF.X, HALF.X)
+fenceSide(true, HALF.Y, -HALF.X, HALF.X, 26)
+fenceSide(false, -HALF.X, -HALF.Y, HALF.Y)
+fenceSide(false, HALF.X, -HALF.Y, HALF.Y)
+
+local Gate = folder("Gate", Yard)
+for _, x in { -14, 14 } do
+	part(Gate, Vector3.new(4, 16, 4), Vector3.new(x, 8, HALF.Y), DARK_CONCRETE, Enum.Material.Concrete, "Pillar")
+	beacon(Gate, Vector3.new(x, 16.6, HALF.Y))
+	lamp(Gate, Vector3.new(x, 0, HALF.Y - 3), false)
+end
+for _, x in { -6, 6 } do
+	local leaf = part(Gate, Vector3.new(12, 12, 0.3), Vector3.new(x, 6.2, HALF.Y), METAL, Enum.Material.DiamondPlate, "GateLeaf")
+	leaf.Transparency = 0.55
+	part(Gate, Vector3.new(12, 0.5, 0.5), Vector3.new(x, 12.2, HALF.Y), RUST, Enum.Material.CorrodedMetal, "GateFrame")
+	part(Gate, Vector3.new(12, 0.5, 0.5), Vector3.new(x, 0.4, HALF.Y), RUST, Enum.Material.CorrodedMetal, "GateFrame")
+	part(Gate, Vector3.new(0.5, 12, 0.5), Vector3.new(x + (if x < 0 then -5.8 else 5.8), 6.2, HALF.Y), RUST, Enum.Material.CorrodedMetal, "GateFrame")
+end
+part(Gate, Vector3.new(32, 4, 1), Vector3.new(0, 18, HALF.Y), DARK_CONCRETE, Enum.Material.Concrete, "Lintel")
+
+local function watchtower(c: Vector2, faceTo: Vector2)
+	local m = Instance.new("Model")
+	m.Name = "Watchtower"
+	m.Parent = Yard
+	for _, o in { Vector2.new(-4, -4), Vector2.new(4, -4), Vector2.new(-4, 4), Vector2.new(4, 4) } do
+		part(m, Vector3.new(0.9, 24, 0.9), Vector3.new(c.X + o.X, 12, c.Y + o.Y), WOOD, Enum.Material.Wood, "Leg")
+	end
+	for y = 7, 19, 6 do
+		part(m, Vector3.new(9, 0.4, 0.4), Vector3.new(c.X, y, c.Y - 4), WOOD, Enum.Material.Wood, "Brace")
+		part(m, Vector3.new(9, 0.4, 0.4), Vector3.new(c.X, y, c.Y + 4), WOOD, Enum.Material.Wood, "Brace")
+		part(m, Vector3.new(0.4, 0.4, 9), Vector3.new(c.X - 4, y, c.Y), WOOD, Enum.Material.Wood, "Brace")
+		part(m, Vector3.new(0.4, 0.4, 9), Vector3.new(c.X + 4, y, c.Y), WOOD, Enum.Material.Wood, "Brace")
+	end
+	part(m, Vector3.new(11, 0.6, 11), Vector3.new(c.X, 24.3, c.Y), WOOD, Enum.Material.WoodPlanks, "Deck")
+	for _, s in { { Vector3.new(10, 2.4, 0.4), Vector2.new(0, -5) }, { Vector3.new(10, 2.4, 0.4), Vector2.new(0, 5) }, { Vector3.new(0.4, 2.4, 10), Vector2.new(-5, 0) }, { Vector3.new(0.4, 2.4, 10), Vector2.new(5, 0) } } do
+		part(m, s[1], Vector3.new(c.X + s[2].X, 25.8, c.Y + s[2].Y), WOOD, Enum.Material.WoodPlanks, "Cabin")
+		local window = part(m, s[1] + Vector3.new(0, 0.2, 0), Vector3.new(c.X + s[2].X, 28.3, c.Y + s[2].Y), Color3.fromRGB(255, 196, 120), Enum.Material.Glass, "Window")
+		window.Transparency = 0.45
+	end
+	part(m, Vector3.new(12.5, 0.8, 12.5), Vector3.new(c.X, 30, c.Y), METAL, Enum.Material.CorrodedMetal, "Roof")
+	local warm = Instance.new("PointLight")
+	warm.Color = Color3.fromRGB(255, 180, 100)
+	warm.Range = 14
+	warm.Brightness = 1.5
+	warm.Parent = part(m, Vector3.new(0.6, 0.6, 0.6), Vector3.new(c.X, 28.5, c.Y), Color3.fromRGB(255, 200, 130), Enum.Material.Neon, "CabinLamp")
+	beacon(m, Vector3.new(c.X, 30.9, c.Y))
+	local head = part(m, Vector3.new(1.4, 1.4, 1.8), Vector3.new(c.X, 27.5, c.Y), METAL, Enum.Material.Metal, "Searchlight")
+	head.CFrame = CFrame.lookAt(head.Position, ORIGIN + Vector3.new(faceTo.X, 0, faceTo.Y))
+	local beam = Instance.new("SpotLight")
+	beam.Face = Enum.NormalId.Front
+	beam.Angle = 28
+	beam.Range = 60
+	beam.Brightness = 3
+	beam.Color = Color3.fromRGB(220, 230, 255)
+	beam.Parent = head
+	local from, to = Instance.new("Attachment"), Instance.new("Attachment")
+	to.Position = Vector3.new(0, 0, -55)
+	from.Parent, to.Parent = head, head
+	local cone = Instance.new("Beam")
+	cone.Attachment0, cone.Attachment1 = from, to
+	cone.Width0, cone.Width1 = 1.4, 26
+	cone.FaceCamera = true
+	cone.LightEmission = 1
+	cone.Color = ColorSequence.new(Color3.fromRGB(210, 225, 255))
+	cone.Transparency = NumberSequence.new(0.8, 1)
+	cone.Segments = 1
+	cone:AddTag("Detail")
+	cone.Parent = head
+	part(m, Vector3.new(2, 24, 0.3), Vector3.new(c.X, 12, c.Y + 4.8), RUST, Enum.Material.CorrodedMetal, "Ladder")
+end
+for _, s in { -1, 1 } do
+	watchtower(Vector2.new(s * (HALF.X - 12), HALF.Y - 12), Vector2.new(s * (HALF.X - 50), HALF.Y - 50))
+	watchtower(Vector2.new(s * (HALF.X - 12), -HALF.Y + 12), Vector2.new(s * (HALF.X - 50), -HALF.Y + 50))
+end
+
+local Outside = folder("Outside", MapModel)
+local function pine(parent: Instance, base: Vector3, h: number, solid: boolean)
+	local trunk = part(parent, Vector3.new(h * 0.3, h * 0.05, h * 0.05), base + Vector3.new(0, h * 0.15, 0), Color3.fromRGB(46, 34, 26), Enum.Material.Wood, "Trunk")
+	trunk.Shape = Enum.PartType.Cylinder
+	trunk.CFrame *= CFrame.Angles(0, 0, math.rad(90))
+	trunk.CanCollide = solid
+	for tier = 0, 1 do
+		local w, th = h * (0.5 - tier * 0.17), h * (0.5 - tier * 0.08)
+		local center = ORIGIN + base + Vector3.new(0, h * (0.2 + tier * 0.3) + th / 2, 0)
+		for q = 0, 3 do
+			local leaf = Instance.new("CornerWedgePart")
+			leaf.Name = "Needles"
+			leaf.Anchored = true
+			leaf.CanCollide = false
+			leaf.CastShadow = solid
+			leaf.Size = Vector3.new(w / 2, th, w / 2)
+			leaf.CFrame = CFrame.new(center) * CFrame.Angles(0, math.rad(90 * q), 0) * CFrame.new(-w / 4, 0, w / 4)
+			leaf.Color = if tier == 0 then Color3.fromRGB(40, 58, 46) else Color3.fromRGB(58, 80, 64)
+			leaf.Material = Enum.Material.Grass
+			leaf.Parent = parent
+		end
+	end
+end
+local forestRand = Random.new(7)
+for x = -HALF.X - 80, HALF.X + 80, 22 do
+	for z = -HALF.Y - 80, HALF.Y + 80, 22 do
+		local p = Vector2.new(x + forestRand:NextNumber(-8, 8), z + forestRand:NextNumber(-8, 8))
+		local inside = math.abs(p.X) < HALF.X + 8 and math.abs(p.Y) < HALF.Y + 8
+		local onRoad = math.abs(p.X) < 18 and p.Y > HALF.Y
+		if not inside and not onRoad then
+			local tree = Instance.new("Model")
+			tree.Name = "Pine"
+			tree.Parent = Outside
+			pine(tree, Vector3.new(p.X, 0, p.Y), forestRand:NextNumber(26, 44), false)
+			if math.abs(p.X) > HALF.X + 40 or math.abs(p.Y) > HALF.Y + 40 then
+				tree:AddTag("Detail")
+				for _, d in tree:GetChildren() do
+					d:AddTag("Detail")
+				end
+			end
+		end
+	end
+end
+for i = 0, 17 do
+	local angle = math.rad(i * 20 + forestRand:NextNumber(-6, 6))
+	local peak = forestRand:NextNumber(90, 170)
+	local at = Vector3.new(math.cos(angle) * 540, -peak * 0.2, math.sin(angle) * 500)
+	local ridge = part(Outside, Vector3.new(peak, peak, 200), at, Color3.fromRGB(22, 25, 34), Enum.Material.Slate, "Mountain")
+	ridge.CFrame = CFrame.lookAt(ORIGIN + at, ORIGIN + Vector3.new(0, at.Y, 0)) * CFrame.Angles(0, 0, math.rad(45))
+	ridge.CanCollide = false
+	ridge.CastShadow = false
+end
+
 for _, side in { Vector3.new(0, 45, -HALF.Y - 1), Vector3.new(0, 45, HALF.Y + 1), Vector3.new(-HALF.X - 1, 45, 0), Vector3.new(HALF.X + 1, 45, 0) } do
 	local barrier = part(Yard, if side.X == 0 then Vector3.new(HALF.X * 2 + 4, 50, 1) else Vector3.new(1, 50, HALF.Y * 2 + 4), side, CONCRETE, Enum.Material.SmoothPlastic, "Barrier")
 	barrier.Transparency = 1
@@ -257,9 +448,9 @@ coreLight.Parent = ring
 local chimney = part(Reactor, Vector3.new(60, 9, 9), Vector3.new(100, 30, -131), DARK_CONCRETE, Enum.Material.Concrete, "Chimney")
 chimney.Shape = Enum.PartType.Cylinder
 chimney.CFrame = CFrame.new(ORIGIN + Vector3.new(100, 30, -131)) * CFrame.Angles(0, 0, math.rad(90))
-local beacon = part(Reactor, Vector3.new(1.5, 1.5, 1.5), Vector3.new(100, 61, -131), Color3.fromRGB(255, 40, 30), Enum.Material.Neon, "Beacon")
-beacon.CastShadow = false
-beacon:SetAttribute("Flicker", true)
+local chimneyBeacon = part(Reactor, Vector3.new(1.5, 1.5, 1.5), Vector3.new(100, 61, -131), Color3.fromRGB(255, 40, 30), Enum.Material.Neon, "Beacon")
+chimneyBeacon.CastShadow = false
+chimneyBeacon:SetAttribute("Flicker", true)
 part(Reactor, Vector3.new(20, 1, 14), Vector3.new(50, 10.5, -80), METAL, Enum.Material.CorrodedMetal, "WalkwayRoof")
 for _, p in { Vector3.new(80, 21.2, -70), Vector3.new(130, 21.2, -70), Vector3.new(80, 21.2, -105), Vector3.new(130, 21.2, -105) } do
 	lamp(Reactor, p, p.X == 130 and p.Z == -105, true)
@@ -428,7 +619,8 @@ local function sign(text: string, pos: Vector3, face: Enum.NormalId, color: Colo
 	label.Parent = gui
 end
 local WHITE, RED, AMBER = Color3.fromRGB(220, 224, 230), Color3.fromRGB(210, 40, 36), Color3.fromRGB(230, 170, 40)
-sign("ANOMALIS  CENTRO DE INVESTIGACIÓN 7", Vector3.new(0, 16, 138.6), Enum.NormalId.Front, WHITE)
+sign("ANOMALIS  LAB-07", Vector3.new(0, 18, HALF.Y - 0.6), Enum.NormalId.Front, WHITE)
+sign("ANOMALIS  SECTOR A  PUERTA", Vector3.new(0, 18, HALF.Y + 0.6), Enum.NormalId.Back, RED)
 sign("SECTOR C  LABORATORIOS", Vector3.new(-35, 12, -39.1), Enum.NormalId.Back, WHITE)
 sign("CONTENCIÓN  SOLO AUTORIZADOS", Vector3.new(-35, 10, -84.1), Enum.NormalId.Back, RED)
 sign("REACTOR 02  RADIACIÓN", Vector3.new(105, 16, -49.1), Enum.NormalId.Back, AMBER)
@@ -447,6 +639,136 @@ for _, p in { Vector3.new(-70, 0, 20), Vector3.new(15, 0, 50), Vector3.new(-15, 
 		puddle.Shape = Enum.PartType.Cylinder
 		puddle.CFrame *= CFrame.Angles(0, 0, math.rad(90))
 		puddle.Transparency = 0.45
+	end
+end
+
+local Landmarks = folder("Landmarks", MapModel)
+local PURPLE = Color3.fromRGB(170, 70, 230)
+local function glowLight(parent: BasePart, kind: string, color: Color3, range: number, brightness: number)
+	local light = Instance.new(kind) :: any
+	light.Color = color
+	light.Range = range
+	light.Brightness = brightness
+	light.Parent = parent
+	return light
+end
+local function bigText(parent: BasePart, text: string, face: Enum.NormalId, color: Color3, font: Enum.Font)
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = face
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 30
+	gui.LightInfluence = 0.4
+	gui.Parent = parent
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextScaled = true
+	label.Font = font
+	label.TextColor3 = color
+	label.Parent = gui
+end
+
+local upper = part(Landmarks, Vector3.new(80, 14, 40), Vector3.new(-35, 24, -62), DARK_CONCRETE, Enum.Material.Concrete, "UpperFloor")
+local WINDOW_TINTS = { Color3.fromRGB(120, 170, 255), Color3.fromRGB(255, 190, 120), nil, Color3.fromRGB(120, 170, 255) }
+for i = 0, 6 do
+	local x = -70 + i * 6.5
+	local tint = WINDOW_TINTS[i % 4 + 1]
+	local pane = part(Landmarks, Vector3.new(4.4, 3.4, 0.3), Vector3.new(x, 24, -41.7), tint or Color3.fromRGB(16, 18, 24), if tint then Enum.Material.Neon else Enum.Material.Glass, "Window")
+	pane.Transparency = if tint then 0.3 else 0.1
+	pane.CastShadow = false
+	part(Landmarks, Vector3.new(5.2, 4.2, 0.2), Vector3.new(x, 24, -41.85), Color3.fromRGB(30, 32, 38), Enum.Material.Metal, "WindowFrame")
+	part(Landmarks, Vector3.new(0.25, 3.4, 0.4), Vector3.new(x, 24, -41.6), Color3.fromRGB(30, 32, 38), Enum.Material.Metal, "Mullion")
+end
+local plate = part(Landmarks, Vector3.new(26, 9, 0.4), Vector3.new(-8, 24, -41.6), Color3.fromRGB(26, 28, 34), Enum.Material.Metal, "LabSign")
+bigText(plate, "LAB-07", Enum.NormalId.Back, Color3.fromRGB(235, 240, 250), Enum.Font.GothamBlack)
+glowLight(plate, "SurfaceLight", Color3.fromRGB(200, 215, 255), 10, 1.5).Face = Enum.NormalId.Back
+for _, edge in { { Vector3.new(26.6, 0.35, 0.3), Vector3.new(-8, 28.65, -41.9) }, { Vector3.new(26.6, 0.35, 0.3), Vector3.new(-8, 19.35, -41.9) }, { Vector3.new(0.35, 9.6, 0.3), Vector3.new(-21.15, 24, -41.9) }, { Vector3.new(0.35, 9.6, 0.3), Vector3.new(5.15, 24, -41.9) } } do
+	part(Landmarks, edge[1], edge[2], Color3.fromRGB(150, 190, 255), Enum.Material.Neon, "SignBorder").CastShadow = false
+end
+local hazard = part(Landmarks, Vector3.new(8, 13, 0.4), Vector3.new(-26, 24, -41.6), Color3.fromRGB(170, 22, 24), Enum.Material.SmoothPlastic, "HazardBanner")
+bigText(hazard, "☣", Enum.NormalId.Back, Color3.fromRGB(16, 4, 4), Enum.Font.GothamBlack)
+glowLight(hazard, "SurfaceLight", Color3.fromRGB(255, 40, 40), 16, 1.6).Face = Enum.NormalId.Back
+local washer = part(Landmarks, Vector3.new(1.5, 0.6, 1.5), Vector3.new(-26, 0.4, -36), Color3.fromRGB(255, 50, 40), Enum.Material.Neon, "FacadeWash")
+washer.CFrame = CFrame.lookAt(washer.Position, ORIGIN + Vector3.new(-26, 26, -42))
+glowLight(washer, "SpotLight", Color3.fromRGB(255, 40, 30), 34, 4).Angle = 40
+for _, x in { -45, -25 } do
+	local sconce = part(Landmarks, Vector3.new(1.6, 0.8, 1), Vector3.new(x, 13, -39.2), Color3.fromRGB(255, 200, 130), Enum.Material.Neon, "Sconce")
+	sconce.CastShadow = false
+	local down = glowLight(sconce, "SpotLight", Color3.fromRGB(255, 185, 110), 22, 3)
+	down.Face = Enum.NormalId.Bottom
+	down.Angle = 90
+end
+for _, edge in { { Vector3.new(81, 1.6, 0.8), Vector3.new(-35, 31.8, -42.4) }, { Vector3.new(81, 1.6, 0.8), Vector3.new(-35, 31.8, -81.6) }, { Vector3.new(0.8, 1.6, 40), Vector3.new(-75.1, 31.8, -62) }, { Vector3.new(0.8, 1.6, 40), Vector3.new(5.1, 31.8, -62) } } do
+	part(Landmarks, edge[1], edge[2], DARK_CONCRETE, Enum.Material.Concrete, "Parapet")
+end
+
+local DOME_GLOW = Color3.fromRGB(205, 90, 255)
+local dome = part(Landmarks, Vector3.new(34, 34, 34), Vector3.new(-35, 31, -62), DOME_GLOW, Enum.Material.Glass, "ResearchDome")
+dome.Shape = Enum.PartType.Ball
+dome.Transparency = 0.58
+dome.CastShadow = false
+local core = part(Landmarks, Vector3.new(6, 6, 6), Vector3.new(-35, 34, -62), DOME_GLOW, Enum.Material.Neon, "DomeCore")
+core.Shape = Enum.PartType.Ball
+glowLight(core, "PointLight", DOME_GLOW, 60, 5)
+glowLight(part(Landmarks, Vector3.new(0.4, 0.4, 0.4), Vector3.new(-35, 50, -62), DOME_GLOW, Enum.Material.Neon, "DomeTop"), "PointLight", DOME_GLOW, 40, 3)
+for _, angle in { 0, 45, 90, 135 } do
+	local rib = part(Landmarks, Vector3.new(0.7, 34.6, 34.6), Vector3.new(-35, 31, -62), Color3.fromRGB(255, 190, 255), Enum.Material.Neon, "DomeRib")
+	rib.Shape = Enum.PartType.Cylinder
+	rib.CFrame = CFrame.new(ORIGIN + Vector3.new(-35, 31, -62)) * CFrame.Angles(0, math.rad(angle), 0)
+	rib.Transparency = 0.7
+	rib.CastShadow = false
+end
+local baseRing = part(Landmarks, Vector3.new(0.8, 35, 35), Vector3.new(-35, 31.4, -62), DOME_GLOW, Enum.Material.Neon, "DomeRing")
+baseRing.Shape = Enum.PartType.Cylinder
+baseRing.CFrame = CFrame.new(ORIGIN + Vector3.new(-35, 31.4, -62)) * CFrame.Angles(0, 0, math.rad(90))
+baseRing.CastShadow = false
+
+local mast = part(Landmarks, Vector3.new(1.2, 6, 1.2), Vector3.new(10, 20, -105), METAL, Enum.Material.Metal, "DishMast")
+local dish = part(Landmarks, Vector3.new(1, 16, 16), Vector3.new(10, 26, -105), Color3.fromRGB(150, 152, 158), Enum.Material.Metal, "SatelliteDish")
+dish.Shape = Enum.PartType.Cylinder
+dish.CFrame = CFrame.new(ORIGIN + Vector3.new(10, 26, -105)) * CFrame.Angles(0, math.rad(-30), math.rad(-35))
+mast.CastShadow = true
+
+local tower = Instance.new("Model")
+tower.Name = "CommsTower"
+tower.Parent = Landmarks
+local TOWER_AT, TOWER_H = Vector2.new(-185, -150), 60
+for _, o in { Vector2.new(-5, -5), Vector2.new(5, -5), Vector2.new(-5, 5), Vector2.new(5, 5) } do
+	local leg = part(tower, Vector3.new(0.8, TOWER_H, 0.8), Vector3.new(TOWER_AT.X + o.X * 0.6, TOWER_H / 2, TOWER_AT.Y + o.Y * 0.6), RUST, Enum.Material.CorrodedMetal, "Leg")
+	leg.CFrame = CFrame.lookAt(ORIGIN + Vector3.new(TOWER_AT.X + o.X, 0, TOWER_AT.Y + o.Y), ORIGIN + Vector3.new(TOWER_AT.X + o.X * 0.2, TOWER_H, TOWER_AT.Y + o.Y * 0.2)) * CFrame.new(0, 0, -TOWER_H / 2) * CFrame.Angles(math.rad(90), 0, 0)
+end
+for y = 8, TOWER_H - 6, 10 do
+	local w = 10 - y / TOWER_H * 8
+	for _, s in { { Vector3.new(w, 0.4, 0.4), Vector2.new(0, -w / 2) }, { Vector3.new(w, 0.4, 0.4), Vector2.new(0, w / 2) }, { Vector3.new(0.4, 0.4, w), Vector2.new(-w / 2, 0) }, { Vector3.new(0.4, 0.4, w), Vector2.new(w / 2, 0) } } do
+		part(tower, s[1], Vector3.new(TOWER_AT.X + s[2].X, y, TOWER_AT.Y + s[2].Y), RUST, Enum.Material.CorrodedMetal, "Brace")
+	end
+	if y % 20 == 8 then
+		beacon(tower, Vector3.new(TOWER_AT.X + w / 2, y + 0.8, TOWER_AT.Y))
+	end
+end
+part(tower, Vector3.new(0.4, 10, 0.4), Vector3.new(TOWER_AT.X, TOWER_H + 5, TOWER_AT.Y), METAL, Enum.Material.Metal, "Antenna")
+beacon(tower, Vector3.new(TOWER_AT.X, TOWER_H + 10.5, TOWER_AT.Y))
+
+local HELIPAD_AT = Vector3.new(195, 0, -40)
+local pad = part(Landmarks, Vector3.new(0.4, 36, 36), HELIPAD_AT + Vector3.new(0, 0.1, 0), Color3.fromRGB(52, 56, 62), Enum.Material.Concrete, "Helipad")
+pad.Shape = Enum.PartType.Cylinder
+pad.CFrame *= CFrame.Angles(0, 0, math.rad(90))
+local ring = part(Landmarks, Vector3.new(0.42, 30, 30), HELIPAD_AT + Vector3.new(0, 0.11, 0), Color3.fromRGB(200, 200, 190), Enum.Material.SmoothPlastic, "HelipadRing")
+ring.Shape = Enum.PartType.Cylinder
+ring.CFrame *= CFrame.Angles(0, 0, math.rad(90))
+local inner = part(Landmarks, Vector3.new(0.44, 27, 27), HELIPAD_AT + Vector3.new(0, 0.12, 0), Color3.fromRGB(52, 56, 62), Enum.Material.Concrete, "HelipadInner")
+inner.Shape = Enum.PartType.Cylinder
+inner.CFrame *= CFrame.Angles(0, 0, math.rad(90))
+for _, s in { { Vector3.new(1.6, 0.1, 11), Vector3.new(-4, 0, 0) }, { Vector3.new(1.6, 0.1, 11), Vector3.new(4, 0, 0) }, { Vector3.new(8, 0.1, 1.6), Vector3.zero } } do
+	part(Landmarks, s[1], HELIPAD_AT + s[2] + Vector3.new(0, 0.36, 0), Color3.fromRGB(210, 210, 200), Enum.Material.SmoothPlastic, "HelipadMark").CanCollide = false
+end
+for i = 0, 11 do
+	local a = math.rad(i * 30)
+	local stud = part(Landmarks, Vector3.new(0.6, 0.4, 0.6), HELIPAD_AT + Vector3.new(math.cos(a) * 17, 0.4, math.sin(a) * 17), Color3.fromRGB(120, 200, 255), Enum.Material.Neon, "PadLight")
+	stud.CastShadow = false
+	if i % 3 == 0 then
+		glowLight(stud, "PointLight", Color3.fromRGB(120, 200, 255), 8, 1)
 	end
 end
 
@@ -504,11 +826,12 @@ Config.Parent = Root
 local LightingModule = Instance.new("ModuleScript")
 LightingModule.Name = "Lighting"
 LightingModule.Source = [[return {
-	ClockTime = 0.2,
-	Brightness = 0.8,
-	Ambient = Color3.fromRGB(14, 14, 24),
-	OutdoorAmbient = Color3.fromRGB(40, 44, 74),
-	EnvironmentDiffuseScale = 0.12,
+	ClockTime = 20,
+	GeographicLatitude = 55,
+	Brightness = 2,
+	Ambient = Color3.fromRGB(22, 22, 34),
+	OutdoorAmbient = Color3.fromRGB(105, 115, 155),
+	EnvironmentDiffuseScale = 0.4,
 	EnvironmentSpecularScale = 1,
 	GlobalShadows = true,
 	ShadowSoftness = 0.2,
@@ -519,9 +842,9 @@ LightingModule.Source = [[return {
 LightingModule.Parent = Root
 
 local atmosphere = Instance.new("Atmosphere")
-atmosphere.Density = 0.42
-atmosphere.Offset = 0
-atmosphere.Color = Color3.fromRGB(34, 38, 66)
+atmosphere.Density = 0.32
+atmosphere.Offset = 0.1
+atmosphere.Color = Color3.fromRGB(84, 92, 124)
 atmosphere.Decay = Color3.fromRGB(8, 8, 18)
 atmosphere.Glare = 0
 atmosphere.Haze = 2
@@ -529,8 +852,8 @@ atmosphere.Parent = LightingModule
 
 local grade = Instance.new("ColorCorrectionEffect")
 grade.Name = "Grade"
-grade.Brightness = -0.03
-grade.Contrast = 0.38
+grade.Brightness = 0
+grade.Contrast = 0.08
 grade.Saturation = 0.12
 grade.TintColor = Color3.fromRGB(206, 212, 255)
 grade.Parent = LightingModule
