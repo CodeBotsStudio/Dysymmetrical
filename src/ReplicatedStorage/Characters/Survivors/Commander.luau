@@ -48,7 +48,7 @@ local function BlindsideBehaviour(self: Types.Ability)
                         },
                         Connections = {
                             PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
-                                CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 10, EXP = 20, Reason = "blinding the killer with Blindside"})
+                                CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 10, EXP = 20, Reason = "cegar al asesino con Blindside"})
                             end,
                         }
                     })
@@ -108,7 +108,7 @@ local function JusticeBehaviour(self: Types.Ability)
                 CFrameOffset = CFrame.new(0, 0, -(self.HitboxLength / 2)),
                 Size = Vector3.new(3, 1.5, self.HitboxLength),
                 Time = self.Duration,
-                Reason = "The Gun Shot",
+                Reason = "el disparo",
                 Damage = self.Damage,
                 EffectsToApply = {
                     {
@@ -120,7 +120,7 @@ local function JusticeBehaviour(self: Types.Ability)
                 },
                 Connections = {
                     PostHit = function(Config: Types.HitboxSettings, Hum: Humanoid)
-                        CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 6, EXP = 14, Reason = "stunning the killer with Justice"})
+                        CommonFunctions.GrantRewardToPlayer(self.Owner, {Money = 6, EXP = 14, Reason = "aturdir al asesino con Justice"})
                     end,
                 }
             })
@@ -178,7 +178,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
         Render = "rbxassetid://108440668883002",
 
         Origin = {
-            TooltipText = "Originates from Project Terminus!",
+            TooltipText = "¡Viene del Proyecto Terminus!",
             Icon = "rbxasset://textures/ui/GuiImagePlaceholder.png",
         },
     },
@@ -221,7 +221,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
 
             Justice = Ability.New({
                 Name = "Justice",
-                Description = "Commander pulls out a gun and shoots forward while in low speed. Does 50 damage to the killer and stuns them for 4.2 seconds.",
+                Description = "Commander saca la pistola y dispara al frente mientras va despacio. Hace 50 de daño al asesino y lo aturde 4,2 segundos.",
                 UseAnimation = "",
                 ShotSound = "",
                 Cooldown = 45,
@@ -249,7 +249,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
 Commander.Config.Description = {
     {
         Type = "Separator",
-        Text = "GENERAL INFO",
+        Text = "INFORMACIÓN GENERAL",
     },
     {
         Type = "Header",
@@ -261,30 +261,30 @@ Commander.Config.Description = {
     },
     {
         Type = "Text",
-        Text = "Initially a simple soldier that managed to turn the military upside-down with his leadership. "
-            .."After some altercations in a company he got hired in as a guard against anomalies, he managed to survive a fatal accident and become one of the peak soldiers in the army. "
-            .."He's been intensely trained for years and has experience with handguns and flash grenades, using them as efficiently as possible and purchasing the tools with most quality.",
+        Text = "Empezó como un simple soldado que puso el ejército patas arriba con su liderazgo. "
+            .."Tras varios altercados en la empresa que lo contrató como guardia contra anomalías, sobrevivió a un accidente mortal y se convirtió en uno de los mejores soldados del ejército. "
+            .."Lleva años de entrenamiento intenso, domina las pistolas y las granadas cegadoras, las usa con la máxima eficacia y compra siempre el mejor equipo.",
     },
     {
         Type = "Header",
-        Text = "STATS",
+        Text = "ESTADÍSTICAS",
     },
     {
         Type = "Text",
         Text = {
-            "Difficulty: ★★★☆☆",
+            "Dificultad: ★★★☆☆",
             -- "Difficulty: 6 7",
-            "Health: "..tostring(Commander.GameplayConfig.Health),
-            "Base Speed: "..tostring(Commander.GameplayConfig.BaseSpeed),
-            "Sprint Speed: "..tostring(math.round(Commander.GameplayConfig.BaseSpeed * Commander.GameplayConfig.SprintSpeedMultiplier * 10) / 10),
-            "Max Stamina: "..tostring(Commander.GameplayConfig.StaminaProperties.MaxStamina),
-            "Stamina Loss per second: "..tostring(Commander.GameplayConfig.StaminaProperties.StaminaDrain),
-            "Stamina Gain per second: "..tostring(Commander.GameplayConfig.StaminaProperties.StaminaGain),
+            "Vida: "..tostring(Commander.GameplayConfig.Health),
+            "Velocidad base: "..tostring(Commander.GameplayConfig.BaseSpeed),
+            "Velocidad al correr: "..tostring(math.round(Commander.GameplayConfig.BaseSpeed * Commander.GameplayConfig.SprintSpeedMultiplier * 10) / 10),
+            "Aguante máximo: "..tostring(Commander.GameplayConfig.StaminaProperties.MaxStamina),
+            "Aguante perdido por segundo: "..tostring(Commander.GameplayConfig.StaminaProperties.StaminaDrain),
+            "Aguante recuperado por segundo: "..tostring(Commander.GameplayConfig.StaminaProperties.StaminaGain),
         },
     },
     {
         Type = "Separator",
-        Text = "PASSIVES",
+        Text = "PASIVAS",
     },
     {
         Type = "Header",
@@ -292,16 +292,16 @@ Commander.Config.Description = {
     },
     {
         Type = "Quote",
-        Text = "\"Diamond armor, full set!\" -Minecraft Steve",
+        Text = "\"¡Armadura de diamante, set completo!\" -Steve de Minecraft",
     },
     {
         Type = "Text",
-        Text = "Every time Commander gets hit, he gets <b>Resistance V</b> for 1 second, acting as invincibility frames.",
+        Text = "Cada vez que golpean a Commander, gana <b>Resistencia V</b> durante 1 segundo, como fotogramas de invencibilidad.",
         Image = "http://www.roblox.com/asset/?id=113412520",
     },
     {
         Type = "Separator",
-        Text = "ABILITIES",
+        Text = "HABILIDADES",
     },
     {
         Type = "Header",
@@ -309,11 +309,11 @@ Commander.Config.Description = {
     },
     {
         Type = "Text",
-        Text = "Commander picks up a flashbang grenade and throws it after "..tostring(Commander.GameplayConfig.Abilities.Blindside.ThrowDelay)..
-            " seconds, triggering it after "..tostring(Commander.GameplayConfig.Abilities.Blindside.TriggerDelay)..
-            " seconds and inflicting the killer <b>Blindness</b> for "..tostring(Commander.GameplayConfig.Abilities.Blindside.FlashTime)..
-            " seconds if they're in a "..tostring(Commander.GameplayConfig.Abilities.Blindside.FlashRadius)..
-            " stud radius.",
+        Text = "Commander saca una granada cegadora y la lanza tras "..tostring(Commander.GameplayConfig.Abilities.Blindside.ThrowDelay)..
+            " segundos; estalla tras "..tostring(Commander.GameplayConfig.Abilities.Blindside.TriggerDelay)..
+            " segundos y causa <b>Ceguera</b> al asesino durante "..tostring(Commander.GameplayConfig.Abilities.Blindside.FlashTime)..
+            " segundos si está a menos de "..tostring(Commander.GameplayConfig.Abilities.Blindside.FlashRadius)..
+            " studs.",
     },
     {
         Type = "Header",
@@ -321,8 +321,8 @@ Commander.Config.Description = {
     },
     {
         Type = "Text",
-        Text = "Commander reloads his gun, getting <b>Slowness "..Utils.Math.IntToRoman(Commander.GameplayConfig.Abilities.Reload.SlownessLevel)..
-            "</b> for "..tostring(Commander.GameplayConfig.Abilities.Reload.Duration).." seconds.",
+        Text = "Commander recarga la pistola y sufre <b>Lentitud "..Utils.Math.IntToRoman(Commander.GameplayConfig.Abilities.Reload.SlownessLevel)..
+            "</b> durante "..tostring(Commander.GameplayConfig.Abilities.Reload.Duration).." segundos.",
     },
     {
         Type = "Header",
@@ -331,11 +331,11 @@ Commander.Config.Description = {
     {
         Type = "Text",
         Text = {
-            "Commander shoots forward "
-            ..tostring(Commander.GameplayConfig.Abilities.Justice.HitboxLength).." studs. If it hits the killer, they get stunned for "
-            ..tostring(Commander.GameplayConfig.Abilities.Justice.StunTime).." seconds and receive "
-            ..tostring(Commander.GameplayConfig.Abilities.Justice.Damage).." damage.",
-            "This ability's charge is obtained through <b>Reload</b>."
+            "Commander dispara al frente a "
+            ..tostring(Commander.GameplayConfig.Abilities.Justice.HitboxLength).." studs. Si acierta al asesino, lo aturde durante "
+            ..tostring(Commander.GameplayConfig.Abilities.Justice.StunTime).." segundos y le hace "
+            ..tostring(Commander.GameplayConfig.Abilities.Justice.Damage).." de daño.",
+            "La carga de esta habilidad se consigue con <b>Reload</b>."
         },
     },
 }

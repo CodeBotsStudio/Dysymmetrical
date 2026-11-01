@@ -12,7 +12,7 @@ function BoolCommand.New(CommandModule: ModuleScript, UI): ImageLabel
     CommandFrame.Parent = UI.Content
 
     CommandFrame.Label.Text = Config.Name
-    CommandFrame.Value.Text = "Current value: "..tostring(workspace:GetAttribute(Config.DisplayedAttribute))
+    CommandFrame.Value.Text = "Valor actual: "..tostring(workspace:GetAttribute(Config.DisplayedAttribute))
     CommandFrame.Execute.MouseEnter:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})
     end)
@@ -22,7 +22,7 @@ function BoolCommand.New(CommandModule: ModuleScript, UI): ImageLabel
     CommandFrame.Execute.MouseButton1Click:Connect(function()
         Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, {Volume = 0.8})
         local Value = Network:FireServerConnection("ExecuteCommand", "REMOTE_FUNCTION", CommandModule.Name)
-        CommandFrame.Value.Text = "Current value: "..tostring(Value or workspace:GetAttribute(Config.DisplayedAttribute))
+        CommandFrame.Value.Text = "Valor actual: "..tostring(Value or workspace:GetAttribute(Config.DisplayedAttribute))
     end)
 
     return CommandFrame

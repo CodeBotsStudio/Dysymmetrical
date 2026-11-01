@@ -3,15 +3,15 @@ local CommonFunctions = {
 	KickIDs = {
 		Noclipping = {
 			ID = "0001",
-			Message = "Player assumed to be noclipping.",
+			Message = "Se ha detectado que atraviesas paredes.",
 		},
 		Flying = {
 			ID = "0002",
-			Message = "Player assumed to be flying.",
+			Message = "Se ha detectado que vuelas.",
 		},
 		TPing = {
 			ID = "0003",
-			Message = "Player assumed to be teleporting across great distances.",
+			Message = "Se ha detectado un teletransporte a gran distancia.",
 		},
 	},
 	AdminPerms = {

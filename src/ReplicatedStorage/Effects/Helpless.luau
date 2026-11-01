@@ -4,6 +4,6 @@ local Effect = require(ReplicatedStorage.Classes.Effect)
 
 return Effect.New({
     Name = "Helpless",
-    Description = "Disables a character's abilities during its presence.",
+    Description = "Desactiva las habilidades del personaje mientras dura.",
     Duration = 1,
 })

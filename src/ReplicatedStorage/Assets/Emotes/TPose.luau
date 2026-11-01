@@ -4,7 +4,7 @@ local Emote = require(ReplicatedStorage.Classes.Emote)
 return Emote.New({
     Config = {
         Name = "T-Pose",
-        Quote = "be not afraid.",
+        Quote = "no temas.",
     },
     AnimationIds = "rbxassetid://87300475457340",
     SoundIds = "rbxassetid://1839549655",

@@ -163,7 +163,7 @@ local function completeStage(player: Player, session: Session)
     local prompt = session.panel:FindFirstChildOfClass("ProximityPrompt")
     if progress < config.Stages then
         if prompt then
-            prompt.ObjectText = `Generator {progress}/{config.Stages}`
+            prompt.ObjectText = `Generador {progress}/{config.Stages}`
         end
         startCheck(player, session)
         return
@@ -217,8 +217,8 @@ local function setupGenerator(generator: Model, janitor: any): boolean
     paintStatus(generator, 0)
 
     local prompt = Instance.new("ProximityPrompt")
-    prompt.ActionText = "Repair"
-    prompt.ObjectText = `Generator 0/{config.Stages}`
+    prompt.ActionText = "Reparar"
+    prompt.ObjectText = `Generador 0/{config.Stages}`
     prompt.HoldDuration = 0
     prompt.MaxActivationDistance = 8
     prompt.RequiresLineOfSight = false

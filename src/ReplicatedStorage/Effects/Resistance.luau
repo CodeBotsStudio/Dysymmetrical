@@ -2,6 +2,6 @@ local Effect = require(game:GetService("ReplicatedStorage").Classes.Effect)
 
 return Effect.New({
     Name = "Resistance",
-    Description = "Reduces the damage inflicted to the player (produced by the killer, not by the environment or himself).",
+    Description = "Reduce el daño que recibe el jugador del asesino (no el del entorno ni el propio).",
     Duration = 15,
 })

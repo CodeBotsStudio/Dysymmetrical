@@ -26,7 +26,7 @@ local Hitbox = {
 		ExecuteOnKill = false,
 		IsProjectile = false,
 		FriendlyFire = false,
-		Reason = "Slash Attack",
+		Reason = "un tajo",
 		Shape = Enum.PartType.Block,
 		MinBlockingWallHeight = 3,
 		IgnoreWalls = false,
@@ -441,7 +441,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 							Network:FireConnection("KilledPlayer", SourcePlayer, TargetPlayer)
 
 							CommonFunctions.UpdatePlayerStat(SourcePlayer, "KillerStats.Kills", 1)
-							CommonFunctions.GrantRewardToPlayer(SourcePlayer, {Money = 20, EXP = 60, Reason = "killing a Survivor"})
+							CommonFunctions.GrantRewardToPlayer(SourcePlayer, {Money = 20, EXP = 60, Reason = "matar a un superviviente"})
 
 							TimeManager.SetTime(TimeManager.CurrentTime + 35)
 						end)

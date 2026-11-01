@@ -19,51 +19,51 @@ local Ruleset: {{
     }} = {
     {
         Type = "Separator",
-        Text = "Rule section N.º 1",
+        Text = "Sección de normas N.º 1",
     },
     {
         Type = "SectionEntry",
-        Text = "Pretty cool rule N.º 1!",
+        Text = "¡Norma N.º 1!",
     },
     {
         Type = "SectionEntry",
-        Text = "Pretty cool feature N.º 2!",
+        Text = "¡Norma N.º 2!",
     },
     {
         Type = "Text",
-        Text = "Quick note N.º 1!",
+        Text = "¡Nota N.º 1!",
     },
     {
         Type = "SectionEntry",
-        Text = "Pretty cool rule N.º 3!",
+        Text = "¡Norma N.º 3!",
     },
     {
         Type = "Text",
-        Text = "Quick note N.º 2!",
+        Text = "¡Nota N.º 2!",
     },
     {
         Type = "Separator",
-        Text = "Rule section N.º 2",
+        Text = "Sección de normas N.º 2",
     },
     {
         Type = "SectionEntry",
-        Text = "Pretty cool rule N.º 1!",
+        Text = "¡Norma N.º 1!",
     },
     {
         Type = "Text",
-        Text = "Quick note N.º 1!",
+        Text = "¡Nota N.º 1!",
     },
     {
         Type = "SectionEntry",
-        Text = "Pretty cool rule N.º 2!",
+        Text = "¡Norma N.º 2!",
     },
     {
         Type = "SectionEntry",
-        Text = "Pretty cool rule N.º 3!",
+        Text = "¡Norma N.º 3!",
     },
     {
         Type = "Text",
-        Text = "Quick note N.º 2!",
+        Text = "¡Nota N.º 2!",
     },
 }
 

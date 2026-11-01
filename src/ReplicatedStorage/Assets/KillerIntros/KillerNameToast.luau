@@ -41,7 +41,7 @@ return function(Parent: ScreenGui, plrNames: {string})
 	end
 
 	if #plrNames > 1 then
-		Group.Container.Label.Text = "The killers are..."
+		Group.Container.Label.Text = "Los asesinos son..."
 	end
 
 	task.wait(1)

@@ -208,7 +208,7 @@ function Shop.ToggleSkinsMenu(Open: boolean?)
             Card.Parent = SkinContainer.ScrollingFrame
             Container.Title.Text = Info.Config.Name
             Container.CharacterRender.Image = Info.Config.Render
-            Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).."$" or "FREE"
+            Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).." $" or "GRATIS"
 
             if Info.Config.CardFrame then
                 Container.Outline.Image = Info.Config.CardFrame.Image or Container.Outline.Image
@@ -760,12 +760,12 @@ function Shop.OnCharButtonPress(codeName: string, info: Types.Killer | Types.Sur
     PreviewInstances.Title.Text = info.Config.Name
 
     if Utils.PlayerData.GetPlayerOwned(LocalPlayer, Type.."s."..codeName) then
-        Buttons.Purchase.Title.Text = "Purchased"
+        Buttons.Purchase.Title.Text = "Comprado"
     else
-        Buttons.Purchase.Title.Text = "Purchase"
+        Buttons.Purchase.Title.Text = "Comprar"
     end
 
-    ButtonsContainer.CurrentItemPrice.Text = info.Config.Price > 0 and tostring(info.Config.Price).."$" or "FREE"
+    ButtonsContainer.CurrentItemPrice.Text = info.Config.Price > 0 and tostring(info.Config.Price).." $" or "GRATIS"
 
     Shop.SelectedItem.Name = codeName
     Shop.SelectedItem.Type = Type
@@ -889,7 +889,7 @@ function Shop.ReloadContent(CreateCards: boolean?)
         Card.Parent = Parent
         Container.Title.Text = Info.Config.Name
         Container.CharacterRender.Image = Info.Config.Render
-        Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).."$" or "FREE"
+        Container.Price.Text = Info.Config.Price > 0 and tostring(Info.Config.Price).." $" or "GRATIS"
 
         if Info.Config.CardFrame then
             Container.Outline.Image = Info.Config.CardFrame.Image or Container.Outline.Image
@@ -1057,9 +1057,9 @@ function Shop.CreateBuyWindow(Module: ModuleScript, skin: boolean?, Parent: Fram
     local Window = BuyWindow.New(Shop, Module, skin, Parent, Card)
     Window.Purchased:Connect(function()
         if Utils.PlayerData.GetPlayerOwned(LocalPlayer, Shop.SelectedItem.Type.."s."..Shop.SelectedItem.Name) then
-            Buttons.Purchase.Title.Text = "Purchased"
+            Buttons.Purchase.Title.Text = "Comprado"
         else
-            Buttons.Purchase.Title.Text = "Purchase"
+            Buttons.Purchase.Title.Text = "Comprar"
         end
         Shop.ReloadContent()
         Shop.ReorderSkins()

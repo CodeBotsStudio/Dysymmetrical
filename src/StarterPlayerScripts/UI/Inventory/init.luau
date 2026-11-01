@@ -148,7 +148,7 @@ function Inventory.EquipItem()
     end
 
     local lastEquipped = Equipped["Equipped"..Inventory.SelectedItem.Type].Value
-    Buttons.Equip.Title.Text = "Equipped"
+    Buttons.Equip.Title.Text = "Equipado"
     Network:FireServerConnection("EquipItem", "REMOTE_EVENT", Inventory.SelectedItem.Name, Inventory.SelectedItem.Type)
     if Equipped["Equipped"..Inventory.SelectedItem.Type].Value == lastEquipped then
         Equipped["Equipped"..Inventory.SelectedItem.Type].Changed:Wait()
@@ -715,9 +715,9 @@ function Inventory.OnCharButtonPress(codeName: string, info: Types.Killer | Type
     PreviewInstances.Title.Text = info.Config.Name
 
     if Equipped["Equipped"..Type].Value == codeName then
-        Buttons.Equip.Title.Text = "Equipped"
+        Buttons.Equip.Title.Text = "Equipado"
     else
-        Buttons.Equip.Title.Text = "Equip"
+        Buttons.Equip.Title.Text = "Equipar"
     end
 
     Inventory.SelectedItem.Name = codeName

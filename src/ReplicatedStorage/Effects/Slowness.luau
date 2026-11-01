@@ -8,7 +8,7 @@ local PlayerSpeedManager = RunService:IsServer() and require(game:GetService("Se
 
 return Effect.New({
     Name = "Slowness",
-    Description = "Makes the player slower the higher the level.",
+    Description = "Vuelve al jugador más lento cuanto más alto es el nivel.",
     ApplyEffect = function(_own: Types.Effect, level: number, char: Model)
         if RunService:IsServer() then
             PlayerSpeedManager.AddSpeedFactor(Players:GetPlayerFromCharacter(char), "SlownessEffect", 1 - 0.26 * level)

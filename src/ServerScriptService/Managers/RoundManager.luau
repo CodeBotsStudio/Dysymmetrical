@@ -187,7 +187,7 @@ function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
     if winner == "Killer" then
         for _, Killer in RoundManager.CurrentRound.Killers do
             CommonFunctions.UpdatePlayerStat(Killer.Player, "KillerStats.KillerWins", 1)
-            CommonFunctions.GrantRewardToPlayer(Killer.Player, {Money = 120, EXP = 180, Reason = "winning a match as Killer"})
+            CommonFunctions.GrantRewardToPlayer(Killer.Player, {Money = 120, EXP = 180, Reason = "ganar una partida como asesino"})
         end
         --survivor losses aren't handled here since when a player dies it directly counts
         Utils.Misc.Print("killer wins")
@@ -197,7 +197,7 @@ function RoundManager.Callables.EndRound(winner: "Survivors" | "Killer")
         end
         for _, Player: Player in RoundManager.CurrentRound.PlayersRemaining do
             CommonFunctions.UpdatePlayerStat(Player, "SurvivorStats.SurvivorWins", 1)
-            CommonFunctions.GrantRewardToPlayer(Player, {Money = 70, EXP = 110, Reason = "winning a match as Survivor"})
+            CommonFunctions.GrantRewardToPlayer(Player, {Money = 70, EXP = 110, Reason = "ganar una partida como superviviente"})
         end
         
         Utils.Misc.Print("survivors win")

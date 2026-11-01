@@ -100,7 +100,7 @@ function PlayerInfoWindow.New(Player: Player, Parent: ScreenGui)
                     if #Skin <= 0 then
                         local Default = require(Utils.Instance.GetCharacterModule("Survivor", Value))
 
-                        Window.Instance.CharactersUsing.Survivor.PortraitLabel.SkinLabel.Text = "Default"
+                        Window.Instance.CharactersUsing.Survivor.PortraitLabel.SkinLabel.Text = "Por defecto"
                         Window.Instance.CharactersUsing.Survivor.PortraitLabel.PortraitImage.Image = Default.Config.Render
 
                         return
@@ -142,7 +142,7 @@ function PlayerInfoWindow.New(Player: Player, Parent: ScreenGui)
                     if #Skin <= 0 then
                         local Default = require(Utils.Instance.GetCharacterModule("Killer", Value))
 
-                        Window.Instance.CharactersUsing.Killer.PortraitLabel.SkinLabel.Text = "Default"
+                        Window.Instance.CharactersUsing.Killer.PortraitLabel.SkinLabel.Text = "Por defecto"
                         Window.Instance.CharactersUsing.Killer.PortraitLabel.PortraitImage.Image = Default.Config.Render
 
                         return

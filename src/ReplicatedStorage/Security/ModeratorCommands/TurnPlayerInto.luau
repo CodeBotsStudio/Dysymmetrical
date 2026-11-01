@@ -11,12 +11,12 @@ return {
     Executable = true,
     Params = {
         {
-            Title = "Chosen Player",
+            Title = "Jugador elegido",
             Type = "Player",
             Default = "...",
         },
         {
-            Title = "Character Type",
+            Title = "Tipo de personaje",
             Default = "...",
             Cache = {
                 Options = {

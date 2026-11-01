@@ -50,7 +50,7 @@ return {
         local counter = label(gui, UDim2.new(0.16, 0, 0.035, 0), UDim2.new(0.5, 0, 0.1, 4), "")
         local function updateCounter()
             local total = workspace:GetAttribute("GeneratorsTotal") or 0
-            counter.Text = `Generators {workspace:GetAttribute("GeneratorsRepaired") or 0}/{total}`
+            counter.Text = `Generadores {workspace:GetAttribute("GeneratorsRepaired") or 0}/{total}`
             counter.Visible = RoundState.Value == "InRound" and total > 0
         end
         workspace:GetAttributeChangedSignal("GeneratorsRepaired"):Connect(updateCounter)
@@ -78,7 +78,7 @@ return {
         tapButton.BackgroundTransparency = 0.3
         tapButton.FontFace = FONT
         tapButton.TextScaled = true
-        tapButton.Text = "REPAIR"
+        tapButton.Text = "REPARAR"
         tapButton.Visible = false
         tapButton.Parent = gui
         local corner = Instance.new("UICorner")
@@ -113,7 +113,7 @@ return {
             ProximityPromptService.Enabled = false
             local touch = UserInputService:GetLastInputType() == Enum.UserInputType.Touch
             local gamepad = UserInputService:GetLastInputType().Name:find("Gamepad") ~= nil
-            hint.Text = if touch then "Tap REPAIR in the green zone" elseif gamepad then "Press X in the green zone" else "Press C in the green zone"
+            hint.Text = if touch then "Toca REPARAR en la zona verde" elseif gamepad then "Pulsa X en la zona verde" else "Pulsa C en la zona verde"
             tapButton.Visible = touch
             zone.Position = UDim2.new(zoneStart, 0, 0, 0)
             zone.Size = UDim2.new(width, 0, 1, 0)

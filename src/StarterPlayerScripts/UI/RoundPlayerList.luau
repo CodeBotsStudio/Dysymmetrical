@@ -80,7 +80,7 @@ function RoundPlayerList._InitUI(Char: Model)
                     Card.PortraitOutline.ImageColor3 = Color3.fromRGB(255, 0, 0)
 
                     Card.PlayerState.TextColor3 = Color3.fromRGB(255, 0, 0)
-                    Card.PlayerState.Text = "DEAD"
+                    Card.PlayerState.Text = "MUERTO"
                     Card.PlayerState.TextTransparency = 1
 
                     Card.PlayerHealth.TextTransparency = 1
@@ -116,7 +116,7 @@ function RoundPlayerList._InitUI(Char: Model)
                     Card.PortraitOutline.ImageColor3 = Color3.fromRGB(150, 150, 150)
 
                     Card.PlayerState.TextColor3 = Color3.fromRGB(170, 170, 170)
-                    Card.PlayerState.Text = "LOST"
+                    Card.PlayerState.Text = "SE FUE"
                     Card.PlayerState.TextTransparency = 0
 
                     Card.PlayerHealth.TextTransparency = 1

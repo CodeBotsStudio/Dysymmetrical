@@ -10,7 +10,7 @@ local PlayerSpeedManager = RunService:IsServer() and require(game:GetService("Se
 
 return Effect.New({
     Name = "Stunned",
-    Description = "Keeps the player still and unable to use their abilities for a specific amount of time.",
+    Description = "Deja al jugador quieto y sin poder usar habilidades durante un tiempo.",
     Duration = 3,
     ShowInGUI = true,
     ApplyEffect = function(_own: Types.Effect, _level: number, char: Model)

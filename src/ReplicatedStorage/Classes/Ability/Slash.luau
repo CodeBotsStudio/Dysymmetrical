@@ -18,7 +18,7 @@ local function DefaultSlashBehaviour(self: Types.Ability)
 				Size = self.HitboxSize,
 				Time = self.Duration,
 				Damage = self.Damage,
-				Reason = "Slash Attack",
+				Reason = "un tajo",
 				ExecuteOnKill = true,
 				Connections = self.Connections,
 			})

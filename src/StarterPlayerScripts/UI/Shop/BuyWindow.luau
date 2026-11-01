@@ -21,7 +21,7 @@ function BuyWindow.New(Shop, Module: ModuleScript, skin: boolean?, Parent: Frame
         skin = false
     end
     local CharInfo = require(Module)
-    Window.Instance.PriceTag.Text = "Purchase "..CharInfo.Config.Name.." for "..(CharInfo.Config.Price > 0 and CharInfo.Config.Price.."$" or "FREE").."?"
+    Window.Instance.PriceTag.Text = "¿Comprar "..CharInfo.Config.Name.." por "..(CharInfo.Config.Price > 0 and CharInfo.Config.Price.." $" or "GRATIS").."?"
     Window.Instance.Parent = Parent
     Window.Instance.Size = Utils.UDim.Zero
     
@@ -33,7 +33,7 @@ function BuyWindow.New(Shop, Module: ModuleScript, skin: boolean?, Parent: Frame
         Window.Instance.Buy.TextLabel.Text = "..."
         local Success = Network:FireServerConnection("BuyItem", "REMOTE_FUNCTION", Module)
         if Success then
-            Window.Instance.Buy.TextLabel.Text = "Purchased!"
+            Window.Instance.Buy.TextLabel.Text = "¡Comprado!"
             Card.Container.Owned.BackgroundTransparency = 0.55
             Card.Container.Owned.TextLabel.TextTransparency = 0
             Window.Purchased:Fire()
@@ -41,7 +41,7 @@ function BuyWindow.New(Shop, Module: ModuleScript, skin: boolean?, Parent: Frame
                 Window:Hide()
             end))
         else
-            Window.Instance.Buy.TextLabel.Text = "you're too poor."
+            Window.Instance.Buy.TextLabel.Text = "no te llega el dinero."
             Window.Checking = false
         end
     end))

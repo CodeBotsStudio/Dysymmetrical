@@ -23,9 +23,9 @@ function MoneyXPRewards:Init()
         local Size = Notification.Size
         Notification.Size = Utils.UDim.Zero
 
-        local Text = "Granted "
+        local Text = "Has ganado "
         if Money and EXP then
-            Text = Text..tostring(Money).."$ and "..tostring(EXP).." EXP"
+            Text = Text..tostring(Money).."$ y "..tostring(EXP).." EXP"
         elseif Money then
             Text = Text..tostring(Money).."$"
         elseif EXP then
@@ -36,7 +36,7 @@ function MoneyXPRewards:Init()
         end
 
         if Reason then
-            Text = Text.." for "..Reason
+            Text = Text.." por "..Reason
         end
         Text = Text.."."
 

@@ -125,7 +125,7 @@ local function InitScripts(module: ModuleScript)
 
     while not ModuleCode.Loaded do
         if ModuleCode.CurrentlyInitting then
-            CurrentlyInitting.Text = "Initializing "..ModuleCode.CurrentlyInitting.."..."
+            CurrentlyInitting.Text = "Iniciando "..ModuleCode.CurrentlyInitting.."..."
         else
             CurrentlyInitting.Text = ""
         end

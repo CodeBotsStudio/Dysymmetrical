@@ -44,51 +44,51 @@ local CurrentChangelog: ChangelogFormat = {
     Entries = {
         {
             Type = "Separator",
-            Text = "Section N.º 1",
+            Text = "Sección N.º 1",
         },
         {
             Type = "SectionEntry",
-            Text = "Pretty cool feature N.º 1!",
+            Text = "¡Novedad N.º 1!",
         },
         {
             Type = "SectionEntry",
-            Text = "Pretty cool feature N.º 2!",
+            Text = "¡Novedad N.º 2!",
         },
         {
             Type = "Text",
-            Text = "Quick note N.º 1!",
+            Text = "¡Nota N.º 1!",
         },
         {
             Type = "SectionEntry",
-            Text = "Pretty cool feature N.º 3!",
+            Text = "¡Novedad N.º 3!",
         },
         {
             Type = "Text",
-            Text = "Quick note N.º 2!",
+            Text = "¡Nota N.º 2!",
         },
         {
             Type = "Separator",
-            Text = "Section N.º 2",
+            Text = "Sección N.º 2",
         },
         {
             Type = "SectionEntry",
-            Text = "Pretty cool feature N.º 1!",
+            Text = "¡Novedad N.º 1!",
         },
         {
             Type = "Text",
-            Text = "Quick note N.º 1!",
+            Text = "¡Nota N.º 1!",
         },
         {
             Type = "SectionEntry",
-            Text = "Pretty cool feature N.º 2!",
+            Text = "¡Novedad N.º 2!",
         },
         {
             Type = "SectionEntry",
-            Text = "Pretty cool feature N.º 3!",
+            Text = "¡Novedad N.º 3!",
         },
         {
             Type = "Text",
-            Text = "Quick note N.º 2!",
+            Text = "¡Nota N.º 2!",
         },
     },
 }

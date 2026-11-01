@@ -12,7 +12,7 @@ local DisappearThread
 
 return Effect.New({
     Name = "Blindness",
-    Description = "Blinds the affected player for a set time. This effect will flash white if the Photosensitive setting is off, and black if it's on.",
+    Description = "Ciega al jugador durante un tiempo. Destella en blanco si el ajuste Fotosensible está apagado y en negro si está encendido.",
 
     ApplyEffect = function(own: Types.Effect, char: Model, level: number, duration: number)
         if not RunService:IsServer() then

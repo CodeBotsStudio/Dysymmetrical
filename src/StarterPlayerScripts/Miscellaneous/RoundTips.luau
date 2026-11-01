@@ -15,25 +15,25 @@ local TIP_TIME = 5
 local function keys(): { repair: string, sprint: string }
     local input = UserInputService:GetLastInputType()
     if input == Enum.UserInputType.Touch then
-        return { repair = "tap REPAIR", sprint = "tap the sprint button" }
+        return { repair = "toca REPARAR", sprint = "toca el botón de correr" }
     elseif input.Name:find("Gamepad") then
-        return { repair = "press X", sprint = "hold L2" }
+        return { repair = "pulsa X", sprint = "mantén L2" }
     end
-    return { repair = "press C", sprint = "hold Shift" }
+    return { repair = "pulsa C", sprint = "mantén Shift" }
 end
 
 local function tipsFor(role: string): { string }
     local k = keys()
     if role == "Killer" then
         return {
-            "Hunt the survivors before the clock runs out. Every kill adds time.",
-            "A loud bang means a survivor failed a repair: that generator glows red for you.",
+            "Caza a los supervivientes antes de que se acabe el reloj. Cada muerte suma tiempo.",
+            "Un estallido fuerte significa que un superviviente falló una reparación: ese generador se ilumina en rojo para ti.",
         }
     end
     return {
-        `Repair generators: {k.repair} when the needle is in the green zone. Each one cuts 15 s off the clock.`,
-        `Run from the killer: {k.sprint}. Repair together to get a wider green zone.`,
-        "Survive until the clock hits zero. Medkits heal you.",
+        `Repara generadores: {k.repair} cuando la aguja esté en la zona verde. Cada uno quita 15 s al reloj.`,
+        `Huye del asesino: {k.sprint}. Reparando juntos la zona verde es más ancha.`,
+        "Sobrevive hasta que el reloj llegue a cero. Los botiquines te curan.",
     }
 end
 
@@ -111,7 +111,7 @@ return {
         Utils.Character.ObserveCharacter(LocalPlayer, function(character: Model)
             local role = character:WaitForChild("Role", 5) :: StringValue?
             if role and role.Value == "Spectator" and RoundState.Value == "InRound" then
-                show({ "You're out. Spectate the others: the next round starts soon." })
+                show({ "Has caído. Mira a los demás: la siguiente ronda empieza pronto." })
             end
         end)
     end,

@@ -395,12 +395,12 @@ local function sign(text: string, pos: Vector3, face: Enum.NormalId, color: Colo
 	label.Parent = gui
 end
 local WHITE, RED, AMBER = Color3.fromRGB(220, 224, 230), Color3.fromRGB(210, 40, 36), Color3.fromRGB(230, 170, 40)
-sign("ANOMALIS RESEARCH SITE 7", Vector3.new(0, 16, 138.6), Enum.NormalId.Front, WHITE)
-sign("SECTOR C  LABORATORIES", Vector3.new(-35, 12, -39.1), Enum.NormalId.Back, WHITE)
-sign("CONTAINMENT  AUTHORIZED ONLY", Vector3.new(-35, 10, -84.1), Enum.NormalId.Back, RED)
-sign("REACTOR 02  RADIATION", Vector3.new(105, 16, -49.1), Enum.NormalId.Back, AMBER)
-sign("STORAGE B", Vector3.new(-110, 10, 69.1), Enum.NormalId.Front, WHITE)
-sign("BARRACKS", Vector3.new(92, 9, 81.9), Enum.NormalId.Front, WHITE)
+sign("ANOMALIS  CENTRO DE INVESTIGACIÓN 7", Vector3.new(0, 16, 138.6), Enum.NormalId.Front, WHITE)
+sign("SECTOR C  LABORATORIOS", Vector3.new(-35, 12, -39.1), Enum.NormalId.Back, WHITE)
+sign("CONTENCIÓN  SOLO AUTORIZADOS", Vector3.new(-35, 10, -84.1), Enum.NormalId.Back, RED)
+sign("REACTOR 02  RADIACIÓN", Vector3.new(105, 16, -49.1), Enum.NormalId.Back, AMBER)
+sign("ALMACÉN B", Vector3.new(-110, 10, 69.1), Enum.NormalId.Front, WHITE)
+sign("BARRACONES", Vector3.new(92, 9, 81.9), Enum.NormalId.Front, WHITE)
 
 for _, z in { -83.4, -76.6 } do
 	detail(part(Details, Vector3.new(148, 1.1, 1.1), Vector3.new(-35, 14.6, z), METAL, Enum.Material.Metal, "Pipe")).Shape = Enum.PartType.Cylinder

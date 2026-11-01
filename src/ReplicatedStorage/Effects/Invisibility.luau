@@ -29,7 +29,7 @@ end
 
 return Effect.New({
     Name = "Invisibility",
-    Description = "Makes the player fairly transparent (but never fully invisible) the higher the level.",
+    Description = "Vuelve al jugador más transparente cuanto más alto es el nivel (nunca del todo invisible).",
     Duration = 10,
     TransparentInstances = {},
 

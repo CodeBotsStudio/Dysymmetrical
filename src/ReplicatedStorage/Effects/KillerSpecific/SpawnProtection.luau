@@ -6,7 +6,7 @@ local Types = require(ReplicatedStorage.Classes.Types)
 
 return Effect.New({
     Name = "Spawn Protection",
-    Description = "Prevents a killer from being stunned for a set time, generally 12 seconds.",
+    Description = "Impide que aturdan al asesino durante un tiempo, normalmente 12 segundos.",
     Duration = 12,
     ShowInGUI = false,
     ApplyEffect = function(self: Types.Effect, level: number, char: Model, duration: number)

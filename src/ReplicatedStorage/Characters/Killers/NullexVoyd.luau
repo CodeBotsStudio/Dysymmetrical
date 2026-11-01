@@ -154,12 +154,12 @@ end
 local NullexVoyd: Types.Killer = Character.CreateKiller({
     Config = {
         Name = "Nullex Voyd",
-        Quote = "Order was the first lie.",
+        Quote = "El orden fue la primera mentira.",
         Render = "rbxassetid://139883756028491",
         Price = 1308,
 
         Origin = {
-            TooltipText = "Originates from Project Terminus!",
+            TooltipText = "¡Viene del Proyecto Terminus!",
             Icon = "rbxasset://textures/ui/GuiImagePlaceholder.png",
         },
 
@@ -224,7 +224,7 @@ local NullexVoydNameLabel = "<font color=\"rgb(180, 180, 180)\">"..NullexVoyd.Co
 NullexVoyd.Config.Description = {
     {
         Type = "Separator",
-        Text = "GENERAL INFO",
+        Text = "INFORMACIÓN GENERAL",
     },
     {
         Type = "Header",
@@ -236,31 +236,31 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Text",
-        Text = "Once a law enforcement automaton built to enforce order, now a void-born executioner of silence. "..
-            NullexVoydNameLabel.." hunts those who trespass forbidden truths, warping space to pursue them through shadows. "..
-            "With a surge of corrupted energy, he blinks across distance, accelerates beyond human reach, and rends with anomalous force. "..
-            "None can hide — his gaze pierces walls, his touch unravels existence itself.",
+        Text = "Antes era un autómata policial creado para imponer el orden; ahora es un verdugo del silencio nacido del vacío. "..
+            NullexVoydNameLabel.." caza a quienes cruzan verdades prohibidas y deforma el espacio para perseguirlos entre las sombras. "..
+            "Con una descarga de energía corrupta salta distancias, acelera más allá de lo humano y desgarra con fuerza anómala. "..
+            "Nadie puede esconderse: su mirada atraviesa paredes y su toque deshace la existencia misma.",
     },
     {
         Type = "Header",
-        Text = "STATS",
+        Text = "ESTADÍSTICAS",
     },
     {
         Type = "Text",
         Text = {
-            "Difficulty: ★★★☆☆",
+            "Dificultad: ★★★☆☆",
             -- "Difficulty: 6 7",
-            "Health: "..tostring(NullexVoyd.GameplayConfig.Health),
-            "Base Speed: "..tostring(NullexVoyd.GameplayConfig.BaseSpeed),
-            "Sprint Speed: "..tostring(math.round(NullexVoyd.GameplayConfig.BaseSpeed * NullexVoyd.GameplayConfig.SprintSpeedMultiplier * 10) / 10),
-            "Max Stamina: "..tostring(NullexVoyd.GameplayConfig.StaminaProperties.MaxStamina),
-            "Stamina Loss per second: "..tostring(NullexVoyd.GameplayConfig.StaminaProperties.StaminaDrain),
-            "Stamina Gain per second: "..tostring(NullexVoyd.GameplayConfig.StaminaProperties.StaminaGain),
+            "Vida: "..tostring(NullexVoyd.GameplayConfig.Health),
+            "Velocidad base: "..tostring(NullexVoyd.GameplayConfig.BaseSpeed),
+            "Velocidad al correr: "..tostring(math.round(NullexVoyd.GameplayConfig.BaseSpeed * NullexVoyd.GameplayConfig.SprintSpeedMultiplier * 10) / 10),
+            "Aguante máximo: "..tostring(NullexVoyd.GameplayConfig.StaminaProperties.MaxStamina),
+            "Aguante perdido por segundo: "..tostring(NullexVoyd.GameplayConfig.StaminaProperties.StaminaDrain),
+            "Aguante recuperado por segundo: "..tostring(NullexVoyd.GameplayConfig.StaminaProperties.StaminaGain),
         },
     },
     {
         Type = "Separator",
-        Text = "ABILITIES",
+        Text = "HABILIDADES",
     },
     {
         Type = "Header",
@@ -268,7 +268,7 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Text",
-        Text = NullexVoydNameLabel.." performs a basic slash, dealing "..tostring(NullexVoyd.GameplayConfig.Abilities.Slash.Damage).." damage.",
+        Text = NullexVoydNameLabel.." lanza un tajo básico que hace "..tostring(NullexVoyd.GameplayConfig.Abilities.Slash.Damage).." de daño.",
         Image = "rbxassetid://9759886280",
     },
     {
@@ -277,7 +277,7 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Text",
-        Text = NullexVoydNameLabel.." slows down for "..tostring(NullexVoyd.GameplayConfig.Abilities.CallbackPing.Duration).." seconds, revealing to him the aura of every single visible & alive survivor in the match that doesn't have <b>Undetectable</b>.",
+        Text = NullexVoydNameLabel.." se ralentiza durante "..tostring(NullexVoyd.GameplayConfig.Abilities.CallbackPing.Duration).." segundos y ve el aura de cada superviviente vivo y visible de la partida que no tenga <b>Indetectable</b>.",
     },
     {
         Type = "Header",
@@ -286,8 +286,8 @@ NullexVoyd.Config.Description = {
     {
         Type = "Text",
         Text = {
-            NullexVoydNameLabel.." places a device on the floor, visible to everyone clearly but undestructible.",
-            "If this ability is used a second time, "..NullexVoydNameLabel.." will be teleported to this device instantly, destroying it in the process.",
+            NullexVoydNameLabel.." coloca un dispositivo en el suelo que todos ven con claridad y que no se puede destruir.",
+            "Si usa esta habilidad otra vez, "..NullexVoydNameLabel.." se teletransporta al instante al dispositivo y lo destruye.",
         },
     },
     {
@@ -296,8 +296,8 @@ NullexVoyd.Config.Description = {
     },
     {
         Type = "Text",
-        Text = NullexVoydNameLabel.." overloads his systems with electricity, giving him <b>Speed "..Utils.Math.IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedDuration).." seconds. "..
-        "When the effect wears off, his systems will exhaust briefly, inflicting him with <b>Slowness "..Utils.Math.IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessLevel).."</b> for "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessDuration).." seconds.",
+        Text = NullexVoydNameLabel.." sobrecarga sus sistemas con electricidad y gana <b>Velocidad "..Utils.Math.IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedLevel).."</b> durante "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SpeedDuration).." segundos. "..
+        "Cuando se acaba, sus sistemas se agotan un momento y sufre <b>Lentitud "..Utils.Math.IntToRoman(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessLevel).."</b> durante "..tostring(NullexVoyd.GameplayConfig.Abilities.Overcharge.SlownessDuration).." segundos.",
     },
 }
 

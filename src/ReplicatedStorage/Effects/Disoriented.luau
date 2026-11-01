@@ -8,7 +8,7 @@ local PlayerModule = not RunService:IsServer() and require(Players.LocalPlayer.P
 
 return Effect.New({
     Name = "Disoriented",
-    Description = "Inverts the player's contorls for the duration of the effect.",
+    Description = "Invierte los controles del jugador mientras dura el efecto.",
     Duration = 4.2,
     ShowInGUI = false,
     ApplyEffect = function()

@@ -17,10 +17,10 @@ return {
         local EnoughPlayers = ReplicatedStorage.RoundInfo.EnoughPlayers
 
         local LabelTexts = {
-        	Lobby = "Round begins in...",
-        	InRound = "Round ends in...",
-        	NotEnough = "Waiting for players...",
-            Frozen = "Time frozen!",
+        	Lobby = "La ronda empieza en...",
+        	InRound = "La ronda acaba en...",
+        	NotEnough = "Esperando jugadores...",
+            Frozen = "¡Tiempo congelado!",
         }
 
         TimeLabel.Text = Utils.Math.ConvertToMinSec(math.ceil(TimeRemaining.Value))

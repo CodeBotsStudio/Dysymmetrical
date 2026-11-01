@@ -2,6 +2,6 @@ local Effect = require(game:GetService("ReplicatedStorage").Classes.Effect)
 
 return Effect.New({
     Name = "Undetectable",
-    Description = "Makes the player's aura invisible for the duration of the effect.",
+    Description = "Hace invisible el aura del jugador mientras dura el efecto.",
     Duration = 15,
 })

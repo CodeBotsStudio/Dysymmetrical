@@ -19,8 +19,8 @@ local AchievementsMenu = {
     Janitor = nil,
     Defaults = {
         Shown = {
-            Title = "Achievement Name",
-            Description = "Achievement Description",
+            Title = "Nombre del logro",
+            Description = "Descripción del logro",
             Icon = "rbxasset://textures/ui/GuiImagePlaceholder.png",
         },
         Hidden = {
@@ -135,7 +135,7 @@ function AchievementsMenu._SetupAchievements()
             end
         end
 
-        Counter.Text = `Achievements ({Unlocked}/{Total} Unlocked)`
+        Counter.Text = `Logros ({Unlocked}/{Total} desbloqueados)`
     end
 
     local function MakeCategoryButton(Name: string, Title: string?, Category: Frame?)
@@ -269,7 +269,7 @@ function AchievementsMenu._SetupAchievements()
                     RewardText = RewardText..Suffix
                 end
 
-                Achievement.Reward.Text = "Reward: "..RewardText
+                Achievement.Reward.Text = "Recompensa: "..RewardText
 
                 Achievement.MouseEnter:Connect(function()
                     if AchievementEquivalent.HideRewardIfLocked and not IsAchievementUnlocked(AchievementValue, AchievementEquivalent) then

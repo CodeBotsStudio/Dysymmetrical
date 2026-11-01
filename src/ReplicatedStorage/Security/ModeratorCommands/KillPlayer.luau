@@ -3,7 +3,7 @@ return {
     Executable = true,
     Params = {
         {
-            Title = "Chosen Player",
+            Title = "Jugador elegido",
             Type = "String",
             Default = "...",
         },

@@ -16,7 +16,7 @@ end
 return Character.CreateSkin("Survivor", "Commander", {
     Config = {
         Name = "Yourself",
-        Quote = "Hey, it's you!",
+        Quote = "¡Eh, si eres tú!",
         Price = 99999999,
 
         Origin = {},
