@@ -249,15 +249,27 @@ local function lshape(center: Vector3, rotY: number)
 	local model = Instance.new("Model")
 	model.Name = "LWall"
 	model.Parent = Loops
-	local long = part(model, Vector3.new(14, 8, WALL_THICKNESS), center + Vector3.new(0, 4, -6), CONCRETE, Enum.Material.Concrete, "Wall")
-	part(model, Vector3.new(WALL_THICKNESS, 8, 8), center + Vector3.new(-6.25, 4, -1.25), CONCRETE, Enum.Material.Concrete, "Wall")
-	part(model, Vector3.new(WALL_THICKNESS, 3, 4), center + Vector3.new(6.25, 1.5, -3.25), CONCRETE, Enum.Material.Concrete, "LowWall")
+	local long = part(model, Vector3.new(20, 8, WALL_THICKNESS), center + Vector3.new(0, 4, -6), CONCRETE, Enum.Material.Concrete, "Wall")
+	part(model, Vector3.new(WALL_THICKNESS, 8, 10), center + Vector3.new(-9.25, 4, -0.25), CONCRETE, Enum.Material.Concrete, "Wall")
+	part(model, Vector3.new(WALL_THICKNESS, 3, 4), center + Vector3.new(9.25, 1.5, -3.25), CONCRETE, Enum.Material.Concrete, "LowWall")
 	model.PrimaryPart = long
 	model:PivotTo(long.CFrame * CFrame.Angles(0, math.rad(rotY), 0))
 end
 for _, l in { { Vector3.new(-120, 0, 5), 0 }, { Vector3.new(60, 0, 0), 90 }, { Vector3.new(-60, 0, 45), 180 }, { Vector3.new(120, 0, 30), -90 }, { Vector3.new(5, 0, 60), 45 } } do
 	lshape(l[1], l[2])
 end
+local function tshape(center: Vector3, rotY: number)
+	local model = Instance.new("Model")
+	model.Name = "TWall"
+	model.Parent = Loops
+	local bar = part(model, Vector3.new(22, 8, WALL_THICKNESS), center + Vector3.new(0, 4, -6), CONCRETE, Enum.Material.Concrete, "Wall")
+	part(model, Vector3.new(WALL_THICKNESS, 8, 12), center + Vector3.new(0, 4, 0.5), CONCRETE, Enum.Material.Concrete, "Wall")
+	model.PrimaryPart = bar
+	model:PivotTo(bar.CFrame * CFrame.Angles(0, math.rad(rotY), 0))
+end
+tshape(Vector3.new(-25, 0, 82), 0)
+tshape(Vector3.new(38, 0, 120), 90)
+lshape(Vector3.new(-55, 0, 128), 0)
 
 local tower = folder("WaterTower", Yard)
 for _, o in { Vector3.new(-5, 0, -5), Vector3.new(5, 0, -5), Vector3.new(-5, 0, 5), Vector3.new(5, 0, 5) } do
@@ -278,6 +290,8 @@ container(Vector3.new(30, 8, 25), 0, Color3.fromRGB(70, 74, 52))
 container(Vector3.new(95, 0, -25), -10, Color3.fromRGB(46, 66, 78))
 container(Vector3.new(145, 0, 60), 80, RUST)
 container(Vector3.new(-40, 0, 110), 90, Color3.fromRGB(70, 74, 52))
+container(Vector3.new(48, 0, 70), 0, RUST)
+container(Vector3.new(48, 0, 86), 0, Color3.fromRGB(46, 66, 78))
 
 for _, p in { Vector3.new(-100, 0, 25), Vector3.new(80, 0, 40), Vector3.new(-30, 0, -20), Vector3.new(40, 0, -30), Vector3.new(-60, 0, 85), Vector3.new(20, 0, 95), Vector3.new(140, 0, -10), Vector3.new(-145, 0, -20) } do
 	local barrier = part(Yard, Vector3.new(9, 3, 1.5), p + Vector3.new(0, 1.5, 0), CONCRETE, Enum.Material.Concrete, "JerseyBarrier")
@@ -354,7 +368,7 @@ local function spawnPoint(parent: Instance, pos: Vector3)
 	p.CanQuery = false
 	p.CanTouch = false
 end
-for i, layout in { { survivors = Vector3.new(0, 0, 116), killer = Vector3.new(-35, 0, -105) }, { survivors = Vector3.new(-120, 0, 50), killer = Vector3.new(130, 0, -60) } } do
+for i, layout in { { survivors = Vector3.new(-12, 0, 104), killer = Vector3.new(-35, 0, -105) }, { survivors = Vector3.new(-120, 0, 50), killer = Vector3.new(130, 0, -60) } } do
 	local l = folder("Layout" .. i, SpawnPoints)
 	local survivors, killers = folder("Survivors", l), folder("Killers", l)
 	for _, offset in { Vector3.new(-4, 0, -4), Vector3.new(4, 0, -4), Vector3.new(-4, 0, 4), Vector3.new(4, 0, 4) } do
