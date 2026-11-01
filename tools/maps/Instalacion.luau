@@ -41,6 +41,24 @@ local Building = folder("Building", MapModel)
 local Yard = folder("Yard", MapModel)
 local Lamps = folder("Lamps", MapModel)
 
+local MaterialService = game:GetService("MaterialService")
+for _, m in {
+	{ "AnomalisLabTile", "CeramicTiles", "rbxassetid://81243399359695", "rbxassetid://93392214421283", "rbxassetid://109790649107314", "rbxassetid://87299537724194", "Regular" },
+	{ "AnomalisRustMetal", "CorrodedMetal", "rbxassetid://92472211671271", "rbxassetid://103811817023703", "rbxassetid://81878616278695", "rbxassetid://114269752282446", "Organic" },
+	{ "AnomalisConcrete", "Concrete", "rbxassetid://72409752443113", "rbxassetid://97656916839878", "rbxassetid://122561031610057", "rbxassetid://91752265013131", "Organic" },
+	{ "AnomalisAsphalt", "Asphalt", "rbxassetid://115052350389321", "rbxassetid://126753607852078", "rbxassetid://117477470501608", "rbxassetid://139318763711632", "Organic" },
+} do
+	if not MaterialService:FindFirstChild(m[1], true) then
+		local variant = Instance.new("MaterialVariant")
+		variant.Name = m[1]
+		variant.BaseMaterial = (Enum.Material :: any)[m[2]]
+		variant.ColorMap, variant.NormalMap, variant.RoughnessMap, variant.MetalnessMap = m[3], m[4], m[5], m[6]
+		variant.StudsPerTile = 10
+		variant.MaterialPattern = (Enum.MaterialPattern :: any)[m[7]]
+		variant.Parent = MaterialService
+	end
+end
+
 local VARIANTS = {
 	[Enum.Material.Concrete] = "AnomalisConcrete",
 	[Enum.Material.CorrodedMetal] = "AnomalisRustMetal",
