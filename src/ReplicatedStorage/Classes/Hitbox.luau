@@ -33,6 +33,10 @@ local Hitbox = {
 		EffectsToApply = {},
 		Connections = {},
 	},
+	SurvivorEscapeEffects = {
+		{ Name = "Speed", Level = 1, Duration = 2 },
+		{ Name = "Resistance", Level = 2, Duration = 8 },
+	},
 }
 
 --- Creates a new hitbox, assigning it to a specific player.
@@ -326,16 +330,13 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 				-- Look for critical parts in the character in question, as well as the resistance effect, if applicable.
 				local TargetCharacter = Humanoid.Parent
 				local HRoot = TargetCharacter and TargetCharacter:IsA("Model") and Utils.Character.GetRootPart(TargetCharacter)
-				local Resistance = TargetCharacter and TargetCharacter:FindFirstChild("Resistance") and TargetCharacter.Effects:FindFirstChild("Resistance") and TargetCharacter.Effects["Resistance"].Value or 0
-
-				-- Configure damage to be affected by the Resistance effect.
-				local Damage = Config.Damage * (1 - Resistance / 5)
+				local Damage = CommonFunctions.ResistedDamage(TargetCharacter, Config.Damage)
 
 				local function DamageHumanoid()
 					CommonFunctions.DamagePlayer({
 						SourcePlayer = SourcePlayer,
 						TargetHumanoid = Humanoid,
-						Damage = Damage,
+						Damage = Config.Damage,
 						Reason = Config.Reason,
 						KnockbackDirection = CheckPart.CFrame.LookVector,
 						KnockbackMagnitude = Config.Knockback,
@@ -364,6 +365,7 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 					end
 
 				end
+				Damage = CommonFunctions.ResistedDamage(TargetCharacter, Config.Damage)
 
 				-- If theres a function set to be executed on player hit for this hitbox, toss the humanoid to it.
 				Hitbox._RunCallback(Config.Connections, "Hit", Config, Humanoid, Index == 1)
@@ -530,6 +532,16 @@ function Hitbox.New(SourcePlayer: Player, Config: Types.HitboxSettings): Types.H
 
 				-- Inflict the hitbox's damage if possible and do some knockback if existent.
 				DamageHumanoid()
+
+				local TargetRole = TargetCharacter:FindFirstChild("Role") :: StringValue?
+				if Char.Role.Value == "Killer" and TargetRole and TargetRole.Value == "Survivor" and Humanoid.Health > 0 then
+					for _, Effect in Hitbox.SurvivorEscapeEffects do
+						local Existing = Utils.Instance.FindFirstChild(TargetCharacter, "Effects." .. Effect.Name, 0) :: NumberValue?
+						if not Existing or Existing.Value < Effect.Level or (Existing.Value == Effect.Level and (Existing:GetAttribute("Duration") or 0) < Effect.Duration) then
+							CommonFunctions.ApplyEffect({ TargetHumanoid = Humanoid, EffectSettings = Effect })
+						end
+					end
+				end
 
 				-- If the hitbox applies effects, apply them.
 				if Config.EffectsToApply then

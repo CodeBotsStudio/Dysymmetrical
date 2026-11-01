@@ -211,6 +211,7 @@ local dummy = p.Character:Clone()
 p.Character.Archivable = false
 dummy.Name = "TestSurvivor"
 for _, s in dummy:GetDescendants() do if s:IsA("BaseScript") then s:Destroy() end end
+if dummy:FindFirstChild("Effects") then dummy.Effects:ClearAllChildren() end
 dummy.Role.Value = "Survivor"
 local root = p.Character.PrimaryPart
 dummy:PivotTo(root.CFrame * CFrame.new(0, 0, -3) * CFrame.Angles(0, math.pi, 0))
@@ -221,6 +222,40 @@ return tostring(dummy:FindFirstChildOfClass("Humanoid").Health)''')
     after = luau('return tostring(_G.TestDummy:FindFirstChildOfClass("Humanoid").Health)')
     check("slash damages a survivor", float(after) < float(health), f"{health} -> {after}")
     check("body hit reaches clients", "Body:TestSurvivor" in log(), log())
+    effects = luau('local e = _G.TestDummy:FindFirstChild("Effects") _G.FirstResistance = e and e:FindFirstChild("Resistance") return e and tostring(e:FindFirstChild("Speed") ~= nil) .. " " .. tostring(e:FindFirstChild("Resistance") ~= nil) or "no folder"')
+    check("hit survivor gets escape speed and protection", effects == "true true", effects)
+    time.sleep(1.5)
+    slash()
+    second = luau('return tostring(_G.TestDummy:FindFirstChildOfClass("Humanoid").Health)')
+    first_hit, second_hit = float(health) - float(after), float(after) - float(second)
+    check("protected survivor takes 60% damage", first_hit > 0 and abs(second_hit - first_hit * 0.6) < 0.5, f"{first_hit:g} then {second_hit:g}")
+    same = luau('return tostring(_G.TestDummy.Effects:FindFirstChild("Resistance") == _G.FirstResistance)')
+    check("protection is not refreshed by later hits", same == "true", same)
+    time.sleep(1.5)
+    armored = luau('''_G.TestDummy:Destroy()
+local p = game.Players:GetPlayers()[1]
+p.Character.Archivable = true
+local dummy = p.Character:Clone()
+p.Character.Archivable = false
+dummy.Name = "TestArmored"
+for _, s in dummy:GetDescendants() do if s:IsA("BaseScript") then s:Destroy() end end
+dummy.Effects:ClearAllChildren()
+dummy.Role.Value = "Survivor"
+if dummy:FindFirstChild("PlayerAbilities") then dummy.PlayerAbilities:Destroy() end
+local abilities = Instance.new("Folder", dummy) abilities.Name = "PlayerAbilities"
+local module = Instance.new("ModuleScript", abilities) module.Name = "CharacterAbilities"
+module.Source = [[return { CharacterModule = { OnHit = function(_, _, _, humanoid)
+    local armor = Instance.new("NumberValue") armor.Name = "Resistance" armor.Value = 2 armor:SetAttribute("Duration", 1) armor.Parent = humanoid.Parent.Effects
+end } }]]
+dummy:FindFirstChildOfClass("Humanoid").Health = 15
+dummy:PivotTo(p.Character.PrimaryPart.CFrame * CFrame.new(0, 0, -3) * CFrame.Angles(0, math.pi, 0))
+dummy.Parent = workspace.Players
+_G.TestDummy = dummy
+return "ok"''')
+    slash()
+    survived = luau('local d = _G.TestDummy local r = d.Effects:FindFirstChild("Resistance") return string.format("%.0f %s %s", d:FindFirstChildOfClass("Humanoid").Health, tostring(d.Effects:FindFirstChild("Speed") ~= nil), tostring(r and r:GetAttribute("Duration")))')
+    check("on-hit armor counts before the kill check", armored == "ok" and survived.startswith("3 true"), survived)
+    check("short armor is upgraded to the 8 s escape protection", survived.endswith(" 8"), survived)
     errors = console_errors()
     check("no script errors (killer)", not errors, "; ".join(errors)[:300])
     play(False)

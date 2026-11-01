@@ -88,6 +88,11 @@ type DamagePlayerSettings = {
 }
 --- Function that should be used to damage a player from another player's attack.
 --- Handles resistance, weakness...
+function CommonFunctions.ResistedDamage(Char: Model, Damage: number): number
+	local Resistance = Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0) :: NumberValue?
+	return Damage * math.clamp(1 - (if Resistance then Resistance.Value else 0) / 5, 0, 1)
+end
+
 function CommonFunctions.DamagePlayer(DamageSettings: DamagePlayerSettings)
     local Char = DamageSettings.TargetHumanoid.Parent
 	local HRP: BasePart = Utils.Character.GetRootPart(Char)
@@ -109,10 +114,7 @@ function CommonFunctions.DamagePlayer(DamageSettings: DamagePlayerSettings)
 			Char.Killer.Value = DamageSettings.SourcePlayer
 		end
 
-		local ResistanceValue = Utils.Instance.FindFirstChild(Char, "Effects.Resistance", 0)
-		if ResistanceValue then
-			DamageSettings.Damage /= 0.1 * ResistanceValue + 1 --since lvl 1 should do the trick already
-		end
+		DamageSettings.Damage = CommonFunctions.ResistedDamage(Char, DamageSettings.Damage)
 		
 		-- "John Doe, scream if you love The Masquerade." "RAAGGGGGGHHHHHH"
 		if Char:GetAttribute("CharacterName") then
