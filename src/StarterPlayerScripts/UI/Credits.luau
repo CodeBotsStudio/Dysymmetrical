@@ -4,6 +4,7 @@ local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -95,7 +96,7 @@ function CreditsMenu.Open(Time: number)
         return "Prevented"
     end
 
-    TweenService:Create(CreditsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.475, 0.599)}):Play()
+    InkFX.Transition(CreditsMenu.UIInstance, true, Time, UDim2.fromScale(0.475, 0.599))
     CreditsMenu.Opened = true
 
     return
@@ -103,7 +104,7 @@ end
 
 function CreditsMenu.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(CreditsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        InkFX.Transition(CreditsMenu.UIInstance, false, Time, CreditsMenu.UIInstance.Size)
     else
         CreditsMenu.UIInstance.Size = Utils.UDim.Zero
     end

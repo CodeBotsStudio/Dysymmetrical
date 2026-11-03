@@ -176,6 +176,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
 
             DataAnchor = Ability.New({
                 Name = "Data Anchor",
+                RenderImage = "rbxassetid://82042307155133",
 
                 FirstCooldown = 3,
                 SecondCooldown = 20,
@@ -197,6 +198,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
 
             CallbackPing = Ability.New({
                 Name = "Callback Ping",
+                RenderImage = "rbxassetid://123063919281024",
                 Duration = 3,
                 InputName = "ThirdAbility",
                 Cooldown = 32.5,
@@ -206,6 +208,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
 
             Overcharge = Ability.New({
                 Name = "Overcharge",
+                RenderImage = "rbxassetid://114480081841217",
                 Cooldown = 45,
                 InputName = "FourthAbility",
                 SpeedDuration = 3.2,
@@ -269,7 +272,7 @@ NullexVoyd.Config.Description = {
     {
         Type = "Text",
         Text = NullexVoydNameLabel.." lanza un tajo básico que hace "..tostring(NullexVoyd.GameplayConfig.Abilities.Slash.Damage).." de daño.",
-        Image = "rbxassetid://133006324317341",
+        Image = "rbxassetid://82563286387450",
     },
     {
         Type = "Header",

@@ -6,6 +6,7 @@ local SideBar = require(script.Parent.SideBar)
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 local TopbarPlus = require(ReplicatedStorage.Packages.TopbarPlus)
 
 local LocalPlayer = Players.LocalPlayer
@@ -113,7 +114,7 @@ function ModPanel.Open(Time: number)
     SideBar.CloseAll(ModPanel)
 
     if Time > 0 then
-        TweenService:Create(ModPanel.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.542, 0.741)}):Play()
+        InkFX.Transition(ModPanel.UIInstance, true, Time, UDim2.fromScale(0.542, 0.741))
     else
         ModPanel.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
     end
@@ -124,7 +125,7 @@ end
 
 function ModPanel.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(ModPanel.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        InkFX.Transition(ModPanel.UIInstance, false, Time, ModPanel.UIInstance.Size)
     else
         ModPanel.UIInstance.Size = Utils.UDim.Zero
     end

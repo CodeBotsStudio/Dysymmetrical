@@ -9,6 +9,7 @@ local SideBar = require(script.Parent.SideBar)
 local Types = require(ReplicatedStorage.Classes.Types)
 local Tooltip = require(ReplicatedStorage.Classes.Tooltip)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
@@ -697,7 +698,7 @@ function Shop.Open(Time: number)
     ShopContainer.Parent.Size = UDim2.fromScale(0.7, 1)
     Shop.SkinMenu.Open = false
 
-    TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
+    InkFX.Transition(UI, true, Time, Utils.UDim.Full20Offset)
     Shop.Opened = true
 
     return
@@ -711,7 +712,7 @@ function Shop.Close(Time: number)
         workspace.Sounds.EmotePreview:Destroy()
     end
     if Time > 0 then
-        TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        InkFX.Transition(UI, false, Time, UI.Size)
     else
         UI.Size = Utils.UDim.Zero
         UI.Visible = false

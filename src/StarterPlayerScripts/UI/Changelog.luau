@@ -4,6 +4,7 @@ local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -146,7 +147,7 @@ function Changelog.Open(Time: number)
     end
 
     if Time > 0 then
-        TweenService:Create(Changelog.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.4, 0.7)}):Play()
+        InkFX.Transition(Changelog.UIInstance, true, Time, UDim2.fromScale(0.4, 0.7))
     else
         Changelog.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
     end
@@ -157,7 +158,7 @@ end
 
 function Changelog.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(Changelog.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        InkFX.Transition(Changelog.UIInstance, false, Time, Changelog.UIInstance.Size)
     else
         Changelog.UIInstance.Size = Utils.UDim.Zero
     end

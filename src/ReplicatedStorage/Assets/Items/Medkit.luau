@@ -7,6 +7,7 @@ local PlayerSpeedManager = RunService:IsServer() and require(game:GetService("Se
 
 return Item.New({
     Name = "Medkit",
+    Icon = "rbxassetid://113163533935584",
     ToolPrefab = script:FindFirstChild("Medkit"),
 
     Behaviour = function(self: Types.Item)

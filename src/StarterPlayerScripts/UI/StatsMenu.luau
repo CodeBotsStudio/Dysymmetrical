@@ -4,6 +4,7 @@ local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -102,14 +103,14 @@ function StatsMenu.Open(Time: number)
         return "Prevented"
     end
 
-    TweenService:Create(StatsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
+    InkFX.Transition(StatsMenu.UIInstance, true, Time, Utils.UDim.Full20Offset)
     StatsMenu.Opened = true
     return
 end
 
 function StatsMenu.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(StatsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        InkFX.Transition(StatsMenu.UIInstance, false, Time, StatsMenu.UIInstance.Size)
     else
         StatsMenu.UIInstance.Size = Utils.UDim.Zero
     end

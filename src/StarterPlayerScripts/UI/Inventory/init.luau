@@ -11,6 +11,7 @@ local Network = require(ReplicatedStorage.Modules.Network)
 local Types = require(ReplicatedStorage.Classes.Types)
 local Tooltip = require(ReplicatedStorage.Classes.Tooltip)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
@@ -661,7 +662,7 @@ function Inventory.Open(Time: number)
         Inventory.EmoteWindow = nil
     end
 
-    TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
+    InkFX.Transition(UI, true, Time, Utils.UDim.Full20Offset)
     Inventory.Opened = true
 
     return
@@ -672,7 +673,7 @@ function Inventory.Close(Time: number)
         Inventory.EmoteWindow:Hide()
     end
     if Time > 0 then
-        TweenService:Create(UI, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        InkFX.Transition(UI, false, Time, UI.Size)
     else
         UI.Size = Utils.UDim.Zero
         UI.Visible = false

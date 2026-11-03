@@ -15,6 +15,7 @@ return {
         Achievements = {
             Welcome = {
                 Title = "Bienvenido a Anomalis",
+                Icon = "rbxassetid://108807232649489",
                 Description = "Juega a Anomalis por primera vez",
                 RewardType = "Currency",
                 Amount = 300,

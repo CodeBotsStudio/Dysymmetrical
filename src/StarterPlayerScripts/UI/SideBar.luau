@@ -114,12 +114,10 @@ function SideBar.OpenMenu(Menu)
         if Menu.Button then
             TweenInverted(Menu.Button, true)
         end
-        InkFX.Reveal(Menu.UIInstance, false)
         if Menu.CloseOthersOnOpen then
             SideBar.CloseAll(Menu)
         end
     else
-        InkFX.Reveal(Menu.UIInstance, true)
         Menu.Close(SideBar.ToggleDuration)
         if Menu.Button then
             TweenInverted(Menu.Button, false)

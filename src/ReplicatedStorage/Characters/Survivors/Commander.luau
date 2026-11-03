@@ -187,12 +187,14 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
         Abilities = {
             BodyArmor = Ability.New({
                 Name = "Body Armor",
+                RenderImage = "rbxassetid://120611547615079",
                 -- Description = "Every time Commander gets damaged, he receives Resistance V for 1 second, acting as invincibility frames.",
                 Passive = true,
             }),
 
             Blindside = Ability.New({
                 Name = "Blindside",
+                RenderImage = "rbxassetid://118477647585035",
 
                 ThrowDelay = 1,
                 TriggerDelay = 3.5,
@@ -211,6 +213,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
 
             Reload = Ability.New({
                 Name = "Reload",
+                RenderImage = "rbxassetid://129836808884946",
                 Duration = 5,
                 Cooldown = 40,
                 InputName = "SecondAbility",
@@ -221,6 +224,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
 
             Justice = Ability.New({
                 Name = "Justice",
+                RenderImage = "rbxassetid://77286835155262",
                 Description = "Commander saca la pistola y dispara al frente mientras va despacio. Hace 50 de daño al asesino y lo aturde 4,2 segundos.",
                 UseAnimation = "",
                 ShotSound = "",

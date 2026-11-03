@@ -6,6 +6,7 @@ local Achievements = require(ReplicatedStorage.Assets.Achievements)
 local Types = require(ReplicatedStorage.Classes.Types)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
 
 local SideBar = require(script.Parent.SideBar)
@@ -26,7 +27,7 @@ local AchievementsMenu = {
         Hidden = {
             Title = "?????",
             Description = "????????????????????",
-            Icon = "rbxassetid://108919288576085",
+            Icon = "rbxassetid://130627942827530",
         },
     },
 }
@@ -68,7 +69,7 @@ function AchievementsMenu.Open(Time: number)
     end
 
     if Time > 0 then
-        TweenService:Create(AchievementsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.5, 0.7)}):Play()
+        InkFX.Transition(AchievementsMenu.UIInstance, true, Time, UDim2.fromScale(0.5, 0.7))
     else
         AchievementsMenu.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
     end
@@ -79,7 +80,7 @@ end
 
 function AchievementsMenu.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(AchievementsMenu.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        InkFX.Transition(AchievementsMenu.UIInstance, false, Time, AchievementsMenu.UIInstance.Size)
     else
         AchievementsMenu.UIInstance.Size = Utils.UDim.Zero
     end

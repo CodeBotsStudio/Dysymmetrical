@@ -33,7 +33,7 @@ return {
             local Second = math.ceil(value)
             if Second ~= LastSecond and State.Value == "InRound" and Second <= 10 and Second > 0 then
                 InkFX.Pop(TimeLabel, 1.22, 0.35)
-                InkFX.Ripple(Frame, 1.25, 0.6, 0)
+                InkFX.Ripple(Frame, 1.25, 0.6)
             end
             LastSecond = Second
         end)
@@ -50,7 +50,7 @@ return {
 
         State.Changed:Connect(function(value: string)
             Update(value)
-            InkFX.Ripple(Frame, 1.6, 0.7, 0)
+            InkFX.Ripple(Frame, 1.6, 0.7)
         end)
         EnoughPlayers.Changed:Connect(function()
             Update(State.Value)

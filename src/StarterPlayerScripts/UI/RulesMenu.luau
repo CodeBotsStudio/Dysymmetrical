@@ -4,6 +4,7 @@ local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -109,7 +110,7 @@ function Rules.Open(Time: number)
     end
 
     if Time > 0 then
-        TweenService:Create(Rules.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0.4, 0.7)}):Play()
+        InkFX.Transition(Rules.UIInstance, true, Time, UDim2.fromScale(0.4, 0.7))
     else
         Rules.UIInstance.Size = UDim2.fromScale(0.4, 0.7)
     end
@@ -120,7 +121,7 @@ end
 
 function Rules.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(Rules.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        InkFX.Transition(Rules.UIInstance, false, Time, Rules.UIInstance.Size)
     else
         Rules.UIInstance.Size = Utils.UDim.Zero
     end

@@ -8,6 +8,7 @@ local PlayerSpeedManager = RunService:IsServer() and require(game:GetService("Se
 
 return Item.New({
     Name = "Bloxy Cola",
+    Icon = "rbxassetid://76600054012804",
     ToolPrefab = script:FindFirstChild("Cola"),
 
     Behaviour = function(self: Types.Item)

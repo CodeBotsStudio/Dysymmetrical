@@ -4,6 +4,7 @@ local TweenService = game:GetService("TweenService")
 
 local SideBar = require(script.Parent.SideBar)
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 
@@ -116,7 +117,7 @@ function Settings.Open(Time: number)
         return "Prevented"
     end
 
-    TweenService:Create(Settings.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Full20Offset}):Play()
+    InkFX.Transition(Settings.UIInstance, true, Time, Utils.UDim.Full20Offset)
     Settings.Opened = true
 
     return
@@ -124,7 +125,7 @@ end
 
 function Settings.Close(Time: number)
     if Time > 0 then
-        TweenService:Create(Settings.UIInstance, TweenInfo.new(Time, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Size = Utils.UDim.Zero}):Play()
+        InkFX.Transition(Settings.UIInstance, false, Time, Settings.UIInstance.Size)
     else
         Settings.UIInstance.Size = Utils.UDim.Zero
         Settings.UIInstance.Visible = false
