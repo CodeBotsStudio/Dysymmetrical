@@ -66,11 +66,15 @@ function CharacterStatsManager._InitUI(Char: Model, UI: Frame)
     end)
 
     local LastHealth = Humanoid.Health
+    local LastPop = 0
     Utils.Instance.ObserveProperty(Humanoid, "Health", function(value: number)
-        if value < LastHealth - 0.5 then
+        local Ready = os.clock() - LastPop > 0.3
+        if Ready and value < LastHealth - 0.5 then
+            LastPop = os.clock()
             InkFX.Pop(HealthText, 1.35, 0.45)
             InkFX.Ripple(HealthText, 1.8, 0.6)
-        elseif value > LastHealth + 0.5 then
+        elseif Ready and value > LastHealth + 0.5 then
+            LastPop = os.clock()
             InkFX.Pop(HealthText, 1.15, 0.4)
         end
         LastHealth = value
