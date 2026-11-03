@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 
 local Utils = require(ReplicatedStorage.Modules.Utils)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -25,66 +26,6 @@ type Button = {
 }
 
 local InvertedInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-local InkVeilImage = "rbxassetid://94299335585756"
-local InkRingImage = "rbxassetid://106770110603452"
-
-local function CalmMotion(): boolean
-    return Utils.PlayerData.GetPlayerSetting(LocalPlayer, "Customization.ScreenShakeEnabled") == false
-end
-
-local function InkRipple(Host: GuiObject, Grow: number, Duration: number)
-    if CalmMotion() then
-        return
-    end
-    for Index, Delay in {0, 0.07} do
-        local Ring = Instance.new("ImageLabel")
-        Ring.Image = InkRingImage
-        Ring.AnchorPoint = Vector2.new(0.5, 0.5)
-        Ring.Position = UDim2.fromScale(0.5, 0.5)
-        Ring.Size = UDim2.fromScale(0.95, 0.95)
-        Ring.Rotation = math.random(0, 360)
-        Ring.BackgroundTransparency = 1
-        Ring.ImageTransparency = 0.1 + Index * 0.25
-        Ring.ZIndex = 6
-        Ring.Parent = Host
-        local Info = TweenInfo.new(Duration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, Delay)
-        TweenService:Create(Ring, Info, {Size = UDim2.fromScale(Grow, Grow), Rotation = Ring.Rotation + 40, ImageTransparency = 1}):Play()
-        task.delay(Duration + Delay, Ring.Destroy, Ring)
-    end
-end
-
-local function InkReveal(Menu: GuiObject?, Closing: boolean)
-    if not Menu or not Menu:IsA("GuiObject") or CalmMotion() then
-        return
-    end
-    local Clip = Instance.new("Frame")
-    Clip.Name = "InkVeil"
-    Clip.Size = UDim2.fromScale(1, 1)
-    Clip.BackgroundTransparency = 1
-    Clip.ClipsDescendants = true
-    Clip.ZIndex = 50
-    local Veil = Instance.new("ImageLabel")
-    Veil.Image = InkVeilImage
-    Veil.BackgroundTransparency = 1
-    Veil.ScaleType = Enum.ScaleType.Stretch
-    Veil.Size = UDim2.fromScale(2, 1)
-    Veil.Position = UDim2.fromScale(if Closing then 0 else -1, 0)
-    Veil.ZIndex = 50
-    Veil.Parent = Clip
-    Clip.Parent = Menu
-    local Duration = if Closing then 0.3 else 0.5
-    local Style = if Closing then Enum.EasingDirection.In else Enum.EasingDirection.Out
-    TweenService:Create(Veil, TweenInfo.new(Duration, Enum.EasingStyle.Sine, Style), {Position = UDim2.fromScale(if Closing then -1 else 0, 0)}):Play()
-    task.delay(Duration, Clip.Destroy, Clip)
-    if not Closing and not Menu:FindFirstChildOfClass("UIScale") then
-        local Settle = Instance.new("UIScale")
-        Settle.Scale = 0.96
-        Settle.Parent = Menu
-        TweenService:Create(Settle, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-        task.delay(0.55, Settle.Destroy, Settle)
-    end
-end
-
 local function Sway(BarButton: GuiObject)
     for _, Name in {"Button", "Inverted"} do
         local Image = BarButton:FindFirstChild(Name) :: GuiObject
@@ -103,7 +44,7 @@ local function Breathe(Buttons: {[GuiObject]: number})
     local Clock = 0
     game:GetService("RunService").RenderStepped:Connect(function(dt: number)
         Clock += dt
-        local Calm = CalmMotion()
+        local Calm = InkFX.Calm()
         for Scale, Phase in Buttons do
             Scale.Scale = if Calm then 1 else 1 + 0.025 * math.sin(Clock * 1.6 + Phase)
         end
@@ -173,12 +114,12 @@ function SideBar.OpenMenu(Menu)
         if Menu.Button then
             TweenInverted(Menu.Button, true)
         end
-        InkReveal(Menu.UIInstance, false)
+        InkFX.Reveal(Menu.UIInstance, false)
         if Menu.CloseOthersOnOpen then
             SideBar.CloseAll(Menu)
         end
     else
-        InkReveal(Menu.UIInstance, true)
+        InkFX.Reveal(Menu.UIInstance, true)
         Menu.Close(SideBar.ToggleDuration)
         if Menu.Button then
             TweenInverted(Menu.Button, false)
@@ -302,7 +243,7 @@ function SideBar:Init()
         Menu.CloseOnOtherOpen = button.CloseOnOtherOpen
         Menu.CloseOthersOnOpen = button.CloseOthersOnOpen
         BarButton.Button.MouseButton1Click:Connect(function()
-            InkRipple(BarButton, 1.75, 0.6)
+            InkFX.Ripple(BarButton, 1.75, 0.6)
             SideBar.OpenMenu(Menu)
         end)
         Breathing[Instance.new("UIScale", BarButton)] = button.LayoutOrder * 0.7
@@ -317,8 +258,8 @@ function SideBar:Init()
 
         local OriginalYLabelBound = BarButton.Title.Holder.Label.AbsoluteSize.Y
         local function Hover()
-            if not CalmMotion() then
-                InkRipple(BarButton, 1.45, 0.45)
+            if not InkFX.Calm() then
+                InkFX.Ripple(BarButton, 1.45, 0.45)
                 Sway(BarButton)
             end
             Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonHover, {Volume = 0.2})

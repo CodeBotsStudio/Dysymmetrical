@@ -49,3 +49,16 @@ prev = Image.new("RGBA", (W // 2 + S // 2, H // 2), (60, 70, 60, 255))
 prev.alpha_composite(img.resize((W // 2, H // 2)))
 prev.alpha_composite(Image.open("UI texturas/efectos/anillo_tinta.png").resize((S // 2, S // 2)), (W // 2, 0))
 prev.save("UI texturas/efectos/vista_previa.png")
+
+D = 256
+yy, xx = np.mgrid[0:D, 0:D].astype(float) - D / 2
+r, th = np.hypot(xx, yy), np.arctan2(yy, xx)
+rim = 118 + 3 * np.sin(th * 3 + 1.3) + 2 * np.sin(th * 5 + 0.4)
+body = np.clip((rim - r) / 4, 0, 1)
+hatch = (np.sin((xx + yy * 0.9) * 0.45) > 0.8) & (rng.random((D, D)) > 0.3)
+disc = np.zeros((D, D, 4), np.uint8)
+disc[..., :3] = np.where(hatch[..., None], [44, 42, 38], [16, 15, 13])
+edge = np.clip(1 - np.abs(r - rim + 2) / 2.2, 0, 1) * 0.6
+disc[..., :3] = (disc[..., :3] * (1 - edge[..., None]) + np.array([236, 228, 210]) * edge[..., None]).astype(np.uint8)
+disc[..., 3] = (body * 255).astype(np.uint8)
+Image.fromarray(disc, "RGBA").filter(ImageFilter.GaussianBlur(0.5)).save("UI texturas/efectos/disco_tinta.png")

@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Types = require(ReplicatedStorage.Classes.Types)
 local Janitor = require(ReplicatedStorage.Packages.Janitor)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 
 type Ability = {
     ModuleCode: Types.Ability,
@@ -73,8 +74,11 @@ function AbilityGUI.InitGUI()
         end
     end), "Disconnect")
 
-    for _, Ability: Ability in Abilities do
+    for Index, Ability: Ability in Abilities do
         AbilityGUI._UpdateAbilityFrameInput(Ability, InputManager, InputManager.CurrentControlScheme)
+        local Frame = Ability.Interactor.Parent :: Frame
+        InkFX.Pop(Frame, 0, 0.5, Index * 0.08)
+        task.delay(Index * 0.08, InkFX.Ripple, Frame, 1.5, 0.5)
 
         --it would be stupid to not add this (again). -Dyscarn
         -- uses label
@@ -90,6 +94,9 @@ function AbilityGUI.InitGUI()
 
         JanitorInstance:Add(Ability.ModuleCode.Signals.CooldownSet:Connect(function(_cooldownSet: number)
             Ability.Timer.TextTransparency = 0
+            InkFX.Pop(Frame, 0.82, 0.4)
+            InkFX.Ripple(Frame, 1.7, 0.5)
+            InkFX.Drain(Frame, Ability.ModuleCode.CooldownTimer)
             while Ability.Timer and Ability.ModuleCode.CooldownTimer > 0 do
                 -- failsafe if the ui gets destroyed for any reason
                 if not Ability.Timer then
