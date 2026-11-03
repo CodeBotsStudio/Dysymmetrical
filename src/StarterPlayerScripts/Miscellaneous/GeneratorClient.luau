@@ -9,6 +9,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Network = require(ReplicatedStorage.Modules.Network)
 local Sounds = require(ReplicatedStorage.Modules.Sounds)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 
 local RoundState: StringValue = ReplicatedStorage.RoundInfo.CurrentState
 
@@ -48,7 +49,14 @@ return {
         gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
         local counter = label(gui, UDim2.new(0.16, 0, 0.035, 0), UDim2.new(0.5, 0, 0.1, 4), "")
+        local lastRepaired = workspace:GetAttribute("GeneratorsRepaired") or 0
         local function updateCounter()
+            local repaired = workspace:GetAttribute("GeneratorsRepaired") or 0
+            if repaired > lastRepaired and counter.Visible then
+                InkFX.Pop(counter, 1.45, 0.55)
+                InkFX.Ripple(counter, 2.6, 0.9)
+            end
+            lastRepaired = repaired
             local total = workspace:GetAttribute("GeneratorsTotal") or 0
             counter.Text = `Generadores {workspace:GetAttribute("GeneratorsRepaired") or 0}/{total}`
             counter.Visible = RoundState.Value == "InRound" and total > 0
@@ -108,6 +116,9 @@ return {
         Network:SetConnection("GeneratorCheck", "REMOTE_EVENT", function(delay: number, sweep: number, zoneStart: number, width: number)
             if repairing then
                 Sounds.PlaySound(Sounds.CommonlyUsedSounds.ButtonPress, { PlaybackSpeed = 1.3 })
+                InkFX.Ripple(needle, 2.4, 0.5)
+            else
+                InkFX.Pop(bar, 0.6, 0.35)
             end
             repairing = true
             ProximityPromptService.Enabled = false

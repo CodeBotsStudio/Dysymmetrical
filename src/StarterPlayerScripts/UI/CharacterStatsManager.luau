@@ -7,6 +7,7 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Utils = require(ReplicatedStorage.Modules.Utils)
+local InkFX = require(ReplicatedStorage.Modules.InkFX)
 
 function CharacterStatsManager:Init()
     local UIPrefab = Utils.Instance.FindFirstChild(script, "Stats")
@@ -36,6 +37,12 @@ function CharacterStatsManager._InitUI(Char: Model, UI: Frame)
     local Health = UI.Health
     local HealthText = Health.TextLabel
     local HealthBar = Health.BarBackground.Bar
+    local HealthTrail = HealthBar:Clone()
+    HealthTrail.Name = "Trail"
+    HealthTrail.BackgroundColor3 = Color3.fromRGB(236, 228, 210)
+    HealthTrail.ZIndex = HealthBar.ZIndex
+    HealthBar.ZIndex += 1
+    HealthTrail.Parent = Health.BarBackground
     
     local Humanoid = Char:FindFirstChildWhichIsA("Humanoid")
     local StaminaAttributes = {
@@ -49,12 +56,24 @@ function CharacterStatsManager._InitUI(Char: Model, UI: Frame)
             return
         end
         
-	    HealthBar.Size = UDim2.fromScale(math.lerp(HealthBar.Size.X.Scale, Humanoid.Health / Humanoid.MaxHealth, delta * 9), 1)
+        local HealthRatio = Humanoid.Health / Humanoid.MaxHealth
+	    HealthBar.Size = UDim2.fromScale(math.lerp(HealthBar.Size.X.Scale, HealthRatio, delta * 9), 1)
+        HealthTrail.Size = UDim2.fromScale(math.max(HealthRatio, math.lerp(HealthTrail.Size.X.Scale, HealthRatio, delta * 1.6)), 1)
 	    --
-	    StaminaBar.Size = UDim2.fromScale(math.lerp(StaminaBar.Size.X.Scale, StaminaAttributes.Stamina.Value / StaminaAttributes.MaxStamina.Value, delta * 9), 1)
+        local StaminaRatio = StaminaAttributes.Stamina.Value / StaminaAttributes.MaxStamina.Value
+	    StaminaBar.Size = UDim2.fromScale(math.lerp(StaminaBar.Size.X.Scale, StaminaRatio, delta * 9), 1)
+        StaminaBar.BackgroundTransparency = if StaminaRatio < 0.25 and not InkFX.Calm() then 0.35 + 0.35 * math.sin(os.clock() * 9) else 0
     end)
 
+    local LastHealth = Humanoid.Health
     Utils.Instance.ObserveProperty(Humanoid, "Health", function(value: number)
+        if value < LastHealth - 0.5 then
+            InkFX.Pop(HealthText, 1.35, 0.45)
+            InkFX.Ripple(HealthText, 1.8, 0.6)
+        elseif value > LastHealth + 0.5 then
+            InkFX.Pop(HealthText, 1.15, 0.4)
+        end
+        LastHealth = value
         HealthText.Text = tostring(math.round(Humanoid.Health)).."/"..tostring(Humanoid.MaxHealth)
     end)
 
