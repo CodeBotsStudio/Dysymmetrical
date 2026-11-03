@@ -45,7 +45,7 @@ function SlashModule.New(Props: Types.Ability?): Types.Ability
 		Cooldown = 2,
 		Duration = 0.4,
 		Damage = 20,
-		RenderImage = "rbxassetid://11218451110",
+		RenderImage = "rbxassetid://114455340704913",
 		UseSound = "rbxassetid://12222200",
 		UseAnimation = "rbxassetid://133504250023139",
 		UICorner = true,

@@ -24,7 +24,7 @@ local Credits: {{ Name: string, Credits: {Credit} }} = {
         Name = "Dysymmetrical",
         Credits = {
             {
-                Render = "rbxassetid://112215528635901",
+                Render = "rbxassetid://132085691188764",
                 DisplayName = "Dyscarn",
                 Username = "@LrgeAlvaro8882",
                 Description = "Hizo el motor de este juego: Dysymmetrical.",

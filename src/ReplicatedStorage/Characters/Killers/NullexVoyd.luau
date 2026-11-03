@@ -155,7 +155,7 @@ local NullexVoyd: Types.Killer = Character.CreateKiller({
     Config = {
         Name = "Nullex Voyd",
         Quote = "El orden fue la primera mentira.",
-        Render = "rbxassetid://139883756028491",
+        Render = "rbxassetid://100323356058904",
         Price = 1308,
 
         Origin = {
@@ -269,7 +269,7 @@ NullexVoyd.Config.Description = {
     {
         Type = "Text",
         Text = NullexVoydNameLabel.." lanza un tajo básico que hace "..tostring(NullexVoyd.GameplayConfig.Abilities.Slash.Damage).." de daño.",
-        Image = "rbxassetid://9759886280",
+        Image = "rbxassetid://133006324317341",
     },
     {
         Type = "Header",

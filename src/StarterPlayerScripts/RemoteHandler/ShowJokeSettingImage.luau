@@ -12,18 +12,18 @@ local LocalPlayer = Players.LocalPlayer
 local Images = {
     Victim = {
         Killer = {
-            "rbxassetid://125952385779817",
+            "rbxassetid://119277567001272",
         },
         Survivor = {
-            "rbxassetid://125952385779817",
+            "rbxassetid://119277567001272",
         },
     },
     Source = {
         Killer = {
-            "rbxassetid://122348374983136",
+            "rbxassetid://90001887337594",
         },
         Survivor = {
-            "rbxassetid://122348374983136",
+            "rbxassetid://90001887337594",
         },
     },
 }

@@ -175,7 +175,7 @@ local Commander: Types.Survivor = Character.CreateSurvivor({
     Config = {
         Name = "Commander",
         Quote = "*pyro noises*",
-        Render = "rbxassetid://108440668883002",
+        Render = "rbxassetid://80481019529425",
 
         Origin = {
             TooltipText = "¡Viene del Proyecto Terminus!",

@@ -14,7 +14,7 @@ AbilityType.__index = AbilityType
 function AbilityType.GetDefaultSettings(): Types.Ability
     return setmetatable({
         Name = "Ability",
-        RenderImage = "rbxassetid://9759886280",
+        RenderImage = "rbxassetid://133006324317341",
         UICorner = true,
         Passive = false,
 

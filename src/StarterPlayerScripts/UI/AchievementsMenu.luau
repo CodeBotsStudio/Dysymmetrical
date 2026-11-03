@@ -26,7 +26,7 @@ local AchievementsMenu = {
         Hidden = {
             Title = "?????",
             Description = "????????????????????",
-            Icon = "rbxassetid://15117261700",
+            Icon = "rbxassetid://108919288576085",
         },
     },
 }
