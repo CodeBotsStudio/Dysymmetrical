@@ -130,6 +130,15 @@ local ok, err = pcall(function()
 	end
 	local beacon = probe:FindFirstChild("Beacon", true)
 	check(beacon and beacon.Position.Y - ORIGIN.Y > 140 and beacon:FindFirstChildOfClass("PointLight"), "falta la luz roja arriba de la chimenea")
+	local count: { [string]: number } = {}
+	for _, d in probe:GetDescendants() do
+		count[d.Name] = (count[d.Name] or 0) + 1
+	end
+	check((count.Steam or 0) >= 3 and count.Smoke == 1, "faltan vapor en las cubas o humo en la chimenea")
+	check((count.Mushroom or 0) >= 20, "faltan hongos en las grietas del pozo")
+	check(count.Siren == 1 and count.Thud == 1 and count.Ring == 1 and count.Phone == 1, "faltan la sirena, el golpe o el teléfono")
+	check((count.Sign or 0) >= 8 and count.TimeClock == 1, "faltan carteles o el fichador")
+	check((count.FallenLog or 0) >= 3 and (count.Barrow or 0) >= 3 and count.TornPlank == 2, "faltan troncos caídos, carretillas o tablones arrancados")
 	local props = probe:FindFirstChild("ReactiveProps")
 	check(props and #props:GetChildren() >= 4, "faltan cajas sueltas en ReactiveProps")
 

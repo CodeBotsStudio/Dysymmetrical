@@ -128,6 +128,9 @@ for material, color in {
 	Terrain:SetMaterialColor(material, color)
 end
 
+local SPORE = accent(ZONE_COLORS.Pozo)
+local spores = 0
+
 local function smooth(points: { Vector2 }, step: number): { Vector2 }
 	local out = {}
 	for i = 1, #points - 1 do
@@ -359,6 +362,10 @@ for i = 0, 4 do
 		plank.CFrame *= CFrame.Angles(math.rad(rng:NextNumber(-5, 5)), math.rad(rng:NextNumber(-8, 8)), 0)
 	end
 end
+for _, side in { -1, 1 } do
+	local torn = detail(part(Pozo, Vector3.new(5, 0.5, 1.8), Vector3.new(POZO.X + side * 2.2, bowlY(0) + 1.6, POZO.Z), WOOD, Enum.Material.WoodPlanks, "TornPlank"))
+	torn.CFrame *= CFrame.Angles(0, math.rad(side * 6), math.rad(side * 55))
+end
 for _ = 1, 8 do
 	local angle, d = rng:NextNumber(0, math.pi * 2), rng:NextNumber(6, 28)
 	local chunk = detail(part(Pozo, Vector3.new(rng:NextNumber(1, 3), rng:NextNumber(0.6, 1.4), rng:NextNumber(1, 3)), Vector3.new(POZO.X + math.cos(angle) * d, bowlY(d) + 0.4, POZO.Z + math.sin(angle) * d), CONCRETE, Enum.Material.Concrete, "Rubble"))
@@ -371,6 +378,17 @@ for _, heading in { 115, 140, 165 } do
 		local turn = math.rad(heading + rng:NextNumber(-25, 25))
 		local q = p + Vector2.new(math.cos(turn), math.sin(turn)) * rng:NextNumber(6, 9)
 		detail(beam(Pozo, p, q, 4.02, 4.1, width, CRACK, Enum.Material.Slate, "Crack"))
+		for _ = 1, 2 do
+			local m = p:Lerp(q, rng:NextNumber(0.1, 0.9)) + Vector2.new(rng:NextNumber(-1, 1), rng:NextNumber(-1, 1)) * width
+			local cap = detail(part(Pozo, Vector3.one * rng:NextNumber(0.5, 1), Vector3.new(m.X, 4.15, m.Y), SPORE, Enum.Material.Neon, "Mushroom"))
+			cap.Shape = Enum.PartType.Ball
+			spores += 1
+			if spores % 8 == 1 then
+				local light = Instance.new("PointLight")
+				light.Color, light.Range, light.Brightness = SPORE, 8, 1.2
+				light.Parent = cap
+			end
+		end
 		p, width = q, width * 0.8
 	end
 end
@@ -513,12 +531,16 @@ local function block(parent: Instance, size: Vector3, x: number, y: number, z: n
 	return p
 end
 
+local function anchor(parent: Instance, pos: Vector3, name: string): Part
+	local p = part(parent, Vector3.new(0.2, 0.2, 0.2), pos, CAP, Enum.Material.SmoothPlastic, name)
+	p.Transparency, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = 1, false, false, false, false
+	return p
+end
+
 local function glow(parent: Instance, pos: Vector3, color: Color3, range: number, brightness: number, shadows: boolean?): Light
-	local anchor = part(parent, Vector3.new(0.2, 0.2, 0.2), pos, color, Enum.Material.SmoothPlastic, "Glow")
-	anchor.Transparency, anchor.CanCollide, anchor.CanQuery, anchor.CanTouch, anchor.CastShadow = 1, false, false, false, false
 	local light = Instance.new("PointLight")
 	light.Color, light.Range, light.Brightness, light.Shadows = accent(color), range * 0.72, brightness * 0.6, shadows == true
-	light.Parent = anchor
+	light.Parent = anchor(parent, pos, "Glow")
 	return light
 end
 
@@ -557,6 +579,51 @@ local function windows(parent: Instance, a: Vector2, b: Vector2, y: number, colo
 		local c = a + d * ((b - a).Magnitude * i / (count + 1)) + n * 0.85
 		beam(parent, c - d * 3, c + d * 3, y, y + 2.2, 0.3, color, Enum.Material.Neon, "Window").CastShadow = false
 	end
+end
+
+local SFX = game:GetService("SoundService"):FindFirstChild("SFX", true)
+local function sound(parent: Instance, name: string, id: string, volume: number, radius: number, looped: boolean): Sound
+	local s = Instance.new("Sound")
+	s.Name, s.SoundId, s.Volume, s.Looped = name, "rbxassetid://" .. id, volume, looped
+	s.RollOffMinDistance, s.RollOffMaxDistance = radius * 0.3, radius
+	s.SoundGroup = SFX :: SoundGroup?
+	s.Parent = parent
+	return s
+end
+
+local function puff(parent: Instance, pos: Vector3, name: string, color: Color3, size: number, life: number)
+	local e = Instance.new("ParticleEmitter")
+	e.Name, e.Texture, e.Color = name, "rbxasset://textures/particles/smoke_main.dds", ColorSequence.new(color)
+	e.Size = NumberSequence.new(size, size * 2.5)
+	e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.2, 0.5), NumberSequenceKeypoint.new(1, 1) })
+	e.LightEmission, e.LightInfluence = 0.25, 0.6
+	e.Lifetime, e.Rate, e.Speed = NumberRange.new(life * 0.7, life), 3, NumberRange.new(1.5, 3)
+	e.SpreadAngle, e.Acceleration = Vector2.new(12, 12), Vector3.new(0.8, 0.6, 0)
+	e.Rotation, e.RotSpeed = NumberRange.new(0, 360), NumberRange.new(-15, 15)
+	e:AddTag("Detail")
+	e.Parent = anchor(parent, pos, name .. "Vent")
+end
+
+local CREAM, BRAND_RED, INK, HAZARD = Color3.fromRGB(232, 220, 190), Color3.fromRGB(196, 38, 30), Color3.fromRGB(30, 26, 24), Color3.fromRGB(232, 186, 36)
+local function sign(parent: Instance, c: Vector2, facing: Vector2, y: number, size: Vector2, text: string, paper: Color3, ink: Color3, glowing: number?): Part
+	local board = block(parent, Vector3.new(size.X, size.Y, 0.3), c.X, y, c.Y, math.deg(math.atan2(facing.X, -facing.Y)), paper, Enum.Material.SmoothPlastic, "Sign")
+	board.CastShadow = false
+	local gui = Instance.new("SurfaceGui")
+	gui.Face, gui.LightInfluence, gui.SizingMode, gui.PixelsPerStud = Enum.NormalId.Front, glowing or 1, Enum.SurfaceGuiSizingMode.PixelsPerStud, 30
+	local label = Instance.new("TextLabel")
+	label.AnchorPoint, label.Position, label.Size = Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.92, 0.82)
+	label.BackgroundTransparency, label.Text, label.TextColor3, label.TextScaled = 1, text, ink, true
+	label.FontFace = Font.new("rbxasset://fonts/families/Oswald.json", Enum.FontWeight.Bold)
+	label.Parent = gui
+	gui.Parent = board
+	return board
+end
+
+local function wallSign(parent: Instance, poly: { Vector2 }, edge: number, t: number, y: number, size: Vector2, text: string, paper: Color3, ink: Color3, glowing: number?): Part
+	local a, b = poly[edge], poly[edge % #poly + 1]
+	local d = (b - a).Unit
+	local n = Vector2.new(d.Y, -d.X)
+	return sign(parent, a + d * t + n * 0.9, n, y, size, text, paper, ink, glowing)
 end
 
 local function tank(parent: Instance, diameter: number, height: number, x: number, y: number, z: number, name: string?, color: Color3?, material: Enum.Material?): Part
@@ -653,25 +720,6 @@ local function generator(name: string, pos: Vector3, rotY: number)
 	light.Parent = status
 	model.PrimaryPart = base
 	model:PivotTo(CFrame.new(ORIGIN + pos + Vector3.new(0, 2, 0)) * CFrame.Angles(0, math.rad(rotY), 0))
-end
-
-local function sign(text: string, pos: Vector3, face: Enum.NormalId, color: Color3)
-	local s = detail(part(Details, Vector3.new(#text * 0.8 + 2, 2.4, 0.2), pos, Color3.fromRGB(28, 30, 34), Enum.Material.Metal, "Sign"))
-	s:RemoveTag("Detail")
-	local gui = Instance.new("SurfaceGui")
-	gui.Face = face
-	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	gui.PixelsPerStud = 40
-	gui.LightInfluence = 1
-	gui.Parent = s
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.fromScale(1, 1)
-	label.BackgroundTransparency = 1
-	label.Text = text
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBlack
-	label.TextColor3 = color
-	label.Parent = gui
 end
 
 local function crossing(x: number, isLog: boolean)
@@ -827,7 +875,7 @@ end
 for x = -69, -51, 2 do
 	block(Patio, Vector3.new(0.4, 14, 0.4), x, 0, 206, 0, METAL, Enum.Material.Metal, "GateBar")
 end
-sign("LA PAPELERA DEL BOSQUE", Vector3.new(-60, 16, 205.5), Enum.NormalId.Front, Color3.fromRGB(214, 190, 140))
+sign(Details, Vector2.new(-60, 205.5), Vector2.new(0, -1), 14.8, Vector2.new(19.6, 2.4), "LA PAPELERA DEL BOSQUE", Color3.fromRGB(28, 30, 34), Color3.fromRGB(214, 190, 140))
 generator("Patio", Vector3.new(-128, 0, 140), 0)
 
 local Bosquecillo = zone("Bosquecillo", Yard)
@@ -942,6 +990,7 @@ end
 for _, v in { Vector2.new(-225, -173), Vector2.new(-195, -178), Vector2.new(-225, -125) } do
 	tank(Nave, 14.6, 1.2, v.X, 18, v.Y, "VatBand", C.Nave, Enum.Material.Neon).CastShadow = false
 	glow(Nave, Vector3.new(v.X, 26, v.Y), C.Nave, 34, 1.6)
+	puff(Nave, Vector3.new(v.X, 24.5, v.Y), "Steam", Color3.fromRGB(200, 220, 205), 2.5, 3)
 end
 for i, v in { Vector2.new(-172, -172), Vector2.new(-208, -165), Vector2.new(-212, -140) } do
 	lamp(Nave, Vector3.new(v.X, 26, v.Y), C.Nave, true, i == 1, 0)
@@ -971,6 +1020,7 @@ beacon.CastShadow = false
 local beaconLight = Instance.new("PointLight")
 beaconLight.Color, beaconLight.Range, beaconLight.Brightness = BEACON_RED, 60, 3
 beaconLight.Parent = beacon
+puff(Chimenea, Vector3.new(150, 161, -122), "Smoke", Color3.fromRGB(70, 66, 74), 7, 10)
 for i, l in PATIO_LAMPS do
 	lamp(Patio, Vector3.new(l[1], heightAt(l[1], l[2]) + 14, l[2]), C.Patio, false, i <= 2)
 end
@@ -992,6 +1042,52 @@ end
 for _, u in { Vector2.new(-12, 10), Vector2.new(20, -18) } do
 	local floorGlow = A(u.X, u.Y)
 	glow(Almacen, Vector3.new(floorGlow.X, 3, floorGlow.Y), C.Almacen, 40, 3.5)
+end
+
+sound(anchor(Rodillos, R(0, 0, 10), "Hum"), "Hum", "9112839126", 0.5, 90, true).Playing = true
+sound(anchor(Nave, Vector3.new(-210, 14, -165), "Hum"), "Hum", "9113370956", 0.35, 60, true).Playing = true
+sound(anchor(Bosquecillo, Vector3.new(80, 6, 160), "Hum"), "Hum", "9112764040", 0.4, 90, true).Playing = true
+local pit = anchor(Pozo, Vector3.new(POZO.X, 3, POZO.Z), "PitVoice")
+sound(pit, "Hum", "9112795571", 0.6, 80, true).Playing = true
+sound(pit, "Siren", "9113073796", 1.2, 700, false)
+sound(pit, "Thud", "9120916241", 1, 120, false)
+
+block(Oficinas, Vector3.new(3.4, 2.6, 1.8), 189, 8, -197.6, 0, WOOD, Enum.Material.WoodPlanks, "Desk")
+local phone = part(Oficinas, Vector3.new(1, 0.5, 0.7), Vector3.new(189, 10.85, -197.6), Color3.fromRGB(24, 22, 24), Enum.Material.SmoothPlastic, "Phone")
+phone.CanCollide = false
+sound(phone, "Ring", "9117304268", 0.9, 60, true)
+sign(Oficinas, Vector2.new(189, -199.1), Vector2.new(0, 1), 11.4, Vector2.new(2.4, 2.8), "MEMO INTERNO\n\nEl turno de noche NO baja al pozo.\nSi suena la sirena,\nno cojáis el teléfono.\n\n- Dirección", CREAM, INK)
+wallSign(Oficinas, oficinasPoly, 3, 31, 9, Vector2.new(1.6, 1.8), "03:07", Color3.fromRGB(40, 40, 44), Color3.fromRGB(255, 60, 40), 0).Name = "TimeClock"
+local rack = wallSign(Oficinas, oficinasPoly, 3, 33, 8.9, Vector2.new(1.4, 2), "TURNO\nNOCHE", METAL, CREAM)
+for k = 1, 6 do
+	detail(part(Oficinas, Vector3.new(0.18, 1, 0.04), Vector3.zero, PAPER, Enum.Material.SmoothPlastic, "Card")).CFrame = rack.CFrame * CFrame.new(-0.6 + k * 0.17, 0.8, -0.2)
+end
+wallSign(Oficinas, oficinasPoly, 3, 33, 14, Vector2.new(7, 2.2), "DÍAS SIN ACCIDENTES: 0", CREAM, BRAND_RED)
+wallSign(Nave, navePoly, 2, 31, 12.5, Vector2.new(8, 2.2), "NAVE 1 · PULPA", CREAM, INK)
+wallSign(Rodillos, rodillosPoly, 3, 41, 8.5, Vector2.new(8, 2.2), "SALA DE RODILLOS", CREAM, INK)
+wallSign(Almacen, almacenPoly, 1, 66, 5, Vector2.new(8, 2.2), "ALMACÉN 2 · BOBINAS", CREAM, INK)
+for _, x in { -214, -186 } do
+	block(Nave, Vector3.new(0.6, 9, 0.6), x, 31, -157, 0, METAL, Enum.Material.Metal, "BillboardLeg")
+end
+sign(Nave, Vector2.new(-200, -156.5), Vector2.new(0, 1), 33.5, Vector2.new(34, 6), "PAPELERA DEL BOSQUE", CREAM, BRAND_RED, 0.3)
+sign(Nave, Vector2.new(-200, -156.5), Vector2.new(0, 1), 31.4, Vector2.new(22, 1.8), "El papel que abraza tus ideas", CREAM, INK, 0.3)
+detail(block(Pozo, Vector3.new(0.4, 4, 0.4), 88, heightAt(88, -40), -40, 0, METAL, Enum.Material.Metal, "Post"))
+detail(sign(Pozo, Vector2.new(88, -40), Vector2.new(-1, 0), heightAt(88, -40) + 3.4, Vector2.new(5, 2.6), "PROHIBIDO EL PASO\nÁREA LAB-07", HAZARD, INK))
+
+local Story = folder("Story", MapModel)
+for _, l in { { 75, 155, 90, 166 }, { 48, 178, 60, 192 }, { -236, 50, -228, 64 } } do
+	detail(rod(Story, Vector2.new(l[1], l[2]), Vector2.new(l[3], l[4]), heightAt(l[1], l[2]), 2.4, woodTone(), Enum.Material.Wood, "FallenLog"))
+end
+local RUST = Color3.fromRGB(120, 62, 40)
+for _, b in { { -150, -45, 30 }, { -25, 140, 140 }, { 40, -120, 250 } } do
+	local tray = detail(block(Story, Vector3.new(2.6, 1.1, 1.8), b[1], heightAt(b[1], b[2]), b[2], b[3], RUST, Enum.Material.CorrodedMetal, "Barrow"))
+	tray.CFrame *= CFrame.Angles(math.rad(105), 0, 0)
+	local wheel = detail(part(Story, Vector3.new(0.3, 1.4, 1.4), Vector3.zero, Color3.fromRGB(30, 30, 32), Enum.Material.Rubber, "Wheel"))
+	wheel.Shape = Enum.PartType.Cylinder
+	wheel.CFrame = tray.CFrame * CFrame.new(1.7, 0, 0) * CFrame.Angles(0, math.rad(90), 0)
+	for _, side in { -0.6, 0.6 } do
+		detail(part(Story, Vector3.new(2.4, 0.15, 0.15), Vector3.zero, WOOD, Enum.Material.Wood, "Handle")).CFrame = tray.CFrame * CFrame.new(-2.2, 0, side)
+	end
 end
 
 local function spawnPoint(parent: Instance, pos: Vector3)
@@ -1071,8 +1167,18 @@ sky.Parent = LightingModule
 local Behaviour = Instance.new("ModuleScript")
 Behaviour.Name = "Behaviour"
 Behaviour.Source = [[--!strict
+local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local TweenService = game:GetService("TweenService")
+
+local VIOLET = Color3.fromRGB(165, 60, 255)
+local SPIN: { [string]: number } = { Roller = 2.5, Saw = 9 }
+
+local function find(name: string): any
+	return script.Parent:FindFirstChild(name, true)
+end
 
 local function tagged(name: string): { Instance }
 	local found = {}
@@ -1134,12 +1240,97 @@ local function oneWayDoors()
 	end)
 end
 
+local function floracion()
+	local connection: RBXScriptConnection
+	connection = workspace:GetAttributeChangedSignal("GeneratorsRepaired"):Connect(function()
+		if not script:IsDescendantOf(workspace) then
+			connection:Disconnect()
+		elseif (workspace:GetAttribute("GeneratorsRepaired") or 0) >= 3 then
+			script.Parent:SetAttribute("Floracion", true)
+		end
+	end)
+end
+
+local function animate()
+	local spinning: { BasePart } = {}
+	local swinging: { [BasePart]: CFrame } = {}
+	for _, d in script.Parent:GetDescendants() do
+		if d:IsA("BasePart") and SPIN[d.Name] then
+			table.insert(spinning, d)
+		elseif d:IsA("BasePart") and (d.Name == "Hook" or d.Name == "Cable") then
+			swinging[d] = d.CFrame
+		end
+	end
+	local cable: BasePart = find("Cable")
+	local pivot = CFrame.new(cable.Position + Vector3.yAxis * cable.Size.Y / 2)
+	local connection: RBXScriptConnection
+	connection = RunService.RenderStepped:Connect(function(dt: number)
+		if not script:IsDescendantOf(workspace) then
+			connection:Disconnect()
+			return
+		end
+		for _, p in spinning do
+			p.CFrame *= CFrame.Angles(SPIN[p.Name] * dt, 0, 0)
+		end
+		local t = os.clock()
+		local sway = pivot * CFrame.Angles(math.sin(t * 0.9) * 0.05, 0, math.sin(t * 0.6) * 0.04) * pivot:Inverse()
+		for p, base in swinging do
+			p.CFrame = sway * base
+		end
+	end)
+end
+
+local function bloom()
+	local map = script.Parent
+	local function start()
+		local siren: Sound, thud: Sound, beacon: BasePart, phone: BasePart = find("Siren"), find("Thud"), find("Beacon"), find("Phone")
+		siren:Play()
+		thud:Play()
+		for _, target in { beacon, find("BeaconBand"), beacon:FindFirstChildOfClass("PointLight") } do
+			TweenService:Create(target, TweenInfo.new(4), { Color = VIOLET }):Play()
+		end
+		for _, d in map:GetDescendants() do
+			if d:IsA("BasePart") and (d.Name == "Plank" or d.Name == "TornPlank") then
+				local base = d.CFrame
+				d.CFrame = base * CFrame.new(0, 0.8, 0) * CFrame.Angles(math.rad(math.random(-12, 12)), 0, math.rad(math.random(-12, 12)))
+				TweenService:Create(d, TweenInfo.new(0.5, Enum.EasingStyle.Bounce), { CFrame = base }):Play()
+			end
+		end
+		local ring = phone:FindFirstChild("Ring") :: Sound
+		ring:Play()
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.ActionText, prompt.ObjectText, prompt.MaxActivationDistance, prompt.RequiresLineOfSight = "Coger", "Teléfono", 8, false
+		prompt.KeyboardKeyCode, prompt.GamepadKeyCode = Enum.KeyCode.C, Enum.KeyCode.ButtonX
+		prompt.Parent = phone
+		prompt.Triggered:Connect(function()
+			ring:Stop()
+			prompt:Destroy()
+			local call = siren:Clone()
+			call.Name, call.PlaybackSpeed, call.Parent = "Call", 0.85, SoundService
+			call:Play()
+			Debris:AddItem(call, 40)
+		end)
+	end
+	if map:GetAttribute("Floracion") then
+		start()
+		return
+	end
+	local connection: RBXScriptConnection
+	connection = map:GetAttributeChangedSignal("Floracion"):Connect(function()
+		connection:Disconnect()
+		start()
+	end)
+end
+
 return {
 	Init = function()
 		if RunService:IsServer() then
 			task.spawn(hurtInCanal)
+			floracion()
 		else
 			oneWayDoors()
+			animate()
+			bloom()
 		end
 	end,
 }]]
