@@ -6,12 +6,12 @@ return {
                 return
             end
 
-            local Behaviour = newChild:FindFirstChild("Behaviour")
+            local Behaviour = newChild:WaitForChild("Behaviour", 10)
             if not Behaviour then
                 return
             end
 
-            require(workspace.Map.Behaviour):Init()
+            require(Behaviour):Init()
         end)
     end,
 }

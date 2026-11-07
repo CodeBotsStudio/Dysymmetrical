@@ -38,11 +38,20 @@ local ok, err = pcall(function()
 	local bowl = heightAt(160, -45) - heightAt(120, -45)
 	check(math.abs(bowl - 3) <= 1, string.format("el cuenco del pozo tiene %.1f de hondo, se esperaba 3", bowl))
 
+	local roofs = {}
+	for _, d in probe:GetDescendants() do
+		if d:GetAttribute("Roof") then
+			table.insert(roofs, d)
+		end
+	end
+	local groundParams = RaycastParams.new()
+	groundParams.FilterType = Enum.RaycastFilterType.Exclude
+	groundParams.FilterDescendantsInstances = { probe:FindFirstChild("Generators"), table.unpack(roofs) }
 	local ramps = 0
 	for _, ramp in probe:GetDescendants() do
 		if ramp:IsA("BasePart") and ramp:GetAttribute("Ramp") then
 			ramps += 1
-			local hit = workspace:Raycast(ramp.Position + Vector3.new(0, 50, 0), Vector3.new(0, -100, 0), params)
+			local hit = workspace:Raycast(ramp.Position + Vector3.new(0, 50, 0), Vector3.new(0, -100, 0), groundParams)
 			check(hit and hit.Instance == ramp and hit.Normal.Y >= math.cos(math.rad(30)), ramp:GetFullName() .. " pasa de 30 grados o no se pisa")
 		end
 	end
@@ -80,6 +89,93 @@ local ok, err = pcall(function()
 			check(gap >= 8, string.format("dos losas del pozo a %.1f, hace falta 8 para rodearlas", gap))
 		end
 	end
+
+	local generators = probe:FindFirstChild("Generators"):GetChildren()
+	check(#generators == 8, "hacen falta 8 sitios de generador, hay " .. #generators)
+	for _, g in generators do
+		local base = (g :: Model):GetPivot().Position
+		local hit = workspace:Raycast(base + Vector3.new(0, 1, 0), Vector3.new(0, -12, 0), groundParams)
+		check(hit and hit.Normal.Y > 0.99, g.Name .. ": el generador no está en suelo plano")
+		check(Vector2.new(base.X - ORIGIN.X - 120, base.Z - ORIGIN.Z + 45).Magnitude > 30, g.Name .. ": el generador está dentro del cuenco del pozo")
+	end
+
+	local shadows, hazards, killerDoors, oneWay, zones = 0, 0, 0, 0, 0
+	for _, d in probe:GetDescendants() do
+		if d:IsA("Light") and d.Shadows then
+			shadows += 1
+		end
+		hazards += if d.Name == "CanalHazard" then 1 else 0
+		killerDoors += if d:GetAttribute("KillerDoor") then 1 else 0
+		oneWay += if d:GetAttribute("OpenDirection") then 1 else 0
+		zones += if d:GetAttribute("Zone") then 1 else 0
+	end
+	check(shadows <= 6, shadows .. " luces con sombra, el máximo es 6")
+	check(hazards > 0, "falta el peligro del canal")
+	check(killerDoors >= 1, "falta la puerta del asesino")
+	check(oneWay >= 2, "faltan 2 salidas de incendios de un sentido")
+	check(zones >= 6, "faltan zonas con atributo Zone")
+	local props = probe:FindFirstChild("ReactiveProps")
+	check(props and #props:GetChildren() >= 4, "faltan cajas sueltas en ReactiveProps")
+
+	local hazards = {}
+	for _, d in probe:GetDescendants() do
+		if d.Name == "CanalHazard" then
+			table.insert(hazards, d)
+		end
+	end
+	local function inCanal(x: number, z: number): boolean
+		for _, h in hazards do
+			local p = h.CFrame:PointToObjectSpace(ORIGIN + Vector3.new(x, h.Position.Y - ORIGIN.Y, z))
+			if math.abs(p.X) < h.Size.X / 2 and math.abs(p.Z) < h.Size.Z / 2 then
+				return true
+			end
+		end
+		return false
+	end
+	local function walkable(x: number, z: number): number?
+		local hit = workspace:Raycast(ORIGIN + Vector3.new(x, 120, z), Vector3.new(0, -200, 0), groundParams)
+		if not hit or hit.Normal.Y < 0.8 or inCanal(x, z) then
+			return nil
+		end
+		local inst = hit.Instance
+		if inst ~= workspace.Terrain and not inst:GetAttribute("Walk") and not inst:GetAttribute("Ramp") then
+			return nil
+		end
+		return hit.Position.Y - ORIGIN.Y
+	end
+	local everything = RaycastParams.new()
+	everything.FilterType = Enum.RaycastFilterType.Exclude
+	everything.FilterDescendantsInstances = {}
+	local function topAt(x: number, z: number): number
+		local hit = workspace:Raycast(ORIGIN + Vector3.new(x, 200, z), Vector3.new(0, -300, 0), everything)
+		return if hit then hit.Position.Y - ORIGIN.Y else -99
+	end
+	local open = {}
+	for x = -250, 250, 10 do
+		for z = -200, 200, 10 do
+			local y = walkable(x, z)
+			if y then
+				local covered = false
+				for k = 0, 15 do
+					local dir = Vector2.new(math.cos(k * math.pi / 8), math.sin(k * math.pi / 8))
+					for dist = 4, 20, 4 do
+						if topAt(x + dir.X * dist, z + dir.Y * dist) >= y + 6 then
+							covered = true
+							break
+						end
+					end
+					if covered then
+						break
+					end
+				end
+				if not covered then
+					table.insert(open, string.format("(%d,%d)", x, z))
+				end
+			end
+		end
+		task.wait()
+	end
+	check(#open == 0, #open .. " puntos sin nada de 6 de alto a menos de 20: " .. table.concat(open, " ", 1, math.min(#open, 60)))
 
 	check(workspace.Terrain:GetMaterialColor(Enum.Material.Sand) == Color3.fromRGB(150, 118, 78), "falta el color del serrín")
 end)
