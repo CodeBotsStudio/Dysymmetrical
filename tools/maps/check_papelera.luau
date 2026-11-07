@@ -92,6 +92,7 @@ local ok, err = pcall(function()
 
 	local generators = probe:FindFirstChild("Generators"):GetChildren()
 	check(#generators == 8, "hacen falta 8 sitios de generador, hay " .. #generators)
+	check(probe.Generators:GetAttribute("ActiveCount") == 5, "Generators necesita ActiveCount = 5")
 	for _, g in generators do
 		local base = (g :: Model):GetPivot().Position
 		local hit = workspace:Raycast(base + Vector3.new(0, 1, 0), Vector3.new(0, -12, 0), groundParams)
@@ -114,6 +115,21 @@ local ok, err = pcall(function()
 	check(killerDoors >= 1, "falta la puerta del asesino")
 	check(oneWay >= 2, "faltan 2 salidas de incendios de un sentido")
 	check(zones >= 6, "faltan zonas con atributo Zone")
+	for _, z in probe:GetDescendants() do
+		local want = z:GetAttribute("LightColor")
+		if z:GetAttribute("Zone") then
+			local lit = false
+			for _, l in z:GetDescendants() do
+				if l:IsA("Light") and typeof(want) == "Color3" and math.abs(l.Color.R - want.R) + math.abs(l.Color.G - want.G) + math.abs(l.Color.B - want.B) < 0.03 then
+					lit = true
+					break
+				end
+			end
+			check(lit, z:GetFullName() .. " no tiene una luz de su color")
+		end
+	end
+	local beacon = probe:FindFirstChild("Beacon", true)
+	check(beacon and beacon.Position.Y - ORIGIN.Y > 140 and beacon:FindFirstChildOfClass("PointLight"), "falta la luz roja arriba de la chimenea")
 	local props = probe:FindFirstChild("ReactiveProps")
 	check(props and #props:GetChildren() >= 4, "faltan cajas sueltas en ReactiveProps")
 

@@ -39,8 +39,9 @@ end
 local TerrainParts = folder("Terrain", MapModel)
 local Buildings = folder("Buildings", MapModel)
 local Yard = folder("Yard", MapModel)
-folder("Lamps", MapModel)
+local Lamps = folder("Lamps", MapModel)
 local Generators = folder("Generators", MapModel)
+Generators:SetAttribute("ActiveCount", 5)
 local Details = folder("Details", MapModel)
 local SpawnPoints = folder("SpawnPoints", MapModel)
 
@@ -67,6 +68,21 @@ local VARIANTS = {
 	[Enum.Material.Asphalt] = "AnomalisAsphalt",
 	[Enum.Material.CeramicTiles] = "AnomalisLabTile",
 }
+
+local ZONE_COLORS = {
+	Nave = Color3.fromRGB(50, 255, 90),
+	Rodillos = Color3.fromRGB(200, 222, 255),
+	Oficinas = Color3.fromRGB(255, 46, 40),
+	Pozo = Color3.fromRGB(165, 60, 255),
+	Patio = Color3.fromRGB(255, 160, 60),
+	Bosquecillo = Color3.fromRGB(70, 140, 90),
+	Almacen = Color3.fromRGB(60, 130, 255),
+}
+local YARD_LIGHT = Color3.fromRGB(190, 205, 255)
+local function accent(c: Color3): Color3
+	local h, s, v = c:ToHSV()
+	return Color3.fromHSV(h, s * 0.72, v)
+end
 
 local function part(parent: Instance, size: Vector3, pos: Vector3, color: Color3, material: Enum.Material, name: string?): Part
 	local p = Instance.new("Part")
@@ -101,12 +117,12 @@ end
 local Outside = folder("Outside", MapModel)
 local Terrain = workspace.Terrain
 for material, color in {
-	[Enum.Material.Asphalt] = Color3.fromRGB(56, 54, 52),
-	[Enum.Material.Pavement] = Color3.fromRGB(40, 42, 48),
-	[Enum.Material.Mud] = Color3.fromRGB(62, 50, 38),
-	[Enum.Material.Ground] = Color3.fromRGB(66, 58, 44),
-	[Enum.Material.LeafyGrass] = Color3.fromRGB(48, 62, 40),
-	[Enum.Material.Rock] = Color3.fromRGB(74, 74, 78),
+	[Enum.Material.Asphalt] = Color3.fromRGB(84, 82, 80),
+	[Enum.Material.Pavement] = Color3.fromRGB(66, 68, 76),
+	[Enum.Material.Mud] = Color3.fromRGB(98, 82, 64),
+	[Enum.Material.Ground] = Color3.fromRGB(100, 88, 68),
+	[Enum.Material.LeafyGrass] = Color3.fromRGB(64, 82, 54),
+	[Enum.Material.Rock] = Color3.fromRGB(90, 90, 96),
 	[Enum.Material.Sand] = Color3.fromRGB(150, 118, 78),
 } do
 	Terrain:SetMaterialColor(material, color)
@@ -130,6 +146,8 @@ local NORTH_WALL = { Vector2.new(-264, -92), Vector2.new(-217, -89), Vector2.new
 local CANAL = smooth({ Vector2.new(-264, 55), Vector2.new(-180, 64), Vector2.new(-120, 50), Vector2.new(-60, 22), Vector2.new(-20, 15), Vector2.new(40, 30), Vector2.new(100, 25), Vector2.new(180, 3), Vector2.new(264, 10) }, 20)
 local TERRACE_RAMPS_X = { -150, 40 }
 local CANAL_HALF = 12
+local PATIO_LAMPS: { { number } } = { { -200, 60 }, { -110, 135 }, { -130, 70 }, { -60, 40 }, { -20, 120 }, { -180, 190 }, { -60, 195 }, { 40, 90 } }
+local YARD_LAMPS: { { number } } = { { -110, -125 }, { -10, -135 }, { 95, -135 }, { -60, -40 }, { 75, -25 } }
 local STACKS: { { number } } = { { -210, 100, 0 }, { -180, 25, 90 }, { -150, 100, 180 }, { -110, 165, 90 }, { -100, 0, 0 }, { -50, -15, 270 }, { -50, 60, 0 }, { 15, 80, 0 }, { -180, -75, 270 }, { 0, -15, 90 }, { 210, 35, 90 }, { 60, 65, 270 }, { -160, 165, 90 }, { -140, 20, 0 }, { 0, 150, 180 }, { 110, 55, 0 }, { -10, 50, 0 }, { -230, -70, 270 }, { 170, 40, 0 }, { -80, -160, 0 }, { 20, 115, 180 }, { -230, 25, 90 }, { -80, 180, 0 }, { -230, 140, 270 }, { -120, -60, 90 }, { 10, 185, 90 }, { 210, 180, 180 }, { -210, 180, 90 }, { 40, -185, 90 }, { -185, 120, 270 }, { -135, -145, 0 }, { -115, 100, 0 }, { -65, 90, 180 }, { 120, -185, 0 }, { -85, 145, 90 }, { -30, 135, 180 }, { -5, -160, 0 }, { -135, 120, 0, 1 }, { -160, -60, 180, 1 }, { -80, 65, 90, 1 }, { 30, 60, 0, 1 }, { 135, 55, 270, 1 }, { 215, -85, 0 }, { -240, 90, 0 }, { -205, 30, 180, 1 }, { -190, -110, 90 }, { -100, -25, 90, 1 }, { 25, -10, 180, 1 } }
 local POZO = Vector3.new(120, 4, -45)
 local POZO_RADIO = 30
@@ -317,6 +335,7 @@ local function bowlY(d: number): number
 end
 local Pozo = folder("Pozo", TerrainParts)
 Pozo:SetAttribute("Zone", "Pozo")
+Pozo:SetAttribute("LightColor", accent(ZONE_COLORS.Pozo))
 for i = 0, 8 do
 	local angle = math.rad(i * 40 + rng:NextNumber() * 20)
 	local d = 8 + (i % 3) * 7
@@ -452,6 +471,7 @@ local function zone(name: string, parent: Instance): Model
 	local m = Instance.new("Model")
 	m.Name = name
 	m:SetAttribute("Zone", name)
+	m:SetAttribute("LightColor", accent(ZONE_COLORS[name]))
 	m.Parent = parent
 	return m
 end
@@ -491,6 +511,52 @@ local function block(parent: Instance, size: Vector3, x: number, y: number, z: n
 	local p = part(parent, size, Vector3.new(x, y + size.Y / 2, z), color or CONCRETE, material or Enum.Material.Concrete, name)
 	p.CFrame *= CFrame.Angles(0, -math.rad(angle or 0), 0)
 	return p
+end
+
+local function glow(parent: Instance, pos: Vector3, color: Color3, range: number, brightness: number, shadows: boolean?): Light
+	local anchor = part(parent, Vector3.new(0.2, 0.2, 0.2), pos, color, Enum.Material.SmoothPlastic, "Glow")
+	anchor.Transparency, anchor.CanCollide, anchor.CanQuery, anchor.CanTouch, anchor.CastShadow = 1, false, false, false, false
+	local light = Instance.new("PointLight")
+	light.Color, light.Range, light.Brightness, light.Shadows = accent(color), range * 0.72, brightness * 0.6, shadows == true
+	light.Parent = anchor
+	return light
+end
+
+local function lamp(parent: Instance, pos: Vector3, color: Color3, ceiling: boolean, shadows: boolean?, angle: number?): Part
+	local ground = heightAt(pos.X, pos.Z)
+	if not ceiling then
+		block(parent, Vector3.new(0.6, pos.Y - ground, 0.6), pos.X, ground, pos.Z, 0, METAL, Enum.Material.Metal, "Pole")
+	end
+	local head = block(parent, if ceiling then Vector3.new(6, 0.35, 0.8) else Vector3.new(2.2, 0.5, 2.2), pos.X, pos.Y, pos.Z, angle, color, Enum.Material.Neon, "Bulb")
+	head.CastShadow = false
+	local tint = accent(color)
+	local spot = Instance.new("SpotLight")
+	spot.Face, spot.Angle, spot.Color, spot.Shadows = Enum.NormalId.Bottom, 100, tint, shadows == true
+	spot.Range, spot.Brightness = if ceiling then 26 else 42, if ceiling then 3.5 else 6
+	spot.Parent = head
+	local halo = Instance.new("PointLight")
+	halo.Color, halo.Range, halo.Brightness = tint, 10, 0.6
+	halo.Parent = head
+	local top, bottom = Instance.new("Attachment"), Instance.new("Attachment")
+	bottom.Position = Vector3.new(0, ground - pos.Y + 0.2, 0)
+	top.Parent, bottom.Parent = head, head
+	local cone = Instance.new("Beam")
+	cone.Attachment0, cone.Attachment1 = top, bottom
+	cone.FaceCamera, cone.LightEmission, cone.Segments = true, 1, 1
+	cone.Width0, cone.Width1 = 1.8, if ceiling then 9 else 16
+	cone.Color, cone.Transparency = ColorSequence.new(tint), NumberSequence.new(0.92, 1)
+	cone:AddTag("Detail")
+	cone.Parent = head
+	return head
+end
+
+local function windows(parent: Instance, a: Vector2, b: Vector2, y: number, color: Color3, count: number)
+	local d = (b - a).Unit
+	local n = Vector2.new(d.Y, -d.X)
+	for i = 1, count do
+		local c = a + d * ((b - a).Magnitude * i / (count + 1)) + n * 0.85
+		beam(parent, c - d * 3, c + d * 3, y, y + 2.2, 0.3, color, Enum.Material.Neon, "Window").CastShadow = false
+	end
 end
 
 local function tank(parent: Instance, diameter: number, height: number, x: number, y: number, z: number, name: string?, color: Color3?, material: Enum.Material?): Part
@@ -692,7 +758,7 @@ local function R2(s: number, v: number): Vector2
 	local p = R(s, v, 0)
 	return Vector2.new(p.X, p.Z)
 end
-room(Rodillos, R2(-2.5, 0), 13, 105, 26, 4, 20, { [1] = { { 45, 6, 7 }, { 95, 12 } }, [2] = { { 15.5, 21, 99 } }, [3] = { { 30, 12 } }, [4] = { { 13, 12 } } })
+local rodillosPoly = room(Rodillos, R2(-2.5, 0), 13, 105, 26, 4, 20, { [1] = { { 45, 6, 7 }, { 95, 12 } }, [2] = { { 15.5, 21, 99 } }, [3] = { { 30, 12 } }, [4] = { { 13, 12 } } })
 for _, seg in { { -45, -25 }, { -17, 3 }, { 11, 26 }, { 34, 44 } } do
 	beam(Rodillos, R2(seg[1], 0), R2(seg[2], 0), 4, 11, 8, METAL, Enum.Material.Metal, "Machine")
 	for s = seg[1] + 2, seg[2] - 2, 5 do
@@ -860,6 +926,74 @@ for _, spot in { { -178, -186, false }, { -182, -183, true }, { -134, 146, false
 	p:AddTag("Reactive")
 end
 
+local C = ZONE_COLORS
+for _, f in {
+	{ Nave, Vector2.new(-200, -175), 0, 88.5, 38.5, 8, Color3.fromRGB(88, 104, 92), Enum.Material.Concrete },
+	{ Nave, Vector2.new(-225, -133.25), 0, 38.5, 45, 8, Color3.fromRGB(88, 104, 92), Enum.Material.Concrete },
+	{ Oficinas, Vector2.new(195, -182), 0, 48.5, 34.5, 8, Color3.fromRGB(82, 50, 44), Enum.Material.WoodPlanks },
+	{ Rodillos, R2(-2.5, 0), 13, 103.5, 24.5, 4, Color3.fromRGB(136, 144, 156), Enum.Material.Concrete },
+	{ Almacen, AC, AA, 108.5, 68.5, 0, Color3.fromRGB(100, 110, 134), Enum.Material.Concrete },
+	{ Chimenea, Vector2.new(126, -139), 0, 26.5, 20.5, 8, Color3.fromRGB(72, 60, 80), Enum.Material.Brick },
+	{ Chimenea, Vector2.new(215, -57), 0, 28.5, 22.5, 4, Color3.fromRGB(72, 60, 80), Enum.Material.Brick },
+} do
+	local floorPart = slab(f[1], f[2], f[3], f[4], f[5], f[6] + 0.2, "Floor")
+	floorPart.Color, floorPart.Material, floorPart.MaterialVariant = f[7], f[8], VARIANTS[f[8]] or ""
+end
+for _, v in { Vector2.new(-225, -173), Vector2.new(-195, -178), Vector2.new(-225, -125) } do
+	tank(Nave, 14.6, 1.2, v.X, 18, v.Y, "VatBand", C.Nave, Enum.Material.Neon).CastShadow = false
+	glow(Nave, Vector3.new(v.X, 26, v.Y), C.Nave, 34, 1.6)
+end
+for i, v in { Vector2.new(-172, -172), Vector2.new(-208, -165), Vector2.new(-212, -140) } do
+	lamp(Nave, Vector3.new(v.X, 26, v.Y), C.Nave, true, i == 1, 0)
+end
+for _, e in { { 2, 2 }, { 3, 3 }, { 5, 2 } } do
+	windows(Nave, navePoly[e[1]], navePoly[e[1] % #navePoly + 1], 22, C.Nave, e[2])
+end
+windows(Oficinas, oficinasPoly[3], oficinasPoly[4], 20, C.Oficinas, 4)
+windows(Oficinas, oficinasPoly[3], oficinasPoly[4], 11, C.Oficinas, 2)
+windows(Oficinas, oficinasPoly[2], oficinasPoly[3], 20, C.Oficinas, 2)
+glow(Oficinas, Vector3.new(195, 14, -174), C.Oficinas, 30, 1.4)
+glow(Oficinas, Vector3.new(195, 24, -192), C.Oficinas, 24, 1.2)
+lamp(Oficinas, Vector3.new(195, 16.2, -162.6), C.Oficinas, true)
+glow(Oficinas, Vector3.new(195, 9.5, -152), C.Oficinas, 28, 2)
+for i, s in { -40, -12, 16, 40 } do
+	lamp(Rodillos, R(s, 0, 22), C.Rodillos, true, i == 3, 13)
+end
+windows(Rodillos, rodillosPoly[3], rodillosPoly[4], 17, C.Rodillos, 6)
+windows(Rodillos, rodillosPoly[1], rodillosPoly[2], 17, C.Rodillos, 4)
+glow(Pozo, Vector3.new(POZO.X, 2.5, POZO.Z), C.Pozo, 55, 2.6, true)
+glow(Chimenea, Vector3.new(126, 18, -139), C.Pozo, 22, 1.4)
+glow(Chimenea, Vector3.new(215, 12, -57), C.Pozo, 20, 1.2)
+local BEACON_RED = Color3.fromRGB(255, 40, 30)
+block(Chimenea, Vector3.new(12.6, 3, 12.6), 150, 149, -122, 0, BEACON_RED, Enum.Material.Neon, "BeaconBand").CastShadow = false
+local beacon = block(Chimenea, Vector3.new(2, 2, 2), 150, 158, -122, 0, BEACON_RED, Enum.Material.Neon, "Beacon")
+beacon.CastShadow = false
+local beaconLight = Instance.new("PointLight")
+beaconLight.Color, beaconLight.Range, beaconLight.Brightness = BEACON_RED, 60, 3
+beaconLight.Parent = beacon
+for i, l in PATIO_LAMPS do
+	lamp(Patio, Vector3.new(l[1], heightAt(l[1], l[2]) + 14, l[2]), C.Patio, false, i <= 2)
+end
+lamp(Patio, Vector3.new(-170, 19.5, -30), C.Patio, true)
+for _, l in YARD_LAMPS do
+	lamp(Lamps, Vector3.new(l[1], heightAt(l[1], l[2]) + 14, l[2]), YARD_LIGHT, false)
+end
+glow(Bosquecillo, Vector3.new(70, 5, 140), C.Bosquecillo, 60, 3.3)
+glow(Bosquecillo, Vector3.new(95, 5, 175), C.Bosquecillo, 60, 3.3)
+for i, u in { Vector2.new(-30, 8), Vector2.new(5, -12), Vector2.new(35, 12) } do
+	local sky = A(u.X, u.Y)
+	block(Almacen, Vector3.new(12, 0.3, 7), sky.X, 19, sky.Y, AA, C.Almacen, Enum.Material.Neon, "Skylight").CastShadow = false
+	lamp(Almacen, Vector3.new(sky.X, 15, sky.Y), C.Almacen, true, i == 2, AA)
+end
+for _, side in { -1, 1 } do
+	local dock = A(side * 23, -30)
+	lamp(Almacen, Vector3.new(dock.X, 15, dock.Y), C.Almacen, true, false, AA)
+end
+for _, u in { Vector2.new(-12, 10), Vector2.new(20, -18) } do
+	local floorGlow = A(u.X, u.Y)
+	glow(Almacen, Vector3.new(floorGlow.X, 3, floorGlow.Y), C.Almacen, 40, 3.5)
+end
+
 local function spawnPoint(parent: Instance, pos: Vector3)
 	local p = part(parent, Vector3.new(1, 1, 1), pos + Vector3.new(0, 3, 0), CONCRETE, Enum.Material.SmoothPlastic, if parent.Name == "Killers" then "KillerSpawn" else "SurvivorSpawn")
 	p.CFrame = CFrame.lookAt(ORIGIN + pos + Vector3.new(0, 3, 0), ORIGIN + Vector3.new(0, 3, 0))
@@ -893,8 +1027,8 @@ LightingModule.Source = [[return {
 	ClockTime = 20,
 	GeographicLatitude = 55,
 	Brightness = 1.4,
-	Ambient = Color3.fromRGB(56, 58, 70),
-	OutdoorAmbient = Color3.fromRGB(92, 98, 118),
+	Ambient = Color3.fromRGB(88, 90, 112),
+	OutdoorAmbient = Color3.fromRGB(104, 110, 134),
 	EnvironmentDiffuseScale = 0.3,
 	EnvironmentSpecularScale = 1,
 	GlobalShadows = true,
@@ -908,7 +1042,7 @@ LightingModule.Parent = Root
 local atmosphere = Instance.new("Atmosphere")
 atmosphere.Density = 0.3
 atmosphere.Offset = 0.12
-atmosphere.Color = Color3.fromRGB(96, 102, 124)
+atmosphere.Color = Color3.fromRGB(92, 94, 128)
 atmosphere.Decay = Color3.fromRGB(30, 30, 44)
 atmosphere.Glare = 0
 atmosphere.Haze = 1.5
@@ -919,7 +1053,7 @@ grade.Name = "Grade"
 grade.Contrast = 0.14
 grade.Brightness = grade.Contrast / 2
 grade.Saturation = -0.18
-grade.TintColor = Color3.fromRGB(240, 240, 252)
+grade.TintColor = Color3.fromRGB(236, 232, 255)
 grade.Parent = LightingModule
 
 local bloom = Instance.new("BloomEffect")
